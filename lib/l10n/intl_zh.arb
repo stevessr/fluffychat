@@ -2404,6 +2404,21 @@
     "notAnImage": "不是图像文件。",
     "importNow": "立即导入",
     "importFromZipFile": "从 .zip 文件导入",
+    "@importFromZipFile": {},
+    "importFromTarGz": "从 .tar.gz 文件导入",
+    "@importFromTarGz": {},
+    "importFromFiles": "从文件导入",
+    "@importFromFiles": {},
+    "importingEmotes": "正在导入表情",
+    "@importingEmotes": {},
+    "uploadingEmote": "正在上传第 {index} 个表情，共 {total} 个",
+    "@uploadingEmote": {
+        "type": "String",
+        "placeholders": {
+            "index": {},
+            "total": {}
+        }
+    },
     "replace": "替换",
     "exportEmotePack": "以 .zip 格式导出表情包",
     "sendTypingNotifications": "发送正在输入通知",
