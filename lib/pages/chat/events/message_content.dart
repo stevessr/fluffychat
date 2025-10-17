@@ -10,6 +10,7 @@ import 'package:fluffychat/pages/chat/events/video_player.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/poll_extension.dart';
 import 'package:fluffychat/utils/url_preview.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -24,6 +25,7 @@ import 'html_message.dart';
 import 'image_bubble.dart';
 import 'map_bubble.dart';
 import 'message_download_content.dart';
+import 'poll_content.dart';
 import 'url_preview_card.dart';
 
 class MessageContent extends StatelessWidget {
@@ -111,6 +113,12 @@ class MessageContent extends StatelessWidget {
     final fontSize =
         AppConfig.messageFontSize * AppSettings.fontSizeFactor.value;
     final buttonTextColor = textColor;
+    
+    // Handle poll events
+    if (event.isPollStart) {
+      return PollContent(event: event);
+    }
+    
     switch (event.type) {
       case EventTypes.Message:
       case EventTypes.Encrypted:

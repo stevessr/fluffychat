@@ -167,6 +167,8 @@ class SafeIframeWidget extends StatelessWidget {
     'codesandbox.io',
     'codepen.io',
     'jsfiddle.net',
+    'player.bilibili.com',
+    'linux.do',
   };
 
   bool _isUrlAllowed(String url) {
