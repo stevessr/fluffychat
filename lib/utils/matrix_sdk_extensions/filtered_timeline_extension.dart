@@ -1,6 +1,7 @@
 import 'package:matrix/matrix.dart';
 
 import '../../config/app_config.dart';
+import '../poll_extension.dart';
 
 extension VisibleInGuiExtension on List<Event> {
   List<Event> filterByVisibleInGui({String? exceptionEventId}) => where(
@@ -15,9 +16,12 @@ extension IsStateExtension on Event {
           .contains(relationshipType) &&
       // always filter out m.key.* events
       !type.startsWith('m.key.verification.') &&
-      // event types to hide: redaction and reaction events
+      // event types to hide: redaction, reaction, poll response and poll end events
       // if a reaction has been redacted we also want it to be hidden in the timeline
+      // poll responses and poll end events should not be shown as individual messages
       !{EventTypes.Reaction, EventTypes.Redaction}.contains(type) &&
+      !isPollResponse &&
+      !isPollEnd &&
       // if we enabled to hide all redacted events, don't show those
       (!AppConfig.hideRedactedEvents || !redacted) &&
       // if we enabled to hide all unknown events, don't show those

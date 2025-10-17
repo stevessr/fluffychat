@@ -13,6 +13,7 @@ import 'package:fluffychat/pages/chat/events/room_creation_state_event.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/file_description.dart';
+import 'package:fluffychat/utils/poll_extension.dart';
 import 'package:fluffychat/utils/string_color.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -77,7 +78,11 @@ class Message extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    if (!{
+    // Handle poll events
+    if (event.isPollStart) {
+      // Polls are rendered like regular messages
+      // Continue to normal message rendering
+    } else if (!{
       EventTypes.Message,
       EventTypes.Sticker,
       EventTypes.Encrypted,
@@ -103,23 +108,26 @@ class Message extends StatelessWidget {
 
     var color = theme.colorScheme.surfaceContainerHigh;
     final displayTime = event.type == EventTypes.RoomCreate ||
+        event.isPollStart ||
         nextEvent == null ||
         !event.originServerTs.sameEnvironment(nextEvent!.originServerTs);
     final nextEventSameSender = nextEvent != null &&
-        {
+        ({
           EventTypes.Message,
           EventTypes.Sticker,
           EventTypes.Encrypted,
-        }.contains(nextEvent!.type) &&
+        }.contains(nextEvent!.type) ||
+            nextEvent!.isPollStart) &&
         nextEvent!.senderId == event.senderId &&
         !displayTime;
 
     final previousEventSameSender = previousEvent != null &&
-        {
+        ({
           EventTypes.Message,
           EventTypes.Sticker,
           EventTypes.Encrypted,
-        }.contains(previousEvent!.type) &&
+        }.contains(previousEvent!.type) ||
+            previousEvent!.isPollStart) &&
         previousEvent!.senderId == event.senderId &&
         previousEvent!.originServerTs.sameEnvironment(event.originServerTs);
 

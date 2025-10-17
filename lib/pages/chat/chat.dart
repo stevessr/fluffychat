@@ -39,6 +39,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/share_scaffold_dialog.dart';
 import '../../utils/account_bundles.dart';
 import '../../utils/localized_exception_extension.dart';
+import 'create_poll_dialog.dart';
 import 'send_file_dialog.dart';
 import 'send_location_dialog.dart';
 
@@ -723,6 +724,14 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
+  void createPollAction() async {
+    await showDialog(
+      context: context,
+      useRootNavigator: false,
+      builder: (c) => CreatePollDialog(room: room),
+    );
+  }
+
   String _getSelectedEventString() {
     var copyString = '';
     if (selectedEvents.length == 1) {
@@ -1154,6 +1163,9 @@ class ChatController extends State<ChatPageWithRoom>
     }
     if (choice == 'location') {
       sendLocationAction();
+    }
+    if (choice == 'poll') {
+      createPollAction();
     }
   }
 

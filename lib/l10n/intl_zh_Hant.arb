@@ -2272,6 +2272,116 @@
         "type": "String",
         "placeholders": {}
     },
+    "createPoll": "建立投票",
+    "@createPoll": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollQuestion": "投票問題",
+    "@pollQuestion": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollQuestionHint": "你想問什麼？",
+    "@pollQuestionHint": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollAnswers": "答案選項",
+    "@pollAnswers": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollAnswer": "答案",
+    "@pollAnswer": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollAddAnswer": "新增答案選項",
+    "@pollAddAnswer": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollRemoveAnswer": "刪除答案",
+    "@pollRemoveAnswer": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollCreate": "建立",
+    "@pollCreate": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollCreated": "投票建立成功",
+    "@pollCreated": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollCreateError": "建立投票時發生錯誤",
+    "@pollCreateError": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollQuestionRequired": "投票問題為必填項",
+    "@pollQuestionRequired": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollMinAnswersRequired": "至少需要 2 個答案選項",
+    "@pollMinAnswersRequired": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollMaxAnswersReached": "最多允許 20 個答案選項",
+    "@pollMaxAnswersReached": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollShowResultsBeforeEnd": "投票結束前顯示結果",
+    "@pollShowResultsBeforeEnd": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollShowResultsHint": "投票進行時，所有人都可以看到投票結果",
+    "@pollShowResultsHint": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollVote": "投票",
+    "@pollVote": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollChangeVote": "修改投票",
+    "@pollChangeVote": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollVotes": "票",
+    "@pollVotes": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollVoteSubmitted": "你的投票已提交",
+    "@pollVoteSubmitted": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollEnd": "結束投票",
+    "@pollEnd": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollEnded": "投票已結束",
+    "@pollEnded": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "pollClosed": "已關閉",
+    "@pollClosed": {
+        "type": "String",
+        "placeholders": {}
+    },
     "widgetVideo": "影片",
     "@widgetVideo": {},
     "redactMessageDescription": "該訊息將對此對話中的所有參與者收回。這不能被反悔。",
