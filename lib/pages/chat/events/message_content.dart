@@ -13,6 +13,7 @@ import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/url_preview.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import '../../../config/app_config.dart';
@@ -25,6 +26,7 @@ import 'html_message.dart';
 import 'image_bubble.dart';
 import 'map_bubble.dart';
 import 'message_download_content.dart';
+import 'url_preview_card.dart';
 
 class MessageContent extends StatelessWidget {
   final Event event;
@@ -259,31 +261,51 @@ class MessageContent extends StatelessWidget {
                 event.onlyEmotes &&
                 event.numberEmotes > 0 &&
                 event.numberEmotes <= 3;
+
+            // 提取 URL 用于预览（仅当功能启用时）
+            final urls = AppConfig.enableUrlPreviews
+                ? UrlPreviewParser.extractUrls(event.body)
+                : <String>[];
+            final previewUrl = urls.isNotEmpty ? urls.first : null;
+
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: HtmlMessage(
-                html: html,
-                textColor: textColor,
-                room: event.room,
-                fontSize:
-                    AppSettings.fontSizeFactor.value *
-                    AppConfig.messageFontSize *
-                    (bigEmotes ? 5 : 1),
-                limitHeight: !selected,
-                linkStyle: TextStyle(
-                  color: linkColor,
-                  fontSize:
-                      AppSettings.fontSizeFactor.value *
-                      AppConfig.messageFontSize,
-                  decoration: TextDecoration.underline,
-                  decorationColor: linkColor,
-                ),
-                onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
-                eventId: event.eventId,
-                checkboxCheckedEvents: event.aggregatedEvents(
-                  timeline,
-                  EventCheckboxRoomExtension.relationshipType,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  HtmlMessage(
+                    html: html,
+                    textColor: textColor,
+                    room: event.room,
+                    fontSize:
+                        AppSettings.fontSizeFactor.value *
+                        AppConfig.messageFontSize *
+                        (bigEmotes ? 5 : 1),
+                    limitHeight: !selected,
+                    linkStyle: TextStyle(
+                      color: linkColor,
+                      fontSize:
+                          AppSettings.fontSizeFactor.value *
+                          AppConfig.messageFontSize,
+                      decoration: TextDecoration.underline,
+                      decorationColor: linkColor,
+                    ),
+                    onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
+                    eventId: event.eventId,
+                    checkboxCheckedEvents: event.aggregatedEvents(
+                      timeline,
+                      EventCheckboxRoomExtension.relationshipType,
+                    ),
+                  ),
+                  if (previewUrl != null && !bigEmotes)
+                    UrlPreviewLoader(
+                      url: previewUrl,
+                      backgroundColor:
+                          textColor == linkColor ? null : textColor.withAlpha(20),
+                      textColor: textColor,
+                    ),
+                ],
               ),
             );
         }
