@@ -73,7 +73,6 @@ abstract class AppConfig {
   static bool experimentalVoip = false;
   static bool showPresences = true;
   static bool displayNavigationRail = false;
-
   // Application identity strings that can be loaded from config
   static String _applicationName = 'FluffyChat';
   static String get applicationName => _applicationName;
