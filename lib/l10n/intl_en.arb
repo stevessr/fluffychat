@@ -2012,6 +2012,116 @@
     "type": "String",
     "placeholders": {}
   },
+  "createPoll": "Create poll",
+  "@createPoll": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pollQuestion": "Poll question",
+  "@pollQuestion": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pollQuestionHint": "What would you like to ask?",
+  "@pollQuestionHint": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pollAnswers": "Answer options",
+  "@pollAnswers": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pollAnswer": "Answer",
+  "@pollAnswer": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pollAddAnswer": "Add answer option",
+  "@pollAddAnswer": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pollRemoveAnswer": "Remove answer",
+  "@pollRemoveAnswer": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pollCreate": "Create",
+  "@pollCreate": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pollCreated": "Poll created successfully",
+  "@pollCreated": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pollCreateError": "Error creating poll",
+  "@pollCreateError": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pollQuestionRequired": "Poll question is required",
+  "@pollQuestionRequired": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pollMinAnswersRequired": "At least 2 answer options are required",
+  "@pollMinAnswersRequired": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pollMaxAnswersReached": "Maximum 20 answer options allowed",
+  "@pollMaxAnswersReached": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pollShowResultsBeforeEnd": "Show results before poll ends",
+  "@pollShowResultsBeforeEnd": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pollShowResultsHint": "Votes are visible to everyone while the poll is open",
+  "@pollShowResultsHint": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pollVote": "Vote",
+  "@pollVote": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pollChangeVote": "Change vote",
+  "@pollChangeVote": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pollVotes": "votes",
+  "@pollVotes": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pollVoteSubmitted": "Your vote has been submitted",
+  "@pollVoteSubmitted": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pollEnd": "End poll",
+  "@pollEnd": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pollEnded": "Poll ended",
+  "@pollEnded": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pollClosed": "Closed",
+  "@pollClosed": {
+    "type": "String",
+    "placeholders": {}
+  },
   "showPassword": "Show password",
   "@showPassword": {
     "type": "String",
