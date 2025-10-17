@@ -15,6 +15,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:http/http.dart' as http;
+
+import '../config/app_config.dart';
 
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/client_manager.dart';
@@ -61,6 +64,7 @@ class Matrix extends StatefulWidget {
 
 class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   int _activeClient = -1;
+  bool isConfigLoaded = false;
   String? activeBundle;
 
   SharedPreferences get store => widget.store;
@@ -218,7 +222,56 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    initMatrix();
+    // Initialize configuration and settings. On web we try to load a
+    // `config.json` before applying settings so that web-hosted overrides
+    // take effect.
+    if (PlatformInfos.isWeb) {
+      initConfig().then((_) {
+        initSettings();
+        setState(() {
+          isConfigLoaded = true;
+        });
+        initMatrix();
+      });
+    } else {
+      initSettings();
+      isConfigLoaded = true;
+      initMatrix();
+    }
+  }
+
+  Future<void> initConfig() async {
+    try {
+      final response = await http.get(Uri.parse('config.json'));
+      if (response.statusCode != 200) {
+        Logs().w(
+            '[ConfigLoader] config.json returned status ${response.statusCode}');
+        return;
+      }
+
+      // Optional: check content type when available
+      final contentType = response.headers['content-type'];
+      if (contentType != null && !contentType.contains('application/json')) {
+        Logs().w('[ConfigLoader] config.json content-type is "$contentType"');
+        // continue parsing anyway to be helpful
+      }
+
+      final configJsonString = utf8.decode(response.bodyBytes);
+      try {
+        final configJson = json.decode(configJsonString);
+        if (configJson is Map<String, dynamic>) {
+          AppConfig.loadFromJson(configJson);
+        } else {
+          Logs()
+              .w('[ConfigLoader] config.json did not decode to a JSON object');
+        }
+      } on FormatException catch (e) {
+        Logs().w('[ConfigLoader] Failed to parse config.json: $e');
+        Logs().v('[ConfigLoader] Response body:', configJsonString);
+      }
+    } catch (e, st) {
+      Logs().v('[ConfigLoader] Failed to load config.json', e, st);
+    }
   }
 
   void _registerSubs(String name) {
@@ -370,6 +423,37 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     }
   }
 
+  void initSettings() {
+    // Load values from AppSettings (backed by SharedPreferences).
+    AppConfig.fontSizeFactor = AppSettings.fontSizeFactor.value;
+
+    AppConfig.renderHtml = AppSettings.renderHtml.value;
+
+    AppConfig.swipeRightToLeftToReply =
+        AppSettings.swipeRightToLeftToReply.value;
+
+    AppConfig.hideRedactedEvents = AppSettings.hideRedactedEvents.value;
+
+    AppConfig.hideUnknownEvents = AppSettings.hideUnknownEvents.value;
+
+    AppConfig.separateChatTypes = AppSettings.separateChatTypes.value;
+
+    AppConfig.autoplayImages = AppSettings.autoplayImages.value;
+
+    AppConfig.sendTypingNotifications =
+        AppSettings.sendTypingNotifications.value;
+
+    AppConfig.sendPublicReadReceipts = AppSettings.sendPublicReadReceipts.value;
+
+    AppConfig.sendOnEnter = AppSettings.sendOnEnter.value;
+
+    AppConfig.experimentalVoip = AppSettings.experimentalVoip.value;
+
+    AppConfig.showPresences = AppSettings.showPresences.value;
+
+    AppConfig.displayNavigationRail = AppSettings.displayNavigationRail.value;
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -389,6 +473,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    if (!isConfigLoaded) {
+      return const Center(child: CircularProgressIndicator());
+    }
     return Provider(
       create: (_) => this,
       child: widget.child,
