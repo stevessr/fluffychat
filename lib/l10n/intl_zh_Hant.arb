@@ -1971,6 +1971,20 @@
     "@invalidServerName": {},
     "importFromZipFile": "從 .zip 檔案匯入",
     "@importFromZipFile": {},
+    "importFromTarGz": "從 .tar.gz 檔案匯入",
+    "@importFromTarGz": {},
+    "importFromFiles": "從檔案匯入",
+    "@importFromFiles": {},
+    "importingEmotes": "正在匯入表情",
+    "@importingEmotes": {},
+    "uploadingEmote": "正在上傳第 {index} 個表情，共 {total} 個",
+    "@uploadingEmote": {
+        "type": "String",
+        "placeholders": {
+            "index": {},
+            "total": {}
+        }
+    },
     "homeserver": "伺服器",
     "@homeserver": {},
     "exportEmotePack": "將表情包匯出成 .zip 檔案",

@@ -10,7 +10,12 @@ import 'package:fluffychat/widgets/mxc_image.dart';
 import '../../widgets/matrix.dart';
 import 'settings_emotes.dart';
 
-enum PopupMenuEmojiActions { import, export }
+enum PopupMenuEmojiActions {
+  export,
+  importZip,
+  importTarGz,
+  importFiles,
+}
 
 class EmotesSettingsView extends StatelessWidget {
   final EmotesSettingsController controller;
@@ -35,16 +40,30 @@ class EmotesSettingsView extends StatelessWidget {
                 case PopupMenuEmojiActions.export:
                   controller.exportAsZip();
                   break;
-                case PopupMenuEmojiActions.import:
+                case PopupMenuEmojiActions.importZip:
                   controller.importEmojiZip();
+                  break;
+                case PopupMenuEmojiActions.importTarGz:
+                  controller.importEmojiTarGz();
+                  break;
+                case PopupMenuEmojiActions.importFiles:
+                  controller.importEmojiFromFiles();
                   break;
               }
             },
             enabled: !controller.readonly,
             itemBuilder: (context) => [
               PopupMenuItem(
-                value: PopupMenuEmojiActions.import,
+                value: PopupMenuEmojiActions.importZip,
                 child: Text(L10n.of(context).importFromZipFile),
+              ),
+              PopupMenuItem(
+                value: PopupMenuEmojiActions.importTarGz,
+                child: Text(L10n.of(context).importFromTarGz),
+              ),
+              PopupMenuItem(
+                value: PopupMenuEmojiActions.importFiles,
+                child: Text(L10n.of(context).importFromFiles),
               ),
               PopupMenuItem(
                 value: PopupMenuEmojiActions.export,

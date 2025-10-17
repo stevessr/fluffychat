@@ -43,13 +43,37 @@ class _ImportEmoteArchiveDialogState extends State<ImportEmoteArchiveDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final totalEmotes = _importMap.length;
+    final uploadedCount = (_progress * totalEmotes).round();
+
     return AlertDialog(
-      title: Text(L10n.of(context).importEmojis),
+      title: Text(
+        _loading
+            ? L10n.of(context).importingEmotes
+            : L10n.of(context).importEmojis,
+      ),
       content: _loading
-          ? Center(
-              child: CircularProgressIndicator(
-                value: _progress,
-              ),
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(
+                  value: _progress,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  L10n.of(context).uploadingEmote(
+                    uploadedCount.toString(),
+                    totalEmotes.toString(),
+                  ),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${(_progress * 100).round()}%',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ],
             )
           : SingleChildScrollView(
               child: Wrap(
@@ -140,57 +164,76 @@ class _ImportEmoteArchiveDialogState extends State<ImportEmoteArchiveDialog> {
       imports.remove(key);
     }
 
-    for (final entry in imports.entries) {
-      setState(() {
-        _progress += 1 / imports.length;
-      });
-      final file = entry.key;
-      final imageCode = entry.value;
+    // 并发上传（一次最多 10 个）以提升速度
+    const concurrencyLimit = 10;
+    final totalItems = imports.length;
+    var completedCount = 0;
 
-      try {
-        var mxcFile = MatrixImageFile(
-          bytes: file.content,
-          name: file.name,
-        );
+    // 将任务分批处理
+    final entries = imports.entries.toList();
+    for (var i = 0; i < entries.length; i += concurrencyLimit) {
+      final batch = entries.skip(i).take(concurrencyLimit).toList();
 
-        final thumbnail = (await mxcFile.generateThumbnail(
-          nativeImplementations: ClientManager.nativeImplementations,
-        ));
-        if (thumbnail == null) {
-          Logs().w('Unable to create thumbnail');
-        } else {
-          mxcFile = thumbnail;
-        }
-        final uri = await Matrix.of(context).client.uploadContent(
-              mxcFile.bytes,
-              filename: mxcFile.name,
-              contentType: mxcFile.mimeType,
+      // 并发处理当前批次
+      await Future.wait(
+        batch.map((entry) async {
+          final file = entry.key;
+          final imageCode = entry.value;
+
+          try {
+            var mxcFile = MatrixImageFile(
+              bytes: file.content,
+              name: file.name,
             );
 
-        final info = <String, dynamic>{
-          ...mxcFile.info,
-        };
+            final thumbnail = (await mxcFile.generateThumbnail(
+              nativeImplementations: ClientManager.nativeImplementations,
+            ));
+            if (thumbnail == null) {
+              Logs().w('Unable to create thumbnail');
+            } else {
+              mxcFile = thumbnail;
+            }
+            final uri = await Matrix.of(context).client.uploadContent(
+                  mxcFile.bytes,
+                  filename: mxcFile.name,
+                  contentType: mxcFile.mimeType,
+                );
 
-        // normalize width / height to 256, required for stickers
-        if (info['w'] is int && info['h'] is int) {
-          final ratio = info['w'] / info['h'];
-          if (info['w'] > info['h']) {
-            info['w'] = 256;
-            info['h'] = (256.0 / ratio).round();
-          } else {
-            info['h'] = 256;
-            info['w'] = (ratio * 256.0).round();
+            final info = <String, dynamic>{
+              ...mxcFile.info,
+            };
+
+            // normalize width / height to 256, required for stickers
+            if (info['w'] is int && info['h'] is int) {
+              final ratio = info['w'] / info['h'];
+              if (info['w'] > info['h']) {
+                info['w'] = 256;
+                info['h'] = (256.0 / ratio).round();
+              } else {
+                info['h'] = 256;
+                info['w'] = (ratio * 256.0).round();
+              }
+            }
+            widget.controller.pack!.images[imageCode] =
+                ImagePackImageContent.fromJson(<String, dynamic>{
+              'url': uri.toString(),
+              'info': info,
+            });
+            successfulUploads.add(file.name);
+          } catch (e) {
+            Logs().d('Could not upload emote $imageCode: $e');
+          } finally {
+            // 更新进度
+            completedCount++;
+            if (mounted) {
+              setState(() {
+                _progress = completedCount / totalItems;
+              });
+            }
           }
-        }
-        widget.controller.pack!.images[imageCode] =
-            ImagePackImageContent.fromJson(<String, dynamic>{
-          'url': uri.toString(),
-          'info': info,
-        });
-        successfulUploads.add(file.name);
-      } catch (e) {
-        Logs().d('Could not upload emote $imageCode');
-      }
+        }),
+      );
     }
 
     await widget.controller.save(context);
@@ -272,7 +315,8 @@ class _EmojiImportPreviewState extends State<_EmojiImportPreview> {
                   child: TextField(
                     controller: controller,
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^[-\w]+$')),
+                      // Support Unicode characters, but disallow spaces, colons, tildes
+                      FilteringTextInputFormatter.allow(RegExp(r'^[^\s:~]+$')),
                     ],
                     autocorrect: false,
                     minLines: 1,
@@ -342,19 +386,42 @@ class _ImageFileError extends StatelessWidget {
 
 extension on String {
   /// normalizes a file path into its name only replacing any special character
-  /// [^-\w] with an underscore and removing the extension
+  /// with an underscore and removing the extension
+  ///
+  /// Supports: png, apng, gif, avif, jpg, jpeg, webp
   ///
   /// Used to compute emote name proposal based on file name
   String get emoteNameFromPath {
     // ... removing leading path
-    return split(RegExp(r'[/\\]'))
-        .last
-        // ... removing file extension
-        .split('.')
-        .first
-        // ... lowering
-        .toLowerCase()
-        // ... replacing unexpected characters
-        .replaceAll(RegExp(r'[^-\w]'), '_');
+    var name = split(RegExp(r'[/\\]')).last;
+
+    // ... removing file extension (support multiple formats)
+    final supportedExtensions = [
+      '.png',
+      '.apng',
+      '.gif',
+      '.avif',
+      '.jpg',
+      '.jpeg',
+      '.webp',
+      '.PNG',
+      '.APNG',
+      '.GIF',
+      '.AVIF',
+      '.JPG',
+      '.JPEG',
+      '.WEBP',
+    ];
+
+    for (final ext in supportedExtensions) {
+      if (name.endsWith(ext)) {
+        name = name.substring(0, name.length - ext.length);
+        break;
+      }
+    }
+
+    // Return the name as-is (support Unicode characters)
+    // Only replace characters that are not allowed (spaces, colons, tildes)
+    return name.replaceAll(RegExp(r'[\s:~]'), '_');
   }
 }
