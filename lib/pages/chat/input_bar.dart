@@ -69,8 +69,9 @@ class InputBar extends StatelessWidget {
         if (ret.length > maxResults) return ret;
       }
     }
+    // Support Unicode characters including Chinese for emote names
     final emojiMatch =
-        RegExp(r'(?:\s|^):(?:([-\w]+)~)?([-\w]+)$').firstMatch(searchText);
+        RegExp(r'(?:\s|^):(?:([^\s:~]+)~)?([^\s:~]+)$', unicode: true).firstMatch(searchText);
     if (emojiMatch != null) {
       final packSearch = emojiMatch[1];
       final emoteSearch = emojiMatch[2]!.toLowerCase();
