@@ -78,12 +78,44 @@ abstract class AppConfig {
 
   static void loadFromJson(Map<String, dynamic> json) {
     if (json['chat_color'] != null) {
+      final dynamic raw = json['chat_color'];
       try {
-        colorSchemeSeed = Color(json['chat_color']);
-      } catch (e) {
+        if (raw is int) {
+          colorSchemeSeed = Color(raw);
+        } else if (raw is String) {
+          var s = raw.trim();
+          // Accept formats like "0xffaabbcc", "#aabbcc", "#ffaabbcc", "aabbcc"
+          if (s.startsWith('0x')) {
+            // parse hex without '0x' prefix
+            colorSchemeSeed = Color(int.parse(s.substring(2), radix: 16));
+          } else if (s.startsWith('#')) {
+            s = s.substring(1);
+            if (s.length == 6) {
+              // add opaque alpha
+              colorSchemeSeed = Color(int.parse('ff' + s, radix: 16));
+            } else if (s.length == 8) {
+              colorSchemeSeed = Color(int.parse(s, radix: 16));
+            } else {
+              throw FormatException('Invalid hex color length');
+            }
+          } else if (RegExp(r'^[0-9a-fA-F]{6}$').hasMatch(s)) {
+            // plain rrggbb
+            colorSchemeSeed = Color(int.parse('ff' + s, radix: 16));
+          } else if (RegExp(r'^[0-9a-fA-F]{8}\$').hasMatch(s)) {
+            colorSchemeSeed = Color(int.parse(s, radix: 16));
+          } else {
+            // Fallback: try to parse as integer
+            colorSchemeSeed = Color(int.parse(s));
+          }
+        } else {
+          Logs().w(
+              '[ConfigLoader] chat_color has unsupported type: ${raw.runtimeType}');
+        }
+      } catch (e, st) {
         Logs().w(
-          'Invalid color in config.json! Please make sure to define the color in this format: "0xffdd0000"',
+          'Invalid color in config.json! Please use formats like "0xffaabbcc", "#aabbcc", or integer.',
           e,
+          st,
         );
       }
     }

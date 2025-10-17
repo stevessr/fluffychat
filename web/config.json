@@ -1,0 +1,10 @@
+{
+  "application_name": "Black manba",
+  "application_welcome_message": "Welcome to FluffyChat",
+  "default_homeserver": "shit.aaca.eu.org",
+  "web_base_url": "https://fluffychat.im/",
+  "privacy_url": "https://fluffychat.im/en/privacy.html",
+  "render_html": true,
+  "hide_redacted_events": false,
+  "hide_unknown_events": false
+}

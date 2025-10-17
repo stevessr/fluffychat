@@ -63,6 +63,7 @@ class Matrix extends StatefulWidget {
 
 class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   int _activeClient = -1;
+  bool isConfigLoaded = false;
   String? activeBundle;
 
   SharedPreferences get store => widget.store;
@@ -220,24 +221,52 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    initMatrix();
     if (PlatformInfos.isWeb) {
-      initConfig().then((_) => initSettings());
+      initConfig().then((_) {
+        initSettings();
+        setState(() {
+          isConfigLoaded = true;
+        });
+        initMatrix();
+      });
     } else {
       initSettings();
+      isConfigLoaded = true;
+      initMatrix();
     }
   }
 
   Future<void> initConfig() async {
     try {
-      final configJsonString =
-          utf8.decode((await http.get(Uri.parse('config.json'))).bodyBytes);
-      final configJson = json.decode(configJsonString);
-      AppConfig.loadFromJson(configJson);
-    } on FormatException catch (_) {
-      Logs().v('[ConfigLoader] config.json not found');
-    } catch (e) {
-      Logs().v('[ConfigLoader] config.json not found', e);
+      final response = await http.get(Uri.parse('config.json'));
+      if (response.statusCode != 200) {
+        Logs().w(
+            '[ConfigLoader] config.json returned status ${response.statusCode}');
+        return;
+      }
+
+      // Optional: check content type when available
+      final contentType = response.headers['content-type'];
+      if (contentType != null && !contentType.contains('application/json')) {
+        Logs().w('[ConfigLoader] config.json content-type is "$contentType"');
+        // continue parsing anyway to be helpful
+      }
+
+      final configJsonString = utf8.decode(response.bodyBytes);
+      try {
+        final configJson = json.decode(configJsonString);
+        if (configJson is Map<String, dynamic>) {
+          AppConfig.loadFromJson(configJson);
+        } else {
+          Logs()
+              .w('[ConfigLoader] config.json did not decode to a JSON object');
+        }
+      } on FormatException catch (e) {
+        Logs().w('[ConfigLoader] Failed to parse config.json: $e');
+        Logs().v('[ConfigLoader] Response body:', configJsonString);
+      }
+    } catch (e, st) {
+      Logs().v('[ConfigLoader] Failed to load config.json', e, st);
     }
   }
 
@@ -391,6 +420,8 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   }
 
   void initSettings() {
+    // ...existing code...
+
     AppConfig.fontSizeFactor =
         double.tryParse(store.getString(SettingKeys.fontSizeFactor) ?? '') ??
             AppConfig.fontSizeFactor;
@@ -458,6 +489,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    if (!isConfigLoaded) {
+      return const Center(child: CircularProgressIndicator());
+    }
     return Provider(
       create: (_) => this,
       child: widget.child,
