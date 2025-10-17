@@ -41,11 +41,12 @@ class _CustomReactionDialogState extends State<CustomReactionDialog>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _textController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -68,6 +69,7 @@ class _CustomReactionDialogState extends State<CustomReactionDialog>
           tabs: const [
             Tab(text: 'Emoji'),
             Tab(text: 'Emotes'),
+            Tab(text: 'Text'),
           ],
         ),
       ),
@@ -104,6 +106,45 @@ class _CustomReactionDialogState extends State<CustomReactionDialog>
             room: widget.room,
             disabledKeys: widget.disabledKeys,
             searchController: _searchController,
+          ),
+          // Text tab
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: _textController,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Enter text',
+                    hintText: 'e.g. OK, +1, 赞',
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (_) => setState(() {}),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(null),
+                      child: Text(l10n.cancel),
+                    ),
+                    const SizedBox(width: 8),
+                    FilledButton.tonal(
+                      onPressed: () {
+                        final value = _textController.text.trim();
+                        if (value.isEmpty) return;
+                        if (widget.disabledKeys.contains(value)) return;
+                        Navigator.of(context).pop(value);
+                      },
+                      child: Text(l10n.ok),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
