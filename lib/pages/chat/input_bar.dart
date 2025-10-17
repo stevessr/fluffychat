@@ -71,7 +71,8 @@ class InputBar extends StatelessWidget {
     }
     // Support Unicode characters including Chinese for emote names
     final emojiMatch =
-        RegExp(r'(?:\s|^):(?:([^\s:~]+)~)?([^\s:~]+)$', unicode: true).firstMatch(searchText);
+        RegExp(r'(?:\s|^):(?:([^\s:~]+)~)?([^\s:~]+)$', unicode: true)
+            .firstMatch(searchText);
     if (emojiMatch != null) {
       final packSearch = emojiMatch[1];
       final emoteSearch = emojiMatch[2]!.toLowerCase();
@@ -387,22 +388,32 @@ class InputBar extends StatelessWidget {
         focusNode: focusNode,
         readOnly: readOnly,
         contextMenuBuilder: (c, e) => markdownContextBuilder(c, e, controller),
-        contentInsertionConfiguration: ContentInsertionConfiguration(
-          onContentInserted: (KeyboardInsertedContent content) {
-            final data = content.data;
-            if (data == null) return;
+        contentInsertionConfiguration: onSubmitImage != null
+            ? ContentInsertionConfiguration(
+                onContentInserted: (KeyboardInsertedContent content) {
+                  final data = content.data;
+                  if (data == null) return;
 
-            final file = MatrixFile(
-              mimeType: content.mimeType,
-              bytes: data,
-              name: content.uri.split('/').last,
-            );
-            room.sendFileEvent(
-              file,
-              shrinkImageMaxDimension: 1600,
-            );
-          },
-        ),
+                  // Check if the content is an image
+                  final mimeType = content.mimeType;
+                  if (mimeType.startsWith('image/')) {
+                    // Pass the image data to the callback for preview
+                    onSubmitImage!(data);
+                  } else {
+                    // For non-image files, send directly
+                    final file = MatrixFile(
+                      mimeType: content.mimeType,
+                      bytes: data,
+                      name: content.uri.split('/').last,
+                    );
+                    room.sendFileEvent(
+                      file,
+                      shrinkImageMaxDimension: 1600,
+                    );
+                  }
+                },
+              )
+            : null,
         minLines: minLines,
         maxLines: maxLines,
         keyboardType: keyboardType!,
