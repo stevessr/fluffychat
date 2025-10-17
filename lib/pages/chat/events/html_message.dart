@@ -13,7 +13,9 @@ import 'package:fluffychat/utils/event_checkbox_extension.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
+import '../../../config/app_config.dart';
 import '../../../utils/url_launcher.dart';
+import 'iframe_widget.dart';
 
 class HtmlMessage extends StatelessWidget {
   final String html;
@@ -80,6 +82,7 @@ class HtmlMessage extends StatelessWidget {
     'img',
     'details',
     'summary',
+    'iframe', // Support for embedded content
     // Not in the allowlist of the matrix spec yet but should be harmless:
     'ruby',
     'rp',
@@ -401,6 +404,31 @@ class HtmlMessage extends StatelessWidget {
         );
       case 'hr':
         return const WidgetSpan(child: Divider());
+      case 'iframe':
+        // Handle iframe elements for embedded content
+        if (!AppConfig.enableIframeRendering) {
+          return const TextSpan(text: '[Embedded content disabled]');
+        }
+
+        final src = node.attributes['src'];
+        if (src == null || src.isEmpty) {
+          return const TextSpan(text: '[Invalid iframe]');
+        }
+
+        final width = double.tryParse(node.attributes['width'] ?? '');
+        final height = double.tryParse(node.attributes['height'] ?? '');
+
+        return WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: SafeIframeWidget(
+              src: src,
+              width: width,
+              height: height,
+            ),
+          ),
+        );
       case 'details':
         var obscure = true;
         return WidgetSpan(
