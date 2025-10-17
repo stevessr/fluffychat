@@ -28,6 +28,20 @@
   "@importEmojis": {},
   "importFromZipFile": "Import from .zip file",
   "@importFromZipFile": {},
+  "importFromTarGz": "Import from .tar.gz file",
+  "@importFromTarGz": {},
+  "importFromFiles": "Import from files",
+  "@importFromFiles": {},
+  "importingEmotes": "Importing emotes",
+  "@importingEmotes": {},
+  "uploadingEmote": "Uploading emote {index} of {total}",
+  "@uploadingEmote": {
+    "type": "String",
+    "placeholders": {
+      "index": {},
+      "total": {}
+    }
+  },
   "exportEmotePack": "Export Emote pack as .zip",
   "@exportEmotePack": {},
   "replace": "Replace",
