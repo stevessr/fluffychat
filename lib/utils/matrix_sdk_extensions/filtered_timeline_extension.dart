@@ -16,6 +16,8 @@ extension IsStateExtension on Event {
           .contains(relationshipType) &&
       // always filter out m.key.* events
       !type.startsWith('m.key.verification.') &&
+      // filter out im.ponies.room_emotes events (custom emote pack configuration)
+      type != 'im.ponies.room_emotes' &&
       // event types to hide: redaction, reaction, poll response and poll end events
       // if a reaction has been redacted we also want it to be hidden in the timeline
       // poll responses and poll end events should not be shown as individual messages
