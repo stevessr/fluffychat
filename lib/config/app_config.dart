@@ -62,6 +62,8 @@ abstract class AppConfig {
   static bool showPresences = true;
   static bool displayNavigationRail = false;
   static bool experimentalVoip = false;
+  static bool enableUrlPreviews = true;
+  static bool enableIframeRendering = true;
   static const bool hideTypingUsernames = false;
   static const String inviteLinkPrefix = 'https://matrix.to/#/';
   static const String deepLinkPrefix = 'im.fluffychat://chat/';
