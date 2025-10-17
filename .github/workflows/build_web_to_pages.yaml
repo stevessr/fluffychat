@@ -1,0 +1,120 @@
+name: Build Web and Push to pages branch
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      base_href:
+        description: "Base href for Flutter Web (e.g. /fluffychat/)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write  # 仅需要推送分支的权限
+
+concurrency:
+  group: build_web_to_pages
+  cancel-in-progress: true
+
+env:
+  REPO_NAME: ${{ github.event.repository.name }}
+
+jobs:
+  build_web_and_push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Load versions
+        run: cat .github/workflows/versions.env >> $GITHUB_ENV
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Setup Rust
+        uses: moonrepo/setup-rust@v1
+        with:
+          cache: true
+
+      - name: Add Rust nightly components
+        run: rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
+
+      - name: Install yq (for prepare-web.sh)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y yq
+
+      - name: Prepare Web (vodozemac)
+        run: |
+          chmod +x ./scripts/prepare-web.sh
+          ./scripts/prepare-web.sh
+
+      - name: Remove vodozemac .gitignore
+        run: rm -f ./assets/vodozemac/.gitignore || true
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Compute BASE_HREF
+        id: href
+        env:
+          INPUT_BASE_HREF: ${{ github.event.inputs.base_href }}
+        run: |
+          if [ -n "$INPUT_BASE_HREF" ]; then
+            echo "BASE_HREF=$INPUT_BASE_HREF" >> $GITHUB_ENV
+          else
+            # 默认使用仓库名称作为子路径，适用于 project pages
+            echo "BASE_HREF=/$REPO_NAME/" >> $GITHUB_ENV
+          fi
+          echo "Using BASE_HREF=$BASE_HREF"
+
+      - name: Build Web (release)
+        run: |
+          flutter build web \
+            --release \
+            --web-renderer canvaskit \
+            --dart-define=FLUTTER_WEB_CANVASKIT_URL=canvaskit/ \
+            --source-maps \
+            --base-href "$BASE_HREF"
+
+      - name: Add .nojekyll and build info
+        run: |
+          touch build/web/.nojekyll
+          printf "Build: %s\n" "$(date '+%Y-%m-%d %H:%M:%S %Z')" > build/web/BUILD_INFO.txt
+          printf "Commit: %s\n" "${GITHUB_SHA}" >> build/web/BUILD_INFO.txt
+          printf "Branch: %s\n" "${GITHUB_REF_NAME}" >> build/web/BUILD_INFO.txt
+          printf "Base href: %s\n" "${BASE_HREF}" >> build/web/BUILD_INFO.txt
+
+      - name: Push build output to pages branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: build/web
+          publish_branch: pages
+          force_orphan: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: |
+            build(web): push web artifacts to pages branch
+            source: ${{ github.sha }}
+            base-href: ${{ env.BASE_HREF }}
+
+      - name: Summary
+        run: |
+          echo "## ✅ Build & Push Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Branch: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "Published branch: \`pages\`" >> $GITHUB_STEP_SUMMARY
+          echo "Base href: \`${BASE_HREF}\`" >> $GITHUB_STEP_SUMMARY
+          echo "Artifacts size:" >> $GITHUB_STEP_SUMMARY
+          du -sh build/web | awk '{print "- " $0}' >> $GITHUB_STEP_SUMMARY
