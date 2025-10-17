@@ -1,0 +1,122 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # 允许手动触发
+
+# 设置权限以便推送到 gh-pages 分支
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+# 只允许一个部署同时运行，但不取消正在进行的运行
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取完整的 git 历史
+      
+      - name: Load versions
+        run: cat .github/workflows/versions.env >> $GITHUB_ENV
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+      
+      - name: Setup Rust
+        uses: moonrepo/setup-rust@v1
+        with:
+          cache: true
+      
+      - name: Add Rust nightly components
+        run: rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y yq cargo
+      
+      - name: Prepare Web (vodozemac)
+        run: |
+          chmod +x ./scripts/prepare-web.sh
+          ./scripts/prepare-web.sh
+      
+      - name: Remove vodozemac .gitignore
+        run: rm -f ./assets/vodozemac/.gitignore
+      
+      - name: Get Flutter dependencies
+        run: flutter pub get
+      
+      - name: Analyze code
+        run: flutter analyze --no-fatal-infos
+        continue-on-error: true  # 分析失败不影响构建
+      
+      - name: Run tests
+        run: flutter test
+        continue-on-error: true  # 测试失败不影响构建
+      
+      - name: Build Web Release
+        run: |
+          flutter build web \
+            --release \
+            --web-renderer canvaskit \
+            --dart-define=FLUTTER_WEB_CANVASKIT_URL=canvaskit/ \
+            --source-maps \
+            --no-wasm-dry-run \
+            --base-href="/"
+      
+      - name: Prepare deployment directory
+        run: |
+          mkdir -p deploy
+          cp -r build/web/* deploy/
+          
+          # 创建 .nojekyll 文件以防止 GitHub Pages 使用 Jekyll
+          touch deploy/.nojekyll
+          
+          # 创建 CNAME 文件（如果你有自定义域名，请取消注释并修改）
+          # echo "your-domain.com" > deploy/CNAME
+          
+          # 添加版本信息
+          echo "Build: $(date '+%Y-%m-%d %H:%M:%S')" > deploy/BUILD_INFO.txt
+          echo "Commit: $(git rev-parse --short HEAD)" >> deploy/BUILD_INFO.txt
+          echo "Branch: $(git rev-parse --abbrev-ref HEAD)" >> deploy/BUILD_INFO.txt
+      
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}  # 使用内置 token
+          publish_dir: ./deploy
+          publish_branch: gh-pages
+          force_orphan: true  # 每次推送创建一个新的提交历史
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: |
+            Deploy FluffyChat to GitHub Pages
+            
+            Source commit: ${{ github.sha }}
+            Build date: $(date '+%Y-%m-%d %H:%M:%S')
+      
+      - name: Summary
+        run: |
+          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Build Status:** Success" >> $GITHUB_STEP_SUMMARY
+          echo "📦 **Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "🌿 **Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **Pages URL:** https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⏱️ **Build Time:** $(date '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
