@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -47,6 +48,51 @@ class _ConfigViewerState extends State<ConfigViewer> {
     setState(() {});
   }
 
+  Future<void> _copyToken(BuildContext context) async {
+    final client = Matrix.of(context).client;
+    final token = client.accessToken;
+
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('No access token available'),
+        ),
+      );
+      return;
+    }
+
+    await Clipboard.setData(ClipboardData(text: token));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Copied to clipboard'),
+      ),
+    );
+  }
+
+  Future<void> _confirmAndCopyToken(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirm'),
+        content: const Text('Copy current access token to clipboard?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Copy'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await _copyToken(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -56,6 +102,21 @@ class _ConfigViewerState extends State<ConfigViewer> {
         leading: BackButton(
           onPressed: () => context.go('/'),
         ),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'copy_access_token') {
+                _confirmAndCopyToken(context);
+              }
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem<String>(
+                value: 'copy_access_token',
+                child: Text('copy accesstoken'),
+              ),
+            ],
+          ),
+        ],
       ),
       body: Column(
         children: [
