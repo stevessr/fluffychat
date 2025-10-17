@@ -3394,7 +3394,7 @@
     "@commandHint_logoutall": {},
     "displayNavigationRail": "在移动设备上显示导航栏",
     "@displayNavigationRail": {},
-    "customReaction": "自定义回应",
+    "customReaction": "自定义反应",
     "@customReaction": {},
     "moreEvents": "更多事件",
     "@moreEvents": {},
