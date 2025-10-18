@@ -13,21 +13,28 @@
 - 连接管理
 - 适配器元数据
 
-### 2. AstrBotVodozemacAdapter (核心实现)
-使用 vodozemac 加密库实现的 AstrBot 适配器，提供：
+### 2. AstrBotPlatformAdapter (AstrBot 平台实现)
+直接与 AstrBot 平台 API 对接，提供：
+- AstrBot HTTP API 接入
+- 可选轮询（Polling）消息模式
+- Webhook / 自定义配置扩展
+- 内置 vodozemac 端到端加密能力
+
+### 3. AstrBotVodozemacAdapter (低层实现)
+纯粹面向 vodozemac 的封装，适用于需要高度自定义的场景：
 - Olm 加密协议支持
 - 会话管理
 - 密钥生成和管理
 - 账户持久化（pickle）
 
-### 3. AdapterManager (适配器管理器)
+### 4. AdapterManager (适配器管理器)
 管理多个平台适配器实例：
 - 注册和注销适配器
 - 消息路由
 - 事件分发
 - 批量操作
 
-### 4. AstrBotIntegration (集成层)
+### 5. AstrBotIntegration (集成层)
 提供高级集成功能：
 - 简化的初始化流程
 - 加密消息发送
@@ -36,6 +43,8 @@
 
 ## 功能特性
 
+- ✅ **AstrBot 官方支持**: 完整对接 AstrBot 官方 API（https://github.com/AstrBotDevs/AstrBot）
+- ✅ **HTTP API / WebSocket**: 支持轮询和 Webhook 两种消息获取模式
 - ✅ **端到端加密**: 使用 Olm 协议（m.olm.v1.curve25519-aes-sha2）
 - ✅ **消息类型**: 支持文本、图片、视频、音频、文件、命令、系统消息、表情反应、位置
 - ✅ **会话管理**: 自动管理加密会话
@@ -44,10 +53,51 @@
 - ✅ **Webhook 支持**: 可配置 webhook 端点
 - ✅ **事件系统**: 完整的事件监听和处理
 - ✅ **多适配器**: 支持同时运行多个适配器实例
+- ✅ **命令响应**: 专用的命令处理和响应接口
+- ✅ **状态监控**: 实时查询 AstrBot 适配器状态
 
 ## 使用示例
 
-### 基础使用
+### 快速开始 - AstrBot 平台集成
+
+```dart
+import 'package:fluffychat/utils/platform_adapters/astrbot_platform_adapter.dart';
+
+// 创建 AstrBot 平台适配器
+final adapter = AstrBotPlatformAdapter();
+
+// 初始化并连接到 AstrBot 实例
+await adapter.initialize({
+  'apiUrl': 'http://localhost:6185/api',  // AstrBot 的 API 地址
+  'authToken': 'your-auth-token',         // 认证令牌（可选）
+  'username': 'bot-username',             // 机器人用户名
+  'botId': 'bot-123',                     // 机器人 ID
+  'enablePolling': true,                  // 启用轮询获取消息
+  'pollingInterval': 5,                   // 轮询间隔（秒）
+});
+
+// 监听来自 AstrBot 的消息
+adapter.messageStream.listen((message) {
+  print('收到消息: ${message.content}');
+  print('发送者: ${message.senderId}');
+  print('房间: ${message.roomId}');
+});
+
+// 发送文本消息
+await adapter.sendTextMessage('Hello from FluffyChat!', 'target-room-id');
+
+// 发送图片
+await adapter.sendImageMessage('https://example.com/image.png', 'room-id');
+
+// 获取适配器状态
+final status = await adapter.getAdapterStatus();
+print('AstrBot 状态: $status');
+
+// 清理
+await adapter.dispose();
+```
+
+### 基础使用（低层 API）
 
 ```dart
 import 'package:fluffychat/utils/platform_adapters/astrbot_integration.dart';

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:matrix/matrix.dart';
 
+import 'package:fluffychat/utils/platform_adapters/astrbot_platform_adapter.dart';
 import 'package:fluffychat/utils/platform_adapters/astrbot_vodozemac_adapter.dart';
 import 'package:fluffychat/utils/platform_adapters/platform_adapter.dart';
 
@@ -165,10 +166,13 @@ class AdapterManager {
     await _eventController.close();
   }
 
-  static Future<AstrBotVodozemacAdapter> createAstrBotAdapter({
+  static Future<PlatformAdapter> createAstrBotAdapter({
     required Map<String, dynamic> config,
+    bool usePlatformAdapter = true,
   }) async {
-    final adapter = AstrBotVodozemacAdapter();
+    final adapter = usePlatformAdapter
+        ? AstrBotPlatformAdapter()
+        : AstrBotVodozemacAdapter();
     await adapter.initialize(config);
     return adapter;
   }
