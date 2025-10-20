@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/utils/url_preview.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
@@ -131,7 +132,7 @@ class UrlPreviewCard extends StatelessWidget {
                         preview.title!,
                         style: TextStyle(
                           fontSize: AppConfig.messageFontSize *
-                              AppConfig.fontSizeFactor,
+                              AppSettings.fontSizeFactor.value,
                           color: txtColor,
                           fontWeight: FontWeight.w600,
                         ),
@@ -146,7 +147,7 @@ class UrlPreviewCard extends StatelessWidget {
                       preview.description!,
                       style: TextStyle(
                         fontSize: (AppConfig.messageFontSize - 1) *
-                            AppConfig.fontSizeFactor,
+                            AppSettings.fontSizeFactor.value,
                         color: txtColor.withAlpha(204),
                       ),
                       maxLines: 3,
