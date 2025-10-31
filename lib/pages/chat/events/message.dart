@@ -581,7 +581,9 @@ class Message extends StatelessWidget {
                                                             },
                                                           ),
                                                         MessageContent(
-                                                          displayEvent,
+                                                          event.isPollStart
+                                                              ? event
+                                                              : displayEvent,
                                                           textColor: textColor,
                                                           linkColor: linkColor,
                                                           onInfoTab: onInfoTab,

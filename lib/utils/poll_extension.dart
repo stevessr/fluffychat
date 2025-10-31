@@ -1,76 +1,126 @@
 import 'package:matrix/matrix.dart';
 
 extension PollExtension on Event {
-  /// Check if this event is a poll start event
-  bool get isPollStart =>
-      type == 'm.poll.start' ||
-      type == 'org.matrix.msc3381.poll.start';
+  /// Check if this event is a poll start event.
+  bool get isPollStart {
+    if (type == 'm.poll.start' || type == 'org.matrix.msc3381.poll.start') {
+      return true;
+    }
 
-  /// Check if this event is a poll response event
-  bool get isPollResponse =>
-      type == 'm.poll.response' ||
-      type == 'org.matrix.msc3381.poll.response';
+    if (content.containsKey('org.matrix.msc3381.poll.start') ||
+        content.containsKey('m.poll.start')) return true;
 
-  /// Check if this event is a poll end event
-  bool get isPollEnd =>
-      type == 'm.poll.end' ||
-      type == 'org.matrix.msc3381.poll.end';
+    if (messageType == 'm.poll.start' ||
+        messageType == 'org.matrix.msc3381.poll.start') return true;
+
+    return false;
+  }
+
+  /// Check if this event is a poll response event.
+  bool get isPollResponse {
+    if (type == 'm.poll.response' ||
+        type == 'org.matrix.msc3381.poll.response') {
+      return true;
+    }
+
+    if (content.containsKey('org.matrix.msc3381.poll.response') ||
+        content.containsKey('m.poll.response')) return true;
+
+    if (messageType == 'm.poll.response' ||
+        messageType == 'org.matrix.msc3381.poll.response') return true;
+
+    return false;
+  }
+
+  /// Check if this event is a poll end event.
+  bool get isPollEnd {
+    if (type == 'm.poll.end' || type == 'org.matrix.msc3381.poll.end') {
+      return true;
+    }
+
+    if (content.containsKey('org.matrix.msc3381.poll.end') ||
+        content.containsKey('m.poll.end')) return true;
+
+    if (messageType == 'm.poll.end' ||
+        messageType == 'org.matrix.msc3381.poll.end') return true;
+
+    return false;
+  }
 
   /// Get poll question from poll start event
   String? get pollQuestion {
     if (!isPollStart) return null;
-    return content.tryGetMap<String, dynamic>('org.matrix.msc3381.poll.start')
-        ?.tryGetMap<String, dynamic>('question')
-        ?.tryGet<String>('body');
+    final start =
+        content.tryGetMap<String, dynamic>('org.matrix.msc3381.poll.start') ??
+            content.tryGetMap<String, dynamic>('m.poll.start');
+
+    // MSC format: question -> { body }
+    final mscQuestion =
+        start?.tryGetMap<String, dynamic>('question')?.tryGet<String>('body');
+    if (mscQuestion != null) return mscQuestion;
+
+    // Standard m.poll.start may put question under 'question' or under 'm.poll.question'
+    final standardQuestion = start?.tryGet<String>('question') ??
+        start?.tryGetMap<String, dynamic>('question')?.tryGet<String>('body');
+    return standardQuestion;
   }
 
   /// Get poll answers/options from poll start event
   List<PollAnswer>? get pollAnswers {
     if (!isPollStart) return null;
-    final answers = content
-        .tryGetMap<String, dynamic>('org.matrix.msc3381.poll.start')
-        ?.tryGetList<dynamic>('answers');
+    final start =
+        content.tryGetMap<String, dynamic>('org.matrix.msc3381.poll.start') ??
+            content.tryGetMap<String, dynamic>('m.poll.start');
 
+    final answers = start?.tryGetList<dynamic>('answers');
     if (answers == null) return null;
 
-    return answers
-        .whereType<Map<String, dynamic>>()
-        .map((answer) => PollAnswer(
-              id: answer.tryGet<String>('id') ?? '',
-              text: answer.tryGet<String>('org.matrix.msc1767.text') ??
-                  answer.tryGet<String>('body') ??
-                  '',
-            ))
-        .toList();
+    return answers.whereType<Map<String, dynamic>>().map((answer) {
+      final id = answer.tryGet<String>('id') ??
+          answer.tryGet<String>('answer_id') ??
+          '';
+      final text = answer
+              .tryGetMap<String, dynamic>('org.matrix.msc1767.text')
+              ?.tryGet<String>('') ??
+          answer.tryGet<String>('org.matrix.msc1767.text') ??
+          answer.tryGet<String>('body') ??
+          answer.tryGet<String>('text') ??
+          '';
+      return PollAnswer(id: id, text: text);
+    }).toList();
   }
 
   /// Get poll kind (disclosed/undisclosed)
   String get pollKind {
     if (!isPollStart) return 'org.matrix.msc3381.poll.undisclosed';
-    return content
-            .tryGetMap<String, dynamic>('org.matrix.msc3381.poll.start')
-            ?.tryGet<String>('kind') ??
+    final start =
+        content.tryGetMap<String, dynamic>('org.matrix.msc3381.poll.start') ??
+            content.tryGetMap<String, dynamic>('m.poll.start');
+    return start?.tryGet<String>('kind') ??
         'org.matrix.msc3381.poll.undisclosed';
   }
 
   /// Check if poll is disclosed (results visible while voting)
-  bool get isPollDisclosed =>
-      pollKind == 'org.matrix.msc3381.poll.disclosed';
+  bool get isPollDisclosed => pollKind == 'org.matrix.msc3381.poll.disclosed';
 
   /// Get the poll start event ID from a poll response
   String? get pollStartEventId {
     if (!isPollResponse) return null;
-    return content
-        .tryGetMap<String, dynamic>('org.matrix.msc3381.poll.response')
-        ?.tryGet<String>('poll_start_event_id');
+    final resp = content
+            .tryGetMap<String, dynamic>('org.matrix.msc3381.poll.response') ??
+        content.tryGetMap<String, dynamic>('m.poll.response');
+    return resp?.tryGet<String>('poll_start_event_id') ??
+        resp?.tryGet<String>('poll_start_event');
   }
 
   /// Get selected answer IDs from poll response
   List<String>? get pollResponseAnswers {
     if (!isPollResponse) return null;
-    final answers = content
-        .tryGetMap<String, dynamic>('org.matrix.msc3381.poll.response')
-        ?.tryGetList<String>('answers');
+    final resp = content
+            .tryGetMap<String, dynamic>('org.matrix.msc3381.poll.response') ??
+        content.tryGetMap<String, dynamic>('m.poll.response');
+    final answers = resp?.tryGetList<String>('answers') ??
+        resp?.tryGetList<String>('answer_ids');
     return answers;
   }
 
@@ -101,8 +151,7 @@ extension PollExtension on Event {
     // Get all poll responses related to this poll
     final timeline = await room.getTimeline();
     final responses = timeline.events.where(
-      (event) =>
-          event.isPollResponse && event.pollStartEventId == eventId,
+      (event) => event.isPollResponse && event.pollStartEventId == eventId,
     );
 
     // Count votes (latest response per user)

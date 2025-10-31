@@ -85,6 +85,8 @@ abstract class AppConfig {
   // Color seed from config.json; prefer AppSettings.colorSchemeSeedInt when
   // available, but keep a dedicated Color here for runtime use.
   static Color? colorSchemeSeed;
+  static bool enableUrlPreviews = true;
+  static bool enableIframeRendering = true;
 
   static void loadFromJson(Map<String, dynamic> json) {
     if (json['chat_color'] != null) {

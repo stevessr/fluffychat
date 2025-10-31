@@ -1,6 +1,7 @@
 import 'package:matrix/matrix.dart';
 
-import '../../config/app_config.dart';
+// import '../../config/app_config.dart'; // Removed unused import
+import '../../config/setting_keys.dart';
 import '../poll_extension.dart';
 
 extension VisibleInGuiExtension on List<Event> {
