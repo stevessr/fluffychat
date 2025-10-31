@@ -245,7 +245,8 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       final response = await http.get(Uri.parse('config.json'));
       if (response.statusCode != 200) {
         Logs().w(
-            '[ConfigLoader] config.json returned status ${response.statusCode}');
+          '[ConfigLoader] config.json returned status ${response.statusCode}',
+        );
         return;
       }
 

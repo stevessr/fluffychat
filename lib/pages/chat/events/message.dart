@@ -750,7 +750,8 @@ class Message extends StatelessWidget {
                                                                         null ||
                                                                     disabled
                                                                         .contains(
-                                                                            key)) {
+                                                                      key,
+                                                                    )) {
                                                                   return;
                                                                 }
                                                                 onSelect(event);

@@ -104,15 +104,15 @@ abstract class AppConfig {
             s = s.substring(1);
             if (s.length == 6) {
               // add opaque alpha
-              colorSchemeSeed = Color(int.parse('ff' + s, radix: 16));
+              colorSchemeSeed = Color(int.parse('ff$s', radix: 16));
             } else if (s.length == 8) {
               colorSchemeSeed = Color(int.parse(s, radix: 16));
             } else {
-              throw FormatException('Invalid hex color length');
+              throw const FormatException('Invalid hex color length');
             }
           } else if (RegExp(r'^[0-9a-fA-F]{6}$').hasMatch(s)) {
             // plain rrggbb
-            colorSchemeSeed = Color(int.parse('ff' + s, radix: 16));
+            colorSchemeSeed = Color(int.parse('ff$s', radix: 16));
           } else if (RegExp(r'^[0-9a-fA-F]{8}\$').hasMatch(s)) {
             colorSchemeSeed = Color(int.parse(s, radix: 16));
           } else {
@@ -121,7 +121,8 @@ abstract class AppConfig {
           }
         } else {
           Logs().w(
-              '[ConfigLoader] chat_color has unsupported type: ${raw.runtimeType}');
+            '[ConfigLoader] chat_color has unsupported type: ${raw.runtimeType}',
+          );
         }
       } catch (e, st) {
         Logs().w(

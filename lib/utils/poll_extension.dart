@@ -8,10 +8,14 @@ extension PollExtension on Event {
     }
 
     if (content.containsKey('org.matrix.msc3381.poll.start') ||
-        content.containsKey('m.poll.start')) return true;
+        content.containsKey('m.poll.start')) {
+      return true;
+    }
 
     if (messageType == 'm.poll.start' ||
-        messageType == 'org.matrix.msc3381.poll.start') return true;
+        messageType == 'org.matrix.msc3381.poll.start') {
+      return true;
+    }
 
     return false;
   }
@@ -24,10 +28,14 @@ extension PollExtension on Event {
     }
 
     if (content.containsKey('org.matrix.msc3381.poll.response') ||
-        content.containsKey('m.poll.response')) return true;
+        content.containsKey('m.poll.response')) {
+      return true;
+    }
 
     if (messageType == 'm.poll.response' ||
-        messageType == 'org.matrix.msc3381.poll.response') return true;
+        messageType == 'org.matrix.msc3381.poll.response') {
+      return true;
+    }
 
     return false;
   }
@@ -39,10 +47,14 @@ extension PollExtension on Event {
     }
 
     if (content.containsKey('org.matrix.msc3381.poll.end') ||
-        content.containsKey('m.poll.end')) return true;
+        content.containsKey('m.poll.end')) {
+      return true;
+    }
 
     if (messageType == 'm.poll.end' ||
-        messageType == 'org.matrix.msc3381.poll.end') return true;
+        messageType == 'org.matrix.msc3381.poll.end') {
+      return true;
+    }
 
     return false;
   }

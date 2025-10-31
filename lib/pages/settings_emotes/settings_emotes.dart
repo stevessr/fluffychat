@@ -294,7 +294,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
       future: () async {
         // 读取文件字节
         final bytes = await files.first.readAsBytes();
-        
+
         // 🚀 在后台线程解压，避免阻塞 UI
         final archive = await compute(_decodeZip, bytes);
 
@@ -347,11 +347,11 @@ class EmotesSettingsController extends State<EmotesSettings> {
       title: L10n.of(context).loadingPleaseWait,
       future: () async {
         final bytes = await files.first.readAsBytes();
-        
+
         // 🚀 在后台线程解压，避免阻塞 UI
         final isGzipped = files.first.name.endsWith('.gz') ||
             files.first.name.endsWith('.tgz');
-        
+
         final archive = await compute(
           isGzipped ? _decodeTarGz : _decodeTar,
           bytes,
@@ -396,9 +396,9 @@ class EmotesSettingsController extends State<EmotesSettings> {
           final bytes = await file.readAsBytes();
           return ArchiveFile(file.name, bytes.length, bytes);
         }).toList();
-        
+
         final archiveFiles = await Future.wait(fileReadFutures);
-        
+
         // Create an in-memory archive from the selected files
         final archive = Archive();
         for (final file in archiveFiles) {
@@ -471,7 +471,7 @@ Archive _decodeZip(List<int> bytes) {
 
 /// 在后台线程解压 TAR.GZ 文件
 Archive _decodeTarGz(List<int> bytes) {
-  final gzipDecoder = GZipDecoder();
+  const gzipDecoder = GZipDecoder();
   final tarBytes = gzipDecoder.decodeBytes(bytes);
   return TarDecoder().decodeBytes(tarBytes);
 }

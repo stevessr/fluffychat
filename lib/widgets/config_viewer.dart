@@ -54,8 +54,8 @@ class _ConfigViewerState extends State<ConfigViewer> {
 
     if (token == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('No access token available'),
+        const SnackBar(
+          content: Text('No access token available'),
         ),
       );
       return;
@@ -63,8 +63,8 @@ class _ConfigViewerState extends State<ConfigViewer> {
 
     await Clipboard.setData(ClipboardData(text: token));
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Copied to clipboard'),
+      const SnackBar(
+        content: Text('Copied to clipboard'),
       ),
     );
   }

@@ -16,8 +16,11 @@ class CustomReactionDialog extends StatefulWidget {
     this.disabledKeys = const {},
   });
 
-  static Future<String?> show(BuildContext context, Room room,
-      {Set<String> disabledKeys = const {}}) {
+  static Future<String?> show(
+    BuildContext context,
+    Room room, {
+    Set<String> disabledKeys = const {},
+  }) {
     return showModalBottomSheet<String>(
       context: context,
       useSafeArea: true,
@@ -95,8 +98,11 @@ class _CustomReactionDialogState extends State<CustomReactionDialog>
                 backgroundColor: theme.colorScheme.surface,
               ),
               skinToneConfig: SkinToneConfig(
-                dialogBackgroundColor: Color.lerp(theme.colorScheme.surface,
-                    theme.colorScheme.primaryContainer, 0.75)!,
+                dialogBackgroundColor: Color.lerp(
+                  theme.colorScheme.surface,
+                  theme.colorScheme.primaryContainer,
+                  0.75,
+                )!,
                 indicatorColor: theme.colorScheme.onSurface,
               ),
             ),
@@ -180,70 +186,73 @@ class _EmotePickerGrid extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: TextField(
             controller: searchController,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: ':/shortcode or search',
-              prefixIcon: const Icon(Icons.search_outlined),
-              border: const OutlineInputBorder(),
+              prefixIcon: Icon(Icons.search_outlined),
+              border: OutlineInputBorder(),
               isDense: true,
             ),
             onChanged: (_) => (context as Element).markNeedsBuild(),
           ),
         ),
         Expanded(
-          child: Builder(builder: (context) {
-            final query = searchController.text.trim().toLowerCase();
-            final filtered = query.isEmpty
-                ? entries
-                : entries
-                    .where((e) => e.$1.toLowerCase().contains(query))
-                    .toList();
-            if (filtered.isEmpty) {
-              return const Center(child: Text('No emotes found'));
-            }
-            return GridView.builder(
-              padding: const EdgeInsets.all(8),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 6,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-              ),
-              itemCount: filtered.length,
-              itemBuilder: (context, i) {
-                final (shortcode, uri) = filtered[i];
-                final key = uri.toString();
-                final disabled = disabledKeys.contains(key);
-                return InkWell(
-                  onTap: disabled ? null : () => Navigator.of(context).pop(key),
-                  child: Opacity(
-                    opacity: disabled ? 0.4 : 1.0,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Expanded(
-                          child: Center(
-                            child: MxcImage(
-                              uri: uri,
-                              width: 40,
-                              height: 40,
-                              animated: false,
-                              isThumbnail: false,
+          child: Builder(
+            builder: (context) {
+              final query = searchController.text.trim().toLowerCase();
+              final filtered = query.isEmpty
+                  ? entries
+                  : entries
+                      .where((e) => e.$1.toLowerCase().contains(query))
+                      .toList();
+              if (filtered.isEmpty) {
+                return const Center(child: Text('No emotes found'));
+              }
+              return GridView.builder(
+                padding: const EdgeInsets.all(8),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 6,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
+                ),
+                itemCount: filtered.length,
+                itemBuilder: (context, i) {
+                  final (shortcode, uri) = filtered[i];
+                  final key = uri.toString();
+                  final disabled = disabledKeys.contains(key);
+                  return InkWell(
+                    onTap:
+                        disabled ? null : () => Navigator.of(context).pop(key),
+                    child: Opacity(
+                      opacity: disabled ? 0.4 : 1.0,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Expanded(
+                            child: Center(
+                              child: MxcImage(
+                                uri: uri,
+                                width: 40,
+                                height: 40,
+                                animated: false,
+                                isThumbnail: false,
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          shortcode,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 11),
-                        ),
-                      ],
+                          const SizedBox(height: 4),
+                          Text(
+                            shortcode,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 11),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
-            );
-          }),
+                  );
+                },
+              );
+            },
+          ),
         ),
       ],
     );

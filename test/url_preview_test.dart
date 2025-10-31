@@ -41,7 +41,7 @@ void main() {
     });
 
     test('UrlPreviewData should serialize to JSON correctly', () {
-      final preview = UrlPreviewData(
+      const preview = UrlPreviewData(
         url: 'https://example.com',
         title: 'Example Domain',
         description: 'This is an example',
@@ -77,7 +77,7 @@ void main() {
     });
 
     test('UrlPreviewData.hasPreview should return true when data exists', () {
-      final preview = UrlPreviewData(
+      const preview = UrlPreviewData(
         url: 'https://example.com',
         title: 'Example',
       );

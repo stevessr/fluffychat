@@ -92,8 +92,10 @@ enum AppSettings<T> {
     }
     if (kIsWeb && loadWebConfigFile) {
       try {
+        final configUri = Uri.base.resolve('config.json');
+        Logs().v('[ConfigLoader] fetching config from $configUri');
         final configJsonString =
-            utf8.decode((await http.get(Uri.parse('config.json'))).bodyBytes);
+            utf8.decode((await http.get(configUri)).bodyBytes);
         final configJson =
             json.decode(configJsonString) as Map<String, Object?>;
         for (final setting in AppSettings.values) {
