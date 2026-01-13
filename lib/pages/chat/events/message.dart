@@ -107,22 +107,20 @@ class Message extends StatelessWidget {
         nextEvent == null ||
         !event.originServerTs.sameEnvironment(nextEvent!.originServerTs);
     final nextEventSameSender = nextEvent != null &&
-        ({
-              EventTypes.Message,
-              EventTypes.Sticker,
-              EventTypes.Encrypted,
-            }.contains(nextEvent!.type) ||
-            nextEvent!.isPollStart) &&
+        {
+          EventTypes.Message,
+          EventTypes.Sticker,
+          EventTypes.Encrypted,
+        }.contains(nextEvent!.type) &&
         nextEvent!.senderId == event.senderId &&
         !displayTime;
 
     final previousEventSameSender = previousEvent != null &&
-        ({
-              EventTypes.Message,
-              EventTypes.Sticker,
-              EventTypes.Encrypted,
-            }.contains(previousEvent!.type) ||
-            previousEvent!.isPollStart) &&
+        {
+          EventTypes.Message,
+          EventTypes.Sticker,
+          EventTypes.Encrypted,
+        }.contains(previousEvent!.type) &&
         previousEvent!.senderId == event.senderId &&
         previousEvent!.originServerTs.sameEnvironment(event.originServerTs);
 
