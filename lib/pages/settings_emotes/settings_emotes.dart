@@ -297,8 +297,6 @@ class EmotesSettingsController extends State<EmotesSettings> {
 
   void createStickers() async {
     final pickedFiles = await selectFiles(
-  void createStickers() async {
-    final pickedFiles = await selectFiles(
       context,
       type: FileType.image,
       allowMultiple: true,
@@ -362,7 +360,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
     // 先选择文件
     final files = await selectFiles(
       context,
-      type: FileSelectorType.zip,
+      type: FileType.any,
     );
 
     // 🚀 用户取消了，直接返回，不显示 loading
@@ -400,7 +398,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
     // 先选择文件
     final files = await selectFiles(
       context,
-      type: FileSelectorType.any,
+      type: FileType.any,
     );
 
     // 🚀 用户取消了，直接返回，不显示 loading
@@ -458,7 +456,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
     // 先选择文件
     final files = await selectFiles(
       context,
-      type: FileSelectorType.images,
+      type: FileType.image,
       allowMultiple: true,
     );
 
