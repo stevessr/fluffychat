@@ -25,16 +25,116 @@ class StickerPickerDialog extends StatefulWidget {
 class StickerPickerDialogState extends State<StickerPickerDialog> {
   String? searchFilter;
 
+  List<_StickerPackEntry> _collectStickerPacks(Room room) {
+    final client = room.client;
+    final packs = <_StickerPackEntry>[];
+    final seenIds = <String>{};
+
+    void addImagePack(
+      BasicEvent? event, {
+      required String id,
+      Room? sourceRoom,
+      String? stateKey,
+    }) {
+      if (event == null) return;
+      if (!seenIds.add(id)) return;
+
+      final rawPack = event.parsedImagePackContent;
+      final filteredImages = <String, ImagePackImageContent>{};
+      for (final entry in rawPack.images.entries) {
+        final image = entry.value;
+        final imageUsage = image.usage ?? rawPack.pack.usage;
+        if (imageUsage != null &&
+            !imageUsage.contains(ImagePackUsage.sticker)) {
+          continue;
+        }
+        filteredImages[entry.key] = image;
+      }
+      if (filteredImages.isEmpty) return;
+
+      final pack = ImagePackContent(
+        images: filteredImages,
+        pack: ImagePackPackContent(
+          displayName: rawPack.pack.displayName,
+          avatarUrl: rawPack.pack.avatarUrl,
+          usage: rawPack.pack.usage,
+          attribution: rawPack.pack.attribution,
+        ),
+      );
+
+      final fallbackName = () {
+        final baseName = sourceRoom?.getLocalizedDisplayname() ?? 'Room';
+        if (stateKey != null && stateKey.isNotEmpty) {
+          return '$baseName - $stateKey';
+        }
+        return baseName;
+      }();
+      final displayName = pack.pack.displayName?.trim();
+      if (displayName == null || displayName.isEmpty) {
+        pack.pack.displayName = fallbackName;
+      }
+      if (pack.pack.avatarUrl == null ||
+          pack.pack.avatarUrl.toString() == '.::') {
+        pack.pack.avatarUrl = sourceRoom?.avatar;
+      }
+
+      packs.add(_StickerPackEntry(id, pack));
+    }
+
+    addImagePack(
+      client.accountData['im.ponies.user_emotes'],
+      id: 'user',
+      stateKey: 'user',
+    );
+
+    final packRooms = client.accountData['im.ponies.emote_rooms'];
+    final rooms = packRooms?.content.tryGetMap<String, Object?>('rooms');
+    if (packRooms != null && rooms != null) {
+      for (final roomEntry in rooms.entries) {
+        final roomId = roomEntry.key;
+        final roomValue = roomEntry.value;
+        final externalRoom = client.getRoomById(roomId);
+        if (externalRoom == null || roomValue is! Map<String, Object?>) {
+          continue;
+        }
+        for (final stateKeyEntry in roomValue.entries) {
+          final stateKey = stateKeyEntry.key;
+          addImagePack(
+            externalRoom.getState('im.ponies.room_emotes', stateKey),
+            id: 'room:$roomId:$stateKey',
+            sourceRoom: externalRoom,
+            stateKey: stateKey,
+          );
+        }
+      }
+    }
+
+    final allRoomEmotes = room.states['im.ponies.room_emotes'];
+    if (allRoomEmotes != null) {
+      for (final entry in allRoomEmotes.entries) {
+        final stateKey = entry.key;
+        addImagePack(
+          entry.value,
+          id: 'room:${room.id}:$stateKey',
+          sourceRoom: room,
+          stateKey: stateKey,
+        );
+      }
+    }
+
+    return packs;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final stickerPacks = widget.room.getImagePacks(ImagePackUsage.sticker);
-    final packSlugs = stickerPacks.keys.toList();
+    final packEntries = _collectStickerPacks(widget.room);
 
     // ignore: prefer_function_declarations_over_variables
     final packBuilder = (BuildContext context, int packIndex) {
-      final pack = stickerPacks[packSlugs[packIndex]]!;
+      final entry = packEntries[packIndex];
+      final pack = entry.pack;
       final filteredImagePackImageEntried = pack.images.entries.toList();
       if (searchFilter?.isNotEmpty ?? false) {
         filteredImagePackImageEntried.removeWhere(
@@ -52,11 +152,11 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
       if (imageKeys.isEmpty) {
         return const SizedBox.shrink();
       }
-      final packName = pack.pack.displayName ?? packSlugs[packIndex];
+      final packName = pack.pack.displayName ?? entry.id;
       return Column(
         children: <Widget>[
           if (packIndex != 0) const SizedBox(height: 20),
-          if (packName != 'user')
+          if (entry.id != 'user')
             ListTile(
               leading: Avatar(
                 mxContent: pack.pack.avatarUrl,
@@ -136,7 +236,7 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                 ),
               ),
             ),
-            if (packSlugs.isEmpty)
+            if (packEntries.isEmpty)
               SliverFillRemaining(
                 child: Center(
                   child: Column(
@@ -160,7 +260,7 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   packBuilder,
-                  childCount: packSlugs.length,
+                  childCount: packEntries.length,
                 ),
               ),
           ],
@@ -168,4 +268,11 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
       ),
     );
   }
+}
+
+class _StickerPackEntry {
+  final String id;
+  final ImagePackContent pack;
+
+  const _StickerPackEntry(this.id, this.pack);
 }
