@@ -31,6 +31,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/other_party_can_receive.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/show_scaffold_dialog.dart';
+import 'package:fluffychat/utils/web_drop_utils.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart';
@@ -123,12 +124,16 @@ class ChatController extends State<ChatPageWithRoom>
 
   void onDragDone(DropDoneDetails details) async {
     setState(() => dragging = false);
-    if (details.files.isEmpty) return;
+    var files = details.files;
+    if (files.isEmpty) {
+      files = await getWebDropFiles();
+      if (files.isEmpty) return;
+    }
 
     await showAdaptiveDialog(
       context: context,
       builder: (c) => SendFileDialog(
-        files: details.files,
+        files: files,
         room: room,
         outerContext: context,
         threadRootEventId: activeThreadId,
@@ -356,6 +361,7 @@ class ChatController extends State<ChatPageWithRoom>
     _loadDraft();
     WidgetsBinding.instance.addPostFrameCallback(_shareItems);
     super.initState();
+    initWebDropListener();
     _displayChatDetailsColumn = ValueNotifier(
       AppSettings.displayChatDetailsColumn.value,
     );
@@ -550,6 +556,7 @@ class ChatController extends State<ChatPageWithRoom>
     timeline?.cancelSubscriptions();
     timeline = null;
     inputFocus.removeListener(_inputFocusListener);
+    disposeWebDropListener();
     super.dispose();
   }
 
