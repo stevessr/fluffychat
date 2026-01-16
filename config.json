@@ -1,6 +1,6 @@
 {
   "applicationName": "FluffyChat",
-  "defaultHomeserver": "neko.aaca.eu.org",
+  "defaultHomeserver": "m.awmc.de5.net",
   "privacyUrl": "https://github.com/krille-chan/fluffychat/blob/main/PRIVACY.md",
   "audioRecordingNumChannels": 1,
   "audioRecordingAutoGain": true,
