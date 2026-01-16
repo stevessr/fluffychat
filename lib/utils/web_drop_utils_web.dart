@@ -84,7 +84,8 @@ Future<List<XFile>> _extractFiles(html.DataTransfer dataTransfer) async {
   final items = <XFile>[];
   final dataItems = dataTransfer.items;
   if (dataItems != null) {
-    for (var i = 0; i < dataItems.length; i++) {
+    final length = dataItems.length ?? 0;
+    for (var i = 0; i < length; i++) {
       final item = dataItems[i];
       if (item.kind != 'file') continue;
       final file = item.getAsFile();
@@ -95,17 +96,17 @@ Future<List<XFile>> _extractFiles(html.DataTransfer dataTransfer) async {
   if (items.isNotEmpty) return items;
 
   final fileList = dataTransfer.files;
-  for (var i = 0; i < fileList.length; i++) {
-    final file = fileList.item(i);
-    if (file == null) continue;
-    items.add(await _xFileFromHtmlFile(file));
+  if (fileList != null) {
+    for (var i = 0; i < fileList.length; i++) {
+      final file = fileList[i];
+      items.add(await _xFileFromHtmlFile(file));
+    }
   }
   return items;
 }
 
 Future<XFile> _xFileFromHtmlFile(html.File file) async {
-  final buffer = await file.arrayBuffer();
-  final bytes = Uint8List.view(buffer);
+  final bytes = await _readFileBytes(file);
   final mimeType = file.type.isNotEmpty ? file.type : lookupMimeType(file.name);
   final name = file.name.isNotEmpty ? file.name : _fallbackName(mimeType);
   return XFile.fromData(bytes, name: name, mimeType: mimeType);
@@ -139,7 +140,7 @@ String? _findUrlInText(String value) {
 
 String? _findImageSrc(String htmlContent) {
   final match =
-      RegExp(r'<img[^>]+src=["\']([^"\']+)["\']', caseSensitive: false)
+      RegExp(r'''<img[^>]+src=["']([^"']+)["']''', caseSensitive: false)
           .firstMatch(htmlContent);
   return match?.group(1);
 }
@@ -156,4 +157,34 @@ String _fallbackName(String? mimeType) {
   if (mimeType == null) return 'file';
   final extension = extensionFromMime(mimeType);
   return extension == null ? 'file' : 'file.$extension';
+}
+
+Future<Uint8List> _readFileBytes(html.File file) {
+  final completer = Completer<Uint8List>();
+  final reader = html.FileReader();
+
+  void completeWithError(Object error) {
+    if (!completer.isCompleted) {
+      completer.completeError(error);
+    }
+  }
+
+  reader.onLoad.listen((_) {
+    final result = reader.result;
+    if (result is ByteBuffer) {
+      completer.complete(Uint8List.view(result));
+    } else if (result is Uint8List) {
+      completer.complete(result);
+    } else if (result is String) {
+      completer.complete(Uint8List.fromList(result.codeUnits));
+    } else {
+      completeWithError(StateError('Unsupported file reader result type'));
+    }
+  });
+  reader.onError.listen((_) {
+    completeWithError(reader.error ?? StateError('FileReader error'));
+  });
+
+  reader.readAsArrayBuffer(file);
+  return completer.future;
 }
