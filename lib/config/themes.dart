@@ -50,6 +50,7 @@ abstract class FluffyThemes {
       visualDensity: VisualDensity.standard,
       useMaterial3: true,
       fontFamily: 'Unicode18',
+      fontFamilyFallback: const ['NotoColorEmoji'],
       brightness: brightness,
       colorScheme: colorScheme,
       dividerColor: brightness == Brightness.dark
