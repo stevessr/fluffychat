@@ -223,7 +223,22 @@ class _AdaptableReactorsDialog extends StatelessWidget {
       ),
     );
 
-    final title = Center(child: Text(reactionEntry!.key));
+    final reactionKey = reactionEntry!.key;
+    final title = reactionKey.startsWith('mxc://')
+        ? Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Center(
+              child: MxcImage(
+                uri: Uri.parse(reactionKey),
+                width: 72,
+                height: 72,
+                animated: true,
+                isThumbnail: false,
+                fit: BoxFit.contain,
+              ),
+            ),
+          )
+        : Center(child: Text(reactionKey));
 
     return AlertDialog.adaptive(title: title, content: body);
   }
