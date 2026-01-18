@@ -49,6 +49,7 @@ abstract class FluffyThemes {
     return ThemeData(
       visualDensity: VisualDensity.standard,
       useMaterial3: true,
+      fontFamily: 'Unicode18',
       brightness: brightness,
       colorScheme: colorScheme,
       dividerColor: brightness == Brightness.dark
