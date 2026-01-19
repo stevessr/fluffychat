@@ -46,10 +46,40 @@ abstract class FluffyThemes {
       seedColor: seed ?? Color(AppSettings.colorSchemeSeedInt.value),
     );
     final isColumnMode = FluffyThemes.isColumnMode(context);
+    // 定义回落字体列表，仅用于系统字体无法显示的字符
+    const fallbackFonts = ['Unicode18', 'NotoColorEmoji'];
+
+    // 创建带有回落字体的 TextTheme
+    TextTheme applyFallbackFonts(TextTheme base) {
+      return base.copyWith(
+        displayLarge: base.displayLarge?.copyWith(fontFamilyFallback: fallbackFonts),
+        displayMedium: base.displayMedium?.copyWith(fontFamilyFallback: fallbackFonts),
+        displaySmall: base.displaySmall?.copyWith(fontFamilyFallback: fallbackFonts),
+        headlineLarge: base.headlineLarge?.copyWith(fontFamilyFallback: fallbackFonts),
+        headlineMedium: base.headlineMedium?.copyWith(fontFamilyFallback: fallbackFonts),
+        headlineSmall: base.headlineSmall?.copyWith(fontFamilyFallback: fallbackFonts),
+        titleLarge: base.titleLarge?.copyWith(fontFamilyFallback: fallbackFonts),
+        titleMedium: base.titleMedium?.copyWith(fontFamilyFallback: fallbackFonts),
+        titleSmall: base.titleSmall?.copyWith(fontFamilyFallback: fallbackFonts),
+        bodyLarge: base.bodyLarge?.copyWith(fontFamilyFallback: fallbackFonts),
+        bodyMedium: base.bodyMedium?.copyWith(fontFamilyFallback: fallbackFonts),
+        bodySmall: base.bodySmall?.copyWith(fontFamilyFallback: fallbackFonts),
+        labelLarge: base.labelLarge?.copyWith(fontFamilyFallback: fallbackFonts),
+        labelMedium: base.labelMedium?.copyWith(fontFamilyFallback: fallbackFonts),
+        labelSmall: base.labelSmall?.copyWith(fontFamilyFallback: fallbackFonts),
+      );
+    }
+
+    final baseTheme = ThemeData(
+      brightness: brightness,
+      colorScheme: colorScheme,
+      useMaterial3: true,
+    );
+
     return ThemeData(
       visualDensity: VisualDensity.standard,
       useMaterial3: true,
-      fontFamilyFallback: const ['Unicode18', 'NotoColorEmoji'],
+      textTheme: applyFallbackFonts(baseTheme.textTheme),
       brightness: brightness,
       colorScheme: colorScheme,
       dividerColor: brightness == Brightness.dark
