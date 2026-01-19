@@ -144,7 +144,7 @@ class ChatInputRow extends StatelessWidget {
                       iconColor: theme.colorScheme.onPrimaryContainer,
                       onSelected: controller.onAddPopupMenuButtonSelected,
                       itemBuilder: (BuildContext context) => [
-                        if (PlatformInfos.isMobile)
+                        if (PlatformInfos.isMobile || PlatformInfos.isWeb)
                           PopupMenuItem(
                             value: AddPopupMenuActions.location,
                             child: ListTile(

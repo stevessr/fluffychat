@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:matrix/matrix.dart';
@@ -33,7 +34,22 @@ class SendLocationDialogState extends State<SendLocationDialog> {
     requestLocation();
   }
 
+  bool get _isWebInsecureContext {
+    if (!kIsWeb) {
+      return false;
+    }
+    final uri = Uri.base;
+    final isLocalhost = uri.host == 'localhost' || uri.host == '127.0.0.1';
+    return uri.scheme != 'https' && !isLocalhost;
+  }
+
   Future<void> requestLocation() async {
+    if (_isWebInsecureContext) {
+      setState(
+        () => error = 'Location sharing on web requires HTTPS or localhost.',
+      );
+      return;
+    }
     if (!(await Geolocator.isLocationServiceEnabled())) {
       setState(() => disabled = true);
       return;
