@@ -49,8 +49,7 @@ abstract class FluffyThemes {
     return ThemeData(
       visualDensity: VisualDensity.standard,
       useMaterial3: true,
-      fontFamily: 'Unicode18',
-      fontFamilyFallback: const ['NotoColorEmoji'],
+      fontFamilyFallback: const ['Unicode18', 'NotoColorEmoji'],
       brightness: brightness,
       colorScheme: colorScheme,
       dividerColor: brightness == Brightness.dark

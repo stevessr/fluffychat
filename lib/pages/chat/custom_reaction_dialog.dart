@@ -81,6 +81,7 @@ class _CustomReactionDialogState extends State<CustomReactionDialog>
             onEmojiSelected: (_, emoji) =>
                 Navigator.of(context).pop(emoji.emoji),
             config: Config(
+              checkPlatformCompatibility: false,
               emojiViewConfig: const EmojiViewConfig(
                 backgroundColor: Colors.transparent,
               ),
