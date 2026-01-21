@@ -1,12 +1,53 @@
 import 'package:flutter/material.dart';
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:emoji_picker_flutter/locales/default_emoji_set_locale.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat/sticker_picker_dialog.dart';
+import 'package:fluffychat/utils/unicode_17_emoji_set.dart';
 import 'chat.dart';
+
+List<CategoryEmoji> _emojiSetWithUnicode17(Locale locale) {
+  final baseSet = getDefaultEmojiLocale(locale);
+  final baseCategories = {
+    for (final category in baseSet) category.category,
+  };
+  final emojiByCategory = <Category, List<Emoji>>{
+    for (final category in baseSet)
+      category.category: List<Emoji>.from(category.emoji),
+  };
+  final emojiValuesByCategory = <Category, Set<String>>{
+    for (final category in baseSet)
+      category.category: category.emoji.map((emoji) => emoji.emoji).toSet(),
+  };
+
+  for (final category in unicode17EmojiSet) {
+    final list = emojiByCategory.putIfAbsent(category.category, () => []);
+    final existing =
+        emojiValuesByCategory.putIfAbsent(category.category, () => <String>{});
+    for (final emoji in category.emoji) {
+      if (existing.add(emoji.emoji)) {
+        list.add(emoji);
+      }
+    }
+  }
+
+  final merged = <CategoryEmoji>[
+    for (final category in baseSet)
+      CategoryEmoji(category.category, emojiByCategory[category.category]!),
+  ];
+
+  for (final category in emojiByCategory.entries) {
+    if (!baseCategories.contains(category.key)) {
+      merged.add(CategoryEmoji(category.key, category.value));
+    }
+  }
+
+  return merged;
+}
 
 class ChatEmojiPicker extends StatelessWidget {
   final ChatController controller;
@@ -43,6 +84,10 @@ class ChatEmojiPicker extends StatelessWidget {
                           config: Config(
                             checkPlatformCompatibility: false,
                             locale: Localizations.localeOf(context),
+                            emojiSet: _emojiSetWithUnicode17,
+                            emojiTextStyle: const TextStyle(
+                              fontFamily: 'NotoColorEmoji',
+                            ),
                             emojiViewConfig: EmojiViewConfig(
                               noRecents: const NoRecent(),
                               backgroundColor:

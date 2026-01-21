@@ -25,6 +25,24 @@ class ChatInputRow extends StatelessWidget {
 
   const ChatInputRow(this.controller, {super.key});
 
+  List<Emoji> _buildSuggestionEmojis(BuildContext context) {
+    final locale = AppSettings.emojiSuggestionLocale.value.isNotEmpty
+        ? Locale(AppSettings.emojiSuggestionLocale.value)
+        : Localizations.localeOf(context);
+    final localizedEmojiByValue = <String, Emoji>{
+      for (final category in getDefaultEmojiLocale(locale))
+        for (final emoji in category.emoji)
+          emoji.emoji: emoji,
+    };
+    final merged = <Emoji>[];
+    for (final category in emojiSetEnglish) {
+      for (final emoji in category.emoji) {
+        merged.add(localizedEmojiByValue[emoji.emoji] ?? emoji);
+      }
+    }
+    return merged;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -341,39 +359,7 @@ class ChatInputRow extends StatelessWidget {
                           filled: false,
                         ),
                         onChanged: controller.onInputBarChanged,
-                        suggestionEmojis:
-                            getDefaultEmojiLocale(
-                              AppSettings.emojiSuggestionLocale.value.isNotEmpty
-                                  ? Locale(
-                                      AppSettings.emojiSuggestionLocale.value,
-                                    )
-                                  : Localizations.localeOf(context),
-                            ).fold<List<Emoji>>(
-                              [],
-                              (emojis, category) =>
-                                  emojis..addAll(category.emoji),
-                            )..addAll([
-                              Emoji('shaking_face', '🫪'),
-                              Emoji('pink_heart', '🩷'),
-                              Emoji('light_blue_heart', '🩵'),
-                              Emoji('grey_heart', '🩶'),
-                              Emoji('pushing_hand_left', '🫷'),
-                              Emoji('pushing_hand_right', '🫸'),
-                              Emoji('moose', '🫎'),
-                              Emoji('donkey', '🫏'),
-                              Emoji('wing', '🪽'),
-                              Emoji('goose', '🪿'),
-                              Emoji('jellyfish', '🪼'),
-                              Emoji('hyacinth', '🪻'),
-                              Emoji('pea_pod', '🫛'),
-                              Emoji('ginger', '🫚'),
-                              Emoji('folding_hand_fan', '🪭'),
-                              Emoji('hair_pick', '🪮'),
-                              Emoji('flute', '🪈'),
-                              Emoji('maracas', '🪇'),
-                              Emoji('khanda', '🪯'),
-                              Emoji('wireless', '🛜'),
-                            ]),
+                        suggestionEmojis: _buildSuggestionEmojis(context),
                       ),
                     ),
                   ),
