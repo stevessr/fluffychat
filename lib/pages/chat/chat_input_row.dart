@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:animations/animations.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:emoji_picker_flutter/locales/default_emoji_set_locale.dart';
 import 'package:matrix/matrix.dart';
 
@@ -347,11 +348,32 @@ class ChatInputRow extends StatelessWidget {
                                       AppSettings.emojiSuggestionLocale.value,
                                     )
                                   : Localizations.localeOf(context),
-                            ).fold(
+                            ).fold<List<Emoji>>(
                               [],
                               (emojis, category) =>
                                   emojis..addAll(category.emoji),
-                            ),
+                            )..addAll([
+                              Emoji('shaking_face', '🫪'),
+                              Emoji('pink_heart', '🩷'),
+                              Emoji('light_blue_heart', '🩵'),
+                              Emoji('grey_heart', '🩶'),
+                              Emoji('pushing_hand_left', '🫷'),
+                              Emoji('pushing_hand_right', '🫸'),
+                              Emoji('moose', '🫎'),
+                              Emoji('donkey', '🫏'),
+                              Emoji('wing', '🪽'),
+                              Emoji('goose', '🪿'),
+                              Emoji('jellyfish', '🪼'),
+                              Emoji('hyacinth', '🪻'),
+                              Emoji('pea_pod', '🫛'),
+                              Emoji('ginger', '🫚'),
+                              Emoji('folding_hand_fan', '🪭'),
+                              Emoji('hair_pick', '🪮'),
+                              Emoji('flute', '🪈'),
+                              Emoji('maracas', '🪇'),
+                              Emoji('khanda', '🪯'),
+                              Emoji('wireless', '🛜'),
+                            ]),
                       ),
                     ),
                   ),
