@@ -4,6 +4,7 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 
 class CustomReactionDialog extends StatefulWidget {
@@ -164,16 +165,17 @@ class _EmotePickerGrid extends StatelessWidget {
     required this.searchController,
   });
 
+  String _packDisplayName(ImagePackContent pack, String id) {
+    final displayName = pack.pack.displayName?.trim();
+    if (displayName == null || displayName.isEmpty) {
+      return id;
+    }
+    return displayName;
+  }
+
   @override
   Widget build(BuildContext context) {
     final emotePacks = room.getImagePacks(ImagePackUsage.emoticon);
-    final entries = <(String key, Uri uri)>[];
-    for (final pack in emotePacks.entries) {
-      for (final e in pack.value.images.entries) {
-        final url = e.value.url;
-        entries.add((e.key, url));
-      }
-    }
 
     return Column(
       children: [
@@ -193,54 +195,98 @@ class _EmotePickerGrid extends StatelessWidget {
         Expanded(
           child: Builder(builder: (context) {
             final query = searchController.text.trim().toLowerCase();
-            final filtered = query.isEmpty
-                ? entries
-                : entries
-                    .where((e) => e.$1.toLowerCase().contains(query))
-                    .toList();
-            if (filtered.isEmpty) {
+            final sections = <_EmotePackSection>[];
+            for (final entry in emotePacks.entries) {
+              final emotes = <(String key, Uri uri)>[];
+              for (final emote in entry.value.images.entries) {
+                if (query.isNotEmpty &&
+                    !emote.key.toLowerCase().contains(query)) {
+                  continue;
+                }
+                emotes.add((emote.key, emote.value.url));
+              }
+              if (emotes.isNotEmpty) {
+                sections.add(
+                  _EmotePackSection(
+                    id: entry.key,
+                    pack: entry.value,
+                    emotes: emotes,
+                  ),
+                );
+              }
+            }
+            if (sections.isEmpty) {
               return const Center(child: Text('No emotes found'));
             }
-            return GridView.builder(
+            return ListView.builder(
               padding: const EdgeInsets.all(8),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 6,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-              ),
-              itemCount: filtered.length,
-              itemBuilder: (context, i) {
-                final (shortcode, uri) = filtered[i];
-                final key = uri.toString();
-                final disabled = disabledKeys.contains(key);
-                return InkWell(
-                  onTap: disabled ? null : () => Navigator.of(context).pop(key),
-                  child: Opacity(
-                    opacity: disabled ? 0.4 : 1.0,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Expanded(
-                          child: Center(
-                            child: MxcImage(
-                              uri: uri,
-                              width: 40,
-                              height: 40,
-                              animated: false,
-                              isThumbnail: false,
+              itemCount: sections.length,
+              itemBuilder: (context, sectionIndex) {
+                final section = sections[sectionIndex];
+                final packName = _packDisplayName(section.pack, section.id);
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (sectionIndex != 0) const SizedBox(height: 12),
+                    ListTile(
+                      dense: true,
+                      leading: Avatar(
+                        mxContent: section.pack.pack.avatarUrl,
+                        name: packName,
+                        client: room.client,
+                      ),
+                      title: Text(packName),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                    ),
+                    GridView.builder(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 6,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
+                      ),
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: section.emotes.length,
+                      itemBuilder: (context, i) {
+                        final (shortcode, uri) = section.emotes[i];
+                        final key = uri.toString();
+                        final disabled = disabledKeys.contains(key);
+                        return InkWell(
+                          onTap: disabled
+                              ? null
+                              : () => Navigator.of(context).pop(key),
+                          child: Opacity(
+                            opacity: disabled ? 0.4 : 1.0,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Expanded(
+                                  child: Center(
+                                    child: MxcImage(
+                                      uri: uri,
+                                      width: 40,
+                                      height: 40,
+                                      animated: false,
+                                      isThumbnail: false,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  shortcode,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 11),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          shortcode,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 11),
-                        ),
-                      ],
+                        );
+                      },
                     ),
-                  ),
+                  ],
                 );
               },
             );
@@ -249,4 +295,16 @@ class _EmotePickerGrid extends StatelessWidget {
       ],
     );
   }
+}
+
+class _EmotePackSection {
+  final String id;
+  final ImagePackContent pack;
+  final List<(String key, Uri uri)> emotes;
+
+  const _EmotePackSection({
+    required this.id,
+    required this.pack,
+    required this.emotes,
+  });
 }
