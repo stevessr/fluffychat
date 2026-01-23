@@ -3372,5 +3372,17 @@
                 "type": "int"
             }
         }
-    }
+    },
+    "customReaction": "自訂反應",
+    "@customReaction": {},
+    "customReactionEmotesTab": "表情包",
+    "@customReactionEmotesTab": {},
+    "customReactionTextTab": "文字",
+    "@customReactionTextTab": {},
+    "customReactionEnterTextLabel": "輸入文字",
+    "@customReactionEnterTextLabel": {},
+    "customReactionEnterTextHint": "例如：OK、+1、讚",
+    "@customReactionEnterTextHint": {},
+    "customReactionEmoteSearchHint": ":/shortcode 或搜尋",
+    "@customReactionEmoteSearchHint": {}
 }
