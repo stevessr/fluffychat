@@ -124,7 +124,7 @@ class ChatController extends State<ChatPageWithRoom>
 
   void onDragDone(DropDoneDetails details) async {
     setState(() => dragging = false);
-    List<XFile> files = List<XFile>.from(details.files);
+    var files = List<XFile>.from(details.files);
     if (files.isEmpty) {
       files = await getWebDropFiles();
       if (files.isEmpty) return;

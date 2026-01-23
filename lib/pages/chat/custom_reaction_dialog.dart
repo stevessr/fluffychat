@@ -126,6 +126,9 @@ class _CustomReactionDialogState extends State<CustomReactionDialog>
               checkPlatformCompatibility: false,
               locale: Localizations.localeOf(context),
               emojiSet: _emojiSetWithUnicode17,
+              emojiTextStyle: const TextStyle(
+                fontFamily: 'NotoColorEmoji',
+              ),
               emojiViewConfig: const EmojiViewConfig(
                 backgroundColor: Colors.transparent,
               ),

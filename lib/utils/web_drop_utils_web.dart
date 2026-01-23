@@ -41,7 +41,7 @@ Future<List<XFile>> getWebDropFiles() async {
     try {
       final data = UriData.parse(url);
       final mimeType = data.mimeType;
-      if (mimeType == null || !mimeType.startsWith('image/')) return const [];
+      if (!mimeType.startsWith('image/')) return const [];
       final extension = extensionFromMime(mimeType) ?? 'bin';
       return [
         XFile.fromData(
