@@ -108,10 +108,10 @@ class _CustomReactionDialogState extends State<CustomReactionDialog>
         title: Text(l10n.customReaction),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Emoji'),
-            Tab(text: 'Emotes'),
-            Tab(text: 'Text'),
+          tabs: [
+            Tab(text: l10n.emojis),
+            Tab(text: l10n.customReactionEmotesTab),
+            Tab(text: l10n.customReactionTextTab),
           ],
         ),
       ),
@@ -164,10 +164,10 @@ class _CustomReactionDialogState extends State<CustomReactionDialog>
                 TextField(
                   controller: _textController,
                   autofocus: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Enter text',
-                    hintText: 'e.g. OK, +1, 赞',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.customReactionEnterTextLabel,
+                    hintText: l10n.customReactionEnterTextHint,
+                    border: const OutlineInputBorder(),
                   ),
                   onChanged: (_) => setState(() {}),
                 ),
@@ -221,6 +221,7 @@ class _EmotePickerGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context);
     final emotePacks = room.getImagePacks(ImagePackUsage.emoticon);
 
     return Column(
@@ -230,7 +231,7 @@ class _EmotePickerGrid extends StatelessWidget {
           child: TextField(
             controller: searchController,
             decoration: InputDecoration(
-              hintText: ':/shortcode or search',
+              hintText: l10n.customReactionEmoteSearchHint,
               prefixIcon: const Icon(Icons.search_outlined),
               border: const OutlineInputBorder(),
               isDense: true,
@@ -262,7 +263,7 @@ class _EmotePickerGrid extends StatelessWidget {
               }
             }
             if (sections.isEmpty) {
-              return const Center(child: Text('No emotes found'));
+              return Center(child: Text(l10n.noEmotesFound));
             }
             return ListView.builder(
               padding: const EdgeInsets.all(8),
