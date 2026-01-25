@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -94,6 +95,8 @@ class ChatPageWithRoom extends StatefulWidget {
   @override
   ChatController createState() => ChatController();
 }
+
+enum _SendAction { unencrypted }
 
 class ChatController extends State<ChatPageWithRoom>
     with WidgetsBindingObserver {
@@ -588,36 +591,69 @@ class ChatController extends State<ChatPageWithRoom>
     Matrix.of(context).setActiveClient(c);
   });
 
-  Future<void> send() async {
+  Future<void> openUnencryptedSendAction() async {
+    if (sendController.text.trim().isEmpty || !room.encrypted) return;
+    final action = await showModalActionPopup<_SendAction>(
+      context: context,
+      title: L10n.of(context).send,
+      cancelLabel: L10n.of(context).cancel,
+      actions: [
+        AdaptiveModalAction(
+          value: _SendAction.unencrypted,
+          label:
+              '${L10n.of(context).send} (${L10n.of(context).encryptionNotEnabled})',
+          icon: const Icon(Icons.lock_open_outlined),
+          isDefaultAction: true,
+        ),
+      ],
+    );
+    if (action == _SendAction.unencrypted) {
+      await send(forceUnencrypted: true);
+    }
+  }
+
+  Future<void> send({bool forceUnencrypted = false}) async {
     if (sendController.text.trim().isEmpty) return;
     _storeInputTimeoutTimer?.cancel();
     final prefs = Matrix.of(context).store;
     prefs.remove('draft_$roomId');
     var parseCommands = true;
+    final forcePlaintext = forceUnencrypted && room.encrypted;
 
-    final commandMatch = RegExp(r'^\/(\w+)').firstMatch(sendController.text);
-    if (commandMatch != null &&
-        !sendingClient.commands.keys.contains(commandMatch[1]!.toLowerCase())) {
-      final l10n = L10n.of(context);
-      final dialogResult = await showOkCancelAlertDialog(
-        context: context,
-        title: l10n.commandInvalid,
-        message: l10n.commandMissing(commandMatch[0]!),
-        okLabel: l10n.sendAsText,
-        cancelLabel: l10n.cancel,
-      );
-      if (dialogResult == OkCancelResult.cancel) return;
+    if (!forcePlaintext) {
+      final commandMatch = RegExp(r'^\/(\w+)').firstMatch(sendController.text);
+      if (commandMatch != null &&
+          !sendingClient.commands.keys.contains(
+            commandMatch[1]!.toLowerCase(),
+          )) {
+        final l10n = L10n.of(context);
+        final dialogResult = await showOkCancelAlertDialog(
+          context: context,
+          title: l10n.commandInvalid,
+          message: l10n.commandMissing(commandMatch[0]!),
+          okLabel: l10n.sendAsText,
+          cancelLabel: l10n.cancel,
+        );
+        if (dialogResult == OkCancelResult.cancel) return;
+        parseCommands = false;
+      }
+    } else {
       parseCommands = false;
     }
 
-    // ignore: unawaited_futures
-    room.sendTextEvent(
-      sendController.text,
-      inReplyTo: replyEvent,
-      editEventId: editEvent?.eventId,
-      parseCommands: parseCommands,
-      threadRootEventId: activeThreadId,
-    );
+    if (forcePlaintext) {
+      // ignore: unawaited_futures
+      _sendUnencryptedText(sendController.text);
+    } else {
+      // ignore: unawaited_futures
+      room.sendTextEvent(
+        sendController.text,
+        inReplyTo: replyEvent,
+        editEventId: editEvent?.eventId,
+        parseCommands: parseCommands,
+        threadRootEventId: activeThreadId,
+      );
+    }
     sendController.value = TextEditingValue(
       text: pendingText,
       selection: const TextSelection.collapsed(offset: 0),
@@ -630,6 +666,97 @@ class ChatController extends State<ChatPageWithRoom>
       editEvent = null;
       pendingText = '';
     });
+  }
+
+  Future<void> _sendUnencryptedText(String message) async {
+    final content = <String, dynamic>{
+      'msgtype': MessageTypes.Text,
+      'body': message,
+    };
+
+    final inReplyTo = replyEvent;
+    if (inReplyTo != null) {
+      var replyText =
+          '<${inReplyTo.senderId}> ${_stripBodyFallback(inReplyTo.body)}';
+      replyText = replyText.split('\n').map((line) => '> $line').join('\n');
+      content['format'] = 'org.matrix.custom.html';
+      final replyHtml = (inReplyTo.formattedText.isNotEmpty
+              ? inReplyTo.formattedText
+              : htmlEscape.convert(inReplyTo.body).replaceAll('\n', '<br>'))
+          .replaceAll(
+        RegExp(
+          r'<mx-reply>.*</mx-reply>',
+          caseSensitive: false,
+          multiLine: false,
+          dotAll: true,
+        ),
+        '',
+      );
+      final repliedHtml =
+          htmlEscape.convert(content['body'] as String).replaceAll('\n', '<br>');
+      content['formatted_body'] =
+          '<mx-reply><blockquote><a href="https://matrix.to/#/${inReplyTo.roomId!}/${inReplyTo.eventId}">In reply to</a> <a href="https://matrix.to/#/${inReplyTo.senderId}">${inReplyTo.senderId}</a><br>$replyHtml</blockquote></mx-reply>$repliedHtml';
+      content['body'] =
+          '${replyText.replaceAll('@room', '@\u200broom')}\n\n${content['body']}';
+      content['m.relates_to'] = {
+        'm.in_reply_to': {
+          'event_id': inReplyTo.eventId,
+        },
+      };
+    }
+
+    if (activeThreadId != null) {
+      content['m.relates_to'] = {
+        'event_id': activeThreadId,
+        'rel_type': RelationshipTypes.thread,
+        'is_falling_back': inReplyTo == null,
+        if (inReplyTo != null) ...{
+          'm.in_reply_to': {
+            'event_id': inReplyTo.eventId,
+          },
+        } else ...{
+          if (threadLastEventId != null)
+            'm.in_reply_to': {
+              'event_id': threadLastEventId,
+            },
+        },
+      };
+    }
+
+    final editEventId = editEvent?.eventId;
+    if (editEventId != null) {
+      final newContent = Map<String, dynamic>.from(content);
+      content['m.new_content'] = newContent;
+      content['m.relates_to'] = {
+        'event_id': editEventId,
+        'rel_type': RelationshipTypes.edit,
+      };
+      if (content['body'] is String) {
+        content['body'] = '* ${content['body']}';
+      }
+      if (content['formatted_body'] is String) {
+        content['formatted_body'] = '* ${content['formatted_body']}';
+      }
+    }
+
+    final txid = sendingClient.generateUniqueTransactionId();
+    await sendingClient.sendMessage(room.id, EventTypes.Message, txid, content);
+  }
+
+  String _stripBodyFallback(String body) {
+    if (body.startsWith('> <@')) {
+      var temp = '';
+      var inPrefix = true;
+      for (final l in body.split('\n')) {
+        if (inPrefix && (l.isEmpty || l.startsWith('> '))) {
+          continue;
+        }
+        inPrefix = false;
+        temp += temp.isEmpty ? l : ('\n$l');
+      }
+      return temp;
+    }
+    return body;
   }
 
   void sendFileAction({FileType type = FileType.any}) async {

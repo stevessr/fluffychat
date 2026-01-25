@@ -409,6 +409,9 @@ class ChatInputRow extends StatelessWidget {
                         : IconButton(
                             tooltip: L10n.of(context).send,
                             onPressed: controller.send,
+                            onLongPress: controller.room.encrypted
+                                ? controller.openUnencryptedSendAction
+                                : null,
                             style: IconButton.styleFrom(
                               backgroundColor: theme.bubbleColor,
                               foregroundColor: theme.onBubbleColor,
