@@ -1,8 +1,5 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
-import 'package:html/parser.dart' as html_parser;
-import 'package:html/dom.dart' as dom;
 import 'package:matrix/matrix.dart';
 
 import 'homeserver_utils.dart';
@@ -73,28 +70,20 @@ class UrlPreviewData {
 
 /// URL 预览解析器
 class UrlPreviewParser {
-  static const int maxRedirects = 5;
-  static const Duration timeout = Duration(seconds: 10);
-  static const int maxContentLength = 1024 * 1024; // 1MB
-
   /// 从 URL 获取预览数据（统一入口）
   ///
   /// 当提供 [client] 且服务器支持 URL 预览时，使用服务器端 API。
-  /// 否则回退到客户端解析。
+  /// 否则返回 null (不再支持客户端解析)
   static Future<UrlPreviewData?> fetchPreview(
     String url, {
     Client? client,
   }) async {
-    // 如果提供了 Matrix 客户端，尝试使用服务器端预览
-    if (client != null) {
-      final serverPreview = await fetchPreviewFromServer(client, url);
-      if (serverPreview != null) {
-        return serverPreview;
-      }
+    // 必须提供 Matrix 客户端才能获取预览
+    if (client == null) {
+      return null;
     }
 
-    // 回退到客户端解析
-    return _fetchPreviewFromClient(url);
+    return fetchPreviewFromServer(client, url);
   }
 
   /// 从 Matrix 服务器获取 URL 预览（使用 Synapse 的 preview_url API）
@@ -121,8 +110,6 @@ class UrlPreviewParser {
       }
 
       // 使用 Matrix SDK 的 API 直接获取原始响应
-      // 注意：PreviewForUrl 类只解析了 og:image 和 matrix:image:size
-      // 我们需要获取完整的 Open Graph 数据，所以直接调用 API
       final response = await client.httpClient.get(
         client.homeserver!.replace(
           path: '/_matrix/client/v1/media/preview_url',
@@ -158,161 +145,6 @@ class UrlPreviewParser {
       Logs().v('[UrlPreviewParser] Server preview error: $e');
       return null;
     }
-  }
-
-  /// 从客户端直接获取 URL 预览（回退方案）
-  static Future<UrlPreviewData?> _fetchPreviewFromClient(String url) async {
-    try {
-      final uri = Uri.tryParse(url);
-      if (uri == null || !uri.hasScheme || !uri.hasAuthority) {
-        return null;
-      }
-
-      // 只支持 http 和 https
-      if (uri.scheme != 'http' && uri.scheme != 'https') {
-        return null;
-      }
-
-      final response = await http.get(
-        uri,
-        headers: {
-          'User-Agent':
-              'Mozilla/5.0 (compatible; FluffyChat/2.0; +https://fluffychat.im)',
-          'Accept':
-              'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Language': 'en-US,en;q=0.5',
-        },
-      ).timeout(timeout);
-
-      if (response.statusCode != 200) {
-        return null;
-      }
-
-      // 检查内容类型
-      final contentType = response.headers['content-type']?.toLowerCase();
-      if (contentType == null || !contentType.contains('html')) {
-        return null;
-      }
-
-      // 检查内容大小
-      if (response.contentLength != null &&
-          response.contentLength! > maxContentLength) {
-        return null;
-      }
-
-      return _parseHtml(url, response.body);
-    } catch (e) {
-      // 静默失败，返回 null
-      return null;
-    }
-  }
-
-  /// 解析 HTML 内容
-  static UrlPreviewData? _parseHtml(String url, String htmlContent) {
-    try {
-      final document = html_parser.parse(htmlContent);
-      final uri = Uri.parse(url);
-
-      String? title;
-      String? description;
-      String? imageUrl;
-      String? siteName;
-      String? favicon;
-      int? imageWidth;
-      int? imageHeight;
-
-      // 优先使用 Open Graph 元数据
-      title = _getMetaContent(document, 'og:title') ??
-          _getMetaContent(document, 'twitter:title') ??
-          document.querySelector('title')?.text.trim();
-
-      description = _getMetaContent(document, 'og:description') ??
-          _getMetaContent(document, 'twitter:description') ??
-          _getMetaContent(document, 'description');
-
-      imageUrl = _getMetaContent(document, 'og:image') ??
-          _getMetaContent(document, 'twitter:image') ??
-          _getMetaContent(document, 'twitter:image:src');
-
-      siteName = _getMetaContent(document, 'og:site_name') ??
-          _getMetaContent(document, 'application-name') ??
-          uri.host;
-
-      // 获取 favicon
-      favicon = _getFavicon(document, uri);
-
-      // 获取图片尺寸
-      final widthStr = _getMetaContent(document, 'og:image:width');
-      final heightStr = _getMetaContent(document, 'og:image:height');
-      if (widthStr != null) {
-        imageWidth = int.tryParse(widthStr);
-      }
-      if (heightStr != null) {
-        imageHeight = int.tryParse(heightStr);
-      }
-
-      // 将相对 URL 转换为绝对 URL
-      if (imageUrl != null && !imageUrl.startsWith('http')) {
-        imageUrl = uri.resolve(imageUrl).toString();
-      }
-      if (favicon != null && !favicon.startsWith('http')) {
-        favicon = uri.resolve(favicon).toString();
-      }
-
-      return UrlPreviewData(
-        url: url,
-        title: title,
-        description: description,
-        imageUrl: imageUrl,
-        siteName: siteName,
-        favicon: favicon,
-        imageWidth: imageWidth,
-        imageHeight: imageHeight,
-      );
-    } catch (e) {
-      return null;
-    }
-  }
-
-  /// 获取 meta 标签内容
-  static String? _getMetaContent(dom.Document document, String property) {
-    // 尝试 property 属性
-    var element = document.querySelector('meta[property="$property"]');
-    if (element != null) {
-      return element.attributes['content']?.trim();
-    }
-
-    // 尝试 name 属性
-    element = document.querySelector('meta[name="$property"]');
-    if (element != null) {
-      return element.attributes['content']?.trim();
-    }
-
-    return null;
-  }
-
-  /// 获取 favicon URL
-  static String? _getFavicon(dom.Document document, Uri baseUri) {
-    // 尝试多种 favicon 链接
-    final selectors = [
-      'link[rel="icon"]',
-      'link[rel="shortcut icon"]',
-      'link[rel="apple-touch-icon"]',
-      'link[rel="apple-touch-icon-precomposed"]',
-    ];
-
-    for (final selector in selectors) {
-      final element = document.querySelector(selector);
-      if (element != null) {
-        final href = element.attributes['href'];
-        if (href != null && href.isNotEmpty) {
-          return href;
-        }
-      }
-    }
-
-    // 默认 favicon 路径
-    return '/favicon.ico';
   }
 
   /// 从文本中提取 URL
