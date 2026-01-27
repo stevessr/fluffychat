@@ -93,5 +93,38 @@ void main() {
 
       expect(preview.hasPreview, false);
     });
+
+    test('UrlPreviewData.fromServerResponse should parse Open Graph data', () {
+      final response = {
+        'og:title': 'Matrix.org',
+        'og:description': 'The open standard for secure, decentralized communication',
+        'og:image': 'mxc://matrix.org/sOmEmEdIa',
+        'og:site_name': 'Matrix.org',
+        'og:image:width': 800,
+        'og:image:height': 600,
+      };
+
+      final preview = UrlPreviewData.fromServerResponse(
+        'https://matrix.org',
+        response,
+      );
+
+      expect(preview.url, 'https://matrix.org');
+      expect(preview.title, 'Matrix.org');
+      expect(preview.description,
+          'The open standard for secure, decentralized communication');
+      expect(preview.imageUrl, 'mxc://matrix.org/sOmEmEdIa');
+      expect(preview.siteName, 'Matrix.org');
+      expect(preview.imageWidth, 800);
+      expect(preview.imageHeight, 600);
+    });
+
+    test('fetchPreview should return null when client is null', () async {
+      final preview = await UrlPreviewParser.fetchPreview(
+        'https://example.com',
+        client: null,
+      );
+      expect(preview, null);
+    });
   });
 }
