@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:matrix/matrix.dart';
+
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
@@ -166,12 +168,14 @@ class UrlPreviewCard extends StatelessWidget {
 /// URL 预览加载器
 class UrlPreviewLoader extends StatefulWidget {
   final String url;
+  final Client? client;
   final Color? backgroundColor;
   final Color? textColor;
 
   const UrlPreviewLoader({
     super.key,
     required this.url,
+    this.client,
     this.backgroundColor,
     this.textColor,
   });
@@ -186,7 +190,10 @@ class _UrlPreviewLoaderState extends State<UrlPreviewLoader> {
   @override
   void initState() {
     super.initState();
-    _previewFuture = UrlPreviewParser.fetchPreview(widget.url);
+    _previewFuture = UrlPreviewParser.fetchPreview(
+      widget.url,
+      client: widget.client,
+    );
   }
 
   @override
