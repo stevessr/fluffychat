@@ -301,6 +301,7 @@ class MessageContent extends StatelessWidget {
                   if (previewUrl != null && !bigEmotes)
                     UrlPreviewLoader(
                       url: previewUrl,
+                      client: event.room.client,
                       backgroundColor:
                           textColor == linkColor ? null : textColor.withAlpha(20),
                       textColor: textColor,
