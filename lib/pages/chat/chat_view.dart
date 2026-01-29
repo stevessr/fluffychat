@@ -26,6 +26,7 @@ import 'package:fluffychat/widgets/unread_rooms_badge.dart';
 import '../../utils/stream_extension.dart';
 import 'chat_emoji_picker.dart';
 import 'chat_input_row.dart';
+import 'formatting_toolbar.dart';
 
 enum _EventContextAction { info, report }
 
@@ -400,6 +401,9 @@ class ChatView extends StatelessWidget {
                                         mainAxisSize: .min,
                                         children: [
                                           ReplyDisplay(controller),
+                                          FormattingToolbar(
+                                            controller: controller.sendController,
+                                          ),
                                           ChatInputRow(controller),
                                           ChatEmojiPicker(controller),
                                         ],

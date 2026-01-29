@@ -3166,4 +3166,15 @@
     "advancedConfigs": "高级配置",
     "advancedConfigurations": "高级配置",
     "signInWithLabel": "登录方式："
+    "@changedTheChatName": {},
+    "underlineText": "下划线",
+    "@underlineText": {},
+    "spoilerText": "隐藏文本",
+    "@spoilerText": {},
+    "inlineCode": "行内代码",
+    "@inlineCode": {},
+    "codeBlock": "代码块",
+    "@codeBlock": {},
+    "quote": "引用",
+    "@quote": {}
 }

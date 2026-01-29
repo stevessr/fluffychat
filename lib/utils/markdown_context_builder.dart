@@ -124,6 +124,30 @@ Widget markdownContextBuilder(
             ContextMenuController.removeAny();
           },
         ),
+        ContextMenuButtonItem(
+          label: l10n.underlineText,
+          onPressed: () {
+            final selection = controller.selection;
+            controller.text = controller.text.replaceRange(
+              selection.start,
+              selection.end,
+              '<u>$selectedText</u>',
+            );
+            ContextMenuController.removeAny();
+          },
+        ),
+        ContextMenuButtonItem(
+          label: l10n.spoilerText,
+          onPressed: () {
+            final selection = controller.selection;
+            controller.text = controller.text.replaceRange(
+              selection.start,
+              selection.end,
+              '||$selectedText||',
+            );
+            ContextMenuController.removeAny();
+          },
+        ),
       ],
     ],
   );
