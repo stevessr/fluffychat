@@ -5,10 +5,14 @@ import 'package:fluffychat/l10n/l10n.dart';
 class FormattingToolbar extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback? onFormatApplied;
+  final VoidCallback? onSendUnencrypted;
+  final bool showSendUnencryptedAction;
 
   const FormattingToolbar({
     required this.controller,
     this.onFormatApplied,
+    this.onSendUnencrypted,
+    this.showSendUnencryptedAction = false,
     super.key,
   });
 
@@ -21,7 +25,8 @@ class FormattingToolbar extends StatelessWidget {
       final cursorPos = selection.baseOffset;
       if (cursorPos < 0) return;
 
-      final newText = text.substring(0, cursorPos) +
+      final newText =
+          text.substring(0, cursorPos) +
           prefix +
           suffix +
           text.substring(cursorPos);
@@ -40,7 +45,11 @@ class FormattingToolbar extends StatelessWidget {
       controller.value = TextEditingValue(
         text: newText,
         selection: TextSelection.collapsed(
-          offset: selection.start + prefix.length + selectedText.length + suffix.length,
+          offset:
+              selection.start +
+              prefix.length +
+              selectedText.length +
+              suffix.length,
         ),
       );
     }
@@ -56,12 +65,7 @@ class FormattingToolbar extends StatelessWidget {
       height: 44,
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHigh,
-        border: Border(
-          bottom: BorderSide(
-            color: theme.dividerColor,
-            width: 1,
-          ),
-        ),
+        border: Border(bottom: BorderSide(color: theme.dividerColor, width: 1)),
       ),
       child: Row(
         children: [
@@ -113,6 +117,16 @@ class FormattingToolbar extends StatelessWidget {
               ],
             ),
           ),
+          if (showSendUnencryptedAction)
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: IconButton(
+                icon: const Icon(Icons.lock_open_outlined, size: 20),
+                tooltip: '${l10n.send} (${l10n.encryptionNotEnabled})',
+                onPressed: onSendUnencrypted,
+                color: theme.colorScheme.onPrimaryContainer,
+              ),
+            ),
         ],
       ),
     );

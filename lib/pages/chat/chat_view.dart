@@ -400,7 +400,17 @@ class ChatView extends StatelessWidget {
                                         children: [
                                           ReplyDisplay(controller),
                                           FormattingToolbar(
-                                            controller: controller.sendController,
+                                            controller:
+                                                controller.sendController,
+                                            showSendUnencryptedAction: true,
+                                            onSendUnencrypted:
+                                                controller.sendController.text
+                                                    .trim()
+                                                    .isNotEmpty
+                                                ? () => controller.send(
+                                                    forceUnencrypted: true,
+                                                  )
+                                                : null,
                                           ),
                                           ChatInputRow(controller),
                                           ChatEmojiPicker(controller),

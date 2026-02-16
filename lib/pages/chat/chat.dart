@@ -96,8 +96,6 @@ class ChatPageWithRoom extends StatefulWidget {
   ChatController createState() => ChatController();
 }
 
-enum _SendAction { unencrypted }
-
 class ChatController extends State<ChatPageWithRoom>
     with WidgetsBindingObserver {
   Room get room => sendingClient.getRoomById(roomId) ?? widget.room;
@@ -591,27 +589,6 @@ class ChatController extends State<ChatPageWithRoom>
     Matrix.of(context).setActiveClient(c);
   });
 
-  Future<void> openUnencryptedSendAction() async {
-    if (sendController.text.trim().isEmpty || !room.encrypted) return;
-    final action = await showModalActionPopup<_SendAction>(
-      context: context,
-      title: L10n.of(context).send,
-      cancelLabel: L10n.of(context).cancel,
-      actions: [
-        AdaptiveModalAction(
-          value: _SendAction.unencrypted,
-          label:
-              '${L10n.of(context).send} (${L10n.of(context).encryptionNotEnabled})',
-          icon: const Icon(Icons.lock_open_outlined),
-          isDefaultAction: true,
-        ),
-      ],
-    );
-    if (action == _SendAction.unencrypted) {
-      await send(forceUnencrypted: true);
-    }
-  }
-
   Future<void> send({bool forceUnencrypted = false}) async {
     if (sendController.text.trim().isEmpty) return;
     _storeInputTimeoutTimer?.cancel();
@@ -680,28 +657,28 @@ class ChatController extends State<ChatPageWithRoom>
           '<${inReplyTo.senderId}> ${_stripBodyFallback(inReplyTo.body)}';
       replyText = replyText.split('\n').map((line) => '> $line').join('\n');
       content['format'] = 'org.matrix.custom.html';
-      final replyHtml = (inReplyTo.formattedText.isNotEmpty
-              ? inReplyTo.formattedText
-              : htmlEscape.convert(inReplyTo.body).replaceAll('\n', '<br>'))
-          .replaceAll(
-        RegExp(
-          r'<mx-reply>.*</mx-reply>',
-          caseSensitive: false,
-          multiLine: false,
-          dotAll: true,
-        ),
-        '',
-      );
-      final repliedHtml =
-          htmlEscape.convert(content['body'] as String).replaceAll('\n', '<br>');
+      final replyHtml =
+          (inReplyTo.formattedText.isNotEmpty
+                  ? inReplyTo.formattedText
+                  : htmlEscape.convert(inReplyTo.body).replaceAll('\n', '<br>'))
+              .replaceAll(
+                RegExp(
+                  r'<mx-reply>.*</mx-reply>',
+                  caseSensitive: false,
+                  multiLine: false,
+                  dotAll: true,
+                ),
+                '',
+              );
+      final repliedHtml = htmlEscape
+          .convert(content['body'] as String)
+          .replaceAll('\n', '<br>');
       content['formatted_body'] =
           '<mx-reply><blockquote><a href="https://matrix.to/#/${inReplyTo.roomId!}/${inReplyTo.eventId}">In reply to</a> <a href="https://matrix.to/#/${inReplyTo.senderId}">${inReplyTo.senderId}</a><br>$replyHtml</blockquote></mx-reply>$repliedHtml';
       content['body'] =
           '${replyText.replaceAll('@room', '@\u200broom')}\n\n${content['body']}';
       content['m.relates_to'] = {
-        'm.in_reply_to': {
-          'event_id': inReplyTo.eventId,
-        },
+        'm.in_reply_to': {'event_id': inReplyTo.eventId},
       };
     }
 
@@ -711,14 +688,10 @@ class ChatController extends State<ChatPageWithRoom>
         'rel_type': RelationshipTypes.thread,
         'is_falling_back': inReplyTo == null,
         if (inReplyTo != null) ...{
-          'm.in_reply_to': {
-            'event_id': inReplyTo.eventId,
-          },
+          'm.in_reply_to': {'event_id': inReplyTo.eventId},
         } else ...{
           if (threadLastEventId != null)
-            'm.in_reply_to': {
-              'event_id': threadLastEventId,
-            },
+            'm.in_reply_to': {'event_id': threadLastEventId},
         },
       };
     }
