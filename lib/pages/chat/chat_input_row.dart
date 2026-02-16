@@ -49,8 +49,9 @@ class ChatInputRow extends StatelessWidget {
         controller.sendController.text.isNotEmpty ||
         controller.replyEvent != null ||
         controller.editEvent != null;
-    final showVoiceMessageButton =
-        PlatformInfos.platformCanRecord && !textMessageOnly;
+    final showVoiceMessageButton = controller.sendController.text
+        .trim()
+        .isEmpty;
 
     if (!controller.room.otherPartyCanReceiveMessages) {
       return Center(
@@ -70,6 +71,7 @@ class ChatInputRow extends StatelessWidget {
     );
 
     return RecordingViewModel(
+      key: controller.recordingViewModelKey,
       builder: (context, recordingViewModel) {
         if (recordingViewModel.isRecording) {
           return RecordingInputRow(

@@ -18,6 +18,7 @@ import 'package:fluffychat/pages/chat/pinned_events.dart';
 import 'package:fluffychat/pages/chat/reply_display.dart';
 import 'package:fluffychat/utils/account_config.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/chat_settings_popup_menu.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -411,6 +412,22 @@ class ChatView extends StatelessWidget {
                                                     forceUnencrypted: true,
                                                   )
                                                 : null,
+                                            showSendVoiceMessageAction:
+                                                PlatformInfos.platformCanRecord,
+                                            onSendVoiceMessage: () {
+                                              final recordingViewModel =
+                                                  controller
+                                                      .recordingViewModelKey
+                                                      .currentState;
+                                              if (recordingViewModel == null ||
+                                                  recordingViewModel
+                                                      .isRecording) {
+                                                return;
+                                              }
+                                              recordingViewModel.startRecording(
+                                                controller.room,
+                                              );
+                                            },
                                           ),
                                           ChatInputRow(controller),
                                           ChatEmojiPicker(controller),

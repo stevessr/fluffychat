@@ -7,12 +7,16 @@ class FormattingToolbar extends StatelessWidget {
   final VoidCallback? onFormatApplied;
   final VoidCallback? onSendUnencrypted;
   final bool showSendUnencryptedAction;
+  final VoidCallback? onSendVoiceMessage;
+  final bool showSendVoiceMessageAction;
 
   const FormattingToolbar({
     required this.controller,
     this.onFormatApplied,
     this.onSendUnencrypted,
     this.showSendUnencryptedAction = false,
+    this.onSendVoiceMessage,
+    this.showSendVoiceMessageAction = false,
     super.key,
   });
 
@@ -124,6 +128,16 @@ class FormattingToolbar extends StatelessWidget {
                 icon: const Icon(Icons.lock_open_outlined, size: 20),
                 tooltip: '${l10n.send} (${l10n.encryptionNotEnabled})',
                 onPressed: onSendUnencrypted,
+                color: theme.colorScheme.onPrimaryContainer,
+              ),
+            ),
+          if (showSendVoiceMessageAction)
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: IconButton(
+                icon: const Icon(Icons.mic_none_outlined, size: 20),
+                tooltip: l10n.voiceMessage,
+                onPressed: onSendVoiceMessage,
                 color: theme.colorScheme.onPrimaryContainer,
               ),
             ),
