@@ -15,7 +15,6 @@ import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/stream_extension.dart';
 import 'package:fluffychat/utils/string_color.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/public_room_dialog.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart';
@@ -131,19 +130,20 @@ class _SpaceViewState extends State<SpaceView> {
   void _joinChildRoom(SpaceRoomsChunk$2 item) async {
     final client = Matrix.of(context).client;
     final space = client.getRoomById(widget.spaceId);
-
-    final joined = await showAdaptiveDialog<bool>(
+    final via = space?.spaceChildren
+        .firstWhereOrNull((child) => child.roomId == item.roomId)
+        ?.via;
+    final roomResult = await showFutureLoadingDialog(
       context: context,
-      builder: (_) => PublicRoomDialog(
-        chunk: item,
-        via: space?.spaceChildren
-            .firstWhereOrNull((child) => child.roomId == item.roomId)
-            ?.via,
-      ),
+      future: () async {
+        final waitForRoom = client.waitForRoomInSync(item.roomId, join: true);
+        await client.joinRoom(item.roomId, via: via);
+        await waitForRoom;
+        return client.getRoomById(item.roomId)!;
+      },
     );
-    if (mounted && joined == true) {
-      setState(() {});
-    }
+    final room = roomResult.result;
+    if (room != null) widget.onChatTab(room);
   }
 
   void _onSpaceAction(SpaceActions action) async {
@@ -597,12 +597,13 @@ class _SpaceViewState extends State<SpaceView> {
                                 visualDensity: const VisualDensity(
                                   vertical: -0.5,
                                 ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
+                                contentPadding: EdgeInsets.only(
+                                  left: 8,
+                                  right: joinedRoom == null ? 0 : 8,
                                 ),
                                 onTap: joinedRoom != null
                                     ? () => widget.onChatTab(joinedRoom!)
-                                    : () => _joinChildRoom(item),
+                                    : null,
                                 onLongPress: isAdmin
                                     ? () => _showSpaceChildEditMenu(
                                         context,
@@ -675,7 +676,10 @@ class _SpaceViewState extends State<SpaceView> {
                                     if (joinedRoom != null)
                                       UnreadBubble(room: joinedRoom)
                                     else
-                                      const Icon(Icons.chevron_right_outlined),
+                                      TextButton(
+                                        onPressed: () => _joinChildRoom(item),
+                                        child: Text(L10n.of(context).join),
+                                      ),
                                   ],
                                 ),
                               ),
