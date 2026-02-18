@@ -42,7 +42,6 @@ class ChatListItem extends StatelessWidget {
     final typingText = room.getLocalizedTypingText(context);
     final lastEvent = room.lastEvent;
     final ownMessage = lastEvent?.senderId == room.client.userID;
-    final unread = room.isUnread;
     final directChatMatrixId = room.directChatMatrixID;
     final isDirectChat = directChatMatrixId != null;
     final hasNotifications = room.notificationCount > 0;
@@ -185,11 +184,6 @@ class ChatListItem extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       softWrap: false,
-                      style: TextStyle(
-                        fontWeight: unread || room.hasNewMessages
-                            ? FontWeight.w500
-                            : null,
-                      ),
                     ),
                   ),
                   if (isMuted)
@@ -215,10 +209,7 @@ class ChatListItem extends StatelessWidget {
                         room.latestEventReceivedTime.localizedTimeShort(
                           context,
                         ),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: theme.colorScheme.outline,
-                        ),
+                        style: TextStyle(fontSize: 11),
                       ),
                     ),
                 ],
@@ -276,10 +267,7 @@ class ChatListItem extends StatelessWidget {
                                 const SizedBox(width: 4),
                                 Text(
                                   L10n.of(context).thread,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: theme.colorScheme.outline,
-                                  ),
+                                  style: TextStyle(fontSize: 11),
                                 ),
                               ],
                             ),
@@ -292,7 +280,6 @@ class ChatListItem extends StatelessWidget {
                             L10n.of(
                               context,
                             ).countChats(room.spaceChildren.length),
-                            style: TextStyle(color: theme.colorScheme.outline),
                           )
                         : typingText.isNotEmpty
                         ? Text(
@@ -347,9 +334,6 @@ class ChatListItem extends StatelessWidget {
                               maxLines: room.notificationCount >= 1 ? 2 : 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                color: unread || room.hasNewMessages
-                                    ? theme.colorScheme.onSurface
-                                    : theme.colorScheme.outline,
                                 decoration: room.lastEvent?.redacted == true
                                     ? TextDecoration.lineThrough
                                     : null,

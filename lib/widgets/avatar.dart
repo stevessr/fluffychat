@@ -11,7 +11,7 @@ class Avatar extends StatelessWidget {
   final String? name;
   final double size;
   final void Function()? onTap;
-  static const double defaultSize = 44;
+  static const double defaultSize = 48;
   final Client? client;
   final String? presenceUserId;
   final Color? presenceBackgroundColor;

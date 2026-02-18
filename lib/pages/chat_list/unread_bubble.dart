@@ -48,7 +48,7 @@ class UnreadBubble extends StatelessWidget {
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
               ),
-              textAlign: TextAlign.center,
+              textAlign: .center,
             )
           : const SizedBox.shrink(),
     );
