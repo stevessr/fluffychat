@@ -151,7 +151,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
     setState(() => status = AudioPlayerStatus.downloading);
     try {
       final fileSize = widget.event.content
-          .tryGetMap<String, dynamic>('info')
+          .tryGetMap<String, Object?>('info')
           ?.tryGet<int>('size');
       matrixFile = await widget.event.downloadAndDecryptAttachment(
         onDownloadProgress: fileSize != null && fileSize > 0
@@ -242,7 +242,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
 
   List<int>? _getWaveform() {
     final eventWaveForm = widget.event.content
-        .tryGetMap<String, dynamic>('org.matrix.msc1767.audio')
+        .tryGetMap<String, Object?>('org.matrix.msc1767.audio')
         ?.tryGetList<int>('waveform');
     if (eventWaveForm == null || eventWaveForm.isEmpty) {
       return null;
@@ -275,7 +275,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
     }
 
     final durationInt = widget.event.content
-        .tryGetMap<String, dynamic>('info')
+        .tryGetMap<String, Object?>('info')
         ?.tryGet<int>('duration');
     if (durationInt != null) {
       final duration = Duration(milliseconds: durationInt);

@@ -12,8 +12,14 @@ linter:
     - omit_local_variable_types
 
 analyzer:
+  plugins:
+    - dart_code_linter
   errors:
     todo: ignore
     use_build_context_synchronously: ignore
   exclude:
     - lib/l10n/*.dart
+
+dart_code_linter:
+  rules:
+    - avoid-dynamic

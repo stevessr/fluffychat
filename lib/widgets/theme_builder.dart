@@ -41,7 +41,7 @@ class ThemeController extends State<ThemeBuilder> {
   static ThemeController of(BuildContext context) =>
       Provider.of<ThemeController>(context, listen: false);
 
-  void _loadData(dynamic _) async {
+  void _loadData(_) async {
     final preferences = _sharedPreferences ??=
         await SharedPreferences.getInstance();
 

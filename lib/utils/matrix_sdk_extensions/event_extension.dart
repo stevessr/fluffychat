@@ -59,7 +59,7 @@ extension LocalizedBody on Event {
           (content['url'] is String));
 
   String? get sizeString => content
-      .tryGetMap<String, dynamic>('info')
+      .tryGetMap<String, Object?>('info')
       ?.tryGet<int>('size')
       ?.sizeString;
 }

@@ -182,7 +182,7 @@ class SettingsController extends State<Settings> {
   bool? crossSigningCached;
   bool? showChatBackupBanner;
 
-  void firstRunBootstrapAction([dynamic _]) async {
+  void firstRunBootstrapAction([_]) async {
     if (showChatBackupBanner != true) {
       showOkAlertDialog(
         context: context,

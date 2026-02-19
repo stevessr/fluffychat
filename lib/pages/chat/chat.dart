@@ -117,9 +117,9 @@ class ChatController extends State<ChatPageWithRoom>
   bool currentlyTyping = false;
   bool dragging = false;
 
-  void onDragEntered(dynamic _) => setState(() => dragging = true);
+  void onDragEntered(_) => setState(() => dragging = true);
 
-  void onDragExited(dynamic _) => setState(() => dragging = false);
+  void onDragExited(_) => setState(() => dragging = false);
 
   void onDragDone(DropDoneDetails details) async {
     setState(() => dragging = false);
@@ -213,7 +213,7 @@ class ChatController extends State<ChatPageWithRoom>
     context.go('/rooms');
   }
 
-  void requestHistory([dynamic _]) async {
+  void requestHistory([_]) async {
     Logs().v('Requesting history...');
     await timeline?.requestHistory(historyCount: _loadHistoryCount);
   }
@@ -265,7 +265,7 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
-  void _shareItems([dynamic _]) {
+  void _shareItems([_]) {
     final shareItems = widget.shareItems;
     if (shareItems == null || shareItems.isEmpty) return;
     if (!room.otherPartyCanReceiveMessages) {
@@ -1053,7 +1053,7 @@ class ChatController extends State<ChatPageWithRoom>
     scrollController.jumpTo(0);
   }
 
-  void onEmojiSelected(dynamic _, Emoji? emoji) {
+  void onEmojiSelected(_, Emoji? emoji) {
     typeEmoji(emoji);
     onInputBarChanged(sendController.text);
   }

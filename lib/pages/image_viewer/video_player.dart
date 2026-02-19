@@ -43,7 +43,7 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
 
     try {
       final fileSize = widget.event.content
-          .tryGetMap<String, dynamic>('info')
+          .tryGetMap<String, Object?>('info')
           ?.tryGet<int>('size');
       final videoFile = await widget.event.downloadAndDecryptAttachment(
         onDownloadProgress: fileSize == null

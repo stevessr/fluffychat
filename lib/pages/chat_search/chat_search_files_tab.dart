@@ -49,7 +49,7 @@ class ChatSearchFilesTab extends StatelessWidget {
           final filetype = (filename.contains('.')
               ? filename.split('.').last.toUpperCase()
               : event.content
-                        .tryGetMap<String, dynamic>('info')
+                        .tryGetMap<String, Object?>('info')
                         ?.tryGet<String>('mimetype')
                         ?.toUpperCase() ??
                     'UNKNOWN');

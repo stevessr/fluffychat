@@ -26,7 +26,7 @@ class MessageReactions extends StatelessWidget {
 
     for (final e in allReactionEvents) {
       final key = e.content
-          .tryGetMap<String, dynamic>('m.relates_to')
+          .tryGetMap<String, Object?>('m.relates_to')
           ?.tryGet<String>('key');
       if (key != null) {
         if (!reactionMap.containsKey(key)) {

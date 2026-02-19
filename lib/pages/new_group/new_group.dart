@@ -108,7 +108,7 @@ class NewGroupController extends State<NewGroup> {
     context.pop<String>(spaceId);
   }
 
-  void submitAction([dynamic _]) async {
+  void submitAction([_]) async {
     final client = Matrix.of(context).client;
 
     try {
