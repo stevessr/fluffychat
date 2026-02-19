@@ -147,7 +147,7 @@ class MyCallingPage extends State<Calling> {
 
   MediaStream? get remoteStream {
     if (call.getRemoteStreams.isNotEmpty) {
-      return call.getRemoteStreams[0].stream!;
+      return call.getRemoteStreams.first.stream!;
     }
     return null;
   }
@@ -327,7 +327,7 @@ class MyCallingPage extends State<Calling> {
   void _switchCamera() async {
     if (call.localUserMediaStream != null) {
       await Helper.switchCamera(
-        call.localUserMediaStream!.stream!.getVideoTracks()[0],
+        call.localUserMediaStream!.stream!.getVideoTracks().first,
       );
     }
     setState(() {});

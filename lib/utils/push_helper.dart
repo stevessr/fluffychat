@@ -340,7 +340,7 @@ class FluffyChatPushPayload {
     if (parts.length != 3) {
       return FluffyChatPushPayload(null, null, null);
     }
-    return FluffyChatPushPayload(parts[0], parts[1], parts[2]);
+    return FluffyChatPushPayload(parts.first, parts[1], parts[2]);
   }
 
   @override

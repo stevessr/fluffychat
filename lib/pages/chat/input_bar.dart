@@ -159,7 +159,7 @@ class InputBar extends StatelessWidget {
                     slugify(
                       user.displayName!.toLowerCase(),
                     ).contains(userSearch))) ||
-            user.id.split(':')[0].toLowerCase().contains(userSearch)) {
+            user.id.localpart!.toLowerCase().contains(userSearch)) {
           ret.add({
             'type': 'user',
             'mxid': user.id,
@@ -185,17 +185,14 @@ class InputBar extends StatelessWidget {
                 ((state.content['alias'] is String &&
                         state.content
                             .tryGet<String>('alias')!
-                            .split(':')[0]
+                            .localpart!
                             .toLowerCase()
                             .contains(roomSearch)) ||
                     (state.content['alt_aliases'] is List &&
                         (state.content['alt_aliases'] as List).any(
                           (l) =>
                               l is String &&
-                              l
-                                  .split(':')[0]
-                                  .toLowerCase()
-                                  .contains(roomSearch),
+                              l.localpart!.toLowerCase().contains(roomSearch),
                         )))) ||
             (r.name.toLowerCase().contains(roomSearch))) {
           ret.add({

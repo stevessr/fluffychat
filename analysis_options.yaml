@@ -28,3 +28,23 @@ dart_code_linter:
     - avoid-unnecessary-type-casts
     - avoid-unrelated-type-assertions
     - no-boolean-literal-compare
+    - no-equal-then-else
+    - prefer-first
+    - prefer-last
+    - prefer-immediate-return
+    - prefer-enums-by-name
+    - avoid-unnecessary-conditionals
+    # TODO:
+    # - member-ordering
+    # - avoid-late-keyword
+    # - avoid-non-null-assertion
+    # - avoid-global-state
+    # - prefer-match-file-name
+    # - avoid-banned-imports:
+    #     entries:
+    #     - paths: ['some/folder/.*\.dart', 'another/folder/.*\.dart']
+    #       deny: ['package:flutter/material.dart']
+    #       message: 'Do not import Flutter Material Design library, we should not depend on it!'
+    # - no-magic-number:
+    #     allowed: [-1, 0, 1,2,4,6,8,12,16,32,40,56,64]
+    #     allow-only-once: true

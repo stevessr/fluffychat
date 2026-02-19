@@ -248,7 +248,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
         } else {
           title = Text(L10n.of(context).compareNumbersMatch);
           final numbers = widget.request.sasNumbers;
-          final numbstr = '${numbers[0]}-${numbers[1]}-${numbers[2]}';
+          final numbstr = '${numbers.first}-${numbers[1]}-${numbers[2]}';
           compareWidget = TextSpan(
             text: numbstr,
             style: const TextStyle(fontSize: 40),
