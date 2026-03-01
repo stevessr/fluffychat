@@ -49,6 +49,7 @@ class SendFileDialog extends StatefulWidget {
 
 class SendFileDialogState extends State<SendFileDialog> {
   bool compress = true;
+  late bool encrypt;
 
   /// Images smaller than 20kb don't need compression.
   static const int minSizeToCompress = 20 * 1000;
@@ -60,6 +61,12 @@ class SendFileDialogState extends State<SendFileDialog> {
   /// all reflect the edit result (always PNG). Keeping bytes + mimetype in one
   /// object avoids drift between the preview, the upload and the extension.
   late final List<XFile> _files = List<XFile>.of(widget.files);
+
+  @override
+  void initState() {
+    super.initState();
+    encrypt = widget.room.encrypted;
+  }
 
   Future<void> _editImage(int index) async {
     final bytes = await _files[index].readAsBytes();
@@ -84,9 +91,6 @@ class SendFileDialogState extends State<SendFileDialog> {
 
   Future<void> _send(String? uniqueFileType) async {
     final l10n = L10n.of(context);
-
-    final proceed = await showTrustUserInRoomDialog(context, widget.room);
-    if (!context.mounted || !proceed) return;
 
     Future<void> sendAction(setProgress) async {
       if (!widget.room.otherPartyCanReceiveMessages) {
@@ -136,39 +140,66 @@ class SendFileDialogState extends State<SendFileDialog> {
           throw FileTooBigMatrixException(file.bytes.length, maxUploadSize);
         }
 
+        // Show progress / notification when sending multiple files
         if (_files.length > 1) {
+          final scaffoldMessenger = ScaffoldMessenger.of(widget.outerContext);
+          scaffoldMessenger.showLoadingSnackBar(
+            l10n.sendingAttachmentCountOfCount(
+              _files.indexOf(xfile) + 1,
+              _files.length,
+            ),
+          );
           setProgress(sentFiles / _files.length + 0.4);
         }
 
         final label = _labelTextController.text.trim();
 
         try {
-          await widget.room.sendFileEvent(
-            file,
-            thumbnail: thumbnail,
-            shrinkImageMaxDimension: compress ? 1600 : null,
-            extraContent: label.isEmpty ? null : {'body': label},
-            threadRootEventId: widget.threadRootEventId,
-            threadLastEventId: widget.threadLastEventId,
-          );
+          if (encrypt || !widget.room.encrypted) {
+            await widget.room.sendFileEvent(
+              file,
+              thumbnail: thumbnail,
+              shrinkImageMaxDimension: compress ? 1600 : null,
+              extraContent: label.isEmpty ? null : {'body': label},
+              threadRootEventId: widget.threadRootEventId,
+              threadLastEventId: widget.threadLastEventId,
+            );
+          } else {
+            await _sendUnencryptedFileEvent(
+              file,
+              thumbnail: thumbnail,
+              label: label.isEmpty ? null : label,
+              shrinkImageMaxDimension: compress ? 1600 : null,
+            );
+          }
         } on MatrixException catch (e) {
           final retryAfterMs = e.retryAfterMs;
           if (e.error != MatrixError.M_LIMIT_EXCEEDED || retryAfterMs == null) {
             rethrow;
           }
-          final retryAfterDuration = Duration(
-            milliseconds: retryAfterMs + 1000,
-          );
 
+          final retryAfterDuration = Duration(milliseconds: retryAfterMs + 1000);
           setProgress(sentFiles / _files.length + 0.2);
           await Future.delayed(retryAfterDuration);
 
-          await widget.room.sendFileEvent(
-            file,
-            thumbnail: thumbnail,
-            shrinkImageMaxDimension: compress ? 1600 : null,
-            extraContent: label.isEmpty ? null : {'body': label},
-          );
+          // Retry once after waiting
+          if (encrypt || !widget.room.encrypted) {
+            await widget.room.sendFileEvent(
+              file,
+              thumbnail: thumbnail,
+              shrinkImageMaxDimension: compress ? 1600 : null,
+              extraContent: label.isEmpty ? null : {'body': label},
+              threadRootEventId: widget.threadRootEventId,
+              threadLastEventId: widget.threadLastEventId,
+            );
+          } else {
+            await _sendUnencryptedFileEvent(
+              file,
+              thumbnail: thumbnail,
+              label: label.isEmpty ? null : label,
+              shrinkImageMaxDimension: compress ? 1600 : null,
+            );
+          }
         }
         sentFiles++;
       }
@@ -185,6 +216,68 @@ class SendFileDialogState extends State<SendFileDialog> {
     }
 
     return;
+  }
+
+  Future<void> _sendUnencryptedFileEvent(
+    MatrixFile file, {
+    MatrixImageFile? thumbnail,
+    String? label,
+    int? shrinkImageMaxDimension,
+  }) async {
+    final client = widget.room.client;
+    if (file is MatrixImageFile && shrinkImageMaxDimension != null) {
+      file = await MatrixImageFile.shrink(
+        bytes: file.bytes,
+        name: file.name,
+        maxDimension: shrinkImageMaxDimension,
+        customImageResizer: client.customImageResizer,
+        nativeImplementations: client.nativeImplementations,
+      );
+    }
+    final uploadResp = await client.uploadContent(
+      file.bytes,
+      filename: file.name,
+      contentType: file.mimeType,
+    );
+
+    final thumbnailUploadResp = thumbnail == null
+        ? null
+        : await client.uploadContent(
+            thumbnail.bytes,
+            filename: thumbnail.name,
+            contentType: thumbnail.mimeType,
+          );
+
+    final content = <String, Object?>{
+      'msgtype': file.msgType,
+      'body': label?.isNotEmpty == true ? label : file.name,
+      'filename': file.name,
+      'url': uploadResp.toString(),
+      'info': {
+        ...file.info,
+        if (thumbnail != null) ...{
+          'thumbnail_url': thumbnailUploadResp.toString(),
+          'thumbnail_info': thumbnail.info,
+        },
+        if (thumbnail?.blurhash != null &&
+            file is MatrixImageFile &&
+            file.blurhash == null)
+          'xyz.amorgan.blurhash': thumbnail!.blurhash,
+      },
+    };
+
+    if (widget.threadRootEventId != null) {
+      content['m.relates_to'] = {
+        'event_id': widget.threadRootEventId!,
+        'rel_type': RelationshipTypes.thread,
+        'is_falling_back': true,
+        if (widget.threadLastEventId != null)
+          'm.in_reply_to': {'event_id': widget.threadLastEventId!},
+      };
+    }
+
+    final txid = client.generateUniqueTransactionId();
+    await client.sendMessage(widget.room.id, EventTypes.Message, txid, content);
   }
 
   Future<String> _calcCombinedFileSize() async {
@@ -232,6 +325,7 @@ class SendFileDialogState extends State<SendFileDialog> {
 
     final compressionSupported =
         uniqueFileType != 'video' || PlatformInfos.isMobile;
+    final showEncryptionToggle = widget.room.encrypted;
 
     return FutureBuilder<String>(
       future: _calcCombinedFileSize(),
@@ -443,6 +537,43 @@ class SendFileDialogState extends State<SendFileDialog> {
                               if (!compressionSupported)
                                 Text(
                                   L10n.of(context).notSupportedOnThisDevice,
+                                  style: theme.textTheme.labelSmall,
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  if (showEncryptionToggle)
+                    Row(
+                      crossAxisAlignment: .center,
+                      children: [
+                        if ({
+                          TargetPlatform.iOS,
+                          TargetPlatform.macOS,
+                        }.contains(theme.platform))
+                          CupertinoSwitch(
+                            value: encrypt,
+                            onChanged: (v) => setState(() => encrypt = v),
+                          )
+                        else
+                          Switch.adaptive(
+                            value: encrypt,
+                            onChanged: (v) => setState(() => encrypt = v),
+                          ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            mainAxisSize: .min,
+                            crossAxisAlignment: .start,
+                            children: [
+                              Text(
+                                L10n.of(context).encryption,
+                                style: theme.textTheme.titleMedium,
+                              ),
+                              if (!encrypt)
+                                Text(
+                                  L10n.of(context).encryptionNotEnabled,
                                   style: theme.textTheme.labelSmall,
                                 ),
                             ],
