@@ -65,20 +65,14 @@ class MarkdownContextBuilder extends StatelessWidget {
             onPressed: () {
               final text = controller.text;
               final selection = controller.selection;
+              const checkBox = '- [ ]';
 
               var start = selection.textBefore(text).lastIndexOf('\n');
               if (start == -1) start = 0;
               final end = selection.end;
+              final selectedText = text.substring(start, end);
 
-              final fullLineSelection = TextSelection(
-                baseOffset: start,
-                extentOffset: end,
-              );
-
-              const checkBox = '- [ ]';
-
-              final replacedRange = fullLineSelection
-                  .textInside(text)
+              final replacedRange = selectedText
                   .split('\n')
                   .map(
                     (line) => line.startsWith(checkBox) || line.isEmpty
@@ -126,6 +120,30 @@ class MarkdownContextBuilder extends StatelessWidget {
                 selection.start,
                 selection.end,
                 '~~$selectedText~~',
+              );
+              ContextMenuController.removeAny();
+            },
+          ),
+          ContextMenuButtonItem(
+            label: l10n.underlineText,
+            onPressed: () {
+              final selection = controller.selection;
+              controller.text = controller.text.replaceRange(
+                selection.start,
+                selection.end,
+                '<u>$selectedText</u>',
+              );
+              ContextMenuController.removeAny();
+            },
+          ),
+          ContextMenuButtonItem(
+            label: l10n.spoilerText,
+            onPressed: () {
+              final selection = controller.selection;
+              controller.text = controller.text.replaceRange(
+                selection.start,
+                selection.end,
+                '||$selectedText||',
               );
               ContextMenuController.removeAny();
             },
