@@ -1,0 +1,61 @@
+name: "Web Build Prefix"
+description: "Shared cached Flutter web build prefix with flutter_rust_bridge precompilation"
+
+inputs:
+  flutter-version:
+    description: "Flutter version for subosito/flutter-action"
+    required: true
+  rust-toolchain:
+    description: "Rust toolchain used to install rust-src"
+    required: false
+    default: nightly-x86_64-unknown-linux-gnu
+
+runs:
+  using: "composite"
+  steps:
+    - uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ inputs.flutter-version }}
+        cache: true
+
+    - uses: moonrepo/setup-rust@v1
+
+    - name: Cache Cargo registry and git index
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+        key: ${{ runner.os }}-cargo-${{ hashFiles('pubspec.lock', 'scripts/prepare-web.sh') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-
+
+    - name: Cache Dart/Flutter pub packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.pub-cache
+          .dart_tool
+        key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pub-
+
+    - name: Add rust-src component
+      shell: bash
+      run: rustup component add rust-src --toolchain "${{ inputs.rust-toolchain }}"
+
+    - name: Precompile flutter_rust_bridge for web
+      shell: bash
+      run: ./scripts/prepare-web.sh
+
+    - name: Remove vodozemac gitignore
+      shell: bash
+      run: rm -f ./assets/vodozemac/.gitignore
+
+    - name: Resolve Flutter dependencies
+      shell: bash
+      run: flutter pub get
+
+    - name: Build web
+      shell: bash
+      run: flutter build web --release
