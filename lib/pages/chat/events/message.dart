@@ -3,14 +3,12 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:swipe_to_action/swipe_to_action.dart';
 
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/file_description.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -23,6 +21,7 @@ import 'message_content.dart';
 import 'message_reactions.dart';
 import 'reply_content.dart';
 import 'state_message.dart';
+import '../custom_reaction_dialog.dart';
 
 class Message extends StatelessWidget {
   final Event event;
@@ -109,8 +108,7 @@ class Message extends StatelessWidget {
         event.type == EventTypes.RoomCreate ||
         nextEvent == null ||
         !event.originServerTs.sameEnvironment(nextEvent!.originServerTs);
-    final nextEventSameSender =
-        nextEvent != null &&
+    final nextEventSameSender = nextEvent != null &&
         {
           EventTypes.Message,
           EventTypes.Sticker,
@@ -119,8 +117,7 @@ class Message extends StatelessWidget {
         nextEvent!.senderId == event.senderId &&
         !displayTime;
 
-    final previousEventSameSender =
-        previousEvent != null &&
+    final previousEventSameSender = previousEvent != null &&
         {
           EventTypes.Message,
           EventTypes.Sticker,
@@ -156,14 +153,29 @@ class Message extends StatelessWidget {
           ? hardCorner
           : roundedCorner,
     );
-    final noBubble =
+    final textIsBigEmote =
+        !displayEvent.redacted &&
+        !displayEvent.isRichMessage &&
         ({
+          MessageTypes.Text,
+          MessageTypes.Notice,
+          MessageTypes.Emote,
+          MessageTypes.None,
+        }.contains(displayEvent.messageType)) &&
+        (bigEmojis.contains(displayEvent.body) ||
+            (displayEvent.onlyEmotes &&
+                displayEvent.numberEmotes > 0 &&
+                displayEvent.numberEmotes <= 5));
+
+    final noBubble =
+        (({
           MessageTypes.Video,
           MessageTypes.Image,
           MessageTypes.Sticker,
         }.contains(event.messageType) &&
         event.fileDescription == null &&
-        !event.redacted);
+        !event.redacted)) ||
+        textIsBigEmote;
 
     if (ownMessage) {
       color = displayEvent.status.isError
@@ -754,96 +766,31 @@ class Message extends StatelessWidget {
                                                               tooltip: L10n.of(
                                                                 context,
                                                               ).customReaction,
-                                                              onPressed: () async {
-                                                                final emoji = await showAdaptiveBottomSheet<String>(
-                                                                  context:
-                                                                      context,
-                                                                  builder: (context) => Scaffold(
-                                                                    appBar: AppBar(
-                                                                      title: Text(
-                                                                        L10n.of(
-                                                                          context,
-                                                                        ).customReaction,
-                                                                      ),
-                                                                      leading: CloseButton(
-                                                                        onPressed: () => Navigator.of(
-                                                                          context,
-                                                                        ).pop(null),
-                                                                      ),
-                                                                    ),
-                                                                    body: SizedBox(
-                                                                      height: double
-                                                                          .infinity,
-                                                                      child: EmojiPicker(
-                                                                        onEmojiSelected:
-                                                                            (
-                                                                              _,
-                                                                              emoji,
-                                                                            ) =>
-                                                                                Navigator.of(
-                                                                                  context,
-                                                                                ).pop(
-                                                                                  emoji.emoji,
-                                                                                ),
-                                                                        config: Config(
-                                                                          locale: Localizations.localeOf(
-                                                                            context,
-                                                                          ),
-                                                                          emojiViewConfig: const EmojiViewConfig(
-                                                                            backgroundColor:
-                                                                                Colors.transparent,
-                                                                          ),
-                                                                          bottomActionBarConfig: const BottomActionBarConfig(
-                                                                            enabled:
-                                                                                false,
-                                                                          ),
-                                                                          categoryViewConfig: CategoryViewConfig(
-                                                                            initCategory:
-                                                                                Category.SMILEYS,
-                                                                            backspaceColor:
-                                                                                theme.colorScheme.primary,
-                                                                            iconColor: theme.colorScheme.primary.withAlpha(
-                                                                              128,
-                                                                            ),
-                                                                            iconColorSelected:
-                                                                                theme.colorScheme.primary,
-                                                                            indicatorColor:
-                                                                                theme.colorScheme.primary,
-                                                                            backgroundColor:
-                                                                                theme.colorScheme.surface,
-                                                                          ),
-                                                                          skinToneConfig: SkinToneConfig(
-                                                                            dialogBackgroundColor: Color.lerp(
-                                                                              theme.colorScheme.surface,
-                                                                              theme.colorScheme.primaryContainer,
-                                                                              0.75,
-                                                                            )!,
-                                                                            indicatorColor:
-                                                                                theme.colorScheme.onSurface,
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  ),
+                                                              onPressed:
+                                                                  () async {
+                                                                final disabled =
+                                                                    sentReactions;
+                                                                final key =
+                                                                    await CustomReactionDialog
+                                                                        .show(
+                                                                  context,
+                                                                  event.room,
+                                                                  disabledKeys:
+                                                                      disabled,
                                                                 );
-                                                                if (emoji ==
-                                                                    null) {
-                                                                  return;
-                                                                }
-                                                                if (sentReactions
-                                                                    .contains(
-                                                                      emoji,
-                                                                    )) {
+                                                                if (key ==
+                                                                        null ||
+                                                                    disabled
+                                                                        .contains(
+                                                                            key)) {
                                                                   return;
                                                                 }
                                                                 onSelect(event);
-
                                                                 await event.room
                                                                     .sendReaction(
-                                                                      event
-                                                                          .eventId,
-                                                                      emoji,
-                                                                    );
+                                                                  event.eventId,
+                                                                  key,
+                                                                );
                                                               },
                                                             ),
                                                           ],
