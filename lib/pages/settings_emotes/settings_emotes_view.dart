@@ -11,7 +11,12 @@ import 'package:matrix/matrix.dart';
 import '../../widgets/matrix.dart';
 import 'settings_emotes.dart';
 
-enum PopupMenuEmojiActions { import, export }
+enum PopupMenuEmojiActions {
+  export,
+  importZip,
+  importTarGz,
+  importFiles,
+}
 
 class EmotesSettingsView extends StatelessWidget {
   final EmotesSettingsController controller;
@@ -67,16 +72,32 @@ class EmotesSettingsView extends StatelessWidget {
                   case PopupMenuEmojiActions.export:
                     controller.exportAsZip();
                     break;
-                  case PopupMenuEmojiActions.import:
+                  case PopupMenuEmojiActions.importZip:
                     controller.importEmojiZip();
+                    break;
+                  case PopupMenuEmojiActions.importTarGz:
+                    controller.importEmojiTarGz();
+                    break;
+                  case PopupMenuEmojiActions.importFiles:
+                    controller.importEmojiFromFiles();
                     break;
                 }
               },
               itemBuilder: (context) => [
                 if (!controller.readonly)
                   PopupMenuItem(
-                    value: PopupMenuEmojiActions.import,
+                    value: PopupMenuEmojiActions.importZip,
                     child: Text(L10n.of(context).importFromZipFile),
+                  ),
+                if (!controller.readonly)
+                  PopupMenuItem(
+                    value: PopupMenuEmojiActions.importTarGz,
+                    child: Text(L10n.of(context).importFromTarGz),
+                  ),
+                if (!controller.readonly)
+                  PopupMenuItem(
+                    value: PopupMenuEmojiActions.importFiles,
+                    child: Text(L10n.of(context).importFromFiles),
                   ),
                 if (imageKeys.isNotEmpty)
                   PopupMenuItem(
