@@ -38,6 +38,24 @@
                 "All",
                 "Deutsch"
             ]
+        },
+        {
+            "name": "stevessr",
+            "website": "https://neko.aaca.eu.org",
+            "reg_method": "SSO",
+            "languages": [
+                "All",
+                "Chinese"
+            ]
+        },
+        {
+            "name": "Murasame",
+            "website": "https://kisume.de",
+            "reg_method": "SSO",
+            "languages": [
+                "All",
+                "Chinese"
+            ]
         }
     ]
 }
