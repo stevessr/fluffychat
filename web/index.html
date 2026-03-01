@@ -20,6 +20,7 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="The cutest messenger in the Matrix network.">
+  <meta http-equiv="x-rocket-loader" content="off">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -33,15 +34,20 @@
   <title>FluffyChat</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" type="text/css" href="splash/style.css">
-  <script src="Imaging.js"></script>
+  <script data-cfasync="false" src="Imaging.js"></script>
 
   <!-- This script adds the flutter initialization JS code -->
-  <script src="flutter.js" defer></script>
+  <script data-cfasync="false" src="flutter.js" defer></script>
 </head>
 
 <body>
-  <script>
+  <script data-cfasync="false">
     window.addEventListener('load', function (ev) {
+      if (window.__fluffyBootstrapStarted) {
+        return;
+      }
+      window.__fluffyBootstrapStarted = true;
+
       {{flutter_js}}
       {{flutter_build_config}}
 
@@ -55,7 +61,7 @@
         });
       }
       });
-    });
+    }, { once: true });
   </script>
   <picture id="splash">
     <source
