@@ -209,7 +209,8 @@ class EmotesSettingsController extends State<EmotesSettings> {
       );
       return;
     }
-    if (!RegExp(r'^[-\w]+$').hasMatch(imageCode)) {
+    // Support Unicode characters including Chinese for emote names
+    if (!RegExp(r'^[^\s:~]+$', unicode: true).hasMatch(imageCode)) {
       controller.text = oldImageCode;
       showOkAlertDialog(
         useRootNavigator: false,
@@ -356,13 +357,32 @@ class EmotesSettingsController extends State<EmotesSettings> {
   }
 
   Future<void> importEmojiZip() async {
-    final result = await selectFiles(context, type: FileType.any);
+    // 先选择文件
+    final files = await selectFiles(
+      context,
+      type: FileType.any,
+    );
 
-    if (result.isEmpty) return;
+    // 🚀 用户取消了，直接返回，不显示 loading
+    if (files.isEmpty) return;
 
-    final buffer = InputMemoryStream(await result.single.readAsBytes());
+    // 显示 loading 并解压
+    final result = await showFutureLoadingDialog<Archive?>(
+      context: context,
+      title: L10n.of(context).loadingPleaseWait,
+      future: () async {
+        // 读取文件字节
+        final bytes = await files.first.readAsBytes();
+        
+        // 🚀 在后台线程解压，避免阻塞 UI
+        final archive = await compute(_decodeZip, bytes);
 
-    final archive = ZipDecoder().decodeStream(buffer);
+        return archive;
+      },
+    );
+
+    final archive = result.result;
+    if (archive == null) return;
 
     await showDialog(
       context: context,
@@ -370,6 +390,112 @@ class EmotesSettingsController extends State<EmotesSettings> {
       useRootNavigator: false,
       builder: (context) =>
           ImportEmoteArchiveDialog(controller: this, archive: archive),
+    );
+    setState(() {});
+  }
+
+  Future<void> importEmojiTarGz() async {
+    // 先选择文件
+    final files = await selectFiles(
+      context,
+      type: FileType.any,
+    );
+
+    // 🚀 用户取消了，直接返回，不显示 loading
+    if (files.isEmpty) return;
+
+    // 检查文件格式
+    if (!files.first.name.endsWith('.tar') &&
+        !files.first.name.endsWith('.tar.gz') &&
+        !files.first.name.endsWith('.tgz')) {
+      await showOkAlertDialog(
+        useRootNavigator: false,
+        context: context,
+        title: L10n.of(context).oopsSomethingWentWrong,
+        message: 'Please select a .tar.gz or .tgz file',
+        okLabel: L10n.of(context).ok,
+      );
+      return;
+    }
+
+    // 显示 loading 并解压
+    final result = await showFutureLoadingDialog<Archive?>(
+      context: context,
+      title: L10n.of(context).loadingPleaseWait,
+      future: () async {
+        final bytes = await files.first.readAsBytes();
+        
+        // 🚀 在后台线程解压，避免阻塞 UI
+        final isGzipped = files.first.name.endsWith('.gz') ||
+            files.first.name.endsWith('.tgz');
+        
+        final archive = await compute(
+          isGzipped ? _decodeTarGz : _decodeTar,
+          bytes,
+        );
+
+        return archive;
+      },
+    );
+
+    final archive = result.result;
+    if (archive == null) return;
+
+    await showDialog(
+      context: context,
+      useRootNavigator: false,
+      builder: (context) => ImportEmoteArchiveDialog(
+        controller: this,
+        archive: archive,
+      ),
+    );
+    setState(() {});
+  }
+
+  Future<void> importEmojiFromFiles() async {
+    // 先选择文件
+    final files = await selectFiles(
+      context,
+      type: FileType.image,
+      allowMultiple: true,
+    );
+
+    // 🚀 用户取消了，直接返回，不显示 loading
+    if (files.isEmpty) return;
+
+    // 显示 loading 并处理文件
+    final result = await showFutureLoadingDialog<Archive?>(
+      context: context,
+      title: L10n.of(context).loadingPleaseWait,
+      future: () async {
+        // 🚀 并发读取所有文件，提升速度
+        final fileReadFutures = files.map((file) async {
+          final bytes = await file.readAsBytes();
+          return ArchiveFile(file.name, bytes.length, bytes);
+        }).toList();
+        
+        final archiveFiles = await Future.wait(fileReadFutures);
+        
+        // Create an in-memory archive from the selected files
+        final archive = Archive();
+        for (final file in archiveFiles) {
+          archive.addFile(file);
+        }
+
+        return archive;
+      },
+    );
+
+    final archive = result.result;
+    if (archive == null) return;
+
+    await showDialog(
+      context: context,
+      useRootNavigator: false,
+      builder: (context) => ImportEmoteArchiveDialog(
+        controller: this,
+        archive: archive,
+      ),
     );
     setState(() {});
   }
@@ -406,4 +532,25 @@ class EmotesSettingsController extends State<EmotesSettings> {
       },
     );
   }
+}
+
+// 🚀 后台线程解压函数（isolate 中执行）
+
+/// 在后台线程解压 ZIP 文件
+Archive _decodeZip(List<int> bytes) {
+  final buffer = InputMemoryStream(bytes);
+  return ZipDecoder().decodeStream(buffer);
+}
+
+/// 在后台线程解压 TAR.GZ 文件
+Archive _decodeTarGz(List<int> bytes) {
+  final gzipDecoder = GZipDecoder();
+  final tarBytes = gzipDecoder.decodeBytes(bytes);
+  return TarDecoder().decodeBytes(tarBytes);
+}
+
+/// 在后台线程解压 TAR 文件
+Archive _decodeTar(List<int> bytes) {
+  final buffer = InputMemoryStream(bytes);
+  return TarDecoder().decodeStream(buffer);
 }
