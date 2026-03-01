@@ -21,8 +21,25 @@ import 'utils/background_push.dart';
 import 'widgets/fluffy_chat_app.dart';
 
 ReceivePort? mainIsolateReceivePort;
+Future<void>? _vodozemacInitFuture;
+const _webMainGuardAttribute = 'data-fluffy-main-started';
+
+Future<void> _ensureVodozemacInitialized() =>
+    _vodozemacInitFuture ??= vod.init(wasmPath: './assets/assets/vodozemac/');
 
 void main() async {
+  if (kIsWeb) {
+    final htmlElement = web.window.document.documentElement;
+    final alreadyStarted =
+        htmlElement?.getAttribute(_webMainGuardAttribute) == '1';
+    if (alreadyStarted) {
+      Logs().w('Duplicate web startup detected. Ignoring this bootstrap.');
+      return;
+    }
+    // Guard against double bootstrap (e.g. script optimizer/reloader quirks).
+    htmlElement?.setAttribute(_webMainGuardAttribute, '1');
+  }
+
   if (PlatformInfos.isAndroid) {
     final port = mainIsolateReceivePort = ReceivePort();
     IsolateNameServer.removePortNameMapping(AppConfig.mainIsolatePortName);
@@ -49,7 +66,7 @@ void main() async {
   final store = await AppSettings.init();
   Logs().i('Welcome to ${AppSettings.applicationName.value} <3');
 
-  await vod.init(wasmPath: './assets/assets/vodozemac/');
+  await _ensureVodozemacInitialized();
 
   Logs().nativeColors = !PlatformInfos.isIOS;
   final clients = await ClientManager.getClients(store: store);
