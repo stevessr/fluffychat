@@ -1872,10 +1872,7 @@
     "encryptThisChat": "加密此聊天",
     "disableEncryptionWarning": "出于安全考虑 ，你不能在之前已启用加密的聊天中禁用加密。",
     "sorryThatsNotPossible": "非常抱歉……这是做不到的",
-<<<<<<< HEAD
-=======
     "deviceKeys": "设备密钥：",
->>>>>>> 668368ddf (feat(emotes): enhance emoji packs, custom reactions, and emoji rendering)
     "report": "举报",
     "fileIsTooBigForServer": "无法发送！服务器只支持最大 {max} 的文件。",
     "noOtherDevicesFound": "未找到其它设备",
@@ -2736,7 +2733,6 @@
             }
         }
     },
-<<<<<<< HEAD
     "editImage": "编辑图片",
     "@editImage": {
         "type": "String",
