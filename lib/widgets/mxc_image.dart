@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
@@ -12,6 +13,7 @@ import 'package:fluffychat/utils/client_download_content_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:matrix/matrix.dart';
 
 class MxcImage extends StatefulWidget {
@@ -130,6 +132,10 @@ class _MxcImageState extends State<MxcImage> {
       if (!mounted) return;
       await Future.delayed(widget.retryDuration);
       _tryLoad();
+    } catch (e, s) {
+      // Some homeservers return 404/forbidden for remote thumbnails.
+      // Keep the UI alive and let the widget render its fallback.
+      Logs().w('Unable to load mxc image', e, s);
     }
   }
 
@@ -139,6 +145,23 @@ class _MxcImageState extends State<MxcImage> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _tryLoad());
   }
 
+  Widget placeholder(BuildContext context) =>
+      widget.placeholder?.call(context) ??
+      Container(
+        width: widget.width,
+        height: widget.height,
+        alignment: Alignment.center,
+        child: const CircularProgressIndicator.adaptive(strokeWidth: 2),
+      );
+
+  bool _looksLikeSvg(Uint8List data) {
+    if (data.isEmpty) return false;
+    final slice = data.sublist(0, min(1024, data.length));
+    final header = utf8.decode(slice, allowMalformed: true).toLowerCase();
+    return header.contains('<svg') ||
+        header.contains('http://www.w3.org/2000/svg');
+  }
+
   @override
   Widget build(BuildContext context) {
     final data = _imageData;
@@ -146,39 +169,47 @@ class _MxcImageState extends State<MxcImage> {
 
     return AnimatedCrossFade(
       duration: FluffyThemes.animationDuration,
-      firstChild: ClipRRect(
-        borderRadius: widget.borderRadius,
-        child: data == null
-            ? _MxcImagePlaceholder(
-                width: widget.width,
-                height: widget.height,
-                placeholder: widget.placeholder,
-              )
-            : Image.memory(
-                data,
-                width: widget.width,
-                height: widget.height,
-                fit: widget.fit,
-                filterQuality: widget.isThumbnail
-                    ? FilterQuality.low
-                    : FilterQuality.medium,
-                errorBuilder: (context, e, s) {
-                  Logs().d('Unable to render mxc image', e, s);
-                  return SizedBox(
-                    width: widget.width,
-                    height: widget.height,
-                    child: Material(
-                      color: Theme.of(context).colorScheme.surfaceContainer,
-                      child: Icon(
-                        Icons.broken_image_outlined,
-                        size: min(widget.height ?? 64, 64),
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
+      firstChild: hasData
+          ? ClipRRect(
+              borderRadius: widget.borderRadius,
+              child: _looksLikeSvg(data)
+                  ? SvgPicture.memory(
+                      data,
+                      width: widget.width,
+                      height: widget.height,
+                      fit: widget.fit ?? BoxFit.contain,
+                      placeholderBuilder: placeholder,
+                    )
+                  : Image.memory(
+                      data,
+                      width: widget.width,
+                      height: widget.height,
+                      fit: widget.fit,
+                      filterQuality: widget.isThumbnail
+                          ? FilterQuality.low
+                          : FilterQuality.medium,
+                      errorBuilder: (context, e, s) {
+                        Logs().d('Unable to render mxc image', e, s);
+                        return SizedBox(
+                          width: widget.width,
+                          height: widget.height,
+                          child: Material(
+                            color: Theme.of(context).colorScheme.surfaceContainer,
+                            child: Icon(
+                              Icons.broken_image_outlined,
+                              size: min(widget.height ?? 64, 64),
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
-      ),
+            )
+          : _MxcImagePlaceholder(
+              width: widget.width,
+              height: widget.height,
+              placeholder: widget.placeholder,
+            ),
       secondChild: _MxcImagePlaceholder(
         width: widget.width,
         height: widget.height,
