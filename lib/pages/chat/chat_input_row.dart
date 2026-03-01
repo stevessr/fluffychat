@@ -3,6 +3,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+
+import 'package:flutter/material.dart';
+
+import 'package:animations/animations.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:emoji_picker_flutter/locales/default_emoji_set_locale.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
@@ -27,6 +32,23 @@ class ChatInputRow extends StatelessWidget {
 
   const ChatInputRow(this.controller, {super.key});
 
+  List<Emoji> _buildSuggestionEmojis(BuildContext context) {
+    final locale = AppSettings.emojiSuggestionLocale.value.isNotEmpty
+        ? Locale(AppSettings.emojiSuggestionLocale.value)
+        : Localizations.localeOf(context);
+    final localizedEmojiByValue = <String, Emoji>{
+      for (final category in getDefaultEmojiLocale(locale))
+        for (final emoji in category.emoji) emoji.emoji: emoji,
+    };
+    final merged = <Emoji>[];
+    for (final category in emojiSetEnglish) {
+      for (final emoji in category.emoji) {
+        merged.add(localizedEmojiByValue[emoji.emoji] ?? emoji);
+      }
+    }
+    return merged;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -34,6 +56,9 @@ class ChatInputRow extends StatelessWidget {
         controller.sendController.text.isNotEmpty ||
         controller.replyEvent != null ||
         controller.editEvent != null;
+    final showVoiceMessageButton = controller.sendController.text
+        .trim()
+        .isEmpty;
 
     if (!controller.room.otherPartyCanReceiveMessages) {
       return Center(
@@ -53,6 +78,7 @@ class ChatInputRow extends StatelessWidget {
     );
 
     return RecordingViewModel(
+      key: controller.recordingViewModelKey,
       builder: (context, recordingViewModel) {
         if (recordingViewModel.isRecording) {
           return RecordingInputRow(
@@ -147,7 +173,7 @@ class ChatInputRow extends StatelessWidget {
                       iconColor: theme.colorScheme.onPrimaryContainer,
                       onSelected: controller.onAddPopupMenuButtonSelected,
                       itemBuilder: (BuildContext context) => [
-                        if (PlatformInfos.isMobile)
+                        if (PlatformInfos.isMobile || PlatformInfos.isWeb)
                           PopupMenuItem(
                             value: AddPopupMenuActions.location,
                             child: ListTile(
@@ -315,18 +341,7 @@ class ChatInputRow extends StatelessWidget {
                           filled: false,
                         ),
                         onChanged: controller.onInputBarChanged,
-                        suggestionEmojis:
-                            getDefaultEmojiLocale(
-                              AppSettings.emojiSuggestionLocale.value.isNotEmpty
-                                  ? Locale(
-                                      AppSettings.emojiSuggestionLocale.value,
-                                    )
-                                  : Localizations.localeOf(context),
-                            ).fold(
-                              [],
-                              (emojis, category) =>
-                                  emojis..addAll(category.emoji),
-                            ),
+                        suggestionEmojis: _buildSuggestionEmojis(context),
                       ),
                     ),
                   ),
@@ -334,43 +349,32 @@ class ChatInputRow extends StatelessWidget {
                     height: height,
                     width: height,
                     alignment: Alignment.center,
-                    child:
-                        PlatformInfos.platformCanRecord &&
-                            !controller.sendController.text.isNotEmpty &&
-                            controller.editEvent == null
-                        ? HoverBuilder(
-                            builder: (context, hovered) => IconButton(
-                              tooltip: L10n.of(context).voiceMessage,
-                              onPressed: hovered
-                                  ? () => recordingViewModel.startRecording(
-                                      controller.room,
-                                    )
-                                  : () => ScaffoldMessenger.of(context)
-                                        .showSnackBar(
-                                          SnackBar(
-                                            margin: EdgeInsets.only(
-                                              bottom: height + 16,
-                                              left: 16,
-                                              right: 16,
-                                              top: 16,
-                                            ),
-                                            showCloseIcon: true,
-                                            content: Text(
-                                              L10n.of(
-                                                context,
-                                              ).longPressToRecordVoiceMessage,
-                                            ),
-                                          ),
-                                        ),
-                              onLongPress: () => recordingViewModel
-                                  .startRecording(controller.room),
-                              style: IconButton.styleFrom(
-                                backgroundColor: theme.bubbleColor,
-                                foregroundColor: theme.onBubbleColor,
-                              ),
-                              icon: Icon(
-                                hovered ? Icons.mic : Icons.mic_none_outlined,
-                              ),
+                    child: showVoiceMessageButton
+                        ? IconButton(
+                            tooltip: L10n.of(context).voiceMessage,
+                            icon: const Icon(Icons.mic_outlined),
+                            onPressed: () =>
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    margin: EdgeInsets.only(
+                                      bottom: height + 16,
+                                      left: 16,
+                                      right: 16,
+                                      top: 16,
+                                    ),
+                                    showCloseIcon: true,
+                                    content: Text(
+                                      L10n.of(
+                                        context,
+                                      ).longPressToRecordVoiceMessage,
+                                    ),
+                                  ),
+                                ),
+                            onLongPress: () => recordingViewModel
+                                .startRecording(controller.room),
+                            style: IconButton.styleFrom(
+                              backgroundColor: theme.bubbleColor,
+                              foregroundColor: theme.onBubbleColor,
                             ),
                           )
                         : IconButton(
