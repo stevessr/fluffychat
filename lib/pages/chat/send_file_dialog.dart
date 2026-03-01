@@ -37,11 +37,18 @@ class SendFileDialog extends StatefulWidget {
 
 class SendFileDialogState extends State<SendFileDialog> {
   bool compress = true;
+  late bool encrypt;
 
   /// Images smaller than 20kb don't need compression.
   static const int minSizeToCompress = 20 * 1000;
 
   final TextEditingController _labelTextController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    encrypt = widget.room.encrypted;
+  }
 
   Future<void> _send() async {
     final scaffoldMessenger = ScaffoldMessenger.of(widget.outerContext);
@@ -106,14 +113,23 @@ class SendFileDialogState extends State<SendFileDialog> {
         final label = _labelTextController.text.trim();
 
         try {
-          await widget.room.sendFileEvent(
-            file,
-            thumbnail: thumbnail,
-            shrinkImageMaxDimension: compress ? 1600 : null,
-            extraContent: label.isEmpty ? null : {'body': label},
-            threadRootEventId: widget.threadRootEventId,
-            threadLastEventId: widget.threadLastEventId,
-          );
+          if (encrypt || !widget.room.encrypted) {
+            await widget.room.sendFileEvent(
+              file,
+              thumbnail: thumbnail,
+              shrinkImageMaxDimension: compress ? 1600 : null,
+              extraContent: label.isEmpty ? null : {'body': label},
+              threadRootEventId: widget.threadRootEventId,
+              threadLastEventId: widget.threadLastEventId,
+            );
+          } else {
+            await _sendUnencryptedFileEvent(
+              file,
+              thumbnail: thumbnail,
+              label: label.isEmpty ? null : label,
+              shrinkImageMaxDimension: compress ? 1600 : null,
+            );
+          }
         } on MatrixException catch (e) {
           final retryAfterMs = e.retryAfterMs;
           if (e.error != MatrixError.M_LIMIT_EXCEEDED || retryAfterMs == null) {
@@ -134,12 +150,21 @@ class SendFileDialogState extends State<SendFileDialog> {
 
           scaffoldMessenger.showLoadingSnackBar(l10n.sendingAttachment);
 
-          await widget.room.sendFileEvent(
-            file,
-            thumbnail: thumbnail,
-            shrinkImageMaxDimension: compress ? 1600 : null,
-            extraContent: label.isEmpty ? null : {'body': label},
-          );
+          if (encrypt || !widget.room.encrypted) {
+            await widget.room.sendFileEvent(
+              file,
+              thumbnail: thumbnail,
+              shrinkImageMaxDimension: compress ? 1600 : null,
+              extraContent: label.isEmpty ? null : {'body': label},
+            );
+          } else {
+            await _sendUnencryptedFileEvent(
+              file,
+              thumbnail: thumbnail,
+              label: label.isEmpty ? null : label,
+              shrinkImageMaxDimension: compress ? 1600 : null,
+            );
+          }
         }
       }
       scaffoldMessenger.clearSnackBars();
@@ -162,6 +187,68 @@ class SendFileDialogState extends State<SendFileDialog> {
     }
 
     return;
+  }
+
+  Future<void> _sendUnencryptedFileEvent(
+    MatrixFile file, {
+    MatrixImageFile? thumbnail,
+    String? label,
+    int? shrinkImageMaxDimension,
+  }) async {
+    final client = widget.room.client;
+    if (file is MatrixImageFile && shrinkImageMaxDimension != null) {
+      file = await MatrixImageFile.shrink(
+        bytes: file.bytes,
+        name: file.name,
+        maxDimension: shrinkImageMaxDimension,
+        customImageResizer: client.customImageResizer,
+        nativeImplementations: client.nativeImplementations,
+      );
+    }
+    final uploadResp = await client.uploadContent(
+      file.bytes,
+      filename: file.name,
+      contentType: file.mimeType,
+    );
+
+    final thumbnailUploadResp = thumbnail == null
+        ? null
+        : await client.uploadContent(
+            thumbnail.bytes,
+            filename: thumbnail.name,
+            contentType: thumbnail.mimeType,
+          );
+
+    final content = <String, Object?>{
+      'msgtype': file.msgType,
+      'body': label?.isNotEmpty == true ? label : file.name,
+      'filename': file.name,
+      'url': uploadResp.toString(),
+      'info': {
+        ...file.info,
+        if (thumbnail != null) ...{
+          'thumbnail_url': thumbnailUploadResp.toString(),
+          'thumbnail_info': thumbnail.info,
+        },
+        if (thumbnail?.blurhash != null &&
+            file is MatrixImageFile &&
+            file.blurhash == null)
+          'xyz.amorgan.blurhash': thumbnail!.blurhash,
+      },
+    };
+
+    if (widget.threadRootEventId != null) {
+      content['m.relates_to'] = {
+        'event_id': widget.threadRootEventId!,
+        'rel_type': RelationshipTypes.thread,
+        'is_falling_back': true,
+        if (widget.threadLastEventId != null)
+          'm.in_reply_to': {'event_id': widget.threadLastEventId!},
+      };
+    }
+
+    final txid = client.generateUniqueTransactionId();
+    await client.sendMessage(widget.room.id, EventTypes.Message, txid, content);
   }
 
   Future<String> _calcCombinedFileSize() async {
@@ -205,6 +292,7 @@ class SendFileDialogState extends State<SendFileDialog> {
 
     final compressionSupported =
         uniqueFileType != 'video' || PlatformInfos.isMobile;
+    final showEncryptionToggle = widget.room.encrypted;
 
     return FutureBuilder<String>(
       future: _calcCombinedFileSize(),
@@ -395,6 +483,43 @@ class SendFileDialogState extends State<SendFileDialog> {
                               if (!compressionSupported)
                                 Text(
                                   L10n.of(context).notSupportedOnThisDevice,
+                                  style: theme.textTheme.labelSmall,
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  if (showEncryptionToggle)
+                    Row(
+                      crossAxisAlignment: .center,
+                      children: [
+                        if ({
+                          TargetPlatform.iOS,
+                          TargetPlatform.macOS,
+                        }.contains(theme.platform))
+                          CupertinoSwitch(
+                            value: encrypt,
+                            onChanged: (v) => setState(() => encrypt = v),
+                          )
+                        else
+                          Switch.adaptive(
+                            value: encrypt,
+                            onChanged: (v) => setState(() => encrypt = v),
+                          ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            mainAxisSize: .min,
+                            crossAxisAlignment: .start,
+                            children: [
+                              Text(
+                                L10n.of(context).encryption,
+                                style: theme.textTheme.titleMedium,
+                              ),
+                              if (!encrypt)
+                                Text(
+                                  L10n.of(context).encryptionNotEnabled,
                                   style: theme.textTheme.labelSmall,
                                 ),
                             ],
