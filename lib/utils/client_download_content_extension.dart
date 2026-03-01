@@ -39,15 +39,22 @@ extension ClientDownloadContentExtension on Client {
           )
         : await mxc.getDownloadUri(this);
 
-    final response = await httpClient.get(
-      httpUri,
-      headers: accessToken == null
-          ? null
-          : {'authorization': 'Bearer $accessToken'},
-    );
-    if (response.statusCode != 200) {
-      throw Exception();
+    final headers = accessToken == null
+        ? null
+        : {'authorization': 'Bearer $accessToken'};
+    var response = await httpClient.get(httpUri, headers: headers);
+
+    // Some homeservers fail remote thumbnail federation while download still
+    // works. Fallback once to raw download to keep media rendering functional.
+    if (response.statusCode != 200 && isThumbnail) {
+      final fallbackUri = await mxc.getDownloadUri(this);
+      response = await httpClient.get(fallbackUri, headers: headers);
     }
+
+    if (response.statusCode != 200) {
+      throw Exception('Unable to download mxc media (${response.statusCode})');
+    }
+
     var imageData = response.bodyBytes;
 
     if (rounded) {
