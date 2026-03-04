@@ -1,6 +1,7 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/pages/chat/events/file_send_status_indicator.dart';
+import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/file_description.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
@@ -10,7 +11,7 @@ import 'package:matrix/matrix.dart';
 
 import '../../../widgets/blur_hash.dart';
 
-class ImageBubble extends StatelessWidget {
+class ImageBubble extends StatefulWidget {
   final Event event;
   final bool tapToView;
   final BoxFit fit;
@@ -43,14 +44,71 @@ class ImageBubble extends StatelessWidget {
   });
 
   @override
+  State<ImageBubble> createState() => _ImageBubbleState();
+}
+
+class _ImageBubbleState extends State<ImageBubble> {
+  static const String _mscSpoilerKey = 'org.matrix.msc2810.spoiler';
+  static const String _spoilerKey = 'm.spoiler';
+
+  bool _revealed = false;
+
+  bool _hasSpoilerMarker(Map<String, Object?>? map, String key) {
+    if (map == null) return false;
+    return map.containsKey(key);
+  }
+
+  bool get _isSpoiler {
+    final content = widget.event.content;
+    final infoMap = content.tryGetMap<String, Object?>('info');
+    return _hasSpoilerMarker(content, _mscSpoilerKey) ||
+        _hasSpoilerMarker(content, _spoilerKey) ||
+        _hasSpoilerMarker(infoMap, _mscSpoilerKey) ||
+        _hasSpoilerMarker(infoMap, _spoilerKey);
+  }
+
+  void _handleTap() {
+    if (_isSpoiler && !_revealed) {
+      setState(() => _revealed = true);
+      return;
+    }
+    widget.onTap?.call();
+  }
+
+  Widget _buildPlaceholder(BuildContext context) {
+    final blurHashString =
+        widget.event.infoMap.tryGet<String>('xyz.amorgan.blurhash') ??
+        'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
+    return SizedBox(
+      width: widget.width,
+      height: widget.height,
+      child: BlurHash(
+        blurhash: blurHashString,
+        width: widget.width,
+        height: widget.height,
+        fit: widget.fit,
+      ),
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant ImageBubble oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.event.eventId != widget.event.eventId) {
+      _revealed = false;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     var borderRadius =
-        this.borderRadius ?? BorderRadius.circular(AppConfig.borderRadius);
+        widget.borderRadius ?? BorderRadius.circular(AppConfig.borderRadius);
 
-    final fileDescription = event.fileDescription;
-    final textColor = this.textColor;
+    final fileDescription = widget.event.fileDescription;
+    final textColor = widget.textColor;
+    final isObscured = _isSpoiler && !_revealed;
 
     if (fileDescription != null) {
       borderRadius = borderRadius.copyWith(
@@ -58,7 +116,7 @@ class ImageBubble extends StatelessWidget {
         bottomRight: Radius.zero,
       );
     }
-    final fileSendingStatus = event.fileSendingStatus;
+    final fileSendingStatus = widget.event.fileSendingStatus;
 
     return Column(
       mainAxisSize: .min,
@@ -70,52 +128,71 @@ class ImageBubble extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: borderRadius,
             side: BorderSide(
-              color: event.messageType == MessageTypes.Sticker
+              color: widget.event.messageType == MessageTypes.Sticker
                   ? Colors.transparent
                   : theme.dividerColor,
             ),
           ),
           child: InkWell(
-            onTap: onTap,
+            onTap: _handleTap,
             borderRadius: borderRadius,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Hero(
-                  tag: event.eventId,
-                  child: AppSettings.showThumbnailsInTimeline.value
+            child: Hero(
+              tag: widget.event.eventId,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  AppSettings.showThumbnailsInTimeline.value
                       ? MxcImage(
-                          event: event,
-                          width: width,
-                          height: height,
-                          fit: fit,
-                          animated: animated,
-                          isThumbnail: thumbnailOnly,
-                          placeholder: event.messageType == MessageTypes.Sticker
+                          event: widget.event,
+                          width: widget.width,
+                          height: widget.height,
+                          fit: widget.fit,
+                          animated: widget.animated,
+                          isThumbnail: widget.thumbnailOnly,
+                          placeholder: widget.event.messageType == MessageTypes.Sticker
                               ? null
-                              : (_) => _ImageBubblePlaceholder(
-                                  event: event,
-                                  width: width,
-                                  height: height,
-                                  fit: fit,
-                                ),
+                              : _buildPlaceholder,
                         )
                       : _ImageBubblePlaceholder(
-                          event: event,
-                          width: width,
-                          height: height,
-                          fit: fit,
+                          event: widget.event,
+                          width: widget.width,
+                          height: widget.height,
+                          fit: widget.fit,
                         ),
-                ),
-                if (fileSendingStatus != null)
-                  FileSendStatusIndicator(fileSendingStatus: fileSendingStatus),
-              ],
+                  if (isObscured)
+                    Positioned.fill(
+                      child: ColoredBox(
+                        color: theme.colorScheme.surface.withAlpha(176),
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.visibility_off,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                L10n.of(context).spoilerText,
+                                style: TextStyle(
+                                  color: theme.colorScheme.onSurface,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (fileSendingStatus != null)
+                    FileSendStatusIndicator(fileSendingStatus: fileSendingStatus),
+                ],
+              ),
             ),
           ),
         ),
         if (fileDescription != null && textColor != null)
           SizedBox(
-            width: width,
+            width: widget.width,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Linkify(
@@ -129,12 +206,12 @@ class ImageBubble extends StatelessWidget {
                 ),
                 options: const LinkifyOptions(humanize: false),
                 linkStyle: TextStyle(
-                  color: linkColor,
+                  color: widget.linkColor,
                   fontSize:
                       AppSettings.fontSizeFactor.value *
                       AppConfig.messageFontSize,
                   decoration: TextDecoration.underline,
-                  decorationColor: linkColor,
+                  decorationColor: widget.linkColor,
                 ),
                 onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
               ),
