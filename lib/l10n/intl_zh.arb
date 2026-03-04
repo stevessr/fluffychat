@@ -1377,6 +1377,11 @@
         "type": "String",
         "placeholders": {}
     },
+    "startConversation": "开始对话",
+    "@startConversation": {
+        "type": "String",
+        "placeholders": {}
+    },
     "sendAsText": "以文本发送",
     "@sendAsText": {
         "type": "String"
