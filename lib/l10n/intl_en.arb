@@ -16,6 +16,17 @@
     "importNow": "Import now",
     "importEmojis": "Import Emojis",
     "importFromZipFile": "Import from .zip file",
+    "importFromTarGz": "Import from .tar.gz file",
+    "importFromFiles": "Import from files",
+    "importingEmotes": "Importing emotes",
+    "uploadingEmote": "Uploading emote {index} of {total}",
+    "@uploadingEmote": {
+        "type": "String",
+        "placeholders": {
+            "index": {},
+            "total": {}
+        }
+    },
     "exportEmotePack": "Export Emote pack as .zip",
     "replace": "Replace",
     "about": "About",
@@ -1599,6 +1610,11 @@
         "type": "String",
         "placeholders": {}
     },
+    "startConversation": "Start conversation",
+    "@startConversation": {
+        "type": "String",
+        "placeholders": {}
+    },
     "sendAsText": "Send as text",
     "@sendAsText": {
         "type": "String"
@@ -2647,6 +2663,31 @@
     "commandHint_logoutall": "Logout all active devices",
     "displayNavigationRail": "Show navigation rail on mobile",
     "customReaction": "Custom reaction",
+    "customReactionEmotesTab": "Emotes",
+    "@customReactionEmotesTab": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "customReactionTextTab": "Text",
+    "@customReactionTextTab": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "customReactionEnterTextLabel": "Enter text",
+    "@customReactionEnterTextLabel": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "customReactionEnterTextHint": "e.g. OK, +1, like",
+    "@customReactionEnterTextHint": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "customReactionEmoteSearchHint": ":/shortcode or search",
+    "@customReactionEmoteSearchHint": {
+        "type": "String",
+        "placeholders": {}
+    },
     "moreEvents": "More events",
     "declineInvitation": "Decline invitation",
     "noMessagesYet": "No messages yet",
@@ -2802,5 +2843,15 @@
     "addTag": "Add tag",
     "removeTag": "Remove tag",
     "tagName": "Tag name",
-    "createNewTag": "Create new tag"
+    "createNewTag": "Create new tag",
+    "underlineText": "Underline",
+    "@underlineText": {},
+    "spoilerText": "Spoiler",
+    "@spoilerText": {},
+    "inlineCode": "Inline code",
+    "@inlineCode": {},
+    "codeBlock": "Code block",
+    "@codeBlock": {},
+    "quote": "Quote",
+    "@quote": {}
 }
