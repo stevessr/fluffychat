@@ -49,7 +49,11 @@ class SendFileDialog extends StatefulWidget {
 
 class SendFileDialogState extends State<SendFileDialog> {
   bool compress = true;
+  bool spoiler = false;
   late bool encrypt;
+
+  static const String _mscSpoilerKey = 'org.matrix.msc2810.spoiler';
+  static const String _spoilerKey = 'm.spoiler';
 
   /// Images smaller than 20kb don't need compression.
   static const int minSizeToCompress = 20 * 1000;
@@ -89,8 +93,22 @@ class SendFileDialogState extends State<SendFileDialog> {
     });
   }
 
+  Map<String, Object?>? _buildExtraContent({
+    String? label,
+    required bool isSpoiler,
+  }) {
+    final extraContent = <String, Object?>{
+      if (label?.isNotEmpty == true) 'body': label,
+      if (isSpoiler) ...{_mscSpoilerKey: true, _spoilerKey: true},
+    };
+    return extraContent.isEmpty ? null : extraContent;
+  }
+
   Future<void> _send(String? uniqueFileType) async {
     final l10n = L10n.of(context);
+
+    final proceed = await showTrustUserInRoomDialog(context, widget.room);
+    if (!context.mounted || !proceed) return;
 
     Future<void> sendAction(setProgress) async {
       if (!widget.room.otherPartyCanReceiveMessages) {
@@ -160,7 +178,10 @@ class SendFileDialogState extends State<SendFileDialog> {
               file,
               thumbnail: thumbnail,
               shrinkImageMaxDimension: compress ? 1600 : null,
-              extraContent: label.isEmpty ? null : {'body': label},
+              extraContent: _buildExtraContent(
+                label: label,
+                isSpoiler: spoiler,
+              ),
               threadRootEventId: widget.threadRootEventId,
               threadLastEventId: widget.threadLastEventId,
             );
@@ -170,6 +191,7 @@ class SendFileDialogState extends State<SendFileDialog> {
               thumbnail: thumbnail,
               label: label.isEmpty ? null : label,
               shrinkImageMaxDimension: compress ? 1600 : null,
+              isSpoiler: spoiler,
             );
           }
         } on MatrixException catch (e) {
@@ -188,7 +210,10 @@ class SendFileDialogState extends State<SendFileDialog> {
               file,
               thumbnail: thumbnail,
               shrinkImageMaxDimension: compress ? 1600 : null,
-              extraContent: label.isEmpty ? null : {'body': label},
+              extraContent: _buildExtraContent(
+                label: label,
+                isSpoiler: spoiler,
+              ),
               threadRootEventId: widget.threadRootEventId,
               threadLastEventId: widget.threadLastEventId,
             );
@@ -198,6 +223,7 @@ class SendFileDialogState extends State<SendFileDialog> {
               thumbnail: thumbnail,
               label: label.isEmpty ? null : label,
               shrinkImageMaxDimension: compress ? 1600 : null,
+              isSpoiler: spoiler,
             );
           }
         }
@@ -223,6 +249,7 @@ class SendFileDialogState extends State<SendFileDialog> {
     MatrixImageFile? thumbnail,
     String? label,
     int? shrinkImageMaxDimension,
+    required bool spoiler,
   }) async {
     final client = widget.room.client;
     if (file is MatrixImageFile && shrinkImageMaxDimension != null) {
@@ -248,22 +275,26 @@ class SendFileDialogState extends State<SendFileDialog> {
             contentType: thumbnail.mimeType,
           );
 
+    final info = <String, Object?>{
+      ...file.info,
+      if (thumbnail != null) ...{
+        'thumbnail_url': thumbnailUploadResp.toString(),
+        'thumbnail_info': thumbnail.info,
+      },
+      if (thumbnail?.blurhash != null &&
+          file is MatrixImageFile &&
+          file.blurhash == null)
+        'xyz.amorgan.blurhash': thumbnail!.blurhash,
+      if (spoiler) ...{_mscSpoilerKey: true, _spoilerKey: true},
+    };
+
     final content = <String, Object?>{
       'msgtype': file.msgType,
       'body': label?.isNotEmpty == true ? label : file.name,
       'filename': file.name,
       'url': uploadResp.toString(),
-      'info': {
-        ...file.info,
-        if (thumbnail != null) ...{
-          'thumbnail_url': thumbnailUploadResp.toString(),
-          'thumbnail_info': thumbnail.info,
-        },
-        if (thumbnail?.blurhash != null &&
-            file is MatrixImageFile &&
-            file.blurhash == null)
-          'xyz.amorgan.blurhash': thumbnail!.blurhash,
-      },
+      'info': info,
+      if (spoiler) ...{_mscSpoilerKey: true, _spoilerKey: true},
     };
 
     if (widget.threadRootEventId != null) {
@@ -539,6 +570,38 @@ class SendFileDialogState extends State<SendFileDialog> {
                                   L10n.of(context).notSupportedOnThisDevice,
                                   style: theme.textTheme.labelSmall,
                                 ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  if (uniqueFileType == 'image')
+                    Row(
+                      crossAxisAlignment: .center,
+                      children: [
+                        if ({
+                          TargetPlatform.iOS,
+                          TargetPlatform.macOS,
+                        }.contains(theme.platform))
+                          CupertinoSwitch(
+                            value: spoiler,
+                            onChanged: (v) => setState(() => spoiler = v),
+                          )
+                        else
+                          Switch.adaptive(
+                            value: spoiler,
+                            onChanged: (v) => setState(() => spoiler = v),
+                          ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            mainAxisSize: .min,
+                            crossAxisAlignment: .start,
+                            children: [
+                              Text(
+                                L10n.of(context).spoilerText,
+                                style: theme.textTheme.titleMedium,
+                              ),
                             ],
                           ),
                         ),
