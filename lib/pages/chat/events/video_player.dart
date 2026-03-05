@@ -7,6 +7,8 @@ import 'dart:math';
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/pages/chat/events/file_send_status_indicator.dart';
 import 'package:fluffychat/utils/file_description.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -18,8 +20,9 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:matrix/matrix.dart';
 
 import '../../image_viewer/image_viewer.dart';
+import 'media_spoiler_overlay.dart';
 
-class EventVideoPlayer extends StatelessWidget {
+class EventVideoPlayer extends StatefulWidget {
   final Event event;
   final Timeline? timeline;
   final Color? textColor;
@@ -33,20 +36,62 @@ class EventVideoPlayer extends StatelessWidget {
     super.key,
   });
 
+  @override
+  State<EventVideoPlayer> createState() => _EventVideoPlayerState();
+}
+
+class _EventVideoPlayerState extends State<EventVideoPlayer> {
   static const String fallbackBlurHash = 'L5H2EC=PM+yV0g-mq.wG9c010J}I';
+
+  bool _revealed = false;
+
+  bool get _isSpoiler => widget.event.isMediaSpoiler;
+
+  void _handleTap(BuildContext context, bool supportsVideoPlayer) {
+    if (_isSpoiler && !_revealed) {
+      setState(() => _revealed = true);
+      return;
+    }
+    if (supportsVideoPlayer) {
+      showDialog(
+        context: context,
+        builder: (_) => ImageViewer(
+          widget.event,
+          timeline: widget.timeline,
+          outerContext: context,
+        ),
+      );
+      return;
+    }
+    widget.event.saveFile(context);
+  }
+
+  @override
+  void didUpdateWidget(covariant EventVideoPlayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.event.eventId != widget.event.eventId) {
+      _revealed = false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context);
     final supportsVideoPlayer = PlatformInfos.supportsVideoPlayer;
+    final isObscured = _isSpoiler && !_revealed;
+    final spoilerReason = widget.event.mediaSpoilerReason;
+    final spoilerLabel = spoilerReason == null
+        ? l10n.spoilerText
+        : '${l10n.spoilerText}: $spoilerReason';
 
     final blurHash =
-        (event.infoMap as Map<String, dynamic>).tryGet<String>(
+        (widget.event.infoMap as Map<String, dynamic>).tryGet<String>(
           'xyz.amorgan.blurhash',
         ) ??
         fallbackBlurHash;
-    final fileDescription = event.fileDescription;
+    final fileDescription = widget.event.fileDescription;
     const maxDimension = 300.0;
-    final infoMap = event.content.tryGetMap<String, Object?>('info');
+    final infoMap = widget.event.content.tryGetMap<String, Object?>('info');
     final videoWidth = infoMap?.tryGet<int>('w') ?? maxDimension;
     final videoHeight = infoMap?.tryGet<int>('h') ?? maxDimension;
 
@@ -67,30 +112,19 @@ class EventVideoPlayer extends StatelessWidget {
           color: Colors.black,
           borderRadius: BorderRadius.circular(AppConfig.borderRadius),
           child: InkWell(
-            onTap: () => supportsVideoPlayer
-                ? showDialog(
-                    context: context,
-                    builder: (_) => ImageViewer(
-                      event,
-                      timeline: timeline,
-                      outerContext: context,
-                    ),
-                  )
-                : event.saveFile(context),
+            onTap: () => _handleTap(context, supportsVideoPlayer),
             borderRadius: BorderRadius.circular(AppConfig.borderRadius),
             child: SizedBox(
               width: width,
               height: height,
               child: Hero(
-                tag: event.eventId,
+                tag: widget.event.eventId,
                 child: Stack(
                   children: [
-                    if (event.hasThumbnail &&
+                    if (widget.event.hasThumbnail &&
                         AppSettings.showThumbnailsInTimeline.value)
                       MxcImage(
-                        event: event,
-                        cacheKey: event.transactionId ?? event.eventId,
-                        cacheName: event.room.id,
+                        event: widget.event,
                         isThumbnail: true,
                         width: width,
                         height: height,
@@ -134,7 +168,10 @@ class EventVideoPlayer extends StatelessWidget {
             ),
           ),
         ),
-        if (fileDescription != null && textColor != null && linkColor != null)
+        if (!isObscured &&
+            fileDescription != null &&
+            widget.textColor != null &&
+            widget.linkColor != null)
           SizedBox(
             width: width,
             child: Padding(
@@ -143,15 +180,19 @@ class EventVideoPlayer extends StatelessWidget {
                 text: fileDescription,
                 textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
                 style: TextStyle(
-                  color: textColor,
-                  fontSize: AppConfig.messageFontSize,
+                  color: widget.textColor,
+                  fontSize:
+                      AppSettings.fontSizeFactor.value *
+                      AppConfig.messageFontSize,
                 ),
                 options: const LinkifyOptions(humanize: false),
                 linkStyle: TextStyle(
-                  color: linkColor,
-                  fontSize: AppConfig.messageFontSize,
+                  color: widget.linkColor,
+                  fontSize:
+                      AppSettings.fontSizeFactor.value *
+                      AppConfig.messageFontSize,
                   decoration: TextDecoration.underline,
-                  decorationColor: linkColor,
+                  decorationColor: widget.linkColor,
                 ),
                 onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
               ),
