@@ -50,18 +50,6 @@ class ImageBubble extends StatefulWidget {
 }
 
 class _ImageBubbleState extends State<ImageBubble> {
-  bool _revealed = false;
-
-  bool get _isSpoiler => widget.event.isMediaSpoiler;
-
-  void _handleTap() {
-    if (_isSpoiler && !_revealed) {
-      setState(() => _revealed = true);
-      return;
-    }
-    widget.onTap?.call();
-  }
-
   Widget _buildPlaceholder(BuildContext context) {
     final blurHashString =
         widget.event.infoMap.tryGet<String>('xyz.amorgan.blurhash') ??
@@ -79,14 +67,6 @@ class _ImageBubbleState extends State<ImageBubble> {
   }
 
   @override
-  void didUpdateWidget(covariant ImageBubble oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.event.eventId != widget.event.eventId) {
-      _revealed = false;
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = L10n.of(context);
@@ -96,7 +76,6 @@ class _ImageBubbleState extends State<ImageBubble> {
 
     final fileDescription = widget.event.fileDescription;
     final textColor = widget.textColor;
-    final isObscured = _isSpoiler && !_revealed;
     final spoilerReason = widget.event.mediaSpoilerReason;
     final spoilerLabel = spoilerReason == null
         ? l10n.spoilerText
@@ -109,77 +88,82 @@ class _ImageBubbleState extends State<ImageBubble> {
       );
     }
 
-    return Column(
-      mainAxisSize: .min,
-      spacing: 8,
-      children: [
-        Material(
-          color: Colors.transparent,
-          clipBehavior: Clip.hardEdge,
-          shape: RoundedRectangleBorder(
-            borderRadius: borderRadius,
-            side: BorderSide(
-              color: widget.event.messageType == MessageTypes.Sticker
-                  ? Colors.transparent
-                  : theme.dividerColor,
+    return MediaSpoilerTapBuilder(
+      isSpoiler: widget.event.isMediaSpoiler,
+      resetKey: widget.event.eventId,
+      onOpen: widget.onTap,
+      builder: (context, isObscured, onTap) => Column(
+        mainAxisSize: .min,
+        spacing: 8,
+        children: [
+          Material(
+            color: Colors.transparent,
+            clipBehavior: Clip.hardEdge,
+            shape: RoundedRectangleBorder(
+              borderRadius: borderRadius,
+              side: BorderSide(
+                color: widget.event.messageType == MessageTypes.Sticker
+                    ? Colors.transparent
+                    : theme.dividerColor,
+              ),
             ),
-          ),
-          child: InkWell(
-            onTap: _handleTap,
-            borderRadius: borderRadius,
-            child: Hero(
-              tag: widget.event.eventId,
-              child: Stack(
-                children: [
-                  MxcImage(
-                    event: widget.event,
-                    width: widget.width,
-                    height: widget.height,
-                    fit: widget.fit,
-                    animated: widget.animated,
-                    isThumbnail: widget.thumbnailOnly,
-                    placeholder:
-                        widget.event.messageType == MessageTypes.Sticker
-                        ? null
-                        : _buildPlaceholder,
-                  ),
-                  if (isObscured)
-                    Positioned.fill(
-                      child: MediaSpoilerOverlay(label: spoilerLabel),
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: borderRadius,
+              child: Hero(
+                tag: widget.event.eventId,
+                child: Stack(
+                  children: [
+                    MxcImage(
+                      event: widget.event,
+                      width: widget.width,
+                      height: widget.height,
+                      fit: widget.fit,
+                      animated: widget.animated,
+                      isThumbnail: widget.thumbnailOnly,
+                      placeholder:
+                          widget.event.messageType == MessageTypes.Sticker
+                          ? null
+                          : _buildPlaceholder,
                     ),
-                ],
+                    if (isObscured)
+                      Positioned.fill(
+                        child: MediaSpoilerOverlay(label: spoilerLabel),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-        if (!isObscured && fileDescription != null && textColor != null)
-          SizedBox(
-            width: widget.width,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Linkify(
-                text: fileDescription,
-                textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
-                style: TextStyle(
-                  color: textColor,
-                  fontSize:
-                      AppSettings.fontSizeFactor.value *
-                      AppConfig.messageFontSize,
+          if (!isObscured && fileDescription != null && textColor != null)
+            SizedBox(
+              width: widget.width,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Linkify(
+                  text: fileDescription,
+                  textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize:
+                        AppSettings.fontSizeFactor.value *
+                        AppConfig.messageFontSize,
+                  ),
+                  options: const LinkifyOptions(humanize: false),
+                  linkStyle: TextStyle(
+                    color: widget.linkColor,
+                    fontSize:
+                        AppSettings.fontSizeFactor.value *
+                        AppConfig.messageFontSize,
+                    decoration: TextDecoration.underline,
+                    decorationColor: widget.linkColor,
+                  ),
+                  onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
                 ),
-                options: const LinkifyOptions(humanize: false),
-                linkStyle: TextStyle(
-                  color: widget.linkColor,
-                  fontSize:
-                      AppSettings.fontSizeFactor.value *
-                      AppConfig.messageFontSize,
-                  decoration: TextDecoration.underline,
-                  decorationColor: widget.linkColor,
-                ),
-                onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }
