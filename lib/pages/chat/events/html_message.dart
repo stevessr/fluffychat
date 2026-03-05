@@ -6,6 +6,7 @@ import 'package:fluffychat/utils/event_checkbox_extension.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
+import 'package:fluffychat/widgets/mxc_image_viewer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
@@ -419,6 +420,7 @@ class HtmlMessage extends StatelessWidget {
                     label: spoilerReason == null
                         ? L10n.of(context).spoilerText
                         : '${L10n.of(context).spoilerText}: $spoilerReason',
+                    mxcUrl: mxcUrl,
                     child: MxcImage(
                       uri: mxcUrl,
                       width: actualWidth,
@@ -587,46 +589,48 @@ class HtmlMessage extends StatelessWidget {
   }
 }
 
-class _InlineImageSpoiler extends StatefulWidget {
+class _InlineImageSpoiler extends StatelessWidget {
   final Widget child;
   final String label;
   final double width;
   final double height;
+  final Uri mxcUrl;
 
   const _InlineImageSpoiler({
     required this.child,
     required this.label,
     required this.width,
     required this.height,
+    required this.mxcUrl,
   });
-
-  @override
-  State<_InlineImageSpoiler> createState() => _InlineImageSpoilerState();
-}
-
-class _InlineImageSpoilerState extends State<_InlineImageSpoiler> {
-  bool _revealed = false;
 
   @override
   Widget build(BuildContext context) {
     final borderRadius = BorderRadius.circular(6);
 
-    return Material(
-      color: Colors.transparent,
-      clipBehavior: Clip.hardEdge,
-      borderRadius: borderRadius,
-      child: InkWell(
-        splashColor: Colors.transparent,
-        onTap: () => setState(() => _revealed = !_revealed),
-        child: SizedBox(
-          width: widget.width,
-          height: widget.height,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              widget.child,
-              if (!_revealed) MediaSpoilerOverlay(label: widget.label),
-            ],
+    return MediaSpoilerTapBuilder(
+      isSpoiler: true,
+      onOpen: () => showDialog(
+        context: context,
+        builder: (_) => MxcImageViewer(mxcUrl),
+      ),
+      builder: (context, isObscured, onTap) => Material(
+        color: Colors.transparent,
+        clipBehavior: Clip.hardEdge,
+        borderRadius: borderRadius,
+        child: InkWell(
+          splashColor: Colors.transparent,
+          onTap: onTap,
+          child: SizedBox(
+            width: width,
+            height: height,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                child,
+                if (isObscured) MediaSpoilerOverlay(label: label),
+              ],
+            ),
           ),
         ),
       ),

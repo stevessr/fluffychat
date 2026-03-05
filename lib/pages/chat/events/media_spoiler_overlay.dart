@@ -45,3 +45,53 @@ class MediaSpoilerOverlay extends StatelessWidget {
     );
   }
 }
+
+typedef MediaSpoilerTapWidgetBuilder = Widget Function(
+  BuildContext context,
+  bool isObscured,
+  VoidCallback onTap,
+);
+
+class MediaSpoilerTapBuilder extends StatefulWidget {
+  final bool isSpoiler;
+  final Object? resetKey;
+  final VoidCallback? onOpen;
+  final MediaSpoilerTapWidgetBuilder builder;
+
+  const MediaSpoilerTapBuilder({
+    required this.isSpoiler,
+    required this.builder,
+    this.resetKey,
+    this.onOpen,
+    super.key,
+  });
+
+  @override
+  State<MediaSpoilerTapBuilder> createState() => _MediaSpoilerTapBuilderState();
+}
+
+class _MediaSpoilerTapBuilderState extends State<MediaSpoilerTapBuilder> {
+  bool _revealed = false;
+
+  bool get _isObscured => widget.isSpoiler && !_revealed;
+
+  void _handleTap() {
+    if (_isObscured) {
+      setState(() => _revealed = true);
+      return;
+    }
+    widget.onOpen?.call();
+  }
+
+  @override
+  void didUpdateWidget(covariant MediaSpoilerTapBuilder oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.resetKey != widget.resetKey) {
+      _revealed = false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      widget.builder(context, _isObscured, _handleTap);
+}

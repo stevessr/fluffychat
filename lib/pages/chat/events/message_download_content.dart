@@ -27,30 +27,9 @@ class MessageDownloadContent extends StatefulWidget {
 }
 
 class _MessageDownloadContentState extends State<MessageDownloadContent> {
-  bool _revealed = false;
-
-  bool get _isSpoiler => widget.event.isMediaSpoiler;
-
-  void _handleTap(BuildContext context) {
-    if (_isSpoiler && !_revealed) {
-      setState(() => _revealed = true);
-      return;
-    }
-    widget.event.saveFile(context);
-  }
-
-  @override
-  void didUpdateWidget(covariant MessageDownloadContent oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.event.eventId != widget.event.eventId) {
-      _revealed = false;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context);
-    final isObscured = _isSpoiler && !_revealed;
     final spoilerReason = widget.event.mediaSpoilerReason;
     final spoilerLabel = spoilerReason == null
         ? l10n.spoilerText
@@ -67,98 +46,103 @@ class _MessageDownloadContentState extends State<MessageDownloadContent> {
               'UNKNOWN');
     final sizeString = widget.event.sizeString ?? '?MB';
     final fileDescription = widget.event.fileDescription;
-    return Column(
-      mainAxisSize: .min,
-      crossAxisAlignment: .start,
-      spacing: 8,
-      children: [
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
-            onTap: () => _handleTap(context),
-            child: Stack(
-              children: [
-                Container(
-                  width: 400,
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    mainAxisSize: .min,
-                    spacing: 16,
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: widget.textColor.withAlpha(32),
-                        child: Icon(
-                          Icons.file_download_outlined,
-                          color: widget.textColor,
+    return MediaSpoilerTapBuilder(
+      isSpoiler: widget.event.isMediaSpoiler,
+      resetKey: widget.event.eventId,
+      onOpen: () => widget.event.saveFile(context),
+      builder: (context, isObscured, onTap) => Column(
+        mainAxisSize: .min,
+        crossAxisAlignment: .start,
+        spacing: 8,
+        children: [
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
+              onTap: onTap,
+              child: Stack(
+                children: [
+                  Container(
+                    width: 400,
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisSize: .min,
+                      spacing: 16,
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: widget.textColor.withAlpha(32),
+                          child: Icon(
+                            Icons.file_download_outlined,
+                            color: widget.textColor,
+                          ),
                         ),
-                      ),
-                      Flexible(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              filename,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: widget.textColor,
-                                fontWeight: FontWeight.w500,
+                        Flexible(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                filename,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: widget.textColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            ),
-                            Text(
-                              '$sizeString | $filetype',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: widget.textColor,
-                                fontSize: 10,
+                              Text(
+                                '$sizeString | $filetype',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: widget.textColor,
+                                  fontSize: 10,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+                  if (isObscured)
+                    Positioned.fill(
+                      child: MediaSpoilerOverlay(label: spoilerLabel),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          if (!isObscured && fileDescription != null) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
+              ),
+              child: Linkify(
+                text: fileDescription,
+                textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
+                style: TextStyle(
+                  color: widget.textColor,
+                  fontSize:
+                      AppSettings.fontSizeFactor.value *
+                      AppConfig.messageFontSize,
                 ),
-                if (isObscured)
-                  Positioned.fill(
-                    child: MediaSpoilerOverlay(label: spoilerLabel),
-                  ),
-              ],
-            ),
-          ),
-        ),
-        if (!isObscured && fileDescription != null) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 8.0,
-            ),
-            child: Linkify(
-              text: fileDescription,
-              textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
-              style: TextStyle(
-                color: widget.textColor,
-                fontSize:
-                    AppSettings.fontSizeFactor.value *
-                    AppConfig.messageFontSize,
+                options: const LinkifyOptions(humanize: false),
+                linkStyle: TextStyle(
+                  color: widget.linkColor,
+                  fontSize:
+                      AppSettings.fontSizeFactor.value *
+                      AppConfig.messageFontSize,
+                  decoration: TextDecoration.underline,
+                  decorationColor: widget.linkColor,
+                ),
+                onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
               ),
-              options: const LinkifyOptions(humanize: false),
-              linkStyle: TextStyle(
-                color: widget.linkColor,
-                fontSize:
-                    AppSettings.fontSizeFactor.value *
-                    AppConfig.messageFontSize,
-                decoration: TextDecoration.underline,
-                decorationColor: widget.linkColor,
-              ),
-              onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
             ),
-          ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
