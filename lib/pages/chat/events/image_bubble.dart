@@ -7,8 +7,10 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/file_description.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
+import 'media_spoiler_overlay.dart';
 import '../../../widgets/blur_hash.dart';
 
 class ImageBubble extends StatefulWidget {
@@ -48,24 +50,9 @@ class ImageBubble extends StatefulWidget {
 }
 
 class _ImageBubbleState extends State<ImageBubble> {
-  static const String _mscSpoilerKey = 'org.matrix.msc2810.spoiler';
-  static const String _spoilerKey = 'm.spoiler';
-
   bool _revealed = false;
 
-  bool _hasSpoilerMarker(Map<String, Object?>? map, String key) {
-    if (map == null) return false;
-    return map.containsKey(key);
-  }
-
-  bool get _isSpoiler {
-    final content = widget.event.content;
-    final infoMap = content.tryGetMap<String, Object?>('info');
-    return _hasSpoilerMarker(content, _mscSpoilerKey) ||
-        _hasSpoilerMarker(content, _spoilerKey) ||
-        _hasSpoilerMarker(infoMap, _mscSpoilerKey) ||
-        _hasSpoilerMarker(infoMap, _spoilerKey);
-  }
+  bool get _isSpoiler => widget.event.isMediaSpoiler;
 
   void _handleTap() {
     if (_isSpoiler && !_revealed) {
@@ -102,6 +89,7 @@ class _ImageBubbleState extends State<ImageBubble> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = L10n.of(context);
 
     var borderRadius =
         widget.borderRadius ?? BorderRadius.circular(AppConfig.borderRadius);
@@ -109,6 +97,10 @@ class _ImageBubbleState extends State<ImageBubble> {
     final fileDescription = widget.event.fileDescription;
     final textColor = widget.textColor;
     final isObscured = _isSpoiler && !_revealed;
+    final spoilerReason = widget.event.mediaSpoilerReason;
+    final spoilerLabel = spoilerReason == null
+        ? l10n.spoilerText
+        : '${l10n.spoilerText}: $spoilerReason';
 
     if (fileDescription != null) {
       borderRadius = borderRadius.copyWith(
@@ -153,34 +145,14 @@ class _ImageBubbleState extends State<ImageBubble> {
                   ),
                   if (isObscured)
                     Positioned.fill(
-                      child: ColoredBox(
-                        color: theme.colorScheme.surface.withAlpha(176),
-                        child: Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.visibility_off,
-                                color: theme.colorScheme.onSurface,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                L10n.of(context).spoilerText,
-                                style: TextStyle(
-                                  color: theme.colorScheme.onSurface,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                      child: MediaSpoilerOverlay(label: spoilerLabel),
                     ),
                 ],
               ),
             ),
           ),
         ),
-        if (fileDescription != null && textColor != null)
+        if (!isObscured && fileDescription != null && textColor != null)
           SizedBox(
             width: widget.width,
             child: Padding(
