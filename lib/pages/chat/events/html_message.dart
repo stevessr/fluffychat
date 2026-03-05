@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/code_highlight_theme.dart';
 import 'package:fluffychat/utils/event_checkbox_extension.dart';
 import 'package:fluffychat/widgets/avatar.dart';
@@ -16,6 +17,7 @@ import 'package:matrix/matrix.dart';
 import '../../../config/app_config.dart';
 import '../../../utils/url_launcher.dart';
 import 'iframe_widget.dart';
+import 'media_spoiler_overlay.dart';
 
 class HtmlMessage extends StatelessWidget {
   final String html;
@@ -389,16 +391,41 @@ class HtmlMessage extends StatelessWidget {
         final actualWidth = width ?? height ?? defaultDimension;
         final actualHeight = height ?? width ?? defaultDimension;
 
+        final spoilerParent = node.parent;
+        final spoilerAttr =
+            spoilerParent?.localName == 'span' &&
+                spoilerParent?.attributes.containsKey('data-mx-spoiler') == true
+            ? spoilerParent!.attributes['data-mx-spoiler']
+            : null;
+
+        final spoilerReason = spoilerAttr?.trim().isNotEmpty == true
+            ? spoilerAttr!.trim()
+            : null;
+
         return WidgetSpan(
           child: SizedBox(
             width: actualWidth,
             height: actualHeight,
-            child: MxcImage(
-              uri: mxcUrl,
-              width: actualWidth,
-              height: actualHeight,
-              isThumbnail: (actualWidth * actualHeight) > (256 * 256),
-            ),
+            child: spoilerAttr == null
+                ? MxcImage(
+                    uri: mxcUrl,
+                    width: actualWidth,
+                    height: actualHeight,
+                    isThumbnail: (actualWidth * actualHeight) > (256 * 256),
+                  )
+                : _InlineImageSpoiler(
+                    width: actualWidth,
+                    height: actualHeight,
+                    label: spoilerReason == null
+                        ? L10n.of(context).spoilerText
+                        : '${L10n.of(context).spoilerText}: $spoilerReason',
+                    child: MxcImage(
+                      uri: mxcUrl,
+                      width: actualWidth,
+                      height: actualHeight,
+                      isThumbnail: (actualWidth * actualHeight) > (256 * 256),
+                    ),
+                  ),
           ),
         );
       case 'hr':
@@ -421,11 +448,7 @@ class HtmlMessage extends StatelessWidget {
           alignment: PlaceholderAlignment.middle,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: SafeIframeWidget(
-              src: src,
-              width: width,
-              height: height,
-            ),
+            child: SafeIframeWidget(src: src, width: width, height: height),
           ),
         );
       case 'details':
@@ -474,6 +497,18 @@ class HtmlMessage extends StatelessWidget {
         if (!node.attributes.containsKey('data-mx-spoiler')) {
           continue block;
         }
+
+        final hasImageChild = node.nodes.any(
+          (n) => n is dom.Element && n.localName == 'img',
+        );
+
+        if (hasImageChild) {
+          return TextSpan(
+            style: TextStyle(fontSize: fontSize, color: textColor),
+            children: _renderWithLineBreaks(node.nodes, context, depth: depth),
+          );
+        }
+
         var obscure = true;
         return WidgetSpan(
           child: StatefulBuilder(
@@ -548,6 +583,53 @@ class HtmlMessage extends StatelessWidget {
       maxLines: maxLines,
       overflow: maxLines == null ? TextOverflow.visible : TextOverflow.fade,
       selectionColor: textColor.withAlpha(128),
+    );
+  }
+}
+
+class _InlineImageSpoiler extends StatefulWidget {
+  final Widget child;
+  final String label;
+  final double width;
+  final double height;
+
+  const _InlineImageSpoiler({
+    required this.child,
+    required this.label,
+    required this.width,
+    required this.height,
+  });
+
+  @override
+  State<_InlineImageSpoiler> createState() => _InlineImageSpoilerState();
+}
+
+class _InlineImageSpoilerState extends State<_InlineImageSpoiler> {
+  bool _revealed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.circular(6);
+
+    return Material(
+      color: Colors.transparent,
+      clipBehavior: Clip.hardEdge,
+      borderRadius: borderRadius,
+      child: InkWell(
+        splashColor: Colors.transparent,
+        onTap: () => setState(() => _revealed = !_revealed),
+        child: SizedBox(
+          width: widget.width,
+          height: widget.height,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              widget.child,
+              if (!_revealed) MediaSpoilerOverlay(label: widget.label),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
