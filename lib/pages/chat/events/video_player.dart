@@ -38,42 +38,10 @@ class EventVideoPlayer extends StatefulWidget {
 class _EventVideoPlayerState extends State<EventVideoPlayer> {
   static const String fallbackBlurHash = 'L5H2EC=PM+yV0g-mq.wG9c010J}I';
 
-  bool _revealed = false;
-
-  bool get _isSpoiler => widget.event.isMediaSpoiler;
-
-  void _handleTap(BuildContext context, bool supportsVideoPlayer) {
-    if (_isSpoiler && !_revealed) {
-      setState(() => _revealed = true);
-      return;
-    }
-    if (supportsVideoPlayer) {
-      showDialog(
-        context: context,
-        builder: (_) => ImageViewer(
-          widget.event,
-          timeline: widget.timeline,
-          outerContext: context,
-        ),
-      );
-      return;
-    }
-    widget.event.saveFile(context);
-  }
-
-  @override
-  void didUpdateWidget(covariant EventVideoPlayer oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.event.eventId != widget.event.eventId) {
-      _revealed = false;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context);
     final supportsVideoPlayer = PlatformInfos.supportsVideoPlayer;
-    final isObscured = _isSpoiler && !_revealed;
     final spoilerReason = widget.event.mediaSpoilerReason;
     final spoilerLabel = spoilerReason == null
         ? l10n.spoilerText
@@ -99,104 +67,122 @@ class _EventVideoPlayerState extends State<EventVideoPlayer> {
         ? null
         : Duration(milliseconds: durationInt);
 
-    return Column(
-      mainAxisSize: .min,
-      spacing: 8,
-      children: [
-        Material(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-          child: InkWell(
-            onTap: () => _handleTap(context, supportsVideoPlayer),
+    return MediaSpoilerTapBuilder(
+      isSpoiler: widget.event.isMediaSpoiler,
+      resetKey: widget.event.eventId,
+      onOpen: () {
+        if (supportsVideoPlayer) {
+          showDialog(
+            context: context,
+            builder: (_) => ImageViewer(
+              widget.event,
+              timeline: widget.timeline,
+              outerContext: context,
+            ),
+          );
+          return;
+        }
+        widget.event.saveFile(context);
+      },
+      builder: (context, isObscured, onTap) => Column(
+        mainAxisSize: .min,
+        spacing: 8,
+        children: [
+          Material(
+            color: Colors.black,
             borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-            child: SizedBox(
-              width: width,
-              height: height,
-              child: Hero(
-                tag: widget.event.eventId,
-                child: Stack(
-                  children: [
-                    if (widget.event.hasThumbnail)
-                      MxcImage(
-                        event: widget.event,
-                        isThumbnail: true,
-                        width: width,
-                        height: height,
-                        fit: BoxFit.cover,
-                        placeholder: (context) => BlurHash(
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+              child: SizedBox(
+                width: width,
+                height: height,
+                child: Hero(
+                  tag: widget.event.eventId,
+                  child: Stack(
+                    children: [
+                      if (widget.event.hasThumbnail)
+                        MxcImage(
+                          event: widget.event,
+                          isThumbnail: true,
+                          width: width,
+                          height: height,
+                          fit: BoxFit.cover,
+                          placeholder: (context) => BlurHash(
+                            blurhash: blurHash,
+                            width: width,
+                            height: height,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      else
+                        BlurHash(
                           blurhash: blurHash,
                           width: width,
                           height: height,
                           fit: BoxFit.cover,
                         ),
-                      )
-                    else
-                      BlurHash(
-                        blurhash: blurHash,
-                        width: width,
-                        height: height,
-                        fit: BoxFit.cover,
-                      ),
-                    Center(
-                      child: CircleAvatar(
-                        child: supportsVideoPlayer
-                            ? const Icon(Icons.play_arrow_outlined)
-                            : const Icon(Icons.file_download_outlined),
-                      ),
-                    ),
-                    if (isObscured)
-                      Positioned.fill(
-                        child: MediaSpoilerOverlay(label: spoilerLabel),
-                      ),
-                    if (duration != null)
-                      Positioned(
-                        bottom: 8,
-                        left: 16,
-                        child: Text(
-                          '${duration.inMinutes.toString().padLeft(2, '0')}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}',
-                          style: TextStyle(
-                            color: Colors.white,
-                            backgroundColor: Colors.black.withAlpha(32),
-                          ),
+                      Center(
+                        child: CircleAvatar(
+                          child: supportsVideoPlayer
+                              ? const Icon(Icons.play_arrow_outlined)
+                              : const Icon(Icons.file_download_outlined),
                         ),
                       ),
-                  ],
+                      if (isObscured)
+                        Positioned.fill(
+                          child: MediaSpoilerOverlay(label: spoilerLabel),
+                        ),
+                      if (duration != null)
+                        Positioned(
+                          bottom: 8,
+                          left: 16,
+                          child: Text(
+                            '${duration.inMinutes.toString().padLeft(2, '0')}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              backgroundColor: Colors.black.withAlpha(32),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        if (!isObscured &&
-            fileDescription != null &&
-            widget.textColor != null &&
-            widget.linkColor != null)
-          SizedBox(
-            width: width,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Linkify(
-                text: fileDescription,
-                textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
-                style: TextStyle(
-                  color: widget.textColor,
-                  fontSize:
-                      AppSettings.fontSizeFactor.value *
-                      AppConfig.messageFontSize,
+          if (!isObscured &&
+              fileDescription != null &&
+              widget.textColor != null &&
+              widget.linkColor != null)
+            SizedBox(
+              width: width,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Linkify(
+                  text: fileDescription,
+                  textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
+                  style: TextStyle(
+                    color: widget.textColor,
+                    fontSize:
+                        AppSettings.fontSizeFactor.value *
+                        AppConfig.messageFontSize,
+                  ),
+                  options: const LinkifyOptions(humanize: false),
+                  linkStyle: TextStyle(
+                    color: widget.linkColor,
+                    fontSize:
+                        AppSettings.fontSizeFactor.value *
+                        AppConfig.messageFontSize,
+                    decoration: TextDecoration.underline,
+                    decorationColor: widget.linkColor,
+                  ),
+                  onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
                 ),
-                options: const LinkifyOptions(humanize: false),
-                linkStyle: TextStyle(
-                  color: widget.linkColor,
-                  fontSize:
-                      AppSettings.fontSizeFactor.value *
-                      AppConfig.messageFontSize,
-                  decoration: TextDecoration.underline,
-                  decorationColor: widget.linkColor,
-                ),
-                onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }
