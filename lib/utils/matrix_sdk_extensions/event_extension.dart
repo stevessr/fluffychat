@@ -7,6 +7,28 @@ import 'package:matrix/matrix.dart';
 
 import 'matrix_file_extension.dart';
 
+const _mscSpoilerKey = 'org.matrix.msc2810.spoiler';
+const _spoilerKey = 'm.spoiler';
+
+bool _isSpoilerMarkerValue(Object? value) => value != null && value != false;
+
+bool _mapHasSpoilerMarker(Map<String, Object?>? map) {
+  if (map == null) return false;
+  return _isSpoilerMarkerValue(map[_mscSpoilerKey]) ||
+      _isSpoilerMarkerValue(map[_spoilerKey]);
+}
+
+String? _mapSpoilerReason(Map<String, Object?>? map) {
+  if (map == null) return null;
+  for (final key in [_spoilerKey, _mscSpoilerKey]) {
+    final value = map[key];
+    if (value is String && value.trim().isNotEmpty) {
+      return value.trim();
+    }
+  }
+  return null;
+}
+
 extension LocalizedBody on Event {
   Future<async.Result<MatrixFile?>> _getFile(BuildContext context) =>
       showFutureLoadingDialog(
@@ -60,4 +82,14 @@ extension LocalizedBody on Event {
       .tryGetMap<String, Object?>('info')
       ?.tryGet<int>('size')
       ?.sizeString;
+
+  bool get isMediaSpoiler {
+    final infoMap = content.tryGetMap<String, Object?>('info');
+    return _mapHasSpoilerMarker(content) || _mapHasSpoilerMarker(infoMap);
+  }
+
+  String? get mediaSpoilerReason {
+    final infoMap = content.tryGetMap<String, Object?>('info');
+    return _mapSpoilerReason(content) ?? _mapSpoilerReason(infoMap);
+  }
 }
