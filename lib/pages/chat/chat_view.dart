@@ -3,7 +3,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import 'package:badges/badges.dart';
-import 'package:desktop_drop/desktop_drop.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/config/setting_keys.dart';
@@ -24,6 +23,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:fluffychat/widgets/unread_rooms_badge.dart';
 import '../../utils/stream_extension.dart';
+import 'chat_drop_target.dart';
 import 'chat_emoji_picker.dart';
 import 'chat_input_row.dart';
 import 'formatting_toolbar.dart';
@@ -302,8 +302,8 @@ class ChatView extends StatelessWidget {
                       ),
                     )
                   : null,
-              body: DropTarget(
-                onDragDone: controller.onDragDone,
+              body: ChatDropTarget(
+                onFilesDropped: controller.onFilesDropped,
                 onDragEntered: controller.onDragEntered,
                 onDragExited: controller.onDragExited,
                 child: Stack(
