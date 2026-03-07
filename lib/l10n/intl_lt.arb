@@ -481,6 +481,11 @@
         "description": "Usage hint for the command /discardsession"
     },
     "commandHint_html": "Siųsti tekstą HTML formatu",
+    "commandHint_rainbow": "Send rainbow-colored text",
+    "@commandHint_rainbow": {
+        "type": "String",
+        "description": "Usage hint for the command /rainbow"
+    },
     "@commandHint_html": {
         "type": "String",
         "description": "Usage hint for the command /html"

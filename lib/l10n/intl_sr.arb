@@ -377,6 +377,11 @@
         "description": "Usage hint for the command /ban"
     },
     "commandHint_html": "Шаљи ХТМЛ обликован текст",
+    "commandHint_rainbow": "Send rainbow-colored text",
+    "@commandHint_rainbow": {
+        "type": "String",
+        "description": "Usage hint for the command /rainbow"
+    },
     "@commandHint_html": {
         "type": "String",
         "description": "Usage hint for the command /html"

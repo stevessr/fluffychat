@@ -652,6 +652,11 @@
         "placeholders": {}
     },
     "commandHint_html": "فرستادن متن با قالب HTML",
+    "commandHint_rainbow": "Send rainbow-colored text",
+    "@commandHint_rainbow": {
+        "type": "String",
+        "description": "Usage hint for the command /rainbow"
+    },
     "@commandHint_html": {
         "type": "String",
         "description": "Usage hint for the command /html"

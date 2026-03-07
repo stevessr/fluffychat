@@ -1762,6 +1762,11 @@
         "description": "Usage hint for the command /invite"
     },
     "commandHint_html": "Kirim teks yang diformat dengan HTML",
+    "commandHint_rainbow": "Send rainbow-colored text",
+    "@commandHint_rainbow": {
+        "type": "String",
+        "description": "Usage hint for the command /rainbow"
+    },
     "@commandHint_html": {
         "type": "String",
         "description": "Usage hint for the command /html"

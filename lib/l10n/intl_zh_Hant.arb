@@ -1865,6 +1865,11 @@
     "commandHint_markasdm": "將給定的 Matrix ID 標示為直接訊息房間",
     "@commandHint_markasdm": {},
     "commandHint_html": "傳送 HTML 格式的文字",
+    "commandHint_rainbow": "Send rainbow-colored text",
+    "@commandHint_rainbow": {
+        "type": "String",
+        "description": "Usage hint for the command /rainbow"
+    },
     "@commandHint_html": {
         "type": "String",
         "description": "Usage hint for the command /html"
