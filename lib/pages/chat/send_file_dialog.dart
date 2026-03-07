@@ -77,7 +77,7 @@ class SendFileDialogState extends State<SendFileDialog> {
     final proceed = await showTrustUserInRoomDialog(context, widget.room);
     if (!context.mounted || !proceed) return;
 
-    Future<void> sendAction(setProgress) async {
+    Future<void> sendAction(void Function(double progress) setProgress) async {
       if (!widget.room.otherPartyCanReceiveMessages) {
         throw OtherPartyCanNotReceiveMessages();
       }
@@ -86,18 +86,28 @@ class SendFileDialogState extends State<SendFileDialog> {
       final maxUploadSize =
           clientConfig.asValue?.value.mUploadSize ?? 100 * 1000 * 1000;
 
+      final scaffoldMessenger = ScaffoldMessenger.of(widget.outerContext);
+      final fileCount = widget.files.length;
       var sentFiles = 0;
+
+      double progressFor(double filePhase) =>
+          fileCount == 0 ? 1 : (sentFiles + filePhase) / fileCount;
 
       for (final xfile in widget.files) {
         final MatrixFile file;
         MatrixImageFile? thumbnail;
         final mimeType = xfile.mimeType ?? lookupMimeType(xfile.path);
+        final lengthResult = await Result.capture(xfile.length());
+        final length = lengthResult.asValue?.value;
 
         // Generate video thumbnail
         if (PlatformInfos.isMobile &&
             mimeType != null &&
             mimeType.startsWith('video')) {
-          setProgress(sentFiles / widget.files.length + 0.2);
+          setProgress(progressFor(0.2));
+          scaffoldMessenger.showSnackBar(
+            SnackBar(content: Text(l10n.compressVideo)),
+          );
           thumbnail = await xfile.getVideoThumbnail();
         }
 
@@ -105,13 +115,14 @@ class SendFileDialogState extends State<SendFileDialog> {
         if (PlatformInfos.isMobile &&
             mimeType != null &&
             mimeType.startsWith('video')) {
-          setProgress(sentFiles / widget.files.length + 0.2);
-          final lengthResult = await Result.capture(xfile.length());
-          final length = lengthResult.asValue?.value;
+          setProgress(progressFor(0.2));
           file = await xfile.getVideoInfo(
             compress: length != null && length > minSizeToCompress && compress,
           );
         } else {
+          if (length != null && length > maxUploadSize) {
+            throw FileTooBigMatrixException(length, maxUploadSize);
+          }
           // Else we just create a MatrixFile
           file = MatrixFile(
             bytes: await xfile.readAsBytes(),
@@ -125,16 +136,15 @@ class SendFileDialogState extends State<SendFileDialog> {
         }
 
         // Show progress / notification when sending multiple files
-        if (widget.files.length > 1) {
-          final scaffoldMessenger = ScaffoldMessenger.of(widget.outerContext);
+        if (fileCount > 1) {
           scaffoldMessenger.showSnackBar(
             SnackBar(
               content: Text(
-                '${l10n.sendingAttachment} (${widget.files.indexOf(xfile) + 1}/${widget.files.length})',
+                '${l10n.sendingAttachment} (${sentFiles + 1}/$fileCount)',
               ),
             ),
           );
-          setProgress(sentFiles / widget.files.length + 0.4);
+          setProgress(progressFor(0.4));
         }
 
         final label = _labelTextController.text.trim();
@@ -145,36 +155,7 @@ class SendFileDialogState extends State<SendFileDialog> {
           isSpoiler: isSpoiler,
         );
 
-        try {
-          if (encrypt || !widget.room.encrypted) {
-            await widget.room.sendFileEvent(
-              file,
-              thumbnail: thumbnail,
-              shrinkImageMaxDimension: compress ? 1600 : null,
-              extraContent: extraContent,
-              threadRootEventId: widget.threadRootEventId,
-              threadLastEventId: widget.threadLastEventId,
-            );
-          } else {
-            await _sendUnencryptedFileEvent(
-              file,
-              thumbnail: thumbnail,
-              label: labelOrNull,
-              shrinkImageMaxDimension: compress ? 1600 : null,
-              spoiler: isSpoiler,
-            );
-          }
-        } on MatrixException catch (e) {
-          final retryAfterMs = e.retryAfterMs;
-          if (e.error != MatrixError.M_LIMIT_EXCEEDED || retryAfterMs == null) {
-            rethrow;
-          }
-
-          final retryAfterDuration = Duration(milliseconds: retryAfterMs + 1000);
-          setProgress(sentFiles / widget.files.length + 0.2);
-          await Future.delayed(retryAfterDuration);
-
-          // Retry once after waiting
+        Future<void> sendFileEvent() async {
           if (encrypt || !widget.room.encrypted) {
             await widget.room.sendFileEvent(
               file,
@@ -194,7 +175,26 @@ class SendFileDialogState extends State<SendFileDialog> {
             );
           }
         }
+
+        try {
+          await sendFileEvent();
+        } on MatrixException catch (e) {
+          final retryAfterMs = e.retryAfterMs;
+          if (e.error != MatrixError.M_LIMIT_EXCEEDED || retryAfterMs == null) {
+            rethrow;
+          }
+
+          final retryAfterDuration = Duration(
+            milliseconds: retryAfterMs + 1000,
+          );
+          setProgress(progressFor(0.2));
+          await Future.delayed(retryAfterDuration);
+
+          // Retry once after waiting
+          await sendFileEvent();
+        }
         sentFiles++;
+        setProgress(progressFor(1));
       }
     }
 
