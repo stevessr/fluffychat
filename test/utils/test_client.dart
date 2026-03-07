@@ -4,6 +4,8 @@ import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import 'package:fluffychat/utils/rainbow_command_extension.dart';
+
 Future<Client> prepareTestClient({
   bool loggedIn = false,
   Uri? homeserver,
@@ -31,6 +33,7 @@ Future<Client> prepareTestClient({
       AuthenticationTypes.sso,
     },
   );
+  client.registerRainbowCommand();
   await client.checkHomeserver(homeserver);
   if (loggedIn) {
     await client.login(

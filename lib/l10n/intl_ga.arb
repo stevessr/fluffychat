@@ -860,6 +860,11 @@
         "description": "Usage hint for the command /leave"
     },
     "commandHint_html": "Seol téacs HTML-formáidithe",
+    "commandHint_rainbow": "Send rainbow-colored text",
+    "@commandHint_rainbow": {
+        "type": "String",
+        "description": "Usage hint for the command /rainbow"
+    },
     "@commandHint_html": {
         "type": "String",
         "description": "Usage hint for the command /html"
