@@ -2,11 +2,8 @@ import 'dart:math';
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
-<<<<<<< HEAD
-import 'package:fluffychat/pages/chat/events/file_send_status_indicator.dart';
-=======
 import 'package:fluffychat/l10n/l10n.dart';
->>>>>>> 155444a1 (update)
+import 'package:fluffychat/pages/chat/events/file_send_status_indicator.dart';
 import 'package:fluffychat/utils/file_description.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -120,12 +117,8 @@ class _EventVideoPlayerState extends State<EventVideoPlayer> {
                 tag: widget.event.eventId,
                 child: Stack(
                   children: [
-<<<<<<< HEAD
                     if (event.hasThumbnail &&
                         AppSettings.showThumbnailsInTimeline.value)
-=======
-                    if (widget.event.hasThumbnail)
->>>>>>> 155444a1 (update)
                       MxcImage(
                         event: widget.event,
                         isThumbnail: true,
@@ -158,14 +151,10 @@ class _EventVideoPlayerState extends State<EventVideoPlayer> {
                       FileSendStatusIndicator(
                         fileSendingStatus: fileSendingStatus,
                       ),
-<<<<<<< HEAD
-=======
-                    ),
                     if (isObscured)
                       Positioned.fill(
                         child: MediaSpoilerOverlay(label: spoilerLabel),
                       ),
->>>>>>> 155444a1 (update)
                     if (duration != null)
                       Positioned(
                         bottom: 8,

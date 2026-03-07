@@ -106,7 +106,8 @@ class Message extends StatelessWidget {
         event.type == EventTypes.RoomCreate ||
         nextEvent == null ||
         !event.originServerTs.sameEnvironment(nextEvent!.originServerTs);
-    final nextEventSameSender = nextEvent != null &&
+    final nextEventSameSender =
+        nextEvent != null &&
         {
           EventTypes.Message,
           EventTypes.Sticker,
@@ -115,7 +116,8 @@ class Message extends StatelessWidget {
         nextEvent!.senderId == event.senderId &&
         !displayTime;
 
-    final previousEventSameSender = previousEvent != null &&
+    final previousEventSameSender =
+        previousEvent != null &&
         {
           EventTypes.Message,
           EventTypes.Sticker,
@@ -139,16 +141,20 @@ class Message extends StatelessWidget {
         : MainAxisAlignment.start;
 
     final displayEvent = event.getDisplayEvent(timeline);
-    const hardCorner = Radius.circular(4);
-    const roundedCorner = Radius.circular(AppConfig.borderRadius);
+    const groupedCorner = Radius.circular(AppConfig.borderRadius * 1.25);
+    const roundedCorner = Radius.circular(AppConfig.borderRadius * 2.5);
     final borderRadius = BorderRadius.only(
-      topLeft: !ownMessage && nextEventSameSender ? hardCorner : roundedCorner,
-      topRight: ownMessage && nextEventSameSender ? hardCorner : roundedCorner,
+      topLeft: !ownMessage && nextEventSameSender
+          ? groupedCorner
+          : roundedCorner,
+      topRight: ownMessage && nextEventSameSender
+          ? groupedCorner
+          : roundedCorner,
       bottomLeft: !ownMessage && previousEventSameSender
-          ? hardCorner
+          ? groupedCorner
           : roundedCorner,
       bottomRight: ownMessage && previousEventSameSender
-          ? hardCorner
+          ? groupedCorner
           : roundedCorner,
     );
     final textIsBigEmote =
@@ -167,12 +173,12 @@ class Message extends StatelessWidget {
 
     final noBubble =
         (({
-          MessageTypes.Video,
-          MessageTypes.Image,
-          MessageTypes.Sticker,
-        }.contains(event.messageType) &&
-        event.fileDescription == null &&
-        !event.redacted)) ||
+              MessageTypes.Video,
+              MessageTypes.Image,
+              MessageTypes.Sticker,
+            }.contains(event.messageType) &&
+            event.fileDescription == null &&
+            !event.redacted)) ||
         textIsBigEmote;
 
     if (ownMessage) {
@@ -682,31 +688,32 @@ class Message extends StatelessWidget {
                                                               L10n.of(
                                                                 context,
                                                               ).customReaction,
-                                                              onPressed:
-                                                                  () async {
+                                                              onPressed: () async {
                                                                 final disabled =
                                                                     sentReactions;
                                                                 final key =
-                                                                    await CustomReactionDialog
-                                                                        .show(
-                                                                  context,
-                                                                  event.room,
-                                                                  disabledKeys:
-                                                                      disabled,
-                                                                );
+                                                                    await CustomReactionDialog.show(
+                                                                      context,
+                                                                      event
+                                                                          .room,
+                                                                      disabledKeys:
+                                                                          disabled,
+                                                                    );
                                                                 if (key ==
                                                                         null ||
                                                                     disabled
                                                                         .contains(
-                                                                            key)) {
+                                                                          key,
+                                                                        )) {
                                                                   return;
                                                                 }
                                                                 onSelect(event);
                                                                 await event.room
                                                                     .sendReaction(
-                                                                  event.eventId,
-                                                                  key,
-                                                                );
+                                                                      event
+                                                                          .eventId,
+                                                                      key,
+                                                                    );
                                                               },
                                                             ),
                                                             leading: CloseButton(
