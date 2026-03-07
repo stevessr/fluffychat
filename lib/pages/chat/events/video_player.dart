@@ -21,12 +21,14 @@ class EventVideoPlayer extends StatefulWidget {
   final Timeline? timeline;
   final Color? textColor;
   final Color? linkColor;
+  final BorderRadius? borderRadius;
 
   const EventVideoPlayer(
     this.event, {
     this.timeline,
     this.textColor,
     this.linkColor,
+    this.borderRadius,
     super.key,
   });
 
@@ -66,6 +68,9 @@ class _EventVideoPlayerState extends State<EventVideoPlayer> {
         ? null
         : Duration(milliseconds: durationInt);
 
+    final borderRadius =
+        widget.borderRadius ?? BorderRadius.circular(AppConfig.borderRadius);
+
     return MediaSpoilerTapBuilder(
       isSpoiler: widget.event.isMediaSpoiler,
       resetKey: widget.event.eventId,
@@ -89,10 +94,11 @@ class _EventVideoPlayerState extends State<EventVideoPlayer> {
         children: [
           Material(
             color: Colors.black,
-            borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+            clipBehavior: Clip.hardEdge,
+            borderRadius: borderRadius,
             child: InkWell(
               onTap: onTap,
-              borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+              borderRadius: borderRadius,
               child: SizedBox(
                 width: width,
                 height: height,
@@ -157,7 +163,10 @@ class _EventVideoPlayerState extends State<EventVideoPlayer> {
             SizedBox(
               width: width,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Linkify(
                   text: fileDescription,
                   textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
