@@ -17,6 +17,7 @@ import 'package:fluffychat/utils/custom_http_client.dart';
 import 'package:fluffychat/utils/custom_image_resizer.dart';
 import 'package:fluffychat/utils/init_with_restore.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/rainbow_command_extension.dart';
 import 'matrix_sdk_extensions/flutter_matrix_dart_sdk_database/builder.dart';
 
 abstract class ClientManager {
@@ -111,7 +112,7 @@ abstract class ClientManager {
     final shareKeysWith = AppSettings.shareKeysWith.value;
     final enableSoftLogout = AppSettings.enableSoftLogout.value;
 
-    return Client(
+    final client = Client(
       clientName,
       httpClient: CustomHttpClient.createHTTPClient(),
       verificationMethods: {
@@ -142,6 +143,8 @@ abstract class ClientManager {
           ? (client) => client.refreshAccessToken()
           : null,
     );
+    client.registerRainbowCommand();
+    return client;
   }
 
   static Future<void> sendInitNotification(String title, String body) async {
