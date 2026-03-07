@@ -184,6 +184,7 @@ class MessageContent extends StatelessWidget {
               textColor: textColor,
               linkColor: linkColor,
               timeline: timeline,
+              borderRadius: borderRadius,
             );
           case MessageTypes.File:
             return MessageDownloadContent(
