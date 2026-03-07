@@ -143,8 +143,8 @@ class Message extends StatelessWidget {
         : MainAxisAlignment.start;
 
     final displayEvent = event.getDisplayEvent(timeline);
-    const groupedCorner = Radius.circular(AppConfig.borderRadius * 1.25);
-    const roundedCorner = Radius.circular(AppConfig.borderRadius * 2.5);
+    const groupedCorner = Radius.circular(AppConfig.borderRadius * 0.75);
+    const roundedCorner = Radius.circular(AppConfig.borderRadius * 2.25);
     final borderRadius = BorderRadius.only(
       topLeft: !ownMessage && nextEventSameSender
           ? groupedCorner
@@ -526,10 +526,7 @@ class Message extends StatelessWidget {
                                                   child: Container(
                                                     decoration: BoxDecoration(
                                                       borderRadius:
-                                                          BorderRadius.circular(
-                                                            AppConfig
-                                                                .borderRadius,
-                                                          ),
+                                                          borderRadius,
                                                     ),
                                                     constraints:
                                                         const BoxConstraints(
