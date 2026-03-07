@@ -8,7 +8,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:desktop_drop/desktop_drop.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:file_picker/file_picker.dart';
@@ -137,11 +136,10 @@ class ChatController extends State<ChatPageWithRoom>
 
   void onDragEntered(_) => setState(() => dragging = true);
 
-  void onDragExited(_) => setState(() => dragging = false);
+  void onDragExited() => setState(() => dragging = false);
 
-  Future<void> onDragDone(DropDoneDetails details) async {
+  Future<void> onFilesDropped(List<XFile> files) async {
     setState(() => dragging = false);
-    final files = List<XFile>.from(details.files);
     if (files.isEmpty) return;
 
     await showAdaptiveDialog(
