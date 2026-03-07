@@ -385,14 +385,18 @@ class ChatView extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(32),
                                 child: controller.room.isAbandonedDMRoom == true
                                     ? Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
                                         children: [
                                           TextButton.icon(
                                             style: TextButton.styleFrom(
                                               padding: const EdgeInsets.all(16),
-                                              foregroundColor: theme.colorScheme.error,
+                                              foregroundColor:
+                                                  theme.colorScheme.error,
                                             ),
-                                            icon: const Icon(Icons.archive_outlined),
+                                            icon: const Icon(
+                                              Icons.archive_outlined,
+                                            ),
                                             onPressed: controller.leaveChat,
                                             label: Text(L10n.of(context).leave),
                                           ),
@@ -400,9 +404,13 @@ class ChatView extends StatelessWidget {
                                             style: TextButton.styleFrom(
                                               padding: const EdgeInsets.all(16),
                                             ),
-                                            icon: const Icon(Icons.forum_outlined),
+                                            icon: const Icon(
+                                              Icons.forum_outlined,
+                                            ),
                                             onPressed: controller.recreateChat,
-                                            label: Text(L10n.of(context).reopenChat),
+                                            label: Text(
+                                              L10n.of(context).reopenChat,
+                                            ),
                                           ),
                                         ],
                                       )
@@ -411,9 +419,11 @@ class ChatView extends StatelessWidget {
                                         children: [
                                           ReplyDisplay(controller),
                                           FormattingToolbar(
-                                            controller: controller.sendController,
+                                            controller:
+                                                controller.sendController,
                                             showSendUnencryptedAction: true,
-                                            onSendUnencrypted: controller.sendController.text
+                                            onSendUnencrypted:
+                                                controller.sendController.text
                                                     .trim()
                                                     .isNotEmpty
                                                 ? () => controller.send(
