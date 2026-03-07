@@ -396,6 +396,11 @@
         "description": "Usage hint for the command /ban"
     },
     "commandHint_html": "Saada HTML-vormingus tekst",
+    "commandHint_rainbow": "Send rainbow-colored text",
+    "@commandHint_rainbow": {
+        "type": "String",
+        "description": "Usage hint for the command /rainbow"
+    },
     "@commandHint_html": {
         "type": "String",
         "description": "Usage hint for the command /html"
@@ -2786,10 +2791,5 @@
     "removeAdminRights": "Eemalda peakasutaja õigused",
     "powerLevel": "Õiguste tase",
     "setPowerLevelDescription": "Õiguste tase on üks võimalusi kirjeldamaks seda, mida kasutaja saab jututoas teha ning see tavaliselt väljendub numbriga vahemikust 0 kuni 100.",
-    "owner": "Omanik",
-    "mute": "Summuta",
-    "@mute": {
-        "description": "This should be a very short string because there is not much space in the button!"
-    },
-    "createNewChat": "Loo uus vestlus"
+    "owner": "Omanik"
 }

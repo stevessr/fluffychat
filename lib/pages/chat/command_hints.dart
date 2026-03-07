@@ -14,6 +14,7 @@ String commandExample(String command) {
     case 'invite':
       return '/$command <matrix-id>';
     case 'html':
+    case 'rainbow':
     case 'sendraw':
     case 'plain':
       return '/$command <message>';
@@ -38,6 +39,8 @@ String commandHint(L10n l10n, String command) {
       return l10n.commandHint_dm;
     case 'html':
       return l10n.commandHint_html;
+    case 'rainbow':
+      return l10n.commandHint_rainbow;
     case 'invite':
       return l10n.commandHint_invite;
     case 'join':

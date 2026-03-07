@@ -396,6 +396,11 @@
         "description": "Usage hint for the command /ban"
     },
     "commandHint_html": "Tekst met HTML-opmaak versturen",
+    "commandHint_rainbow": "Send rainbow-colored text",
+    "@commandHint_rainbow": {
+        "type": "String",
+        "description": "Usage hint for the command /rainbow"
+    },
     "@commandHint_html": {
         "type": "String",
         "description": "Usage hint for the command /html"
@@ -2785,15 +2790,5 @@
     "removeAdminRights": "Verwijder beheerder-rechten",
     "powerLevel": "Rechtenniveau",
     "setPowerLevelDescription": "Rechtenniveau's definiëren wat een persoon mag doen in deze chat en variëren meestal tussen 0 en 100.",
-    "owner": "Eigenaar",
-    "mute": "Demp",
-    "@mute": {
-        "description": "This should be a very short string because there is not much space in the button!"
-    },
-    "createNewChat": "Creëer nieuw chat",
-    "reset": "Herstellen",
-    "fluffyChatSupportBannerMessage": "Fluffy Chat heeft JOUW hulp nodig. _\n\nFluffyChat zal altijd gratis zijn, maar ontwikkeling en hosting kost geld.\nDe toekomst van het project hangt af van steun van mensen zoals jij.",
-    "skipSupportingFluffyChat": "FluffyChat steunen overslaan",
-    "iDoNotWantToSupport": "Ik wil niet ondersteunen",
-    "iAlreadySupportFluffyChat": "Ik steun FluffyChat al"
+    "owner": "Eigenaar"
 }

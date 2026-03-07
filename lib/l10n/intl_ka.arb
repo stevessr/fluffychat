@@ -703,6 +703,11 @@
         "description": "Usage hint for the command /dm"
     },
     "commandHint_html": "HTML ფორმატირებული ტექსტის გაგზავნა",
+    "commandHint_rainbow": "Send rainbow-colored text",
+    "@commandHint_rainbow": {
+        "type": "String",
+        "description": "Usage hint for the command /rainbow"
+    },
     "@commandHint_html": {
         "type": "String",
         "description": "Usage hint for the command /html"

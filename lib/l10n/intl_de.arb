@@ -395,6 +395,11 @@
         "description": "Usage hint for the command /ban"
     },
     "commandHint_html": "Sende HTML-formatierten Text",
+    "commandHint_rainbow": "Send rainbow-colored text",
+    "@commandHint_rainbow": {
+        "type": "String",
+        "description": "Usage hint for the command /rainbow"
+    },
     "@commandHint_html": {
         "type": "String",
         "description": "Usage hint for the command /html"
@@ -2786,25 +2791,5 @@
     "clientWellKnownInformation": "Bekannte Informationen zum Client:",
     "join": "Beitreten",
     "searchOrEnterHomeserverAddress": "Homeserver-Adresse suchen oder eingeben",
-    "matrixId": "Matrix ID",
-    "reset": "Zurücksetzen",
-    "setPowerLevel": "Power-Level einstellen",
-    "makeModerator": "Zum Moderator machen",
-    "makeAdmin": "Zum Admin machen",
-    "removeModeratorRights": "Moderatorenrechte entziehen",
-    "removeAdminRights": "Adminrechte entziehen",
-    "powerLevel": "Power-Level",
-    "setPowerLevelDescription": "Die Power-Level legen fest, was ein Mitglied in diesem Raum tun darf und liegen üblicherweise zwischen 0 und 100.",
-    "owner": "Besitzer",
-    "mute": "Stumm",
-    "@mute": {
-        "description": "This should be a very short string because there is not much space in the button!"
-    },
-    "createNewChat": "Neuen Chat erstellen",
-    "supportFluffyChat": "FluffyChat unterstützen",
-    "support": "Unterstützen",
-    "fluffyChatSupportBannerMessage": "FluffyChat braucht DEINE Hilfe!\n❤️❤️❤️\nFluffyChat wird immer kostenlos bleiben, aber Entwicklung und Hosting kosten Geld.\nDie Zukunft des Projekts hängt von deiner Unterstützung ab.",
-    "skipSupportingFluffyChat": "FluffyChat unterstützen überspringen",
-    "iDoNotWantToSupport": "Ich möchte nicht unterstützen",
-    "iAlreadySupportFluffyChat": "I unterstütze FluffyChat bereits"
+    "matrixId": "Matrix ID"
 }
