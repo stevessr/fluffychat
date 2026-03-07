@@ -509,6 +509,11 @@
         "type": "String",
         "description": "Usage hint for the command /html"
     },
+    "commandHint_rainbow": "Send rainbow-colored text",
+    "@commandHint_rainbow": {
+        "type": "String",
+        "description": "Usage hint for the command /rainbow"
+    },
     "commandHint_invite": "Invite the given user to this room",
     "@commandHint_invite": {
         "type": "String",

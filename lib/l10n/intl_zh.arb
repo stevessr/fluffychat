@@ -377,6 +377,11 @@
         "description": "Usage hint for the command /ban"
     },
     "commandHint_html": "发送 HTML 格式化文本",
+    "commandHint_rainbow": "发送彩色字体",
+    "@commandHint_rainbow": {
+        "type": "String",
+        "description": "Usage hint for the command /rainbow"
+    },
     "@commandHint_html": {
         "type": "String",
         "description": "Usage hint for the command /html"
