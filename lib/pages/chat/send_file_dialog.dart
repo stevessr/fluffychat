@@ -133,6 +133,8 @@ class SendFileDialogState extends State<SendFileDialog> {
         final MatrixFile file;
         MatrixImageFile? thumbnail;
         final mimeType = xfile.mimeType ?? lookupMimeType(xfile.path);
+        final lengthResult = await Result.capture(xfile.length());
+        final length = lengthResult.asValue?.value;
 
         // Generate video thumbnail
         if (PlatformInfos.isMobile &&
@@ -145,8 +147,6 @@ class SendFileDialogState extends State<SendFileDialog> {
         if (PlatformInfos.isMobile &&
             mimeType != null &&
             mimeType.startsWith('video')) {
-          final lengthResult = await Result.capture(xfile.length());
-          final length = lengthResult.asValue?.value;
           scaffoldMessenger.clearSnackBars();
           scaffoldMessenger.showLoadingSnackBar(l10n.compressingVideo);
           file = await xfile.getVideoInfo(
@@ -159,9 +159,12 @@ class SendFileDialogState extends State<SendFileDialog> {
             );
           }
         } else {
+          if (length != null && length > maxUploadSize) {
+            throw FileTooBigMatrixException(length, maxUploadSize);
+          }
           // Else we just create a MatrixFile
           file = MatrixFile(
-            bytes: await _files[i].readAsBytes(),
+            bytes: await xfile.readAsBytes(),
             name: xfile.name,
             mimeType: mimeType,
           ).detectFileType;
