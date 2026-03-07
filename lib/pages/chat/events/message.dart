@@ -110,7 +110,8 @@ class Message extends StatelessWidget {
         previousEvent == null ||
         !event.originServerTs.sameEnvironment(previousEvent!.originServerTs);
 
-    final nextEventSameSender = nextEvent != null &&
+    final nextEventSameSender =
+        nextEvent != null &&
         {
           EventTypes.Message,
           EventTypes.Sticker,
@@ -690,20 +691,27 @@ class Message extends StatelessWidget {
                                                     context,
                                                   ).customReaction,
                                                   onPressed: () async {
-                                                    final disabled = sentReactions;
-                                                    final key = await CustomReactionDialog.show(
-                                                      context,
-                                                      event.room,
-                                                      disabledKeys: disabled,
-                                                    );
-                                                    if (key == null || disabled.contains(key)) {
+                                                    final disabled =
+                                                        sentReactions;
+                                                    final key =
+                                                        await CustomReactionDialog.show(
+                                                          context,
+                                                          event.room,
+                                                          disabledKeys:
+                                                              disabled,
+                                                        );
+                                                    if (key == null ||
+                                                        disabled.contains(
+                                                          key,
+                                                        )) {
                                                       return;
                                                     }
                                                     onSelect(event);
-                                                    await event.room.sendReaction(
-                                                      event.eventId,
-                                                      key,
-                                                    );
+                                                    await event.room
+                                                        .sendReaction(
+                                                          event.eventId,
+                                                          key,
+                                                        );
                                                   },
                                                 ),
                                               ],
