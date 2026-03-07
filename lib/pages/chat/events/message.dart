@@ -141,8 +141,8 @@ class Message extends StatelessWidget {
         : MainAxisAlignment.start;
 
     final displayEvent = event.getDisplayEvent(timeline);
-    const groupedCorner = Radius.circular(AppConfig.borderRadius * 1.25);
-    const roundedCorner = Radius.circular(AppConfig.borderRadius * 2.5);
+    const groupedCorner = Radius.circular(AppConfig.borderRadius * 0.75);
+    const roundedCorner = Radius.circular(AppConfig.borderRadius * 2.25);
     final borderRadius = BorderRadius.only(
       topLeft: !ownMessage && nextEventSameSender
           ? groupedCorner
@@ -638,37 +638,32 @@ class Message extends StatelessWidget {
                                                       padding: EdgeInsets.zero,
                                                       icon: Center(
                                                         child: Opacity(
-                                                          opacity:
-                                                              sentReactions
-                                                                  .contains(
-                                                                    emoji,
-                                                                  )
+                                                          opacity: sentReactions
+                                                                  .contains(emoji)
                                                               ? 0.33
                                                               : 1,
                                                           child: Text(
                                                             emoji,
                                                             style:
                                                                 const TextStyle(
-                                                                  fontSize: 20,
-                                                                ),
-                                                            textAlign: TextAlign
-                                                                .center,
+                                                              fontSize: 20,
+                                                            ),
                                                           ),
                                                         ),
                                                       ),
                                                       onPressed:
-                                                          sentReactions
-                                                              .contains(emoji)
-                                                          ? null
-                                                          : () {
-                                                              onSelect(event);
-                                                              event.room
-                                                                  .sendReaction(
-                                                                    event
-                                                                        .eventId,
+                                                          sentReactions.contains(
+                                                                emoji,
+                                                              )
+                                                              ? null
+                                                              : () {
+                                                                  onSelect(event);
+                                                                  event.room
+                                                                      .sendReaction(
+                                                                    event.eventId,
                                                                     emoji,
                                                                   );
-                                                            },
+                                                                },
                                                     ),
                                                   ),
                                                   IconButton(
@@ -680,6 +675,7 @@ class Message extends StatelessWidget {
                                                       context,
                                                     ).customReaction,
                                                     onPressed: () async {
+
                                                       final emoji = await showAdaptiveBottomSheet<String>(
                                                         context: context,
                                                         builder: (context) => Scaffold(
