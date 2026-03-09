@@ -17,6 +17,7 @@ import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/member_actions_popup_menu_button.dart';
 import '../../../config/app_config.dart';
+import '../../../utils/matrix_sdk_extensions/event_extension.dart';
 import 'message_content.dart';
 import 'message_reactions.dart';
 import 'reply_content.dart';
@@ -157,19 +158,7 @@ class Message extends StatelessWidget {
           ? groupedCorner
           : roundedCorner,
     );
-    final textIsBigEmote =
-        !displayEvent.redacted &&
-        !displayEvent.isRichMessage &&
-        ({
-          MessageTypes.Text,
-          MessageTypes.Notice,
-          MessageTypes.Emote,
-          MessageTypes.None,
-        }.contains(displayEvent.messageType)) &&
-        (bigEmojis.contains(displayEvent.body) ||
-            (displayEvent.onlyEmotes &&
-                displayEvent.numberEmotes > 0 &&
-                displayEvent.numberEmotes <= 5));
+    final textIsBigEmote = displayEvent.isBigEmojiMessage(bigEmojis);
 
     final noBubble =
         (({
