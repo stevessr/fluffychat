@@ -7,6 +7,7 @@ import 'package:fluffychat/pages/chat/events/video_player.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -261,12 +262,7 @@ class MessageContent extends StatelessWidget {
               html = '* $html';
             }
 
-            final bigEmotes =
-                !event.isRichMessage &&
-                (bigEmojis.contains(event.body) ||
-                    (event.onlyEmotes &&
-                        event.numberEmotes > 0 &&
-                        event.numberEmotes <= 5));
+            final bigEmotes = event.isBigEmojiMessage(bigEmojis);
 
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
