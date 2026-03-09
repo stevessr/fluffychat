@@ -94,4 +94,16 @@ extension LocalizedBody on Event {
     final infoMap = content.tryGetMap<String, Object?>('info');
     return _mapSpoilerReason(content) ?? _mapSpoilerReason(infoMap);
   }
+
+  String get bodyWithoutReplyFallback =>
+      calcUnlocalizedBody(hideReply: true, plaintextBody: true).trim();
+
+  bool isBigEmojiMessage(Set<String> bigEmojis) {
+    if (redacted || !Event.textOnlyMessageTypes.contains(messageType)) {
+      return false;
+    }
+
+    return bigEmojis.contains(bodyWithoutReplyFallback) ||
+        (onlyEmotes && numberEmotes > 0 && numberEmotes <= 5);
+  }
 }
