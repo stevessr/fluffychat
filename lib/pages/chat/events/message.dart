@@ -4,6 +4,7 @@ import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/file_description.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -660,34 +661,46 @@ class Message extends StatelessWidget {
                                                               L10n.of(
                                                                 context,
                                                               ).customReaction,
-                                                              onPressed: () async {
-                                                                final disabled =
-                                                                    sentReactions;
-                                                                final key =
-                                                                    await CustomReactionDialog.show(
-                                                                      context,
-                                                                      event
-                                                                          .room,
-                                                                      disabledKeys:
-                                                                          disabled,
-                                                                    );
-                                                                if (key ==
-                                                                        null ||
-                                                                    disabled
-                                                                        .contains(
-                                                                          key,
-                                                                        )) {
-                                                                  return;
-                                                                }
-                                                                onSelect(event);
-                                                                await event.room
-                                                                    .sendReaction(
-                                                                      event
-                                                                          .eventId,
-                                                                      key,
-                                                                    );
-                                                              },
                                                             ),
+                                                            actions: [
+                                                              IconButton(
+                                                                icon: const Icon(
+                                                                  Icons
+                                                                      .add_reaction_outlined,
+                                                                ),
+                                                                tooltip: L10n.of(
+                                                                  context,
+                                                                ).customReaction,
+                                                                onPressed:
+                                                                    () async {
+                                                                  final disabled =
+                                                                      sentReactions;
+                                                                  final key =
+                                                                      await CustomReactionDialog.show(
+                                                                        context,
+                                                                        event
+                                                                            .room,
+                                                                        disabledKeys:
+                                                                            disabled,
+                                                                      );
+                                                                  if (key ==
+                                                                          null ||
+                                                                      disabled
+                                                                          .contains(
+                                                                            key,
+                                                                          )) {
+                                                                    return;
+                                                                  }
+                                                                  onSelect(event);
+                                                                  await event.room
+                                                                      .sendReaction(
+                                                                        event
+                                                                            .eventId,
+                                                                        key,
+                                                                      );
+                                                                },
+                                                              ),
+                                                            ],
                                                             leading: CloseButton(
                                                               onPressed: () =>
                                                                   Navigator.of(
@@ -708,25 +721,32 @@ class Message extends StatelessWidget {
                                                                             .emoji,
                                                                       ),
                                                               config: Config(
+                                                                checkPlatformCompatibility:
+                                                                    false,
                                                                 locale:
                                                                     Localizations.localeOf(
                                                                       context,
                                                                     ),
+                                                                emojiTextStyle:
+                                                                    const TextStyle(
+                                                                  fontFamily:
+                                                                      'NotoColorEmoji',
+                                                                ),
                                                                 emojiViewConfig:
-                                                                    const EmojiViewConfig(
-                                                                      backgroundColor:
-                                                                          Colors
-                                                                              .transparent,
-                                                                    ),
+                                                                    EmojiViewConfig(
+                                                                  backgroundColor:
+                                                                      Colors
+                                                                          .transparent,
+                                                                ),
                                                                 bottomActionBarConfig:
                                                                     const BottomActionBarConfig(
-                                                                      enabled:
-                                                                          false,
-                                                                    ),
-                                                                categoryViewConfig: CategoryViewConfig(
+                                                                  enabled:
+                                                                      false,
+                                                                ),
+                                                                categoryViewConfig:
+                                                                    CategoryViewConfig(
                                                                   initCategory:
-                                                                      Category
-                                                                          .SMILEYS,
+                                                                      Category.SMILEYS,
                                                                   backspaceColor: theme
                                                                       .colorScheme
                                                                       .primary,
@@ -746,8 +766,10 @@ class Message extends StatelessWidget {
                                                                       .colorScheme
                                                                       .surface,
                                                                 ),
-                                                                skinToneConfig: SkinToneConfig(
-                                                                  dialogBackgroundColor: Color.lerp(
+                                                                skinToneConfig:
+                                                                    SkinToneConfig(
+                                                                  dialogBackgroundColor:
+                                                                      Color.lerp(
                                                                     theme
                                                                         .colorScheme
                                                                         .surface,
