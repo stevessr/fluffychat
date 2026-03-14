@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/file_description.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -683,9 +684,165 @@ class Message extends StatelessWidget {
                                                           },
                                                   ),
                                                 ),
-                                                IconButton(
-                                                  icon: const Icon(
-                                                    Icons.add_reaction_outlined,
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons
+                                                          .add_reaction_outlined,
+                                                    ),
+                                                    tooltip: L10n.of(
+                                                      context,
+                                                    ).customReaction,
+                                                    onPressed: () async {
+
+                                                      final emoji = await showAdaptiveBottomSheet<String>(
+                                                        context: context,
+                                                        builder: (context) => Scaffold(
+                                                          appBar: AppBar(
+                                                            title: Text(
+                                                              L10n.of(
+                                                                context,
+                                                              ).customReaction,
+                                                            ),
+                                                            actions: [
+                                                              IconButton(
+                                                                icon: const Icon(
+                                                                  Icons
+                                                                      .add_reaction_outlined,
+                                                                ),
+                                                                tooltip: L10n.of(
+                                                                  context,
+                                                                ).customReaction,
+                                                                onPressed:
+                                                                    () async {
+                                                                  final disabled =
+                                                                      sentReactions;
+                                                                  final key =
+                                                                      await CustomReactionDialog.show(
+                                                                        context,
+                                                                        event
+                                                                            .room,
+                                                                        disabledKeys:
+                                                                            disabled,
+                                                                      );
+                                                                  if (key ==
+                                                                          null ||
+                                                                      disabled
+                                                                          .contains(
+                                                                            key,
+                                                                          )) {
+                                                                    return;
+                                                                  }
+                                                                  onSelect(event);
+                                                                  await event.room
+                                                                      .sendReaction(
+                                                                        event
+                                                                            .eventId,
+                                                                        key,
+                                                                      );
+                                                                },
+                                                              ),
+                                                            ],
+                                                            leading: CloseButton(
+                                                              onPressed: () =>
+                                                                  Navigator.of(
+                                                                    context,
+                                                                  ).pop(null),
+                                                            ),
+                                                          ),
+                                                          body: SizedBox(
+                                                            height:
+                                                                double.infinity,
+                                                            child: EmojiPicker(
+                                                              onEmojiSelected:
+                                                                  (_, emoji) =>
+                                                                      Navigator.of(
+                                                                        context,
+                                                                      ).pop(
+                                                                        emoji
+                                                                            .emoji,
+                                                                      ),
+                                                              config: Config(
+                                                                checkPlatformCompatibility:
+                                                                    false,
+                                                                locale:
+                                                                    Localizations.localeOf(
+                                                                      context,
+                                                                    ),
+                                                                emojiTextStyle:
+                                                                    const TextStyle(
+                                                                  fontFamily:
+                                                                      'NotoColorEmoji',
+                                                                ),
+                                                                emojiViewConfig:
+                                                                    EmojiViewConfig(
+                                                                  backgroundColor:
+                                                                      Colors
+                                                                          .transparent,
+                                                                ),
+                                                                bottomActionBarConfig:
+                                                                    const BottomActionBarConfig(
+                                                                  enabled:
+                                                                      false,
+                                                                ),
+                                                                categoryViewConfig:
+                                                                    CategoryViewConfig(
+                                                                  initCategory:
+                                                                      Category.SMILEYS,
+                                                                  backspaceColor: theme
+                                                                      .colorScheme
+                                                                      .primary,
+                                                                  iconColor: theme
+                                                                      .colorScheme
+                                                                      .primary
+                                                                      .withAlpha(
+                                                                        128,
+                                                                      ),
+                                                                  iconColorSelected: theme
+                                                                      .colorScheme
+                                                                      .primary,
+                                                                  indicatorColor: theme
+                                                                      .colorScheme
+                                                                      .primary,
+                                                                  backgroundColor: theme
+                                                                      .colorScheme
+                                                                      .surface,
+                                                                ),
+                                                                skinToneConfig:
+                                                                    SkinToneConfig(
+                                                                  dialogBackgroundColor:
+                                                                      Color.lerp(
+                                                                    theme
+                                                                        .colorScheme
+                                                                        .surface,
+                                                                    theme
+                                                                        .colorScheme
+                                                                        .primaryContainer,
+                                                                    0.75,
+                                                                  )!,
+                                                                  indicatorColor: theme
+                                                                      .colorScheme
+                                                                      .onSurface,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                      if (emoji == null) {
+                                                        return;
+                                                      }
+                                                      if (sentReactions
+                                                          .contains(emoji)) {
+                                                        return;
+                                                      }
+                                                      onSelect(event);
+
+                                                      await event.room
+                                                          .sendReaction(
+                                                            event.eventId,
+                                                            emoji,
+                                                          );
+                                                    },
                                                   ),
                                                   tooltip: L10n.of(
                                                     context,
