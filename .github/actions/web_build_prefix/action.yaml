@@ -35,7 +35,6 @@ runs:
       with:
         path: |
           ~/.pub-cache
-          .dart_tool
         key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
         restore-keys: |
           ${{ runner.os }}-pub-
@@ -65,6 +64,10 @@ runs:
     - name: Resolve Flutter dependencies
       shell: bash
       run: flutter pub get
+
+    - name: Clean build artifacts
+      shell: bash
+      run: flutter clean
 
     - name: Build web
       shell: bash
