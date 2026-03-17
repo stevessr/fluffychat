@@ -2971,5 +2971,9 @@
     "customReactionEnterTextHint": "例如：OK、+1、讚",
     "@customReactionEnterTextHint": {},
     "customReactionEmoteSearchHint": ":/shortcode 或搜尋",
-    "@customReactionEmoteSearchHint": {}
+    "@customReactionEmoteSearchHint": {},
+    "customReactionEmotesJumpLabel": "快速跳轉",
+    "@customReactionEmotesJumpLabel": {},
+    "customReactionEmotesJumpAll": "全部表情包",
+    "@customReactionEmotesJumpAll": {}
 }

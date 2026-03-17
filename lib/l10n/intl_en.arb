@@ -2693,6 +2693,16 @@
         "type": "String",
         "placeholders": {}
     },
+    "customReactionEmotesJumpLabel": "Quick jump",
+    "@customReactionEmotesJumpLabel": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "customReactionEmotesJumpAll": "All",
+    "@customReactionEmotesJumpAll": {
+        "type": "String",
+        "placeholders": {}
+    },
     "moreEvents": "More events",
     "declineInvitation": "Decline invitation",
     "noMessagesYet": "No messages yet",
