@@ -66,10 +66,6 @@ void main() async {
   final store = await AppSettings.init();
   Logs().i('Welcome to ${AppSettings.applicationName.value} <3');
 
-  if (!_vodozemacInitialized) {
-    await vod.init(wasmPath: './assets/assets/vodozemac/');
-    _vodozemacInitialized = true;
-  }
   await _ensureVodozemacInitialized();
 
   Logs().nativeColors = !PlatformInfos.isIOS;
