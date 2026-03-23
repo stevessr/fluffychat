@@ -9,6 +9,7 @@ import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/file_description.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/string_color.dart';
+import 'package:fluffychat/utils/unicode_17_emoji_set.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/member_actions_popup_menu_button.dart';
@@ -727,6 +728,8 @@ class Message extends StatelessWidget {
                                                                     Localizations.localeOf(
                                                                       context,
                                                                     ),
+                                                                emojiSet:
+                                                                    emojiSetWithUnicode17,
                                                                 emojiTextStyle:
                                                                     const TextStyle(
                                                                   fontFamily:
