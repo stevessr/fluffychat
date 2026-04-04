@@ -2865,5 +2865,9 @@
     "codeBlock": "代码块",
     "@codeBlock": {},
     "quote": "引用",
-    "@quote": {}
+    "@quote": {},
+    "addTag": "添加标签",
+    "removeTag": "删除标签",
+    "tagName": "标签名称",
+    "createNewTag": "创建新标签"
 }
