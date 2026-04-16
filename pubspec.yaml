@@ -16,7 +16,6 @@ dependencies:
   badges: ^3.2.0
   blurhash_dart: ^1.2.1
   chewie: ^1.13.1
-  chewie: ^1.13.0
   collection: ^1.18.0
   cross_file: ^0.3.5
   desktop_drop: ^0.7.1
