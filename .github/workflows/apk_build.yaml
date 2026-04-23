@@ -1,4 +1,4 @@
-name: APK Build Workflow
+name: Manual Android APK Build
 
 on:
   workflow_dispatch:
@@ -27,9 +27,28 @@ jobs:
       - run: flutter pub get
       - name: Build APK
         run: flutter build apk --release --target-platform android-arm,android-arm64
+      - name: Locate APK
+        id: locate_apk
+        run: |
+          apk_path=""
+          if [[ -f build/app/outputs/flutter-apk/app-release.apk ]]; then
+            apk_path=build/app/outputs/flutter-apk/app-release.apk
+          elif [[ -f build/app/outputs/apk/release/app-release.apk ]]; then
+            apk_path=build/app/outputs/apk/release/app-release.apk
+          else
+            apk_path="$(find build/app/outputs -name 'app-release.apk' | sort | head -n 1)"
+          fi
+
+          if [[ -z "$apk_path" ]]; then
+            echo "Unable to find app-release.apk"
+            find build/app/outputs -type f | sort
+            exit 1
+          fi
+
+          echo "apk_path=$apk_path" >> "$GITHUB_OUTPUT"
       - name: Upload APK artifact
         uses: actions/upload-artifact@v7
         with:
           name: fluffychat-release-apk
-          path: build/app/outputs/**/app-release.apk
+          path: ${{ steps.locate_apk.outputs.apk_path }}
           if-no-files-found: error
