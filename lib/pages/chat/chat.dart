@@ -10,8 +10,8 @@ import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat/chat_view.dart';
-import 'package:fluffychat/pages/chat/recording_view_model.dart';
 import 'package:fluffychat/pages/chat/event_info_dialog.dart';
+import 'package:fluffychat/pages/chat/recording_view_model.dart';
 import 'package:fluffychat/pages/chat/start_poll_bottom_sheet.dart';
 import 'package:fluffychat/pages/chat_details/chat_details.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
@@ -29,7 +29,6 @@ import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart'
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/share_scaffold_dialog.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -751,20 +750,6 @@ class ChatController extends State<ChatPageWithRoom>
       context: context,
       builder: (c) => SendFileDialog(
         files: files,
-        room: room,
-        outerContext: context,
-        threadRootEventId: activeThreadId,
-        threadLastEventId: threadLastEventId,
-      ),
-    );
-  }
-
-  Future<void> sendImageFromClipBoard(Uint8List? image) async {
-    if (image == null) return;
-    await showAdaptiveDialog(
-      context: context,
-      builder: (c) => SendFileDialog(
-        files: [XFile.fromData(image)],
         room: room,
         outerContext: context,
         threadRootEventId: activeThreadId,
