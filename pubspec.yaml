@@ -118,6 +118,12 @@ flutter:
     - family: NotoColorEmoji
       fonts:
         - asset: assets/fonts/NotoColorEmoji-Regular.ttf
+    - family: GoogleSansCode
+      fonts:
+        - asset: assets/fonts/GoogleSansCode.ttf
+    - family: GoogleSansCodeItalic
+      fonts:
+        - asset: assets/fonts/GoogleSansCode-Italic.ttf
 
 hooks:
   user_defines:
