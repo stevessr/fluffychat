@@ -10,6 +10,7 @@ import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat/trust_user_key_dialog.dart';
 import 'package:fluffychat/utils/markdown_context_builder.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:matrix/matrix.dart';
@@ -26,7 +27,6 @@ class InputBar extends StatelessWidget {
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onSubmitted;
-  final ValueChanged<Uint8List?>? onSubmitImage;
   final FocusNode? focusNode;
   final TextEditingController? controller;
   final InputDecoration decoration;
@@ -41,7 +41,6 @@ class InputBar extends StatelessWidget {
     this.maxLines,
     this.keyboardType,
     this.onSubmitted,
-    this.onSubmitImage,
     this.focusNode,
     this.controller,
     required this.decoration,
@@ -411,40 +410,47 @@ class InputBar extends StatelessWidget {
             editableTextState: e,
             controller: controller,
           ),
-          contentInsertionConfiguration: ContentInsertionConfiguration(
-            onContentInserted: (KeyboardInsertedContent content) async {
-              final proceed = await showTrustUserInRoomDialog(context, room);
-              if (!proceed) return;
-              final data = content.data;
-              if (data == null) return;
+          contentInsertionConfiguration: kIsWeb
+              ? null
+              : ContentInsertionConfiguration(
+                  onContentInserted: (KeyboardInsertedContent content) async {
+                    final proceed = await showTrustUserInRoomDialog(
+                      context,
+                      room,
+                    );
+                    if (!proceed) return;
+                    final data = content.data;
+                    if (data == null) return;
 
-              final file = MatrixFile(
-                mimeType: content.mimeType,
-                bytes: data,
-                name: content.uri.split('/').last,
-              );
-              room.sendFileEvent(file, shrinkImageMaxDimension: 1600);
-            },
-          ),
+                    final file = MatrixFile(
+                      mimeType: content.mimeType,
+                      bytes: data,
+                      name: content.uri.split('/').last,
+                    );
+                    room.sendFileEvent(file, shrinkImageMaxDimension: 1600);
+                  },
+                ),
           minLines: minLines,
           maxLines: maxLines,
           keyboardType: keyboardType,
           textInputAction: textInputAction,
-          autofocus: autofocus!,
+          autofocus: autofocus ?? false,
           inputFormatters: [
             LengthLimitingTextInputFormatter((maxPDUSize / 3).floor()),
           ],
           onSubmitted: (text) {
             // fix for library for now
             // it sets the types for the callback incorrectly
-            onSubmitted!(text);
+            final cb = onSubmitted;
+            if (cb != null) cb(text);
           },
           maxLength: AppSettings.textMessageMaxLength.value,
           decoration: decoration,
           onChanged: (text) {
             // fix for the library for now
             // it sets the types for the callback incorrectly
-            onChanged!(text);
+            final cb = onChanged;
+            if (cb != null) cb(text);
           },
           textCapitalization: TextCapitalization.sentences,
         ),
