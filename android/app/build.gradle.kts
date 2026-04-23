@@ -51,7 +51,8 @@ android {
     signingConfigs {
        create("release") {
             keyAlias = "dummyAlias"
-            keyPassword = "dummyPassword"
+            // The bundled dummy keystore is PKCS12, so the key password must match the store password.
+            keyPassword = "dummyStorePassword"
             storeFile = file("dummy.keystore")
             storePassword = "dummyStorePassword"
         }
