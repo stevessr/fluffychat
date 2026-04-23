@@ -51,6 +51,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
       - uses: ./.github/actions/free_up_space
       - uses: subosito/flutter-action@v2
         with:
@@ -146,6 +150,10 @@ jobs:
       AVD_CONFIG_PATH: "~/.android/avd/test.avd/config.ini"
     steps:
       - uses: actions/checkout@v6
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
       - uses: ./.github/actions/free_up_space
       # https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
       - name: Enable KVM group perms
