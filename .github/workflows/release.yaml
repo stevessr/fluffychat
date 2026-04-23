@@ -100,13 +100,32 @@ jobs:
           PLAYSTORE_DEPLOY_KEY: ${{ secrets.PLAYSTORE_DEPLOY_KEY }}
         run: ./scripts/prepare-android-release.sh
       - run: flutter build apk --release --target-platform android-arm,android-arm64
+      - name: Locate APK
+        id: locate_apk
+        run: |
+          apk_path=""
+          if [[ -f build/app/outputs/flutter-apk/app-release.apk ]]; then
+            apk_path=build/app/outputs/flutter-apk/app-release.apk
+          elif [[ -f build/app/outputs/apk/release/app-release.apk ]]; then
+            apk_path=build/app/outputs/apk/release/app-release.apk
+          else
+            apk_path="$(find build/app/outputs -name 'app-release.apk' | sort | head -n 1)"
+          fi
+
+          if [[ -z "$apk_path" ]]; then
+            echo "Unable to find app-release.apk"
+            find build/app/outputs -type f | sort
+            exit 1
+          fi
+
+          echo "apk_path=$apk_path" >> "$GITHUB_OUTPUT"
       - name: Upload to release
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: build/app/outputs/apk/release/app-release.apk
+          asset_path: ${{ steps.locate_apk.outputs.apk_path }}
           asset_name: fluffychat.apk
           asset_content_type: application/vnd.android.package-archive
 
@@ -156,10 +175,12 @@ jobs:
       - name: Install Fastlane
         working-directory: android
         run: gem install fastlane -NV
-      - name: Add Firebase Messaging
-        run: |
-          echo '${{secrets.GOOGLE_SERVICES_JSON}}' | base64 -d > android/app/google-services.json
-          ./scripts/add-firebase-messaging.sh
+      - name: Prepare Google Services
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: bash ./scripts/setup-google-services.sh
+      - name: Enable Firebase Messaging
+        run: bash ./scripts/add-firebase-messaging.sh
       - run: flutter pub get
       - name: Prepare Android Release Build
         env:
