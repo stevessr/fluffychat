@@ -14,6 +14,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   pasteboard
   record_linux
   screen_retriever_linux
+  sqlcipher_flutter_libs
   url_launcher_linux
   window_manager
   window_to_front
