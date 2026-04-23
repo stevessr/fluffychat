@@ -746,7 +746,7 @@ class Message extends StatelessWidget {
                                                                 emojiTextStyle:
                                                                     const TextStyle(
                                                                   fontFamily:
-                                                                      'NotoColorEmoji',
+                                                                      'GoogleSansCode',
                                                                 ),
                                                                 emojiViewConfig:
                                                                     EmojiViewConfig(
