@@ -10,6 +10,8 @@ if [[ -z "${secret//[[:space:]]/}" ]]; then
   exit 0
 fi
 
+rm -f "$target"
+
 python3 - "$target" <<'PY'
 import base64
 import json
