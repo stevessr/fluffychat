@@ -13,7 +13,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   handy_window
   record_linux
   screen_retriever_linux
-  sqlcipher_flutter_libs
   url_launcher_linux
   webcrypto
   window_manager
