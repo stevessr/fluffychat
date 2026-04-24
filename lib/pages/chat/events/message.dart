@@ -776,7 +776,11 @@ class Message extends StatelessWidget {
                                                                 emojiTextStyle:
                                                                     const TextStyle(
                                                                   fontFamilyFallback: [
-                                                                    'GoogleSansCode',
+                                                                    ...FluffyThemes
+                                                                        .fontFallbacks,
+                                                                    'Apple Color Emoji',
+                                                                    'Noto Color Emoji',
+                                                                    'Segoe UI Emoji',
                                                                   ],
                                                                 ),
                                                                 emojiViewConfig:
