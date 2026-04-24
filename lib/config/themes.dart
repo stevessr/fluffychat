@@ -10,6 +10,13 @@ abstract class FluffyThemes {
 
   static const double navRailWidth = 80.0;
 
+  static const List<String> fontFallbacks = [
+    'GoogleSansCode',
+    'GoogleSansCodeItalic',
+    'Unicode18',
+    'NotoColorEmoji',
+  ];
+
   static bool isColumnModeByWidth(double width) =>
       width > columnWidth * 2 + navRailWidth;
 
@@ -45,57 +52,50 @@ abstract class FluffyThemes {
       seedColor: seed ?? Color(AppSettings.colorSchemeSeedInt.value),
     );
     final isColumnMode = FluffyThemes.isColumnMode(context);
-    // 定义回落字体列表，仅用于系统字体无法显示的字符
-    const fallbackFonts = [
-      'GoogleSansCode',
-      'GoogleSansCodeItalic',
-      'Unicode18',
-      'NotoColorEmoji',
-    ];
 
     // 创建带有回落字体的 TextTheme
     TextTheme applyFallbackFonts(TextTheme base) {
       return base.copyWith(
         displayLarge: base.displayLarge?.copyWith(
-          fontFamilyFallback: fallbackFonts,
+          fontFamilyFallback: fontFallbacks,
         ),
         displayMedium: base.displayMedium?.copyWith(
-          fontFamilyFallback: fallbackFonts,
+          fontFamilyFallback: fontFallbacks,
         ),
         displaySmall: base.displaySmall?.copyWith(
-          fontFamilyFallback: fallbackFonts,
+          fontFamilyFallback: fontFallbacks,
         ),
         headlineLarge: base.headlineLarge?.copyWith(
-          fontFamilyFallback: fallbackFonts,
+          fontFamilyFallback: fontFallbacks,
         ),
         headlineMedium: base.headlineMedium?.copyWith(
-          fontFamilyFallback: fallbackFonts,
+          fontFamilyFallback: fontFallbacks,
         ),
         headlineSmall: base.headlineSmall?.copyWith(
-          fontFamilyFallback: fallbackFonts,
+          fontFamilyFallback: fontFallbacks,
         ),
         titleLarge: base.titleLarge?.copyWith(
-          fontFamilyFallback: fallbackFonts,
+          fontFamilyFallback: fontFallbacks,
         ),
         titleMedium: base.titleMedium?.copyWith(
-          fontFamilyFallback: fallbackFonts,
+          fontFamilyFallback: fontFallbacks,
         ),
         titleSmall: base.titleSmall?.copyWith(
-          fontFamilyFallback: fallbackFonts,
+          fontFamilyFallback: fontFallbacks,
         ),
-        bodyLarge: base.bodyLarge?.copyWith(fontFamilyFallback: fallbackFonts),
+        bodyLarge: base.bodyLarge?.copyWith(fontFamilyFallback: fontFallbacks),
         bodyMedium: base.bodyMedium?.copyWith(
-          fontFamilyFallback: fallbackFonts,
+          fontFamilyFallback: fontFallbacks,
         ),
-        bodySmall: base.bodySmall?.copyWith(fontFamilyFallback: fallbackFonts),
+        bodySmall: base.bodySmall?.copyWith(fontFamilyFallback: fontFallbacks),
         labelLarge: base.labelLarge?.copyWith(
-          fontFamilyFallback: fallbackFonts,
+          fontFamilyFallback: fontFallbacks,
         ),
         labelMedium: base.labelMedium?.copyWith(
-          fontFamilyFallback: fallbackFonts,
+          fontFamilyFallback: fontFallbacks,
         ),
         labelSmall: base.labelSmall?.copyWith(
-          fontFamilyFallback: fallbackFonts,
+          fontFamilyFallback: fontFallbacks,
         ),
       );
     }
