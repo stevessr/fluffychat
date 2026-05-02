@@ -32,18 +32,18 @@
             ]
         },
         {
-            "name": "stevessr",
+            "name": "neko.aaca.eu.org",
             "website": "https://neko.aaca.eu.org",
-            "reg_method": "SSO",
+            "reg_method": "oidc",
             "languages": [
                 "All",
                 "Chinese"
             ]
         },
         {
-            "name": "Murasame",
+            "name": "kisume.de",
             "website": "https://kisume.de",
-            "reg_method": "SSO",
+            "reg_method": "oidc",
             "languages": [
                 "All",
                 "Chinese"
