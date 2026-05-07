@@ -2806,5 +2806,9 @@
     "fluffyChatSupportBannerMessage": "FluffyChat braucht DEINE Hilfe!\n❤️❤️❤️\nFluffyChat wird immer kostenlos bleiben, aber Entwicklung und Hosting kosten Geld.\nDie Zukunft des Projekts hängt von deiner Unterstützung ab.",
     "skipSupportingFluffyChat": "FluffyChat unterstützen überspringen",
     "iDoNotWantToSupport": "Ich möchte nicht unterstützen",
-    "iAlreadySupportFluffyChat": "I unterstütze FluffyChat bereits"
+    "iAlreadySupportFluffyChat": "I unterstütze FluffyChat bereits",
+    "startVoiceCall": "Sprachanruf starten",
+    "joinVoiceCall": "Sprachanruf beitreten",
+    "startVideoCall": "Videoanruf starten",
+    "joinVideoCall": "Videoanruf beitreten"
 }
