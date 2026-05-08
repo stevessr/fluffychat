@@ -22,7 +22,10 @@ ReceivePort? mainIsolateReceivePort;
 
 bool _vodozemacInitialized = false;
 
-void main() async {
+bool isIntegrationTest = false;
+
+void main(List<String> args) async {
+  isIntegrationTest = args.singleOrNull == 'integration_test';
   if (PlatformInfos.isAndroid) {
     final port = mainIsolateReceivePort = ReceivePort();
     IsolateNameServer.removePortNameMapping(AppConfig.mainIsolatePortName);

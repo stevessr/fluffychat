@@ -193,7 +193,7 @@ class BackgroundPush {
     if (PlatformInfos.isIOS) {
       //<GOOGLE_SERVICES>await firebase.requestPermission();
     }
-    if (PlatformInfos.isAndroid) {
+    if (PlatformInfos.isAndroid && !isIntegrationTest) {
       _flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin
@@ -279,7 +279,7 @@ class BackgroundPush {
           ),
           kind: 'http',
         ),
-        append: false,
+        append: true,
       );
     } catch (e, s) {
       Logs().e('[Push] Unable to set pushers', e, s);

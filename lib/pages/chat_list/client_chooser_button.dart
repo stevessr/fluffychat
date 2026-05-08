@@ -115,33 +115,35 @@ class ClientChooserButton extends StatelessWidget {
                 value: client,
                 child: FutureBuilder<Profile?>(
                   future: client.fetchOwnProfile(),
-                  builder: (context, snapshot) => Row(
-                    children: [
-                      Avatar(
-                        mxContent: snapshot.data?.avatarUrl,
-                        name:
-                            snapshot.data?.displayName ??
-                            client.userID!.localpart,
-                        size: 32,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          snapshot.data?.displayName ??
-                              client.userID!.localpart!,
-                          overflow: TextOverflow.ellipsis,
+                  builder: (context, snapshot) {
+                    final displayname =
+                        snapshot.data?.displayName ?? client.userID!.localpart!;
+                    return Row(
+                      key: ValueKey('switch_account_$displayname'),
+                      children: [
+                        Avatar(
+                          mxContent: snapshot.data?.avatarUrl,
+                          name: displayname,
+                          size: 32,
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      IconButton(
-                        icon: const Icon(Icons.edit_outlined),
-                        onPressed: () => controller.editBundlesForAccount(
-                          client.userID,
-                          bundle,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            displayname,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                        const SizedBox(width: 12),
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined),
+                          onPressed: () => controller.editBundlesForAccount(
+                            client.userID,
+                            bundle,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),

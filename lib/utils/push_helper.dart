@@ -17,6 +17,7 @@ import 'package:flutter_shortcuts_new/flutter_shortcuts_new.dart';
 import 'package:matrix/matrix.dart';
 
 const notificationAvatarDimension = 128;
+final Map<String, DateTime> lastReceivedPushNotification = {};
 
 Future<void> pushHelper(
   PushNotification notification, {
@@ -99,6 +100,8 @@ Future<void> _tryPushHelper(
               (client) => client.clientName == clientName,
             ) ??
             await ClientManager.createClient(clientName, store));
+
+  lastReceivedPushNotification[client.clientName] = DateTime.now();
 
   final event = await client.getEventByPushNotification(
     notification,
