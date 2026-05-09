@@ -1713,7 +1713,6 @@
         "placeholders": {}
     },
     "addAccount": "Додати обліковий запис",
-    "enableMultiAccounts": "(БЕТА) Увімкнути кілька облікових записів на цьому пристрої",
     "openInMaps": "Відкрити в картах",
     "@openInMaps": {
         "type": "String",
@@ -2796,9 +2795,6 @@
     "supportFluffyChat": "Підтримати FluffyChat",
     "support": "Підтримка",
     "fluffyChatSupportBannerMessage": "FluffyChat потребує Вашої підтримки!\n❤️❤️❤️\nFluffyChat завжди залишатиметься безкоштовним, однак розробка та хостинг потребують коштів.\nМайбутнє проєкту залежить від підтримки людей, як Ви.",
-    "skipSupportingFluffyChat": "Пропустити підтримку FluffyChat",
-    "iDoNotWantToSupport": "Я не хочу підтримувати",
-    "iAlreadySupportFluffyChat": "Я вже підтримую FluffyChat",
     "setLowPriority": "Встановити низький пріоритет",
     "unsetLowPriority": "Скинути низький пріоритет",
     "removeCallFromChat": "Видалити виклик з чату",

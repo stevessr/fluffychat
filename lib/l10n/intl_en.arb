@@ -1339,7 +1339,6 @@
     "addToBundle": "Add to bundle",
     "removeFromBundle": "Remove from this bundle",
     "bundleName": "Bundle name",
-    "enableMultiAccounts": "(BETA) Enable multi accounts on this device",
     "openInMaps": "Open in maps",
     "@openInMaps": {
         "type": "String",
@@ -2784,10 +2783,7 @@
     "reset": "Reset",
     "supportFluffyChat": "Support FluffyChat",
     "support": "Support",
-    "fluffyChatSupportBannerMessage": "FluffyChat needs YOUR help!\n❤️❤️❤️\nFluffyChat will always be free, but development and hosting still cost money.\nThe future of the project depends on support from people like you.",
-    "skipSupportingFluffyChat": "Skip supporting FluffyChat",
-    "iDoNotWantToSupport": "I do not want to support",
-    "iAlreadySupportFluffyChat": "I already support FluffyChat",
+    "fluffyChatSupportBannerMessage": "FluffyChat needs YOUR help!\nis an independent non-profit project. We don’t show ads or sell data, which means our development depends entirely on our community.\n\nTo keep the project going and available for everyone, we rely on people like you. If you find the app useful, please consider a small contribution to support our work.",
     "setLowPriority": "Set low priority",
     "unsetLowPriority": "Unset low priority",
     "removeCallFromChat": "Remove call from chat",
@@ -2802,5 +2798,6 @@
     "addTag": "Add tag",
     "removeTag": "Remove tag",
     "tagName": "Tag name",
-    "createNewTag": "Create new tag"
+    "createNewTag": "Create new tag",
+    "hideRoomsInSpaces": "Hide rooms that are in a space"
 }

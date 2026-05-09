@@ -4,7 +4,7 @@ publish_to: none
 # On version bump please also increase:
 # 1. The build number (for F-Droid)
 # 2. The version in /snap/snapcraft.yaml
-version: 2.5.1+3551
+version: 2.6.0+3553
 
 environment:
   sdk: ">=3.11.1 <4.0.0"
@@ -54,7 +54,7 @@ dependencies:
   native_imaging: ^0.4.0
   opus_caf_converter_dart: ^1.0.1
   package_info_plus: ^9.0.1
-  particles_network: ^1.9.3
+  particles_network: ^1.9.4
   path: ^1.9.0
   path_provider: ^2.1.2
   pretty_qr_code: ^3.6.0
