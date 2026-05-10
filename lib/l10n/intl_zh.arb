@@ -2465,32 +2465,9 @@
     "noChatsFoundHere": "此处尚未找到聊天。使用下方按钮 ⤵️ 开始和某人的新聊天",
     "loginWithMatrixId": "使用 Matrix-ID 登录",
     "doesNotSeemToBeAValidHomeserver": "似乎不是兼容的主服务器。URL 不正确？",
-    "prepareSendingAttachment": "准备发送附件…",
     "sendingAttachment": "发送附件中…",
     "calculatingFileSize": "计算文件尺寸中…",
-    "generatingVideoThumbnail": "生成视频缩略图中…",
     "compressVideo": "压缩视频中…",
-    "sendingAttachmentCountOfCount": "正在发送附件 {index}，共 {length} 个附件…",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
-    "serverLimitReached": "达到了服务器限制！等待 {seconds} 秒…",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "oneOfYourDevicesIsNotVerified": "您设备中的一台未验证",
     "noticeChatBackupDeviceVerification": "注意：当你连接所有设备到聊天备份时，这些设备将被自动验证。",
     "welcomeText": "你好呀 👋 欢迎来到 FluffyChat。你可以登录任意兼容 https://matrix.org 的 homeserver，然后和任何人聊天。这是个巨大的去中心化消息网络！",

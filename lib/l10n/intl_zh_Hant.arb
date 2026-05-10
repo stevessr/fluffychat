@@ -2700,31 +2700,6 @@
     "@changeTheDescriptionOfTheGroup": {},
     "calculatingFileSize": "正在計算檔案大小…",
     "@calculatingFileSize": {},
-    "prepareSendingAttachment": "準備傳送附件…",
-    "@prepareSendingAttachment": {},
-    "generatingVideoThumbnail": "生成影片縮圖中…",
-    "@generatingVideoThumbnail": {},
-    "sendingAttachmentCountOfCount": "附件傳送中 {index}/{length}…",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
-    "serverLimitReached": "已達伺服器上限! 請稍等{seconds}秒…",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "welcomeText": "嘿，嘿👋這是FluffyChat。 您可以登入任何與https://matrix.org相容的歸屬伺服器後和任何人聊天。 這是一個巨大的去中心化訊息網路！",
     "@welcomeText": {},
     "setWallpaper": "設定背景樣式",

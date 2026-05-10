@@ -184,6 +184,7 @@ class UrlLauncher {
         if (!context.mounted) return;
         await showAdaptiveDialog(
           context: context,
+          barrierDismissible: true,
           builder: (c) =>
               PublicRoomDialog(roomAlias: identityParts.primaryIdentifier),
         );

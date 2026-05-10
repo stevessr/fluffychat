@@ -106,7 +106,7 @@ class PublicRoomDialog extends StatelessWidget {
             final topic = profile?.topic;
             return SingleChildScrollView(
               child: Column(
-                spacing: 16,
+                spacing: 8,
                 mainAxisSize: .min,
                 crossAxisAlignment: .stretch,
                 children: [

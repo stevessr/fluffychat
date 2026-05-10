@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/pages/chat/events/file_send_status_indicator.dart';
 import 'package:fluffychat/utils/file_description.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -53,6 +54,7 @@ class EventVideoPlayer extends StatelessWidget {
     final duration = durationInt == null
         ? null
         : Duration(milliseconds: durationInt);
+    final fileSendingStatus = event.fileSendingStatus;
 
     return Column(
       mainAxisSize: .min,
@@ -80,7 +82,8 @@ class EventVideoPlayer extends StatelessWidget {
                 tag: event.eventId,
                 child: Stack(
                   children: [
-                    if (event.hasThumbnail)
+                    if (event.hasThumbnail &&
+                        AppSettings.showThumbnailsInTimeline.value)
                       MxcImage(
                         event: event,
                         isThumbnail: true,
@@ -101,13 +104,18 @@ class EventVideoPlayer extends StatelessWidget {
                         height: height,
                         fit: BoxFit.cover,
                       ),
-                    Center(
-                      child: CircleAvatar(
-                        child: supportsVideoPlayer
-                            ? const Icon(Icons.play_arrow_outlined)
-                            : const Icon(Icons.file_download_outlined),
+                    if (fileSendingStatus == null)
+                      Center(
+                        child: CircleAvatar(
+                          child: supportsVideoPlayer
+                              ? const Icon(Icons.play_arrow_outlined)
+                              : const Icon(Icons.file_download_outlined),
+                        ),
+                      )
+                    else
+                      FileSendStatusIndicator(
+                        fileSendingStatus: fileSendingStatus,
                       ),
-                    ),
                     if (duration != null)
                       Positioned(
                         bottom: 8,

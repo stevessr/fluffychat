@@ -617,15 +617,6 @@
     },
     "pinMessage": "அறைக்கு முள்",
     "unlockOldMessages": "பழைய செய்திகளைத் திறக்கவும்",
-    "serverLimitReached": "சேவையக வரம்பு அடைந்தது! {seconds} விநாடிகள் காத்திருக்கிறது ...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "acceptedKeyVerification": "{sender} ஏற்றுக்கொள்ளப்பட்ட விசை சரிபார்ப்பு",
     "@acceptedKeyVerification": {
         "type": "String",
@@ -724,7 +715,6 @@
     "newGroup": "புதிய குழு",
     "noOtherDevicesFound": "வேறு சாதனங்கள் எதுவும் கிடைக்கவில்லை",
     "sendRoomNotifications": "ஒரு @room அறிவிப்புகளை அனுப்பவும்",
-    "generatingVideoThumbnail": "வீடியோ சிறு உருவத்தை உருவாக்குதல் ...",
     "reply": "பதில்",
     "@reply": {
         "type": "String",
@@ -800,7 +790,6 @@
     "publicSpaces": "பொது இடங்கள்",
     "discover": "கண்டுபிடி",
     "commandHint_unignore": "கொடுக்கப்பட்ட மேட்ரிக்ச் ஐடியை இணைக்கவும்",
-    "prepareSendingAttachment": "அனுப்பும் இணைப்பைத் தயாரிக்கவும் ...",
     "sendingAttachment": "இணைப்பை அனுப்புகிறது ...",
     "continueText": "தொடரவும்",
     "welcomeText": "ஏய் ஏய் 👋 இது பஞ்சுபோன்றது. Https://matrix.org உடன் இணக்கமான எந்த ஓம்சர்வரில் நீங்கள் உள்நுழையலாம். பின்னர் யாருடனும் அரட்டையடிக்கவும். இது ஒரு பெரிய பரவலாக்கப்பட்ட செய்தியிடல் நெட்வொர்க்!",
@@ -2244,18 +2233,6 @@
     "changelog": "மாற்றபதிவு",
     "calculatingFileSize": "கோப்பு அளவைக் கணக்கிடுகிறது ...",
     "compressVideo": "அமைக்கும் வீடியோ ...",
-    "sendingAttachmentCountOfCount": "{length} இன் இணைப்பு {index}ஐ அனுப்புகிறது...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
     "oneOfYourDevicesIsNotVerified": "உங்கள் சாதனங்களில் ஒன்று சரிபார்க்கப்படவில்லை",
     "noticeChatBackupDeviceVerification": "குறிப்பு: உங்கள் எல்லா சாதனங்களையும் அரட்டை காப்புப்பிரதியுடன் இணைக்கும்போது, அவை தானாகவே சரிபார்க்கப்படும்.",
     "manageAccount": "கணக்கை நிர்வகிக்கவும்",

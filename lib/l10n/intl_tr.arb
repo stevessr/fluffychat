@@ -2669,35 +2669,10 @@
     "@loginWithMatrixId": {},
     "doesNotSeemToBeAValidHomeserver": "Uyumlu bir ana sunucu gibi görünmüyor. Yanlış URL mi?",
     "@doesNotSeemToBeAValidHomeserver": {},
-    "prepareSendingAttachment": "Ek gönderilmeye hazırlanıyor...",
-    "@prepareSendingAttachment": {},
-    "serverLimitReached": "Sunucu sınırına ulaşıldı! {seconds} saniye bekleniyor...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "calculatingFileSize": "Dosya boyutu hesaplanıyor...",
     "@calculatingFileSize": {},
-    "sendingAttachmentCountOfCount": "Ek {index} / {length} gönderiliyor...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
     "sendingAttachment": "Ek gönderiliyor...",
     "@sendingAttachment": {},
-    "generatingVideoThumbnail": "Video küçük resmi oluşturuluyor...",
-    "@generatingVideoThumbnail": {},
     "compressVideo": "Video sıkıştırılıyor...",
     "@compressVideo": {},
     "oneOfYourDevicesIsNotVerified": "Aygıtlarınızdan biri doğrulanmadı",

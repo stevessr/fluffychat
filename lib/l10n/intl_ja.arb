@@ -2326,31 +2326,8 @@
     "sendCanceled": "送信を取り消しました",
     "loginWithMatrixId": "Matrix-IDでログイン",
     "calculatingFileSize": "ファイルサイズを計算しています…",
-    "prepareSendingAttachment": "送信する添付ファイルを準備しています…",
     "sendingAttachment": "添付ファイルを送信しています…",
-    "generatingVideoThumbnail": "ビデオサムネイルを生成しています…",
     "compressVideo": "ビデオを圧縮しています…",
-    "sendingAttachmentCountOfCount": "{length}個中{index}個の添付ファイルを送信しています…",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
-    "serverLimitReached": "サーバーのリミットに達しました！{seconds}秒お待ちください…",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "oneOfYourDevicesIsNotVerified": "いずれかのデバイスが認証されていません",
     "noticeChatBackupDeviceVerification": "注意：すべてのデバイスをチャットのバックアップに接続している場合、それらは自動的に認証されます。",
     "continueText": "続ける",

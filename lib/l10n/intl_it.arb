@@ -2615,35 +2615,10 @@
     "@sendCanceled": {},
     "calculatingFileSize": "Calcolo della dimensione del file...",
     "@calculatingFileSize": {},
-    "prepareSendingAttachment": "Preparazione per l'invio dell'allegato...",
-    "@prepareSendingAttachment": {},
     "sendingAttachment": "Invio allegato...",
     "@sendingAttachment": {},
     "compressVideo": "Compressione video...",
     "@compressVideo": {},
-    "generatingVideoThumbnail": "Generazione miniatura video...",
-    "@generatingVideoThumbnail": {},
-    "sendingAttachmentCountOfCount": "Invio dell'allegato {index} di {length}...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
-    "serverLimitReached": "Limite server raggiunto! Attendere {seconds} secondi...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "oneOfYourDevicesIsNotVerified": "Uno dei tuoi dispositivi non è verificato",
     "@oneOfYourDevicesIsNotVerified": {},
     "noticeChatBackupDeviceVerification": "Nota: quando colleghi tutti i tuoi dispositivi al backup della chat, vengono verificati automaticamente.",

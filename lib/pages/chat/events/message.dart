@@ -203,8 +203,6 @@ class Message extends StatelessWidget {
     final enterThread = this.enterThread;
     final sender = event.senderFromMemoryOrFallback;
 
-    final fileSendingStatus = event.fileSendingStatus;
-
     return _AnimateIn(
       animateIn: animateIn,
       child: Center(
@@ -318,34 +316,6 @@ class Message extends StatelessWidget {
                                 height: 16,
                                 child: event.status == EventStatus.error
                                     ? const Icon(Icons.error, color: Colors.red)
-                                    : fileSendingStatus != null
-                                    ? Stack(
-                                        children: [
-                                          Center(
-                                            child: switch (fileSendingStatus) {
-                                              FileSendingStatus
-                                                  .generatingThumbnail =>
-                                                Icon(
-                                                  Icons.compress_outlined,
-                                                  size: 14,
-                                                ),
-                                              FileSendingStatus.encrypting =>
-                                                Icon(
-                                                  Icons.lock_outlined,
-                                                  size: 14,
-                                                ),
-                                              FileSendingStatus.uploading =>
-                                                Icon(
-                                                  Icons.upload_outlined,
-                                                  size: 14,
-                                                ),
-                                            },
-                                          ),
-                                          const CircularProgressIndicator.adaptive(
-                                            strokeWidth: 1,
-                                          ),
-                                        ],
-                                      )
                                     : null,
                               ),
                             ),

@@ -2398,20 +2398,7 @@
     "@alwaysUse24HourFormat": {
         "description": "Set to true to always display time of day in 24 hour format."
     },
-    "prepareSendingAttachment": "Pripremi slanje priloga …",
     "sendingAttachment": "Slanje priloga …",
-    "sendingAttachmentCountOfCount": "Slanje priloga {index} od {length} …",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
     "ignoreUser": "Zanemari korisnika",
     "aboutHomeserver": "Informacije o {homeserver}",
     "@aboutHomeserver": {
@@ -2521,17 +2508,7 @@
     "loginWithMatrixId": "Prijava pomoću Matrix-ID-a",
     "doesNotSeemToBeAValidHomeserver": "Čini se da nije kompatibilan homeserver. Pogrešan URL?",
     "calculatingFileSize": "Izračunavanje veličine datoteke …",
-    "generatingVideoThumbnail": "Generiranje minijatura videa …",
     "compressVideo": "Komprimiranje videa …",
-    "serverLimitReached": "Granica servera je dosegnuta! Čeka {seconds} s …",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "oneOfYourDevicesIsNotVerified": "Jedan od tvojih uređaja nije potvrđen",
     "noticeChatBackupDeviceVerification": "Napomena: Kada spojiš sve svoje uređaje na sigurnosnu kopiju chata, oni se automatski potvrđuju.",
     "continueText": "Nastavi",

@@ -2475,7 +2475,6 @@
     "changelog": "Registro de mudanças",
     "sendCanceled": "Envio cancelado",
     "unableToJoinChat": "Não foi possível entrar na conversa. Talvez a outra pessoa já fechou a conversa.",
-    "prepareSendingAttachment": "Preparando o envio do anexo...",
     "sendingAttachment": "Enviando o anexo...",
     "noticeChatBackupDeviceVerification": "Observação: Quando você conecta todos os seus dispositivos ao backup de conversas, eles são verificados automaticamente.",
     "continueText": "Continuar",
@@ -2553,17 +2552,7 @@
     "loginWithMatrixId": "Conectar com ID Matrix",
     "calculatingFileSize": "Calculando o tamanho do arquivo...",
     "compressVideo": "Comprimindo o vídeo...",
-    "generatingVideoThumbnail": "Gerando a miniatura do vídeo...",
     "oneOfYourDevicesIsNotVerified": "Um dos seus dispositivos não está verificado",
-    "serverLimitReached": "Limite do servidor alcançado! Esperando {seconds} segundos...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "manageAccount": "Gerenciar conta",
     "newChatRequest": "📩 Nova solicitação de conversa",
     "userLevel": "{level} - Usuário",
@@ -2584,18 +2573,6 @@
     "waitingForServer": "Aguardando o servidor...",
     "notificationRuleEncryptedDescription": "Notifica o usuário de mensagens em salas criptografadas.",
     "sendRoomNotifications": "Enviar notificações de @room",
-    "sendingAttachmentCountOfCount": "Enviando o {index}° anexo de {length}...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
     "welcomeText": "Olá! 👋 Este é o FluffyChat. Você pode se conectar com qualquer servidor que é compatível com o https://matrix.org. E então conversar com qualquer um. É uma rede gigante e descentralizada de conversa!",
     "notificationRuleRoomServerAclDescription": "Omite notificações de listas de controle de acesso de servidor de uma sala (ACL).",
     "notificationRuleIsUserMentionDescription": "Notifica o usuário quando é mencionado diretamente em uma mensagem.",

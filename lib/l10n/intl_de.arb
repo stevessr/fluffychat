@@ -2465,31 +2465,8 @@
     "doesNotSeemToBeAValidHomeserver": "Scheint kein kompatibler Homeserver zu sein. Falsche URL?",
     "loginWithMatrixId": "Mit Matrix-ID anmelden",
     "sendingAttachment": "Anhang wird gesendet ...",
-    "generatingVideoThumbnail": "Generiere Video-Vorschaubild ...",
-    "serverLimitReached": "Server-Limit erreicht! Warte {seconds} Sekunden ...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "calculatingFileSize": "Dateigröße wird berechnet ...",
-    "prepareSendingAttachment": "Anhang zum Senden vorbereiten ...",
     "compressVideo": "Video wird komprimiert ...",
-    "sendingAttachmentCountOfCount": "Sende Anhang {index} von {length} ...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
     "fileIsTooBigForServer": "Kann nicht gesendet werden! Der Server unterstützt nur Anhänge bis höchstens {max}.",
     "@fileIsTooBigForServer": {
         "type": "String",

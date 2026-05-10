@@ -2222,30 +2222,7 @@
     "loginWithMatrixId": "Logáil isteach le Matrix-ID",
     "calculatingFileSize": "Méid an chomhaid á ríomh...",
     "sendingAttachment": "Iatán á sheoladh...",
-    "generatingVideoThumbnail": "Mionsamhail físe á cruthú...",
     "compressVideo": "Físeán á chomhbhrú...",
-    "sendingAttachmentCountOfCount": "Ceangaltán {index} de {length} á sheoladh...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
-    "prepareSendingAttachment": "Ullmhaigh an t- iatán á sheoladh...",
-    "serverLimitReached": "Sroicheadh teorainn an fhreastalaí! Ag fanacht {seconds} soicind...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "oneOfYourDevicesIsNotVerified": "Ní fhíoraítear ceann de do ghléasanna",
     "noticeChatBackupDeviceVerification": "Nóta: Nuair a nascann tú do ghléasanna go léir leis an gcúltaca comhrá, déantar iad a fhíorú go huathoibríoch.",
     "continueText": "Lean ar aghaidh",

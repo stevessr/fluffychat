@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:async/async.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/pages/chat/events/file_send_status_indicator.dart';
 import 'package:fluffychat/utils/error_reporter.dart';
 import 'package:fluffychat/utils/file_description.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
@@ -287,6 +288,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final waveform = _waveform;
+    final fileSendingStatus = widget.event.fileSendingStatus;
 
     return ValueListenableBuilder(
       valueListenable: matrix.voiceMessageEventId,
@@ -338,6 +340,10 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                                   strokeWidth: 2,
                                   color: widget.color,
                                   value: _downloadProgress,
+                                )
+                              : fileSendingStatus != null
+                              ? FileSendStatusIndicator(
+                                  fileSendingStatus: fileSendingStatus,
                                 )
                               : InkWell(
                                   borderRadius: BorderRadius.circular(64),

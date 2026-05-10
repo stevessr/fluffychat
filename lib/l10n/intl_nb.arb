@@ -2071,15 +2071,6 @@
         }
     },
     "jumpToLastReadMessage": "Hopp til sist leste melding",
-    "serverLimitReached": "Grensen for server er nådd! Venter i {seconds} sekunder...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "blur": "Uskarphet:",
     "opacity": "Ugjennomsiktighet:",
     "noContactInformationProvided": "Serveren oppgir ingen gyldig kontaktinformasjon",
@@ -2365,8 +2356,6 @@
         "description": "Usage hint for the command /clearcache"
     },
     "doesNotSeemToBeAValidHomeserver": "Ser ikke ut til å være en kompatibel hjemmeserver. Feil URL?",
-    "prepareSendingAttachment": "Forbered sending av vedlegg...",
-    "generatingVideoThumbnail": "Genererer videominiatyrbilde ...",
     "compressVideo": "Komprimerer video...",
     "welcomeText": "Hei, hei! 👋 Dette er FluffyChat. Du kan logge på hvilken som helst hjemmeserver som er kompatibel med https://matrix.org. Og deretter chatte med hvem som helst. Det er et stort desentralisert meldingsnettverk!",
     "notificationRuleIsUserMentionDescription": "Varsler brukeren når de er direkte nevnt i en melding.",
@@ -2740,18 +2729,6 @@
         "placeholders": {
             "time": {
                 "type": "String"
-            }
-        }
-    },
-    "sendingAttachmentCountOfCount": "Sender vedlegg {index} av {length}...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
             }
         }
     },

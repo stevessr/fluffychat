@@ -1435,15 +1435,6 @@
     "pleaseFillOut": "Ttxil-k·m, ččar",
     "invalidUrl": "url armeɣtu",
     "addLink": "Rnu aseɣwen",
-    "serverLimitReached": "Talast n uqeddac tewweḍ! Araǧu n {seconds} n tasinin…",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "unableToJoinChat": "Ur yezmir ara ad yernu ɣer udiwenni. Ahat aseqdac n udiwenni-agi imdel-it yakan.",
     "previous": "Uzwir",
     "otherPartyNotLoggedIn": "Aḥric nniḍen ur yeqqin ara akka tura, ihi ur yezmir ara ad d-yeṭṭef iznan!",
@@ -2154,18 +2145,6 @@
         }
     },
     "compressVideo": "Asekkussem n tvidyut...",
-    "sendingAttachmentCountOfCount": "Tuzna umedday {index} n {length}…",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
     "welcomeText": "Azul Azul 👋 Wa d FluffyChat. Tzemreḍ ad tkecmeḍ ɣer uqeddac agejdan, yellan yemsaḍa akked https://matrix.org. Dɣa meslay d win tebɣiḍ, d aẓeṭṭa n udiwenni araslemmas amuqṛan!",
     "notificationRuleRoomnotif": "Alɣu n texxamt",
     "notificationRuleRoomnotifDescription": "Azen alɣu i useqdec mi ara yelli yizen yegber '@room'.",

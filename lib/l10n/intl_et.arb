@@ -2465,30 +2465,7 @@
     "noChatsFoundHere": "Siin ei leidu veel ühtegi vestlust. Alusta uut vestlust klõpsides allpool asuvat nuppu. ⤵️",
     "loginWithMatrixId": "Logi sisse Matrix-ID alusel",
     "doesNotSeemToBeAValidHomeserver": "Ei tundu olema ühilduv koduserver. Kas võrguaadress on ikka õige?",
-    "prepareSendingAttachment": "Valmistume manuse saatmiseks...",
-    "generatingVideoThumbnail": "Loome video pisipilti...",
     "compressVideo": "Pakime videot väiksemaks...",
-    "sendingAttachmentCountOfCount": "Saadame manust: {index} pikkusega {length}...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
-    "serverLimitReached": "Serveri poolt lubatud ülempiir on käes. Ootame {seconds} sekundit...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "sendingAttachment": "Saadame manust...",
     "calculatingFileSize": "Arvutame faili suurust...",
     "oneOfYourDevicesIsNotVerified": "Üks sinu seadmetest pole verifitseeritud",

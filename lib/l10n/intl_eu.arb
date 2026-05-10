@@ -2466,31 +2466,8 @@
     "loginWithMatrixId": "Hasi saioa Matrix IDarekin",
     "doesNotSeemToBeAValidHomeserver": "Ez dirudi zerbitzaria bateragarria denik. Zuzena da URLa?",
     "calculatingFileSize": "Fitxategiaren tamaina kalkulatzen…",
-    "prepareSendingAttachment": "Eranskinaren bidalketa prestatzen…",
     "sendingAttachment": "Eranskina bidaltzen…",
     "compressVideo": "Bideoa konprimatzen…",
-    "generatingVideoThumbnail": "Bideoaren iruditxoa sortzen…",
-    "serverLimitReached": "Zerbitzariaren muga gainditu da! Itxaron {seconds} segundo…",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
-    "sendingAttachmentCountOfCount": "{index}. eranskina bidaltzen ({length} guztira)…",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
     "oneOfYourDevicesIsNotVerified": "Zure gailuetako bat ez dago egiaztatuta",
     "noticeChatBackupDeviceVerification": "Oharra: gailu guztiak txat-babeskopiarekin konektatzen dituzunean, automatikoki egiaztatzen dira.",
     "opacity": "Opakutasuna:",
