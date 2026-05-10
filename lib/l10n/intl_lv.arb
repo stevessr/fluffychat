@@ -2449,30 +2449,7 @@
     "spaces": "Kopienas",
     "markAsUnread": "Atzīmēt kā nelasītu",
     "sendingAttachment": "Nosūta pielikumu...",
-    "generatingVideoThumbnail": "Izveido video sīktēlu...",
-    "sendingAttachmentCountOfCount": "Nosūta {index}. pielikumu no {length}...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
-    "serverLimitReached": "Sasniegts servera ierobežojums. Gaida {seconds} sekundes...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "calculatingFileSize": "Aprēķina datnes lielumu...",
-    "prepareSendingAttachment": "Sagatavo pielikuma nosūtīšanu...",
     "compressVideo": "Saspiež video...",
     "oneOfYourDevicesIsNotVerified": "Viena no ierīcēm nav apliecināta",
     "noticeChatBackupDeviceVerification": "Piezīme: kad visas ierīces tiek savienotas ar tērzēšanu rezerves kopiju, tās tiek automātiski apliecinātas.",

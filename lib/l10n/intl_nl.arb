@@ -2499,18 +2499,7 @@
     "loginWithMatrixId": "Inloggen met Matrix-ID",
     "calculatingFileSize": "Bestandsgrootte berekenen...",
     "sendingAttachment": "Bijlage versturen...",
-    "generatingVideoThumbnail": "Video-voorbeeld genereren...",
-    "prepareSendingAttachment": "Bijlage versturen voorbereiden...",
     "compressVideo": "Video comprimeren...",
-    "serverLimitReached": "Server limiet bereikt! Wacht {seconds} seconden...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "version": "Versie",
     "supportPage": "Supportpagina",
     "serverInformation": "Server-informatie:",
@@ -2538,18 +2527,6 @@
     "verifyOtherUser": "🔐 Persoon verifiëren",
     "verifyOtherDevice": "🔐 Ander apparaat verifiëren",
     "doesNotSeemToBeAValidHomeserver": "Dit lijkt geen ondersteunde server. Verkeerde URL?",
-    "sendingAttachmentCountOfCount": "Bijlage versturen {index} van {length}...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
     "continueText": "Doorgaan",
     "welcomeText": "Hallo hallo 👋 Dit is FluffyChat. Je kan inloggen op elke server die werkt met https://matrix.org. En dan chat je met iedereen. Het is een groot decentraal chat-netwerk!",
     "appWantsToUseForLogin": "Inloggen met '{server}'",

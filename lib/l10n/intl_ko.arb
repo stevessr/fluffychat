@@ -2641,27 +2641,6 @@
     "@changeTheCanonicalRoomAlias": {},
     "sendCanceled": "전송 최소됨",
     "@sendCanceled": {},
-    "sendingAttachmentCountOfCount": "첨부파일 {length}개중 {index}번째 전송 중...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
-    "serverLimitReached": "서버 한도에 도달했습니다! {seconds}초 기다리는 중...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "noContactInformationProvided": "서버가 유효한 연락처 정보를 제공하지 않음",
     "@noContactInformationProvided": {},
     "welcomeText": "안녕하세요 👋 FluffyChat이에요. 당신은 htpps://matrix.org와 호환되는 모든 홈서버를 사용할 수 있어요. 그리고 모두와 대화해보세요. 거대한 분산 대화망이니까요!",
@@ -2674,8 +2653,6 @@
     "@changeTheChatPermissions": {},
     "calculatingFileSize": "파일 크기 계산 중...",
     "@calculatingFileSize": {},
-    "prepareSendingAttachment": "첨부된 파일 전송 준비 중...",
-    "@prepareSendingAttachment": {},
     "oneOfYourDevicesIsNotVerified": "당신의 기기 중 하나가 인증되지 않았음",
     "@oneOfYourDevicesIsNotVerified": {},
     "noticeChatBackupDeviceVerification": "참고: 모든 기기에 채팅 백업을 설정하면 자동으로 서로 인증됩니다.",
@@ -2734,8 +2711,6 @@
     "@changelog": {},
     "sendingAttachment": "첨부된 파일 전송 중...",
     "@sendingAttachment": {},
-    "generatingVideoThumbnail": "영상 썸네일 만드는 중...",
-    "@generatingVideoThumbnail": {},
     "compressVideo": "영상 압축 중...",
     "@compressVideo": {},
     "blur": "블러:",

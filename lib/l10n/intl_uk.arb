@@ -2466,31 +2466,8 @@
     "loginWithMatrixId": "Увійти за допомогою Matrix-ID",
     "doesNotSeemToBeAValidHomeserver": "Здається, це несумісний домашній сервер. Неправильна URL-адреса?",
     "calculatingFileSize": "Обчислення розміру файлу...",
-    "prepareSendingAttachment": "Підготовка до надсилання вкладення...",
     "sendingAttachment": "Надсилання вкладення...",
-    "generatingVideoThumbnail": "Генерування мініатюри відео...",
     "compressVideo": "Стиснення відео...",
-    "sendingAttachmentCountOfCount": "Надсилання вкладення {index} з {length}...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
-    "serverLimitReached": "Досягнуто ліміту сервера! Очікування {seconds} секунд...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "oneOfYourDevicesIsNotVerified": "Один із ваших пристроїв не верифікований",
     "noticeChatBackupDeviceVerification": "Примітка: Коли ви під'єднуєте всі свої пристрої до резервної копії бесіди, вони автоматично верифікуються.",
     "continueText": "Продовжити",

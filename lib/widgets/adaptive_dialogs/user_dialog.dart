@@ -64,7 +64,7 @@ class UserDialog extends StatelessWidget {
                 ).lastActiveAgo(lastActiveTimestamp.localizedTimeShort(context))
               : null;
           return Column(
-            spacing: 16,
+            spacing: 8,
             mainAxisSize: .min,
             crossAxisAlignment: .stretch,
             children: [

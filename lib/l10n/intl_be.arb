@@ -2567,31 +2567,8 @@
     "loginWithMatrixId": "Увайсці з Matrix-ID",
     "doesNotSeemToBeAValidHomeserver": "Гэта не выглядае як дамашні сервер. Няслушны URL?",
     "calculatingFileSize": "Вылічэнне памеру файла...",
-    "prepareSendingAttachment": "Падрыхтоўка адпраўкі прыкладання...",
     "sendingAttachment": "Адпраўка прыкладання...",
-    "generatingVideoThumbnail": "Стварэнне вокладкі відэа...",
     "compressVideo": "Сцісканне відэа...",
-    "sendingAttachmentCountOfCount": "Адпраўляецца прыкладанне {index} з {length}...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
-    "serverLimitReached": "Дасягнуты серверны ліміт! Пачакайце {seconds} секунд...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "oneOfYourDevicesIsNotVerified": "Адна з вашых прылад не спраўджана",
     "noticeChatBackupDeviceVerification": "Заўвага: Калі вы падключыце ўсе свае прылады да рэзервовага капіравання, яны аўтаматычна спраўдзяцца.",
     "welcomeText": "Вітаначкі 👋 Гэта FluffyChat. Вы можаце ўвайсці на любы дамашні сервер, што сумяшчальны з https://matrix.org, а потым паразмаўляць з кім-небудзь. Гэта вялізная дэцэнтралізаваная сетка абмену паведамленнямі!",

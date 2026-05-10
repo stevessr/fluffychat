@@ -2430,27 +2430,13 @@
     "compressVideo": "Сжатие видео...",
     "oneOfYourDevicesIsNotVerified": "Одно из ваших устройств не подтверждено",
     "chatPermissionsDescription": "Задайте уровень власти, необходимый для совершения определённых действий в этом чате. Уровни власти 0, 50 и 100 обычно означают пользователей, модераторов и администраторов соответственно, но любая градация также возможна.",
-    "prepareSendingAttachment": "Подготовка к отправке вложения...",
     "sendRoomNotifications": "Упоминать @room",
     "calculatingFileSize": "Вычисление размера файла...",
     "sendingAttachment": "Отправка вложения...",
-    "generatingVideoThumbnail": "Создание превью видео...",
     "noticeChatBackupDeviceVerification": "Примечание: Если вы подключите все свои устройства к резервному копированию чатов, то они автоматически станут подтверждёнными.",
     "changeTheCanonicalRoomAlias": "Изменить основной общедоступный адрес чата",
     "loginWithMatrixId": "Войти через Matrix ID",
     "serverInformation": "Информация о сервере:",
-    "sendingAttachmentCountOfCount": "Отправляется вложение {index} из {length}...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
     "welcomeText": "Привет. Это FluffyChat. Вы можете подписаться на любой сервер, который совместим с https://matrix.org. А потом поболтать с кем нибудь. Это огромная децентрализованная сеть обмена сообщениями!",
     "noContactInformationProvided": "Сервер не предоставляет никакой правдивой контактной информации",
     "aboutHomeserver": "О сервере {homeserver}",
@@ -2734,15 +2720,6 @@
     "@thereAreCountUsersBlocked": {
         "type": "String",
         "count": {}
-    },
-    "serverLimitReached": "Достигнут серверный лимит! Подождите {seconds} секунд...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
     },
     "countVotes": "{count, plural, =1{Один голос} other{{count} голоса(-ов)}}",
     "@countVotes": {

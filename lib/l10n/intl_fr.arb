@@ -2707,35 +2707,10 @@
     },
     "calculatingFileSize": "Calcul en cours...",
     "@calculatingFileSize": {},
-    "prepareSendingAttachment": "Préparation à l'envoi...",
-    "@prepareSendingAttachment": {},
     "sendingAttachment": "Envoi en cours...",
     "@sendingAttachment": {},
-    "generatingVideoThumbnail": "Génération de la vignette...",
-    "@generatingVideoThumbnail": {},
     "compressVideo": "Compression de la vidéo...",
     "@compressVideo": {},
-    "sendingAttachmentCountOfCount": "Envoi {index} sur {length}...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
-    "serverLimitReached": "Nombre de tentatives dépassé! Patientez {seconds} secondes...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "oneOfYourDevicesIsNotVerified": "Un de vos appareils n'est pas vérifié",
     "@oneOfYourDevicesIsNotVerified": {},
     "customReaction": "Réaction",

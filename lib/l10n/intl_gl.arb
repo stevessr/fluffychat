@@ -2466,31 +2466,8 @@
     "loginWithMatrixId": "Acceder co ID-Matrix",
     "doesNotSeemToBeAValidHomeserver": "Non semella ser un servidor de inicio compatible. É o URL correcto?",
     "calculatingFileSize": "Calculando o tamaño do ficheiro…",
-    "prepareSendingAttachment": "Preparando o envío…",
     "sendingAttachment": "Enviando o anexo…",
-    "generatingVideoThumbnail": "Creando miniatura do vídeo…",
     "compressVideo": "Comprimindo o vídeo…",
-    "serverLimitReached": "Acadouse o límite do servidor! Agarda {seconds} segundos…",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
-    "sendingAttachmentCountOfCount": "Enviando o anexo {index} de {length}…",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
     "oneOfYourDevicesIsNotVerified": "Un dos teus dispositivos non está verificado",
     "noticeChatBackupDeviceVerification": "Nota: Cando conectas todos os teus dispositivos á copia de apoio da conversa quedan verificados automaticamente.",
     "blur": "Néboa:",

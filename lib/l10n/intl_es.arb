@@ -2293,15 +2293,6 @@
     },
     "deletePushRuleCanNotBeUndone": "Si eliminas este ajuste de notificación, esto no se puede deshacer.",
     "more": "Más",
-    "serverLimitReached": "¡Alcanzado límite del servidor! Esperando {seconds} segundos...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "groupCanBeFoundViaSearch": "Los grupos se pueden encontrar buscando",
     "addChatOrSubSpace": "Añadir chat o sub espacio",
     "sendRoomNotifications": "Mandar notificación @sala",
@@ -2432,20 +2423,6 @@
     "changeGeneralChatSettings": "Cambiar los ajustes generales de chat",
     "inviteOtherUsers": "Invitar a otros usuarios a este chat",
     "calculatingFileSize": "Calculando tamaño de archivo...",
-    "prepareSendingAttachment": "Prepara envío del adjunto...",
-    "generatingVideoThumbnail": "Generando miniatura de vídeo...",
-    "sendingAttachmentCountOfCount": "Enviando adjunto {index} de {length}...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
     "compressVideo": "Comprimiendo vídeo...",
     "blur": "Difuminar:",
     "continueText": "Continuar",

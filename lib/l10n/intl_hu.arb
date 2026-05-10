@@ -2702,27 +2702,6 @@
     "@ignoreUser": {},
     "commandHint_roomupgrade": "Szoba frissítése a megadott szoba verzióra",
     "@commandHint_roomupgrade": {},
-    "sendingAttachmentCountOfCount": "{index} csatolmány küldése {length}-ból...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
-    "serverLimitReached": "Szerver korlát elérve! {seconds} mp türelem...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "oneOfYourDevicesIsNotVerified": "Egyik készüléke nem hitelesített",
     "@oneOfYourDevicesIsNotVerified": {},
     "synchronizingPleaseWaitCounter": " Szinkronizálás… ({percentage}%)",
@@ -2736,12 +2715,8 @@
     },
     "calculatingFileSize": "Fájl méret kalkulálása...",
     "@calculatingFileSize": {},
-    "prepareSendingAttachment": "Felkészülés csatolmány küldésére...",
-    "@prepareSendingAttachment": {},
     "sendingAttachment": "Csatolmány küldése...",
     "@sendingAttachment": {},
-    "generatingVideoThumbnail": "Videó miniatűr generálása...",
-    "@generatingVideoThumbnail": {},
     "compressVideo": "Videó tömörítése...",
     "@compressVideo": {},
     "contentNotificationSettings": "Tartalom értesítési beállítások",

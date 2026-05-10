@@ -2737,35 +2737,10 @@
     "@doesNotSeemToBeAValidHomeserver": {},
     "calculatingFileSize": "Lasketaan tiedoston kokoa...",
     "@calculatingFileSize": {},
-    "prepareSendingAttachment": "Valmistele lähetettävä liite...",
-    "@prepareSendingAttachment": {},
     "sendingAttachment": "Lähetetään liitettä...",
     "@sendingAttachment": {},
-    "generatingVideoThumbnail": "Videon pikkukuvan luominen...",
-    "@generatingVideoThumbnail": {},
     "compressVideo": "Pakataan videota...",
     "@compressVideo": {},
-    "sendingAttachmentCountOfCount": "Lähetetään {length} pituista liitettä {index}...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
-    "serverLimitReached": "Palvelinraja saavutettu! Odotetaan {seconds} sekuntia...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "oneOfYourDevicesIsNotVerified": "Yhtä laitteistasi ei ole vahvistettu",
     "@oneOfYourDevicesIsNotVerified": {},
     "noticeChatBackupDeviceVerification": "Huomautus: Kun yhdistät kaikki laitteesi keskustelun varmuuskopiointiin, ne vahvistetaan automaattisesti.",

@@ -2465,8 +2465,6 @@
         }
     },
     "calculatingFileSize": "S'està calculant la mida de l'arxiu...",
-    "prepareSendingAttachment": "S'està preparant per enviar l'adjunt...",
-    "generatingVideoThumbnail": "S'està generant la miniatura del vídeo...",
     "noticeChatBackupDeviceVerification": "Nota: quan connectes tots els dispositius al backup del xat, es verifiquen automàticament.",
     "continueText": "Continua",
     "strikeThrough": "Text ratllat",
@@ -2484,27 +2482,6 @@
     },
     "sendingAttachment": "S'està enviant l'adjunt...",
     "compressVideo": "S'està comprimint el vídeo...",
-    "sendingAttachmentCountOfCount": "S'està enviant l'adjunt {index} de {length}...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
-    "serverLimitReached": "S'ha arribat al límit del servidor! Esperant {seconds} segons...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "oneOfYourDevicesIsNotVerified": "Un dels teus dispositius no està verificat",
     "welcomeText": "Hola hola! 👋 Això és FluffyChat. Pots iniciar sessió en qualsevol servidor compatible amb https://matrix.org. I llavors xatejar amb qualsevol. És una xarxa enorme de missatgeria descentralitzada !",
     "blur": "Difumina:",

@@ -2420,19 +2420,6 @@
     "sendingAttachment": "Mengirim lampiran...",
     "compressVideo": "Mengompres video...",
     "calculatingFileSize": "Menghitung ukuran berkas...",
-    "prepareSendingAttachment": "Menyiapkan pengiriman lampiran...",
-    "sendingAttachmentCountOfCount": "Mengirim lampiran {index} dari {length}...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
     "userLevel": "{level} - Pengguna",
     "@userLevel": {
         "type": "String",
@@ -2467,7 +2454,6 @@
     "space": "Space",
     "spaces": "Space",
     "noMoreChatsFound": "Tidak ada chat lagi yang ditemukan...",
-    "generatingVideoThumbnail": "Membuat gambar kecil video...",
     "changelog": "Catatan perubahan",
     "sendRoomNotifications": "Kirim notifikasi @room",
     "updateInstalled": "🎉 Pembaruan {version} terpasang!",
@@ -2480,15 +2466,6 @@
         }
     },
     "inviteOtherUsers": "Undang pengguna lain ke chat ini",
-    "serverLimitReached": "Batasan server tercapai! Menunggu {seconds} detik...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "chatPermissionsDescription": "Tentukan tingkat kekuasaan yang diperlukan untuk tindakan tertentu dalam chat ini. Tingkat kekuasaan 0, 50 dan 100 biasanya mewakili pengguna, moderator dan admin, tetapi gradasi apa pun dimungkinkan.",
     "oneOfYourDevicesIsNotVerified": "Salah satu perangkat Anda tidak terverifikasi",
     "noticeChatBackupDeviceVerification": "Catatan: Ketika Anda menghubungkan semua perangkat Anda ke cadangan chat, mereka akan diverifikasi secara otomatis.",

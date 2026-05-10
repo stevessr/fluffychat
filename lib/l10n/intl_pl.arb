@@ -2239,7 +2239,6 @@
     "banUserDescription": "Użytkownik zostanie zbanowany w czacie i nie będzie w stanie dołączyć do czatu do momentu odbanowania.",
     "sendReadReceipts": "Wysyłaj powiadomienia o przeczytaniu wiadomości",
     "verifyOtherDevice": "🔐 Zweryfikuj inne urządzenie",
-    "prepareSendingAttachment": "Przygotuj wysyłanie załącznika...",
     "acceptedKeyVerification": "{sender} zaakceptował/-a weryfikację kluczy",
     "@acceptedKeyVerification": {
         "type": "String",
@@ -2339,20 +2338,7 @@
     "doesNotSeemToBeAValidHomeserver": "Wydaje się nie być kompatybilnym serwerem domowym. Niepoprawny adres URL?",
     "calculatingFileSize": "Obliczanie rozmiaru pliku...",
     "sendingAttachment": "Wysyłanie załącznika...",
-    "generatingVideoThumbnail": "Generowanie podglądu filmu...",
     "compressVideo": "Kompresowanie filmu...",
-    "sendingAttachmentCountOfCount": "Wysyłanie {index} z {length} części załącznika...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
     "welcomeText": "No cześć! 👋 Tutaj FluffyChat. Możesz zapisać się do dowolnego serwera domowego, kompatybilnego z https://matrix.org i rozmawiać ze wszystkimi. To duża zdecentralizowana sieć czatów!",
     "blur": "Rozmazanie:",
     "opacity": "Przezroczystość:",
@@ -2384,15 +2370,6 @@
     },
     "continueText": "Kontynuuj",
     "noticeChatBackupDeviceVerification": "Uwaga: Urządzenia dodane do kopii zapasowej czatu automatycznie zostają zweryfikowane.",
-    "serverLimitReached": "Osiągnięto limit serwera. Czekanie {seconds} sekund...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "oneOfYourDevicesIsNotVerified": "Jedno z Twoich urządzeń nie jest zweryfikowane",
     "supportPage": "Strona obsługi użytkownika",
     "serverInformation": "Informacje o serwerze:",

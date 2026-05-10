@@ -2405,31 +2405,8 @@
             }
         }
     },
-    "prepareSendingAttachment": "Připravuji odeslání přílohy...",
     "sendingAttachment": "Posílám přílohu...",
-    "generatingVideoThumbnail": "Vytvářím náhledový obrázek videa...",
     "compressVideo": "Komprimuji video...",
-    "sendingAttachmentCountOfCount": "Odesílám přílohu {index} z {length}...",
-    "@sendingAttachmentCountOfCount": {
-        "type": "integer",
-        "placeholders": {
-            "index": {
-                "type": "int"
-            },
-            "length": {
-                "type": "int"
-            }
-        }
-    },
-    "serverLimitReached": "Dosažen limit serveru! Čekám {seconds} sekund...",
-    "@serverLimitReached": {
-        "type": "integer",
-        "placeholders": {
-            "seconds": {
-                "type": "int"
-            }
-        }
-    },
     "oneOfYourDevicesIsNotVerified": "Jedno z vašich zařízení není ověřeno",
     "continueText": "Pokračovat",
     "welcomeText": "Ahoj, ahoj 👋 Tohle je FluffyChat. Můžete se přihlásit k jakémukoliv domácímu serveru, který je kompatibilní s https://matrix.org, a začít s kýmkoliv chatovat. Je to obří decentralizovaná chatovací síť!",
