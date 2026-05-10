@@ -1,4 +1,3 @@
-import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -176,9 +175,6 @@ class ClientChooserButton extends StatelessWidget {
         child: PopupMenuButton<Object>(
           key: Key('accounts_and_settings_buttons'),
           tooltip: 'Accounts and settings',
-          popUpAnimationStyle: FluffyThemes.isColumnMode(context)
-              ? AnimationStyle.noAnimation
-              : null, // https://github.com/flutter/flutter/issues/167180
           onSelected: (o) => _clientSelected(o, context),
           itemBuilder: _bundleMenuItems,
           child: Center(
