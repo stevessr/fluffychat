@@ -37,7 +37,7 @@ abstract class UpdateNotifier {
                     ),
                   ],
                 ),
-                Text(l10n.fluffyChatSupportBannerMessage),
+                Text(l10n.possibleByYou),
               ],
             ),
             actions: [
