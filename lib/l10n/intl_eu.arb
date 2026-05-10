@@ -1344,11 +1344,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "extremeOffensive": "Izugarri iraingarria",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "groups": "Taldeak",
     "@groups": {
         "type": "String",
@@ -1760,16 +1755,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "howOffensiveIsThisContent": "Zenbaterainoko iraingarria da eduki hau?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "Ez da iraingarria",
-    "@inoffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "locationPermissionDeniedNotice": "Kokapen baimena ukatu da. Eman zure kokapena partekatzeko baimena.",
     "@locationPermissionDeniedNotice": {
         "type": "String",
@@ -1810,11 +1795,6 @@
     "scanQrCode": "Eskaneatu QR kodea",
     "obtainingLocation": "Kokapena atzitzen…",
     "@obtainingLocation": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "offensive": "Iraingarria",
-    "@offensive": {
         "type": "String",
         "placeholders": {}
     },

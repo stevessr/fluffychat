@@ -619,11 +619,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "extremeOffensive": "とても攻撃的",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "fileName": "ファイル名",
     "@fileName": {
         "type": "String",
@@ -715,11 +710,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "howOffensiveIsThisContent": "どのくらい攻撃的でしたか？",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
     "id": "ID",
     "@id": {
         "type": "String",
@@ -742,11 +732,6 @@
     },
     "incorrectPassphraseOrKey": "パスフレーズかリカバリーキーが間違っています",
     "@incorrectPassphraseOrKey": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "非攻撃的",
-    "@inoffensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -1011,11 +996,6 @@
                 "type": "int"
             }
         }
-    },
-    "offensive": "攻撃的",
-    "@offensive": {
-        "type": "String",
-        "placeholders": {}
     },
     "offline": "オフライン",
     "@offline": {

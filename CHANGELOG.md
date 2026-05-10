@@ -77,6 +77,7 @@
 - chore: Small design adjustments (Christian Kußowski)
 - chore: Allow localhost with scheme as homeserver (Christian Kußowski)
 - chore: Remove workaround for popup menu crash bug (Christian Kußowski)
+- chore: no longer send deprecated score when reporting an event
 
 ## v2.5.1
 Update to latest version of fcm_shared_isolate to fix push on iOS.

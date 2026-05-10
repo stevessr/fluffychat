@@ -731,11 +731,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "extremeOffensive": "Tre ofenda",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "fileName": "Dosiernomo",
     "@fileName": {
         "type": "String",
@@ -827,11 +822,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "howOffensiveIsThisContent": "Kiel ofenda estas ĉi tiu enhavo?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
     "id": "Identigilo",
     "@id": {
         "type": "String",
@@ -854,11 +844,6 @@
     },
     "incorrectPassphraseOrKey": "Neĝusta pasfrazo aŭ rehava ŝlosilo",
     "@incorrectPassphraseOrKey": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "Neofenda",
-    "@inoffensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -1126,11 +1111,6 @@
     },
     "obtainingLocation": "Akirante lokon…",
     "@obtainingLocation": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "offensive": "Ofenda",
-    "@offensive": {
         "type": "String",
         "placeholders": {}
     },

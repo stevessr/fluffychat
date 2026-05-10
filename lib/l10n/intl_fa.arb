@@ -941,11 +941,6 @@
             }
         }
     },
-    "howOffensiveIsThisContent": "این محتوا چقدر توهین‌آمیز است؟",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
     "enableEmotesGlobally": "فعال کردن بسته شکلک به‌صورت سراسری",
     "@enableEmotesGlobally": {
         "type": "String",
@@ -1002,11 +997,6 @@
     },
     "everythingReady": "همه‌چیز آماده است!",
     "@everythingReady": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "extremeOffensive": "بسیار توهین‌آمیز",
-    "@extremeOffensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -1214,11 +1204,6 @@
     },
     "incorrectPassphraseOrKey": "عبارت عبور یا کلید بازیابی نادرست است",
     "@incorrectPassphraseOrKey": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "بی‌ضرر",
-    "@inoffensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -1488,11 +1473,6 @@
     },
     "none": "هیچ",
     "@none": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "offensive": "توهین‌آمیز",
-    "@offensive": {
         "type": "String",
         "placeholders": {}
     },

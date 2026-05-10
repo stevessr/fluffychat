@@ -143,11 +143,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "extremeOffensive": "매우 공격적임",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "everythingReady": "모든 것이 준비됐어요!",
     "@everythingReady": {
         "type": "String",
@@ -795,11 +790,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "howOffensiveIsThisContent": "이 콘텐츠가 얼마나 모욕적인가요?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
     "hideUnknownEvents": "알 수 없는 이벤트 숨기기",
     "@hideUnknownEvents": {
         "type": "String",
@@ -1108,11 +1098,6 @@
     },
     "offline": "오프라인",
     "@offline": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "offensive": "모욕적임",
-    "@offensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -1736,11 +1721,6 @@
     },
     "inviteContact": "연락처 초대",
     "@inviteContact": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "모욕적이지 않음",
-    "@inoffensive": {
         "type": "String",
         "placeholders": {}
     },

@@ -740,11 +740,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "extremeOffensive": "Extrem beleidigend",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "fileName": "Dateiname",
     "@fileName": {
         "type": "String",
@@ -836,11 +831,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "howOffensiveIsThisContent": "Wie beleidigend ist dieser Inhalt?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
     "id": "ID",
     "@id": {
         "type": "String",
@@ -863,11 +853,6 @@
     },
     "incorrectPassphraseOrKey": "Falsches Passwort oder Wiederherstellungsschlüssel",
     "@incorrectPassphraseOrKey": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "Harmlos",
-    "@inoffensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -1145,11 +1130,6 @@
     },
     "obtainingLocation": "Standort wird ermittelt …",
     "@obtainingLocation": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "offensive": "Beleidigend",
-    "@offensive": {
         "type": "String",
         "placeholders": {}
     },

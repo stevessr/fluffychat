@@ -607,11 +607,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "extremeOffensive": "極端令人反感",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "fileName": "檔案名稱",
     "@fileName": {
         "type": "String",
@@ -703,11 +698,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "howOffensiveIsThisContent": "這個內容有多令人反感？",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
     "id": "ID",
     "@id": {
         "type": "String",
@@ -730,11 +720,6 @@
     },
     "incorrectPassphraseOrKey": "錯誤的密碼短語或恢復金鑰",
     "@incorrectPassphraseOrKey": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "不令人反感",
-    "@inoffensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -999,11 +984,6 @@
                 "type": "int"
             }
         }
-    },
-    "offensive": "令人反感",
-    "@offensive": {
-        "type": "String",
-        "placeholders": {}
     },
     "offline": "離線",
     "@offline": {

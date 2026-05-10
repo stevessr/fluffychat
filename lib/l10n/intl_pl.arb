@@ -1648,11 +1648,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "offensive": "Obraźliwe",
-    "@offensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "pleaseEnterYourPin": "Podaj swój pin",
     "@pleaseEnterYourPin": {
         "type": "String",
@@ -1814,11 +1809,6 @@
         "placeholders": {}
     },
     "removeFromSpace": "Usuń z przestrzeni",
-    "extremeOffensive": "Bardzo obraźliwe",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "errorObtainingLocation": "Błąd w ustalaniu lokalizacji: {error}",
     "@errorObtainingLocation": {
         "type": "String",
@@ -1827,16 +1817,6 @@
                 "type": "String"
             }
         }
-    },
-    "howOffensiveIsThisContent": "Jak bardzo obraźliwa jest ta treść?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "Nieobraźliwe",
-    "@inoffensive": {
-        "type": "String",
-        "placeholders": {}
     },
     "recoveryKey": "Klucz odzyskiwania",
     "recoveryKeyLost": "Utracono klucz odzyskiwania?",

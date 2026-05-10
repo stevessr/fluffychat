@@ -863,11 +863,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "extremeOffensive": "Extremely offensive",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "fileName": "File name",
     "@fileName": {
         "type": "String",
@@ -959,11 +954,6 @@
     "hideRedactedMessages": "Hide redacted messages",
     "hideRedactedMessagesBody": "If someone redacts a message, this message won't be visible in the chat anymore.",
     "hideInvalidOrUnknownMessageFormats": "Hide invalid or unknown message formats",
-    "howOffensiveIsThisContent": "How offensive is this content?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
     "id": "ID",
     "@id": {
         "type": "String",
@@ -980,11 +970,6 @@
     },
     "incorrectPassphraseOrKey": "Incorrect passphrase or recovery key",
     "@incorrectPassphraseOrKey": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "Inoffensive",
-    "@inoffensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -1285,11 +1270,6 @@
     },
     "obtainingLocation": "Obtaining location…",
     "@obtainingLocation": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "offensive": "Offensive",
-    "@offensive": {
         "type": "String",
         "placeholders": {}
     },

@@ -1023,16 +1023,6 @@
     },
     "hideRedactedMessages": "சரிசெய்யப்பட்ட செய்திகளை மறைக்கவும்",
     "hideRedactedMessagesBody": "யாராவது ஒரு செய்தியை மாற்றியமைத்தால், இந்த செய்தி இனி அரட்டையில் காணப்படாது.",
-    "howOffensiveIsThisContent": "இந்த உள்ளடக்கம் எவ்வளவு ஆபத்தானது?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "செயலற்றது",
-    "@inoffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "inviteContact": "தொடர்பை அழைக்கவும்",
     "@inviteContact": {
         "type": "String",
@@ -1130,11 +1120,6 @@
                 "type": "int"
             }
         }
-    },
-    "offensive": "தாக்குதல்",
-    "@offensive": {
-        "type": "String",
-        "placeholders": {}
     },
     "openCamera": "திறந்த கேமரா",
     "@openCamera": {
@@ -1608,11 +1593,6 @@
     },
     "everythingReady": "எல்லாம் தயாராக!",
     "@everythingReady": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "extremeOffensive": "மிகவும் தாக்குதல்",
-    "@extremeOffensive": {
         "type": "String",
         "placeholders": {}
     },

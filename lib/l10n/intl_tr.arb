@@ -744,11 +744,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "extremeOffensive": "Aşırı rahatsız edici",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "fileName": "Dosya adı",
     "@fileName": {
         "type": "String",
@@ -840,11 +835,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "howOffensiveIsThisContent": "Bu içerik ne kadar rahatsız edici?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
     "id": "Kimlik",
     "@id": {
         "type": "String",
@@ -867,11 +857,6 @@
     },
     "incorrectPassphraseOrKey": "Yanlış parola veya kurtarma anahtarı",
     "@incorrectPassphraseOrKey": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "Rahatsız edici değil",
-    "@inoffensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -1161,11 +1146,6 @@
     },
     "obtainingLocation": "Konum alınıyor…",
     "@obtainingLocation": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "offensive": "Rahatsız edici",
-    "@offensive": {
         "type": "String",
         "placeholders": {}
     },

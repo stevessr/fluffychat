@@ -786,11 +786,6 @@
   },
   "homeserver": "Homeserver",
   "@homeserver": {},
-  "extremeOffensive": "Lubhang nakakasakit",
-  "@extremeOffensive": {
-    "type": "String",
-    "placeholders": {}
-  },
   "commandHint_plain": "Magpadala ng hindi na-format na text",
   "@commandHint_plain": {
     "type": "String",

@@ -565,11 +565,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "extremeOffensive": "Extremt stötande",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "fileName": "Filnamn",
     "@fileName": {
         "type": "String",
@@ -656,11 +651,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "howOffensiveIsThisContent": "Hur stötande är detta innehåll?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
     "id": "ID",
     "@id": {
         "type": "String",
@@ -683,11 +673,6 @@
     },
     "incorrectPassphraseOrKey": "Felaktig lösenordsfras eller åsterställningsnyckel",
     "@incorrectPassphraseOrKey": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "Oförargligt",
-    "@inoffensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -947,11 +932,6 @@
                 "type": "int"
             }
         }
-    },
-    "offensive": "Stötande",
-    "@offensive": {
-        "type": "String",
-        "placeholders": {}
     },
     "offline": "Offline",
     "@offline": {

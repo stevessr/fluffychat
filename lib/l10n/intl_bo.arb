@@ -449,10 +449,6 @@
     "type": "String",
     "placeholders": {}
   },
-  "@inoffensive": {
-    "type": "String",
-    "placeholders": {}
-  },
   "@unpin": {
     "type": "String",
     "placeholders": {}
@@ -592,10 +588,6 @@
     }
   },
   "@weSentYouAnEmail": {
-    "type": "String",
-    "placeholders": {}
-  },
-  "@offensive": {
     "type": "String",
     "placeholders": {}
   },
@@ -1261,10 +1253,6 @@
     "type": "String",
     "placeholders": {}
   },
-  "@howOffensiveIsThisContent": {
-    "type": "String",
-    "placeholders": {}
-  },
   "@serverRequiresEmail": {},
   "@screenSharingTitle": {},
   "@sentCallInformations": {
@@ -1707,10 +1695,6 @@
   "@commandHint_hug": {},
   "@replace": {},
   "@reject": {
-    "type": "String",
-    "placeholders": {}
-  },
-  "@extremeOffensive": {
     "type": "String",
     "placeholders": {}
   },

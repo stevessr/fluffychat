@@ -821,18 +821,6 @@ class ChatController extends State<ChatPageWithRoom>
     final event = selectedEvents.single;
     final l10n = L10n.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
-    final score = await showModalActionPopup<int>(
-      context: context,
-      title: l10n.reportMessage,
-      message: l10n.howOffensiveIsThisContent,
-      cancelLabel: l10n.cancel,
-      actions: [
-        AdaptiveModalAction(value: -100, label: l10n.extremeOffensive),
-        AdaptiveModalAction(value: -50, label: l10n.offensive),
-        AdaptiveModalAction(value: 0, label: l10n.inoffensive),
-      ],
-    );
-    if (score == null) return;
     if (!mounted) return;
     final reason = await showTextInputDialog(
       context: context,
@@ -845,12 +833,9 @@ class ChatController extends State<ChatPageWithRoom>
     if (!mounted) return;
     final result = await showFutureLoadingDialog(
       context: context,
-      future: () => Matrix.of(context).client.reportEvent(
-        event.roomId!,
-        event.eventId,
-        reason: reason,
-        score: score,
-      ),
+      future: () => Matrix.of(
+        context,
+      ).client.reportEvent(event.roomId!, event.eventId, reason: reason),
     );
     if (result.error != null) return;
     if (!mounted) return;

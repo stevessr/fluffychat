@@ -1461,16 +1461,6 @@
     "@commandInvalid": {
         "type": "String"
     },
-    "extremeOffensive": "Украй образливий",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "howOffensiveIsThisContent": "Наскільки образливий цей вміст?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
     "participant": "Учасник",
     "@participant": {
         "type": "String",
@@ -1645,11 +1635,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "inoffensive": "Необразливий",
-    "@inoffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "noEncryptionForPublicRooms": "Активувати шифрування можна лише тоді, коли кімната більше не буде загальнодоступною.",
     "@noEncryptionForPublicRooms": {
         "type": "String",
@@ -1699,11 +1684,6 @@
     },
     "obtainingLocation": "Отримання розташування…",
     "@obtainingLocation": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "offensive": "Образливий",
-    "@offensive": {
         "type": "String",
         "placeholders": {}
     },
