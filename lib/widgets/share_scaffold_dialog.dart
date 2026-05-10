@@ -166,22 +166,24 @@ class _ShareScaffoldDialogState extends State<ShareScaffoldDialog> {
           ),
         ],
       ),
-      bottomNavigationBar: AnimatedSize(
-        duration: FluffyThemes.animationDuration,
-        curve: FluffyThemes.animationCurve,
-        child: selectedRoomId == null
-            ? const SizedBox.shrink()
-            : Material(
-                elevation: 8,
-                shadowColor: theme.appBarTheme.shadowColor,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: ElevatedButton(
-                    onPressed: _forwardAction,
-                    child: Text(L10n.of(context).forward),
+      bottomNavigationBar: SafeArea(
+        child: AnimatedSize(
+          duration: FluffyThemes.animationDuration,
+          curve: FluffyThemes.animationCurve,
+          child: selectedRoomId == null
+              ? const SizedBox.shrink()
+              : Material(
+                  elevation: 8,
+                  shadowColor: theme.appBarTheme.shadowColor,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: ElevatedButton(
+                      onPressed: _forwardAction,
+                      child: Text(L10n.of(context).forward),
+                    ),
                   ),
                 ),
-              ),
+        ),
       ),
     );
   }
