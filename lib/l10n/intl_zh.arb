@@ -708,11 +708,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "extremeOffensive": "令人极度反感",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "fileName": "文件名",
     "@fileName": {
         "type": "String",
@@ -804,11 +799,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "howOffensiveIsThisContent": "这些内容有多令人反感？",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
     "id": "ID",
     "@id": {
         "type": "String",
@@ -831,11 +821,6 @@
     },
     "incorrectPassphraseOrKey": "不正确的密码短语或恢复密钥",
     "@incorrectPassphraseOrKey": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "不令人反感",
-    "@inoffensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -1100,11 +1085,6 @@
                 "type": "int"
             }
         }
-    },
-    "offensive": "令人反感",
-    "@offensive": {
-        "type": "String",
-        "placeholders": {}
     },
     "offline": "离线",
     "@offline": {

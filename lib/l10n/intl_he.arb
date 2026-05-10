@@ -902,11 +902,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "extremeOffensive": "פוגעני ביותר",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "hideUnknownEvents": "הסתר אירועים לא ידועים",
     "@hideUnknownEvents": {
         "type": "String",
@@ -945,11 +940,6 @@
     },
     "delete": "מחיקה",
     "@delete": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "לֹא פּוֹגֵעַ",
-    "@inoffensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -1013,11 +1003,6 @@
     },
     "help": "עזרה",
     "@help": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "howOffensiveIsThisContent": "עד כמה התוכן הזה פוגעני?",
-    "@howOffensiveIsThisContent": {
         "type": "String",
         "placeholders": {}
     },
@@ -1236,11 +1221,6 @@
     },
     "noPasswordRecoveryDescription": "עדיין לא הוספת דרך לשחזר את הסיסמה שלך.",
     "@noPasswordRecoveryDescription": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "offensive": "פוגעני",
-    "@offensive": {
         "type": "String",
         "placeholders": {}
     },

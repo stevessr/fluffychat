@@ -199,11 +199,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "offensive": "Maslach",
-    "@offensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "notifications": "Fógraí",
     "@notifications": {
         "type": "String",
@@ -261,11 +256,6 @@
     },
     "invited": "Le cuireadh",
     "@invited": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "Neamhurchóideach",
-    "@inoffensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -1324,16 +1314,6 @@
     },
     "iHaveClickedOnLink": "Chliceáil mé ar an nasc",
     "@iHaveClickedOnLink": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "howOffensiveIsThisContent": "Cé chomh maslach atá an t-ábhar seo?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "extremeOffensive": "Fíor-maslach",
-    "@extremeOffensive": {
         "type": "String",
         "placeholders": {}
     },

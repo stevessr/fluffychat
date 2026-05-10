@@ -1496,11 +1496,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "extremeOffensive": "Rendkívül sértő",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "fontSize": "Betűméret",
     "@fontSize": {
         "type": "String",
@@ -1516,16 +1511,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "howOffensiveIsThisContent": "Mennyire sértő ez a tartalom?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "Nem sértő",
-    "@inoffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "locationPermissionDeniedNotice": "A helymeghatározás visszautasításra került. Kérem engedélyezze, hogy meg tudja osztani helyzetét.",
     "@locationPermissionDeniedNotice": {
         "type": "String",
@@ -1538,11 +1523,6 @@
     },
     "scanQrCode": "QR kód beolvasása",
     "@scanQrCode": {},
-    "offensive": "Sértő",
-    "@offensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "oopsPushError": "Hoppá! Sajnos hiba lépett fel a push értesítések beállításakor.",
     "@oopsPushError": {
         "type": "String",

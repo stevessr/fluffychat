@@ -1596,11 +1596,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "extremeOffensive": "Extremadament ofensiu",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "yourChatBackupHasBeenSetUp": "S’ha configurat la còpia de seguretat del xat.",
     "contentHasBeenReported": "El contingut s’ha denunciat als administradors del servidor",
     "@contentHasBeenReported": {
@@ -1771,11 +1766,6 @@
             }
         }
     },
-    "howOffensiveIsThisContent": "Com d’ofensiu és aquest contingut?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
     "commandHint_clearcache": "Neteja la memòria cau",
     "@commandHint_clearcache": {
         "type": "String",
@@ -1921,11 +1911,6 @@
     },
     "encryptThisChat": "Xifra aquest xat",
     "reopenChat": "Reobre el xat",
-    "inoffensive": "Inofensiu",
-    "@inoffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "addToBundle": "Afegeix al pquet",
     "countFiles": "{count} arxius",
     "@countFiles": {
@@ -1949,11 +1934,6 @@
     "chatPermissions": "Permisos del xat",
     "sender": "Remitent",
     "storeInAndroidKeystore": "Desa en la Android KeyStore",
-    "offensive": "Ofensiu",
-    "@offensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "makeAdminDescription": "Un cop hagis fet admin aquesta persona ja no podràs desfer-ho, ja que llavors tindrà els mateixos permisos que tu.",
     "saveKeyManuallyDescription": "Per desar aquesta clau manualment, pica l'eina de compartir o copia-la al porta-retalls.",
     "editBundlesForAccount": "Edita paquets per aquest compte",

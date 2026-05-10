@@ -1565,11 +1565,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "offensive": "Menyinggung",
-    "@offensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "obtainingLocation": "Mendapatkan lokasi…",
     "@obtainingLocation": {
         "type": "String",
@@ -1627,18 +1622,8 @@
         "type": "String",
         "placeholders": {}
     },
-    "inoffensive": "Tidak menyinggung",
-    "@inoffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "ignore": "Abaikan",
     "@ignore": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "howOffensiveIsThisContent": "Seberapa menyinggungnya konten ini?",
-    "@howOffensiveIsThisContent": {
         "type": "String",
         "placeholders": {}
     },
@@ -1788,11 +1773,6 @@
     },
     "changeTheme": "Ubah tema",
     "@changeTheme": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "extremeOffensive": "Sangat menyinggung",
-    "@extremeOffensive": {
         "type": "String",
         "placeholders": {}
     },

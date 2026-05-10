@@ -231,11 +231,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "offensive": "Agresyvus",
-    "@offensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "offline": "Neprisijungta",
     "@offline": {
         "type": "String",
@@ -589,11 +584,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "extremeOffensive": "Itin įžeidžiantis",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "forward": "Toliau",
     "@forward": {
         "type": "String",
@@ -738,11 +728,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "howOffensiveIsThisContent": "Kiek įžeižiantis šis turinys?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
     "id": "ID",
     "@id": {
         "type": "String",
@@ -755,11 +740,6 @@
     },
     "incorrectPassphraseOrKey": "Neteisinga slaptafrazė arba atkūrimo raktas",
     "@incorrectPassphraseOrKey": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "Neįžeidžiantis",
-    "@inoffensive": {
         "type": "String",
         "placeholders": {}
     },

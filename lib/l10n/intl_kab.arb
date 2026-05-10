@@ -918,11 +918,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "offensive": "Tanṭagt",
-    "@offensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "editRoomAliases": "Ẓreg tizeẓla n taxxamt",
     "@editRoomAliases": {
         "type": "String",
@@ -1260,11 +1255,6 @@
     },
     "incorrectPassphraseOrKey": "Tafyirt n uɛeddi neɣ tasarut n tririt d tarameɣtut",
     "@incorrectPassphraseOrKey": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "Ur yettḍurru ara",
-    "@inoffensive": {
         "type": "String",
         "placeholders": {}
     },

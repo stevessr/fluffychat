@@ -689,11 +689,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "extremeOffensive": "Екстремно увредљив",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "fileName": "Назив фајла",
     "@fileName": {
         "type": "String",
@@ -785,11 +780,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "howOffensiveIsThisContent": "Колико је увредљив овај садржај?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
     "id": "ИД",
     "@id": {
         "type": "String",
@@ -812,11 +802,6 @@
     },
     "incorrectPassphraseOrKey": "Неисправна фраза или кључ опоравка",
     "@incorrectPassphraseOrKey": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "Није увредљив",
-    "@inoffensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -1081,11 +1066,6 @@
                 "type": "int"
             }
         }
-    },
-    "offensive": "Увредљив",
-    "@offensive": {
-        "type": "String",
-        "placeholders": {}
     },
     "offline": "Ван везе",
     "@offline": {

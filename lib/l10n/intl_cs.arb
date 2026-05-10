@@ -741,11 +741,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "extremeOffensive": "Extrémně urážlivé",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "fileName": "Název souboru",
     "@fileName": {
         "type": "String",
@@ -837,11 +832,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "howOffensiveIsThisContent": "Jak urážlivý je tento obsah?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
     "id": "ID",
     "@id": {
         "type": "String",
@@ -864,11 +854,6 @@
     },
     "incorrectPassphraseOrKey": "Nesprávné přístupové heslo anebo klíč pro obnovu",
     "@incorrectPassphraseOrKey": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "Neškodný",
-    "@inoffensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -1158,11 +1143,6 @@
     },
     "obtainingLocation": "Získávání polohy…",
     "@obtainingLocation": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "offensive": "Urážlivé",
-    "@offensive": {
         "type": "String",
         "placeholders": {}
     },

@@ -601,11 +601,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "extremeOffensive": "Erittäin loukkaavaa",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "fileName": "Tiedostonimi",
     "@fileName": {
         "type": "String",
@@ -679,11 +674,6 @@
     },
     "hideUnknownEvents": "Piilota tuntemattomat tapahtumat",
     "@hideUnknownEvents": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "howOffensiveIsThisContent": "Kuinka loukkaavaa tämä sisältö on?",
-    "@howOffensiveIsThisContent": {
         "type": "String",
         "placeholders": {}
     },
@@ -945,11 +935,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "offensive": "Loukkaava",
-    "@offensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "offline": "Poissa verkosta",
     "@offline": {
         "type": "String",
@@ -1101,11 +1086,6 @@
     },
     "encryption": "Salaus",
     "@encryption": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "Loukkaamatonta",
-    "@inoffensive": {
         "type": "String",
         "placeholders": {}
     },

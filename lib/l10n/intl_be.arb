@@ -860,11 +860,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "extremeOffensive": "Занадта абражальны",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "fileName": "Назва файла",
     "@fileName": {
         "type": "String",
@@ -956,11 +951,6 @@
     "hideRedactedMessages": "Схаваць адрэдагаваныя паведамленні",
     "hideRedactedMessagesBody": "Калі хтосьці рэдагуе паведамленне, яно будзе схавана ў чаце.",
     "hideInvalidOrUnknownMessageFormats": "Хаваць памылковыя ці невядомыя фарматы паведамленняў",
-    "howOffensiveIsThisContent": "Наколькі абражальны гэты кантэнт?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
     "id": "ID",
     "@id": {
         "type": "String",
@@ -977,11 +967,6 @@
     },
     "incorrectPassphraseOrKey": "Няслушныя фраза-пароль ці ключ аднаўлення",
     "@incorrectPassphraseOrKey": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "Безабідны",
-    "@inoffensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -1733,11 +1718,6 @@
     },
     "obtainingLocation": "Атрыманне месцазнаходжання…",
     "@obtainingLocation": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "offensive": "Абражальна",
-    "@offensive": {
         "type": "String",
         "placeholders": {}
     },

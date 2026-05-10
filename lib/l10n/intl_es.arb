@@ -1521,11 +1521,6 @@
             }
         }
     },
-    "howOffensiveIsThisContent": "¿Cuán ofensivo es este contenido?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
     "noPasswordRecoveryDescription": "Aún no ha agregado una forma de recuperar su contraseña.",
     "@noPasswordRecoveryDescription": {
         "type": "String",
@@ -1564,11 +1559,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "extremeOffensive": "Extremadamente ofensivo",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "editBlockedServers": "Editar servidores bloqueado",
     "@editBlockedServers": {
         "type": "String",
@@ -1594,11 +1584,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "inoffensive": "Inofensivo",
-    "@inoffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "reason": "Razón",
     "@reason": {
         "type": "String",
@@ -1621,11 +1606,6 @@
     },
     "notifications": "Notificaciones",
     "@notifications": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "offensive": "Ofensiva",
-    "@offensive": {
         "type": "String",
         "placeholders": {}
     },

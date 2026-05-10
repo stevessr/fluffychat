@@ -1323,11 +1323,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "inoffensive": "غير مسيء",
-    "@inoffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "iHaveClickedOnLink": "نقرت على الرابط",
     "@iHaveClickedOnLink": {
         "type": "String",
@@ -1335,11 +1330,6 @@
     },
     "ignore": "تجاهل",
     "@ignore": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "howOffensiveIsThisContent": "ما مدى سوء هذا المحتوى؟",
-    "@howOffensiveIsThisContent": {
         "type": "String",
         "placeholders": {}
     },
@@ -1355,11 +1345,6 @@
     },
     "fontSize": "حجم الخط",
     "@fontSize": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "extremeOffensive": "مسيئة للغاية",
-    "@extremeOffensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -1892,11 +1877,6 @@
     },
     "locationPermissionDeniedNotice": "تم رفض إذن الموقع. الرجاء منح الإذن للقدرة على مشاركة موقعك.",
     "@locationPermissionDeniedNotice": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "offensive": "عدواني",
-    "@offensive": {
         "type": "String",
         "placeholders": {}
     },

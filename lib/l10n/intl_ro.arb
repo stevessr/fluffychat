@@ -206,11 +206,6 @@
             }
         }
     },
-    "howOffensiveIsThisContent": "Cât de ofensiv este acest conținut?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
     "kickFromChat": "Dați afară din chat",
     "@kickFromChat": {
         "type": "String",
@@ -823,11 +818,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "inoffensive": "Inofensiv",
-    "@inoffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "inviteContact": "Invitați contact",
     "@inviteContact": {
         "type": "String",
@@ -1295,11 +1285,6 @@
                 "type": "int"
             }
         }
-    },
-    "offensive": "Ofensiv",
-    "@offensive": {
-        "type": "String",
-        "placeholders": {}
     },
     "or": "Sau",
     "@or": {
@@ -2047,11 +2032,6 @@
                 "type": "String"
             }
         }
-    },
-    "extremeOffensive": "De foarte mare ofensă",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
     },
     "id": "ID",
     "@id": {

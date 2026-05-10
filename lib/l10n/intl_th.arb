@@ -645,10 +645,6 @@
     "type": "String",
     "placeholders": {}
   },
-  "@inoffensive": {
-    "type": "String",
-    "placeholders": {}
-  },
   "@unpin": {
     "type": "String",
     "placeholders": {}
@@ -773,10 +769,6 @@
     }
   },
   "@weSentYouAnEmail": {
-    "type": "String",
-    "placeholders": {}
-  },
-  "@offensive": {
     "type": "String",
     "placeholders": {}
   },
@@ -1370,10 +1362,6 @@
     "placeholders": {}
   },
   "@unverified": {},
-  "@howOffensiveIsThisContent": {
-    "type": "String",
-    "placeholders": {}
-  },
   "@serverRequiresEmail": {},
   "@screenSharingTitle": {},
   "@sentCallInformations": {
@@ -1774,10 +1762,6 @@
     "description": "Usage hint for the command /dm"
   },
   "@reject": {
-    "type": "String",
-    "placeholders": {}
-  },
-  "@extremeOffensive": {
     "type": "String",
     "placeholders": {}
   },

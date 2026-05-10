@@ -722,11 +722,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "extremeOffensive": "Izrazito uvredljiv",
-    "@extremeOffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "fileName": "Ime datoteke",
     "@fileName": {
         "type": "String",
@@ -818,11 +813,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "howOffensiveIsThisContent": "Koliko je ovaj sadržaj uvredljiv?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
     "id": "ID",
     "@id": {
         "type": "String",
@@ -845,11 +835,6 @@
     },
     "incorrectPassphraseOrKey": "Neispravna lozinka ili ključ za obnavljanje",
     "@incorrectPassphraseOrKey": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "Neuvredljiv",
-    "@inoffensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -1109,11 +1094,6 @@
                 "type": "int"
             }
         }
-    },
-    "offensive": "Uvredljiv",
-    "@offensive": {
-        "type": "String",
-        "placeholders": {}
     },
     "offline": "Nepovezano s internetom",
     "@offline": {

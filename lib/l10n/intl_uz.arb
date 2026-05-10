@@ -860,11 +860,6 @@
     "hideRedactedMessages": "Oʻchirilgan xabarlarni yashirish",
     "hideRedactedMessagesBody": "Agar kimdir xabarni oʻchirsa, bu xabar endi suhbatda koʻrinmaydi.",
     "hideInvalidOrUnknownMessageFormats": "Notoʻgʻri yoki nomaʼlum xabar formatlarini yashirish",
-    "howOffensiveIsThisContent": "Bu kontent qanchalik haqoratli?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
     "id": "ID",
     "@id": {
         "type": "String",
@@ -881,11 +876,6 @@
     },
     "incorrectPassphraseOrKey": "Notoʻgʻri parol yoki tiklash kaliti",
     "@incorrectPassphraseOrKey": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "inoffensive": "Zararsiz",
-    "@inoffensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -1029,11 +1019,6 @@
     },
     "everythingReady": "Hammasi tayyor!",
     "@everythingReady": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "extremeOffensive": "O‘ta haqoratomuz",
-    "@extremeOffensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -1281,11 +1266,6 @@
     },
     "obtainingLocation": "Joylashuv aniqlanmoqda…",
     "@obtainingLocation": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "offensive": "Haqoratomuz",
-    "@offensive": {
         "type": "String",
         "placeholders": {}
     },

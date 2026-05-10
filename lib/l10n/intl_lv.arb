@@ -531,11 +531,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "inoffensive": "Nav aizskarošs",
-    "@inoffensive": {
-        "type": "String",
-        "placeholders": {}
-    },
     "unpin": "Atspraust",
     "@unpin": {
         "type": "String",
@@ -694,11 +689,6 @@
     },
     "weSentYouAnEmail": "Mēs nosūtīja e-pasta ziņu",
     "@weSentYouAnEmail": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "offensive": "Aizskarošs",
-    "@offensive": {
         "type": "String",
         "placeholders": {}
     },
@@ -1479,11 +1469,6 @@
         "type": "String",
         "placeholders": {}
     },
-    "howOffensiveIsThisContent": "Cik aizskarošs ir šis saturs?",
-    "@howOffensiveIsThisContent": {
-        "type": "String",
-        "placeholders": {}
-    },
     "serverRequiresEmail": "Šim serverim ir nepieciešams pārbaudīt Tavu e-pasta adresi reģistrācijai.",
     "screenSharingTitle": "ekrāna kopīgošana",
     "sentCallInformations": "{senderName} nosūtīja informāciju par zvanu",
@@ -2005,11 +1990,6 @@
     "replace": "Aizstāt",
     "reject": "Noraidīt",
     "@reject": {
-        "type": "String",
-        "placeholders": {}
-    },
-    "extremeOffensive": "Īpaši aizskarošs",
-    "@extremeOffensive": {
         "type": "String",
         "placeholders": {}
     },
