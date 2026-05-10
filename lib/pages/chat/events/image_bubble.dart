@@ -1,5 +1,6 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/pages/chat/events/file_send_status_indicator.dart';
 import 'package:fluffychat/utils/file_description.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
@@ -57,6 +58,7 @@ class ImageBubble extends StatelessWidget {
         bottomRight: Radius.zero,
       );
     }
+    final fileSendingStatus = event.fileSendingStatus;
 
     return Column(
       mainAxisSize: .min,
@@ -76,31 +78,38 @@ class ImageBubble extends StatelessWidget {
           child: InkWell(
             onTap: onTap,
             borderRadius: borderRadius,
-            child: Hero(
-              tag: event.eventId,
-              child: AppSettings.showThumbnailsInTimeline.value
-                  ? MxcImage(
-                      event: event,
-                      width: width,
-                      height: height,
-                      fit: fit,
-                      animated: animated,
-                      isThumbnail: thumbnailOnly,
-                      placeholder: event.messageType == MessageTypes.Sticker
-                          ? null
-                          : (_) => _ImageBubblePlaceholder(
-                              event: event,
-                              width: width,
-                              height: height,
-                              fit: fit,
-                            ),
-                    )
-                  : _ImageBubblePlaceholder(
-                      event: event,
-                      width: width,
-                      height: height,
-                      fit: fit,
-                    ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Hero(
+                  tag: event.eventId,
+                  child: AppSettings.showThumbnailsInTimeline.value
+                      ? MxcImage(
+                          event: event,
+                          width: width,
+                          height: height,
+                          fit: fit,
+                          animated: animated,
+                          isThumbnail: thumbnailOnly,
+                          placeholder: event.messageType == MessageTypes.Sticker
+                              ? null
+                              : (_) => _ImageBubblePlaceholder(
+                                  event: event,
+                                  width: width,
+                                  height: height,
+                                  fit: fit,
+                                ),
+                        )
+                      : _ImageBubblePlaceholder(
+                          event: event,
+                          width: width,
+                          height: height,
+                          fit: fit,
+                        ),
+                ),
+                if (fileSendingStatus != null)
+                  FileSendStatusIndicator(fileSendingStatus: fileSendingStatus),
+              ],
             ),
           ),
         ),

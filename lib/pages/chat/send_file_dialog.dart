@@ -346,7 +346,7 @@ class SendFileDialogState extends State<SendFileDialog> {
                         controller: _labelTextController,
                         labelText: L10n.of(context).optionalMessage,
                         minLines: 1,
-                        maxLines: 3,
+                        maxLines: 1,
                         maxLength: 255,
                         counterText: '',
                       ),
