@@ -41,22 +41,6 @@ class ImageBubble extends StatelessWidget {
     super.key,
   });
 
-  Widget _buildPlaceholder(BuildContext context) {
-    final blurHashString =
-        event.infoMap.tryGet<String>('xyz.amorgan.blurhash') ??
-        'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
-    return SizedBox(
-      width: width,
-      height: height,
-      child: BlurHash(
-        blurhash: blurHashString,
-        width: width,
-        height: height,
-        fit: fit,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -94,17 +78,29 @@ class ImageBubble extends StatelessWidget {
             borderRadius: borderRadius,
             child: Hero(
               tag: event.eventId,
-              child: MxcImage(
-                event: event,
-                width: width,
-                height: height,
-                fit: fit,
-                animated: animated,
-                isThumbnail: thumbnailOnly,
-                placeholder: event.messageType == MessageTypes.Sticker
-                    ? null
-                    : _buildPlaceholder,
-              ),
+              child: AppSettings.showThumbnailsInTimeline.value
+                  ? MxcImage(
+                      event: event,
+                      width: width,
+                      height: height,
+                      fit: fit,
+                      animated: animated,
+                      isThumbnail: thumbnailOnly,
+                      placeholder: event.messageType == MessageTypes.Sticker
+                          ? null
+                          : (_) => _ImageBubblePlaceholder(
+                              event: event,
+                              width: width,
+                              height: height,
+                              fit: fit,
+                            ),
+                    )
+                  : _ImageBubblePlaceholder(
+                      event: event,
+                      width: width,
+                      height: height,
+                      fit: fit,
+                    ),
             ),
           ),
         ),
@@ -136,6 +132,36 @@ class ImageBubble extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+class _ImageBubblePlaceholder extends StatelessWidget {
+  final Event event;
+  final double width, height;
+  final BoxFit fit;
+
+  const _ImageBubblePlaceholder({
+    required this.event,
+    required this.width,
+    required this.height,
+    required this.fit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final blurHashString =
+        event.infoMap.tryGet<String>('xyz.amorgan.blurhash') ??
+        'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
+    return SizedBox(
+      width: width,
+      height: height,
+      child: BlurHash(
+        blurhash: blurHashString,
+        width: width,
+        height: height,
+        fit: fit,
+      ),
     );
   }
 }

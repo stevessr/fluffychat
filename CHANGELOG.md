@@ -1,4 +1,5 @@
 ## v2.6.0
+- feat: Option to hide thumbnails of images and videos (Christian Kußowski)
 - feat(chat): make messagePreviewMaxLines configurable, with default 128 (Halil Kaskavalci)
 - feat: Add Android summary notification (krille-chan)
 - feat: Enable push notifications for multi account (krille-chan)
@@ -74,6 +75,8 @@
 - chore: Perform a one shot sync in every push helper execution (krille-chan)
 - chore: Remove multi account beta warning (krille-chan)
 - chore: Small design adjustments (Christian Kußowski)
+- chore: Allow localhost with scheme as homeserver (Christian Kußowski)
+- chore: Remove workaround for popup menu crash bug (Christian Kußowski)
 
 ## v2.5.1
 Update to latest version of fcm_shared_isolate to fix push on iOS.

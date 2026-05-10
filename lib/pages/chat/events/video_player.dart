@@ -80,7 +80,8 @@ class EventVideoPlayer extends StatelessWidget {
                 tag: event.eventId,
                 child: Stack(
                   children: [
-                    if (event.hasThumbnail)
+                    if (event.hasThumbnail &&
+                        AppSettings.showThumbnailsInTimeline.value)
                       MxcImage(
                         event: event,
                         isThumbnail: true,

@@ -72,7 +72,8 @@ enum AppSettings<T> {
   sendTimelineEventTimeout<int>('chat.fluffy.send_timeline_event_timeout', 15),
   webNotificationSound<bool>('chat.fluffy.web_notification_sound', true),
   chatFilter<String>('chat.fluffy.chat_filter', 'allChats'),
-  hideRoomsInSpaces<bool>('chat.fluffy.hideRoomsInSpaces', false);
+  hideRoomsInSpaces<bool>('chat.fluffy.hideRoomsInSpaces', false),
+  showThumbnailsInTimeline<bool>('chat.fluffy.showThumbnailsInTimeline', true);
 
   final String key;
   final T defaultValue;
