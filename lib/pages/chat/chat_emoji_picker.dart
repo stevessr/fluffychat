@@ -23,6 +23,7 @@ class _ChatEmojiPickerState extends State<ChatEmojiPicker> {
   Emoji? _firstEmoji;
   Emoji? _secondEmoji;
   Future<GoogleEmojiKitchenImage?>? _googleMashupFuture;
+  Future<List<GoogleEmojiKitchenSuggestion>>? _googleSuggestionsFuture;
 
   ChatController get controller => widget.controller;
 
@@ -36,10 +37,20 @@ class _ChatEmojiPickerState extends State<ChatEmojiPicker> {
     return resolveGoogleEmojiKitchenMix(firstEmoji.emoji, secondEmoji.emoji);
   }
 
+  Future<List<GoogleEmojiKitchenSuggestion>>? _suggestionsForSelection(
+    Emoji? firstEmoji,
+  ) {
+    if (!_mashupMode || firstEmoji == null) {
+      return null;
+    }
+    return resolveGoogleEmojiKitchenSuggestions(firstEmoji.emoji, limit: 8);
+  }
+
   void _setMashupMode(bool enabled) {
     setState(() {
       _mashupMode = enabled;
       _googleMashupFuture = _futureForSelection(_firstEmoji, _secondEmoji);
+      _googleSuggestionsFuture = _suggestionsForSelection(_firstEmoji);
     });
   }
 
@@ -48,6 +59,7 @@ class _ChatEmojiPickerState extends State<ChatEmojiPicker> {
       _firstEmoji = firstEmoji;
       _secondEmoji = secondEmoji;
       _googleMashupFuture = _futureForSelection(firstEmoji, secondEmoji);
+      _googleSuggestionsFuture = _suggestionsForSelection(firstEmoji);
     });
   }
 
@@ -60,10 +72,8 @@ class _ChatEmojiPickerState extends State<ChatEmojiPicker> {
 
     if (_firstEmoji == null) {
       _setMashupSelection(emoji, null);
-    } else if (_secondEmoji == null) {
-      _setMashupSelection(_firstEmoji, emoji);
     } else {
-      _setMashupSelection(_secondEmoji, emoji);
+      _setMashupSelection(_firstEmoji, emoji);
     }
   }
 
@@ -116,10 +126,13 @@ class _ChatEmojiPickerState extends State<ChatEmojiPicker> {
           firstEmoji: _firstEmoji,
           secondEmoji: _secondEmoji,
           matchFuture: _googleMashupFuture,
+          suggestionsFuture: _googleSuggestionsFuture,
           sending: _sendingMashup,
           onEnabledChanged: _setMashupMode,
           onClear: () => _setMashupSelection(null, null),
           onSwap: () => _setMashupSelection(_secondEmoji, _firstEmoji),
+          onSuggestionSelected: (emoji) =>
+              _setMashupSelection(_firstEmoji, emoji),
           onInsertText: () => _insertMashupText(context),
           onSendMatch: (match) => _sendMashup(context, match),
         ),
@@ -225,10 +238,12 @@ class _EmojiMashupPanel extends StatelessWidget {
   final Emoji? firstEmoji;
   final Emoji? secondEmoji;
   final Future<GoogleEmojiKitchenImage?>? matchFuture;
+  final Future<List<GoogleEmojiKitchenSuggestion>>? suggestionsFuture;
   final bool sending;
   final ValueChanged<bool> onEnabledChanged;
   final VoidCallback onClear;
   final VoidCallback onSwap;
+  final ValueChanged<Emoji> onSuggestionSelected;
   final VoidCallback onInsertText;
   final Future<void> Function(GoogleEmojiKitchenImage match) onSendMatch;
 
@@ -237,10 +252,12 @@ class _EmojiMashupPanel extends StatelessWidget {
     required this.firstEmoji,
     required this.secondEmoji,
     required this.matchFuture,
+    required this.suggestionsFuture,
     required this.sending,
     required this.onEnabledChanged,
     required this.onClear,
     required this.onSwap,
+    required this.onSuggestionSelected,
     required this.onInsertText,
     required this.onSendMatch,
   });
@@ -273,7 +290,11 @@ class _EmojiMashupPanel extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      enabled ? l10n.emojiMashupPickHint : l10n.emojiMashupHint,
+                      !enabled
+                          ? l10n.emojiMashupHint
+                          : _canCompose
+                          ? l10n.emojiMashupReady
+                          : l10n.emojiMashupHint,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall,
@@ -295,6 +316,78 @@ class _EmojiMashupPanel extends StatelessWidget {
               ),
               if (enabled) ...[
                 const SizedBox(height: 8),
+                if (firstEmoji != null)
+                  FutureBuilder<List<GoogleEmojiKitchenSuggestion>>(
+                    future: suggestionsFuture,
+                    builder: (context, snapshot) {
+                      final suggestions = snapshot.data ?? const [];
+                      final isWaiting =
+                          snapshot.connectionState == ConnectionState.waiting &&
+                          suggestions.isEmpty;
+                      if (suggestions.isEmpty && !isWaiting) {
+                        return const SizedBox.shrink();
+                      }
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  l10n.emojiMashupPickHint,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.bodySmall,
+                                ),
+                              ),
+                              if (isWaiting)
+                                SizedBox.square(
+                                  dimension: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            height: 42,
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: suggestions.length,
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(width: 8),
+                              itemBuilder: (context, index) {
+                                final suggestion = suggestions[index];
+                                final selected =
+                                    secondEmoji?.emoji == suggestion.emoji;
+                                return ChoiceChip(
+                                  selected: selected,
+                                  label: Text(
+                                    suggestion.emoji,
+                                    style: const TextStyle(fontSize: 18),
+                                  ),
+                                  showCheckmark: false,
+                                  visualDensity: VisualDensity.compact,
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  onSelected: (_) => onSuggestionSelected(
+                                    Emoji(
+                                      suggestion.emoji,
+                                      suggestion.codepointKey,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                if (firstEmoji != null) const SizedBox(height: 8),
                 FutureBuilder<GoogleEmojiKitchenImage?>(
                   future: matchFuture,
                   builder: (context, snapshot) {
