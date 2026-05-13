@@ -134,6 +134,9 @@ class SendFileDialogState extends State<SendFileDialog> {
         if (file.bytes.length > maxUploadSize) {
           throw FileTooBigMatrixException(file.bytes.length, maxUploadSize);
         }
+          if (widget.files.length > 1) {
+            setProgress(sentFiles / totalFiles + 0.4);
+          }
 
         // Show progress / notification when sending multiple files
         if (fileCount > 1) {
@@ -174,6 +177,7 @@ class SendFileDialogState extends State<SendFileDialog> {
               spoiler: isSpoiler,
             );
           }
+          sentFiles++;
         }
 
         try {
