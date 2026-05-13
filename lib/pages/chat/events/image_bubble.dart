@@ -1,7 +1,7 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/pages/chat/events/file_send_status_indicator.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/pages/chat/events/file_send_status_indicator.dart';
 import 'package:fluffychat/utils/file_description.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
@@ -141,7 +141,8 @@ class _ImageBubbleState extends State<ImageBubble> {
                           fit: widget.fit,
                           animated: widget.animated,
                           isThumbnail: widget.thumbnailOnly,
-                          placeholder: widget.event.messageType == MessageTypes.Sticker
+                          placeholder:
+                              widget.event.messageType == MessageTypes.Sticker
                               ? null
                               : _buildPlaceholder,
                         )
@@ -156,7 +157,9 @@ class _ImageBubbleState extends State<ImageBubble> {
                       child: MediaSpoilerOverlay(label: spoilerLabel),
                     ),
                   if (fileSendingStatus != null)
-                    FileSendStatusIndicator(fileSendingStatus: fileSendingStatus),
+                    FileSendStatusIndicator(
+                      fileSendingStatus: fileSendingStatus,
+                    ),
                 ],
               ),
             ),

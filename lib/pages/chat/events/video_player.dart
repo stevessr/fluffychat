@@ -22,12 +22,14 @@ class EventVideoPlayer extends StatefulWidget {
   final Timeline? timeline;
   final Color? textColor;
   final Color? linkColor;
+  final BorderRadius? borderRadius;
 
   const EventVideoPlayer(
     this.event, {
     this.timeline,
     this.textColor,
     this.linkColor,
+    this.borderRadius,
     super.key,
   });
 
@@ -98,7 +100,9 @@ class _EventVideoPlayerState extends State<EventVideoPlayer> {
     final duration = durationInt == null
         ? null
         : Duration(milliseconds: durationInt);
-    final fileSendingStatus = event.fileSendingStatus;
+    final borderRadius =
+        widget.borderRadius ?? BorderRadius.circular(AppConfig.borderRadius);
+    final fileSendingStatus = widget.event.fileSendingStatus;
 
     return Column(
       mainAxisSize: .min,
@@ -106,10 +110,11 @@ class _EventVideoPlayerState extends State<EventVideoPlayer> {
       children: [
         Material(
           color: Colors.black,
-          borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+          clipBehavior: Clip.hardEdge,
+          borderRadius: borderRadius,
           child: InkWell(
             onTap: () => _handleTap(context, supportsVideoPlayer),
-            borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+            borderRadius: borderRadius,
             child: SizedBox(
               width: width,
               height: height,
@@ -117,7 +122,7 @@ class _EventVideoPlayerState extends State<EventVideoPlayer> {
                 tag: widget.event.eventId,
                 child: Stack(
                   children: [
-                    if (event.hasThumbnail &&
+                    if (widget.event.hasThumbnail &&
                         AppSettings.showThumbnailsInTimeline.value)
                       MxcImage(
                         event: widget.event,

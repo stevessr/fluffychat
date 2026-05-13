@@ -122,28 +122,25 @@ class SendFileDialogState extends State<SendFileDialog> {
             throw FileTooBigMatrixException(length, maxUploadSize);
           }
 
-<<<<<<< HEAD
-          // Show progress / notification when sending multiple files
           if (widget.files.length > 1) {
-            final scaffoldMessenger = ScaffoldMessenger.of(widget.outerContext);
-            scaffoldMessenger.showLoadingSnackBar(
-              l10n.sendingAttachmentCountOfCount(
-                widget.files.indexOf(xfile) + 1,
-                widget.files.length,
-              ),
-            );
             setProgress(sentFiles / widget.files.length + 0.4);
           }
 
           final label = _labelTextController.text.trim();
+          final labelOrNull = label.isEmpty ? null : label;
+          final isSpoiler = spoiler && file.msgType == MessageTypes.Image;
+          final extraContent = _buildExtraContent(
+            label: labelOrNull,
+            isSpoiler: isSpoiler,
+          );
 
-          try {
+          Future<void> sendFileEvent() async {
             if (encrypt || !widget.room.encrypted) {
               await widget.room.sendFileEvent(
                 file,
                 thumbnail: thumbnail,
                 shrinkImageMaxDimension: compress ? 1600 : null,
-                extraContent: label.isEmpty ? null : {'body': label},
+                extraContent: extraContent,
                 threadRootEventId: widget.threadRootEventId,
                 threadLastEventId: widget.threadLastEventId,
               );
@@ -151,106 +148,31 @@ class SendFileDialogState extends State<SendFileDialog> {
               await _sendUnencryptedFileEvent(
                 file,
                 thumbnail: thumbnail,
-                label: label.isEmpty ? null : label,
+                label: labelOrNull,
                 shrinkImageMaxDimension: compress ? 1600 : null,
+                spoiler: isSpoiler,
               );
             }
+          }
+
+          try {
+            await sendFileEvent();
           } on MatrixException catch (e) {
             final retryAfterMs = e.retryAfterMs;
-            if (e.error != MatrixError.M_LIMIT_EXCEEDED || retryAfterMs == null) {
+            if (e.error != MatrixError.M_LIMIT_EXCEEDED ||
+                retryAfterMs == null) {
               rethrow;
             }
 
-            final retryAfterDuration = Duration(milliseconds: retryAfterMs + 1000);
+            final retryAfterDuration = Duration(
+              milliseconds: retryAfterMs + 1000,
+            );
             setProgress(sentFiles / widget.files.length + 0.2);
             await Future.delayed(retryAfterDuration);
 
-            // Retry once after waiting
-            if (encrypt || !widget.room.encrypted) {
-              await widget.room.sendFileEvent(
-                file,
-                thumbnail: thumbnail,
-                shrinkImageMaxDimension: compress ? 1600 : null,
-                extraContent: label.isEmpty ? null : {'body': label},
-                threadRootEventId: widget.threadRootEventId,
-                threadLastEventId: widget.threadLastEventId,
-              );
-            } else {
-              await _sendUnencryptedFileEvent(
-                file,
-                thumbnail: thumbnail,
-                label: label.isEmpty ? null : label,
-                shrinkImageMaxDimension: compress ? 1600 : null,
-              );
-            }
+            await sendFileEvent();
           }
           sentFiles++;
-=======
-        if (file.bytes.length > maxUploadSize) {
-          throw FileTooBigMatrixException(length, maxUploadSize);
-        }
-
-        if (widget.files.length > 1) {
-          scaffoldMessenger.showLoadingSnackBar(
-            l10n.sendingAttachmentCountOfCount(
-              widget.files.indexOf(xfile) + 1,
-              widget.files.length,
-            ),
-          );
-        }
-
-        final label = _labelTextController.text.trim();
-        final labelOrNull = label.isEmpty ? null : label;
-        final isSpoiler = spoiler && file.msgType == MessageTypes.Image;
-        final extraContent = _buildExtraContent(
-          label: labelOrNull,
-          isSpoiler: isSpoiler,
-        );
-
-        Future<void> sendFileEvent() async {
-          if (encrypt || !widget.room.encrypted) {
-            await widget.room.sendFileEvent(
-              file,
-              thumbnail: thumbnail,
-              shrinkImageMaxDimension: compress ? 1600 : null,
-              extraContent: extraContent,
-              threadRootEventId: widget.threadRootEventId,
-              threadLastEventId: widget.threadLastEventId,
-            );
-          } else {
-            await _sendUnencryptedFileEvent(
-              file,
-              thumbnail: thumbnail,
-              label: labelOrNull,
-              shrinkImageMaxDimension: compress ? 1600 : null,
-              spoiler: isSpoiler,
-            );
-          }
-        }
-
-        try {
-          await sendFileEvent();
-        } on MatrixException catch (e) {
-          final retryAfterMs = e.retryAfterMs;
-          if (e.error != MatrixError.M_LIMIT_EXCEEDED || retryAfterMs == null) {
-            rethrow;
-          }
-          final retryAfterDuration = Duration(
-            milliseconds: retryAfterMs + 1000,
-          );
-
-          scaffoldMessenger.showSnackBar(
-            SnackBar(
-              content: Text(
-                l10n.serverLimitReached(retryAfterDuration.inSeconds),
-              ),
-            ),
-          );
-          await Future.delayed(retryAfterDuration);
-
-          scaffoldMessenger.showLoadingSnackBar(l10n.sendingAttachment);
-          await sendFileEvent();
->>>>>>> 027f095b (finish)
         }
       },
     );

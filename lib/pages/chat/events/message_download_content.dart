@@ -1,10 +1,7 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
-<<<<<<< HEAD
-import 'package:fluffychat/pages/chat/events/file_send_status_indicator.dart';
-=======
 import 'package:fluffychat/l10n/l10n.dart';
->>>>>>> 155444a1 (update)
+import 'package:fluffychat/pages/chat/events/file_send_status_indicator.dart';
 import 'package:fluffychat/utils/file_description.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
@@ -69,14 +66,10 @@ class _MessageDownloadContentState extends State<MessageDownloadContent> {
                   ?.tryGet<String>('mimetype')
                   ?.toUpperCase() ??
               'UNKNOWN');
-<<<<<<< HEAD
-    final sizeString = event.sizeString ?? '?MB';
-    final fileDescription = event.fileDescription;
-    final fileSendingStatus = event.fileSendingStatus;
-=======
     final sizeString = widget.event.sizeString ?? '?MB';
     final fileDescription = widget.event.fileDescription;
->>>>>>> 155444a1 (update)
+    final fileSendingStatus = widget.event.fileSendingStatus;
+
     return Column(
       mainAxisSize: .min,
       crossAxisAlignment: .start,
@@ -86,41 +79,6 @@ class _MessageDownloadContentState extends State<MessageDownloadContent> {
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
-<<<<<<< HEAD
-            onTap: () => event.saveFile(context),
-            child: Container(
-              width: 400,
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisSize: .min,
-                spacing: 16,
-                children: [
-                  if (fileSendingStatus != null)
-                    FileSendStatusIndicator(
-                      fileSendingStatus: fileSendingStatus,
-                    )
-                  else
-                    CircleAvatar(
-                      backgroundColor: textColor.withAlpha(32),
-                      child: Icon(
-                        Icons.file_download_outlined,
-                        color: textColor,
-                      ),
-                    ),
-                  Flexible(
-                    child: Column(
-                      crossAxisAlignment: .start,
-                      mainAxisSize: .min,
-                      children: [
-                        Text(
-                          filename,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: textColor,
-                            fontWeight: FontWeight.w500,
-                          ),
-=======
             onTap: () => _handleTap(context),
             child: Stack(
               children: [
@@ -131,14 +89,18 @@ class _MessageDownloadContentState extends State<MessageDownloadContent> {
                     mainAxisSize: .min,
                     spacing: 16,
                     children: [
-                      CircleAvatar(
-                        backgroundColor: widget.textColor.withAlpha(32),
-                        child: Icon(
-                          Icons.file_download_outlined,
-                          color: widget.textColor,
->>>>>>> 155444a1 (update)
+                      if (fileSendingStatus != null)
+                        FileSendStatusIndicator(
+                          fileSendingStatus: fileSendingStatus,
+                        )
+                      else
+                        CircleAvatar(
+                          backgroundColor: widget.textColor.withAlpha(32),
+                          child: Icon(
+                            Icons.file_download_outlined,
+                            color: widget.textColor,
+                          ),
                         ),
-                      ),
                       Flexible(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,

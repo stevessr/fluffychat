@@ -2811,7 +2811,17 @@
     "removeTag": "Remove tag",
     "tagName": "Tag name",
     "createNewTag": "Create new tag",
+    "underlineText": "Underline",
+    "@underlineText": {},
+    "spoilerText": "Spoiler",
+    "@spoilerText": {},
+    "inlineCode": "Inline code",
+    "@inlineCode": {},
+    "codeBlock": "Code block",
+    "@codeBlock": {},
+    "quote": "Quote",
+    "@quote": {},
     "hideRoomsInSpaces": "Hide rooms that are in a space",
     "possibleByYou": "This release was only possible thanks to your support. FluffyChat remains free, open-source, and entirely community-driven.",
-    "showThumbnailsInTimeline": "Show thumbnails of images and videos",
+    "showThumbnailsInTimeline": "Show thumbnails of images and videos"
 }
