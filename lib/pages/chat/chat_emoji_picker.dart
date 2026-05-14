@@ -20,74 +20,45 @@ class ChatEmojiPicker extends StatefulWidget {
 class _ChatEmojiPickerState extends State<ChatEmojiPicker> {
   ChatController get controller => widget.controller;
 
-  void _openMashupDialog() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => EmojiMashupDialog(controller: controller),
-    );
-  }
-
   Widget _buildEmojiTab(BuildContext context, ThemeData theme) {
-    return Column(
-      children: [
-        Container(
-          color: theme.colorScheme.surface,
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.auto_awesome),
-                tooltip: L10n.of(context).emojiMashup,
-                onPressed: _openMashupDialog,
-              ),
-              const Spacer(),
-            ],
-          ),
+    return EmojiPicker(
+      onEmojiSelected: controller.onEmojiSelected,
+      onBackspacePressed: controller.emojiPickerBackspace,
+      config: Config(
+        checkPlatformCompatibility: false,
+        locale: Localizations.localeOf(context),
+        emojiSet: emojiSetWithUnicode17,
+        emojiTextStyle: const TextStyle(
+          fontFamilyFallback: [
+            ...FluffyThemes.fontFallbacks,
+            'Apple Color Emoji',
+            'Noto Color Emoji',
+            'Segoe UI Emoji',
+          ],
         ),
-        Expanded(
-          child: EmojiPicker(
-            onEmojiSelected: controller.onEmojiSelected,
-            onBackspacePressed: controller.emojiPickerBackspace,
-            config: Config(
-              checkPlatformCompatibility: false,
-              locale: Localizations.localeOf(context),
-              emojiSet: emojiSetWithUnicode17,
-              emojiTextStyle: const TextStyle(
-                fontFamilyFallback: [
-                  ...FluffyThemes.fontFallbacks,
-                  'Apple Color Emoji',
-                  'Noto Color Emoji',
-                  'Segoe UI Emoji',
-                ],
-              ),
-              emojiViewConfig: EmojiViewConfig(
-                noRecents: const NoRecent(),
-                backgroundColor: theme.colorScheme.onInverseSurface,
-              ),
-              bottomActionBarConfig: const BottomActionBarConfig(
-                enabled: false,
-              ),
-              categoryViewConfig: CategoryViewConfig(
-                backspaceColor: theme.colorScheme.primary,
-                iconColor: theme.colorScheme.primary.withAlpha(128),
-                iconColorSelected: theme.colorScheme.primary,
-                indicatorColor: theme.colorScheme.primary,
-                backgroundColor: theme.colorScheme.surface,
-              ),
-              skinToneConfig: SkinToneConfig(
-                dialogBackgroundColor: Color.lerp(
-                  theme.colorScheme.surface,
-                  theme.colorScheme.primaryContainer,
-                  0.75,
-                )!,
-                indicatorColor: theme.colorScheme.onSurface,
-              ),
-            ),
-          ),
+        emojiViewConfig: EmojiViewConfig(
+          noRecents: const NoRecent(),
+          backgroundColor: theme.colorScheme.onInverseSurface,
         ),
-      ],
+        bottomActionBarConfig: const BottomActionBarConfig(
+          enabled: false,
+        ),
+        categoryViewConfig: CategoryViewConfig(
+          backspaceColor: theme.colorScheme.primary,
+          iconColor: theme.colorScheme.primary.withAlpha(128),
+          iconColorSelected: theme.colorScheme.primary,
+          indicatorColor: theme.colorScheme.primary,
+          backgroundColor: theme.colorScheme.surface,
+        ),
+        skinToneConfig: SkinToneConfig(
+          dialogBackgroundColor: Color.lerp(
+            theme.colorScheme.surface,
+            theme.colorScheme.primaryContainer,
+            0.75,
+          )!,
+          indicatorColor: theme.colorScheme.onSurface,
+        ),
+      ),
     );
   }
 

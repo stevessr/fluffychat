@@ -413,6 +413,14 @@ class ChatView extends StatelessWidget {
                                                     forceUnencrypted: true,
                                                   )
                                                 : null,
+                                            onEmojiMashup: () {
+                                              showModalBottomSheet(
+                                                context: context,
+                                                isScrollControlled: true,
+                                                backgroundColor: Colors.transparent,
+                                                builder: (context) => EmojiMashupDialog(controller: controller),
+                                              );
+                                            },
                                           ),
                                           ChatInputRow(controller),
                                           ChatEmojiPicker(controller),
