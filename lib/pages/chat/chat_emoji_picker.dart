@@ -18,127 +18,37 @@ class ChatEmojiPicker extends StatefulWidget {
 }
 
 class _ChatEmojiPickerState extends State<ChatEmojiPicker> {
-  bool _mashupMode = false;
-  bool _sendingMashup = false;
-  Emoji? _firstEmoji;
-  Emoji? _secondEmoji;
-  Future<GoogleEmojiKitchenImage?>? _googleMashupFuture;
-  Future<List<GoogleEmojiKitchenSuggestion>>? _googleSuggestionsFuture;
-
   ChatController get controller => widget.controller;
 
-  Future<GoogleEmojiKitchenImage?>? _futureForSelection(
-    Emoji? firstEmoji,
-    Emoji? secondEmoji,
-  ) {
-    if (!_mashupMode || firstEmoji == null || secondEmoji == null) {
-      return null;
-    }
-    return resolveGoogleEmojiKitchenMix(firstEmoji.emoji, secondEmoji.emoji);
-  }
-
-  Future<List<GoogleEmojiKitchenSuggestion>>? _suggestionsForSelection(
-    Emoji? firstEmoji,
-  ) {
-    if (!_mashupMode || firstEmoji == null) {
-      return null;
-    }
-    return resolveGoogleEmojiKitchenSuggestions(firstEmoji.emoji, limit: 8);
-  }
-
-  void _setMashupMode(bool enabled) {
-    setState(() {
-      _mashupMode = enabled;
-      _googleMashupFuture = _futureForSelection(_firstEmoji, _secondEmoji);
-      _googleSuggestionsFuture = _suggestionsForSelection(_firstEmoji);
-    });
-  }
-
-  void _setMashupSelection(Emoji? firstEmoji, Emoji? secondEmoji) {
-    setState(() {
-      _firstEmoji = firstEmoji;
-      _secondEmoji = secondEmoji;
-      _googleMashupFuture = _futureForSelection(firstEmoji, secondEmoji);
-      _googleSuggestionsFuture = _suggestionsForSelection(firstEmoji);
-    });
-  }
-
-  void _onEmojiSelected(Category? category, Emoji? emoji) {
-    if (!_mashupMode) {
-      controller.onEmojiSelected(category, emoji);
-      return;
-    }
-    if (emoji == null) return;
-
-    if (_firstEmoji == null) {
-      _setMashupSelection(emoji, null);
-    } else {
-      _setMashupSelection(_firstEmoji, emoji);
-    }
-  }
-
-  void _insertMashupText(BuildContext context) {
-    final firstEmoji = _firstEmoji;
-    final secondEmoji = _secondEmoji;
-    if (firstEmoji == null || secondEmoji == null) return;
-
-    controller.typeEmoji(
-      Emoji(firstEmoji.emoji + secondEmoji.emoji, L10n.of(context).emojiMashup),
+  void _openMashupDialog() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => EmojiMashupDialog(controller: controller),
     );
-    controller.onInputBarChanged(controller.sendController.text);
-  }
-
-  Future<void> _sendMashup(
-    BuildContext context,
-    GoogleEmojiKitchenImage match,
-  ) async {
-    if (_sendingMashup) return;
-
-    final l10n = L10n.of(context);
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    setState(() => _sendingMashup = true);
-    try {
-      await controller.room.sendFileEvent(
-        match.toMatrixFile(),
-        extraContent: {'body': '${l10n.emojiMashup}: ${match.fallbackText}'},
-        threadRootEventId: controller.activeThreadId,
-        threadLastEventId: controller.threadLastEventId,
-      );
-      if (!context.mounted) return;
-      controller.hideEmojiPicker();
-    } catch (e) {
-      if (!context.mounted) return;
-      scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text('${l10n.oopsSomethingWentWrong}: $e')),
-      );
-    } finally {
-      if (mounted) {
-        setState(() => _sendingMashup = false);
-      }
-    }
   }
 
   Widget _buildEmojiTab(BuildContext context, ThemeData theme) {
     return Column(
       children: [
-        _EmojiMashupPanel(
-          enabled: _mashupMode,
-          firstEmoji: _firstEmoji,
-          secondEmoji: _secondEmoji,
-          matchFuture: _googleMashupFuture,
-          suggestionsFuture: _googleSuggestionsFuture,
-          sending: _sendingMashup,
-          onEnabledChanged: _setMashupMode,
-          onClear: () => _setMashupSelection(null, null),
-          onSwap: () => _setMashupSelection(_secondEmoji, _firstEmoji),
-          onSuggestionSelected: (emoji) =>
-              _setMashupSelection(_firstEmoji, emoji),
-          onInsertText: () => _insertMashupText(context),
-          onSendMatch: (match) => _sendMashup(context, match),
+        Container(
+          color: theme.colorScheme.surface,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.auto_awesome),
+                tooltip: L10n.of(context).emojiMashup,
+                onPressed: _openMashupDialog,
+              ),
+              const Spacer(),
+            ],
+          ),
         ),
         Expanded(
           child: EmojiPicker(
-            onEmojiSelected: _onEmojiSelected,
+            onEmojiSelected: controller.onEmojiSelected,
             onBackspacePressed: controller.emojiPickerBackspace,
             config: Config(
               checkPlatformCompatibility: false,
@@ -233,152 +143,205 @@ class _ChatEmojiPickerState extends State<ChatEmojiPicker> {
   }
 }
 
-class _EmojiMashupPanel extends StatelessWidget {
-  final bool enabled;
-  final Emoji? firstEmoji;
-  final Emoji? secondEmoji;
-  final Future<GoogleEmojiKitchenImage?>? matchFuture;
-  final Future<List<GoogleEmojiKitchenSuggestion>>? suggestionsFuture;
-  final bool sending;
-  final ValueChanged<bool> onEnabledChanged;
-  final VoidCallback onClear;
-  final VoidCallback onSwap;
-  final ValueChanged<Emoji> onSuggestionSelected;
-  final VoidCallback onInsertText;
-  final Future<void> Function(GoogleEmojiKitchenImage match) onSendMatch;
+class EmojiMashupDialog extends StatefulWidget {
+  final ChatController controller;
 
-  const _EmojiMashupPanel({
-    required this.enabled,
-    required this.firstEmoji,
-    required this.secondEmoji,
-    required this.matchFuture,
-    required this.suggestionsFuture,
-    required this.sending,
-    required this.onEnabledChanged,
-    required this.onClear,
-    required this.onSwap,
-    required this.onSuggestionSelected,
-    required this.onInsertText,
-    required this.onSendMatch,
-  });
+  const EmojiMashupDialog({required this.controller, super.key});
 
-  bool get _canCompose => firstEmoji != null && secondEmoji != null;
+  @override
+  State<EmojiMashupDialog> createState() => _EmojiMashupDialogState();
+}
+
+class _EmojiMashupDialogState extends State<EmojiMashupDialog> {
+  Emoji? _firstEmoji;
+  Emoji? _secondEmoji;
+  bool _sending = false;
+
+  Future<GoogleEmojiKitchenImage?>? get _mashupFuture =>
+      _firstEmoji != null && _secondEmoji != null
+          ? resolveGoogleEmojiKitchenMix(_firstEmoji!.emoji, _secondEmoji!.emoji)
+          : null;
+
+  Future<List<GoogleEmojiKitchenSuggestion>>? get _suggestionsFuture =>
+      _firstEmoji != null
+          ? resolveGoogleEmojiKitchenSuggestions(_firstEmoji!.emoji, limit: 8)
+          : null;
+
+  void _onEmojiSelected(Category? category, Emoji? emoji) {
+    if (emoji == null) return;
+    setState(() {
+      if (_firstEmoji == null) {
+        _firstEmoji = emoji;
+      } else {
+        _secondEmoji = emoji;
+      }
+    });
+  }
+
+  Future<void> _sendMashup(GoogleEmojiKitchenImage match) async {
+    if (_sending) return;
+    setState(() => _sending = true);
+    try {
+      await widget.controller.room.sendFileEvent(
+        match.toMatrixFile(),
+        extraContent: {'body': '${L10n.of(context).emojiMashup}: ${match.fallbackText}'},
+        threadRootEventId: widget.controller.activeThreadId,
+        threadLastEventId: widget.controller.threadLastEventId,
+      );
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      widget.controller.hideEmojiPicker();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${L10n.of(context).oopsSomethingWentWrong}: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = L10n.of(context);
+    final screenHeight = MediaQuery.sizeOf(context).height;
 
-    return Material(
-      color: theme.colorScheme.surfaceContainerHighest.withAlpha(150),
-      child: AnimatedSize(
-        duration: FluffyThemes.animationDuration,
-        curve: FluffyThemes.animationCurve,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  FilterChip(
-                    avatar: const Icon(Icons.auto_awesome, size: 18),
-                    label: Text(l10n.emojiMashup),
-                    selected: enabled,
-                    onSelected: onEnabledChanged,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      !enabled
-                          ? l10n.emojiMashupHint
-                          : _canCompose
-                          ? l10n.emojiMashupReady
-                          : l10n.emojiMashupHint,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall,
+    return Container(
+      height: screenHeight * 0.75,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            ),
+            child: Column(
+              children: [
+                Center(
+                  child: Container(
+                    width: 32,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.onSurfaceVariant.withAlpha(100),
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  if (enabled) ...[
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    const Icon(Icons.auto_awesome, size: 20),
+                    const SizedBox(width: 8),
+                    Text(l10n.emojiMashup, style: theme.textTheme.titleMedium),
+                    const Spacer(),
                     IconButton(
-                      tooltip: l10n.reset,
-                      onPressed: _canCompose ? onClear : null,
-                      icon: const Icon(Icons.clear_all),
-                    ),
-                    IconButton(
-                      tooltip: l10n.emojiMashupSwap,
-                      onPressed: _canCompose ? onSwap : null,
-                      icon: const Icon(Icons.swap_horiz),
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
-                ],
-              ),
-              if (enabled) ...[
-                const SizedBox(height: 8),
-                if (firstEmoji != null)
+                ),
+                const SizedBox(height: 16),
+                FutureBuilder<GoogleEmojiKitchenImage?>(
+                  future: _mashupFuture,
+                  builder: (context, snapshot) {
+                    final match = snapshot.data;
+                    final isWaiting = _firstEmoji != null && _secondEmoji != null &&
+                        snapshot.connectionState == ConnectionState.waiting;
+
+                    return Container(
+                      height: 160,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: match != null
+                          ? Image.memory(match.bytes, fit: BoxFit.contain)
+                          : isWaiting
+                          ? Center(child: CircularProgressIndicator())
+                          : Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (_firstEmoji != null)
+                                    Text(_firstEmoji!.emoji, style: const TextStyle(fontSize: 48)),
+                                  if (_firstEmoji != null && _secondEmoji == null)
+                                    const Icon(Icons.add, size: 32),
+                                  if (_secondEmoji != null)
+                                    Text(_secondEmoji!.emoji, style: const TextStyle(fontSize: 48)),
+                                  if (_firstEmoji == null)
+                                    Icon(Icons.auto_awesome, size: 48, color: theme.colorScheme.onSurfaceVariant),
+                                ],
+                              ),
+                            ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                if (_firstEmoji != null && _secondEmoji != null)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.swap_horiz),
+                        onPressed: () => setState(() {
+                          final temp = _firstEmoji;
+                          _firstEmoji = _secondEmoji;
+                          _secondEmoji = temp;
+                        }),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () => setState(() {
+                          _firstEmoji = null;
+                          _secondEmoji = null;
+                        }),
+                      ),
+                      const SizedBox(width: 16),
+                      FutureBuilder<GoogleEmojiKitchenImage?>(
+                        future: _mashupFuture,
+                        builder: (context, snapshot) {
+                          final match = snapshot.data;
+                          return FilledButton.icon(
+                            onPressed: match != null && !_sending ? () => _sendMashup(match) : null,
+                            icon: _sending
+                                ? const SizedBox.square(
+                                    dimension: 16,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : const Icon(Icons.send),
+                            label: Text(l10n.send),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                if (_firstEmoji != null)
                   FutureBuilder<List<GoogleEmojiKitchenSuggestion>>(
-                    future: suggestionsFuture,
+                    future: _suggestionsFuture,
                     builder: (context, snapshot) {
                       final suggestions = snapshot.data ?? const [];
-                      final isWaiting =
-                          snapshot.connectionState == ConnectionState.waiting &&
-                          suggestions.isEmpty;
-                      if (suggestions.isEmpty && !isWaiting) {
-                        return const SizedBox.shrink();
-                      }
-
+                      if (suggestions.isEmpty) return const SizedBox.shrink();
                       return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  l10n.emojiMashupPickHint,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.bodySmall,
-                                ),
-                              ),
-                              if (isWaiting)
-                                SizedBox.square(
-                                  dimension: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 12),
                           SizedBox(
-                            height: 42,
+                            height: 40,
                             child: ListView.separated(
                               scrollDirection: Axis.horizontal,
                               itemCount: suggestions.length,
-                              separatorBuilder: (_, _) =>
-                                  const SizedBox(width: 8),
+                              separatorBuilder: (_, _) => const SizedBox(width: 8),
                               itemBuilder: (context, index) {
-                                final suggestion = suggestions[index];
-                                final selected =
-                                    secondEmoji?.emoji == suggestion.emoji;
-                                return ChoiceChip(
-                                  selected: selected,
-                                  label: Text(
-                                    suggestion.emoji,
-                                    style: const TextStyle(fontSize: 18),
-                                  ),
-                                  showCheckmark: false,
-                                  visualDensity: VisualDensity.compact,
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                  onSelected: (_) => onSuggestionSelected(
-                                    Emoji(
-                                      suggestion.emoji,
-                                      suggestion.codepointKey,
-                                    ),
-                                  ),
+                                final s = suggestions[index];
+                                return ActionChip(
+                                  label: Text(s.emoji, style: const TextStyle(fontSize: 20)),
+                                  onPressed: () => _onEmojiSelected(null, Emoji(s.emoji, s.codepointKey)),
                                 );
                               },
                             ),
@@ -387,199 +350,50 @@ class _EmojiMashupPanel extends StatelessWidget {
                       );
                     },
                   ),
-                if (firstEmoji != null) const SizedBox(height: 8),
-                FutureBuilder<GoogleEmojiKitchenImage?>(
-                  future: matchFuture,
-                  builder: (context, snapshot) {
-                    final match = snapshot.data;
-                    final isWaiting =
-                        _canCompose &&
-                        snapshot.connectionState == ConnectionState.waiting;
-                    final isReady = match != null;
-                    final statusText = !_canCompose
-                        ? l10n.emojiMashupPickHint
-                        : isWaiting
-                        ? l10n.loadingPleaseWait
-                        : isReady
-                        ? l10n.emojiMashupReady
-                        : l10n.unavailable;
-
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          children: [
-                            _EmojiSlot(
-                              label: l10n.emojiMashupFirst,
-                              emoji: firstEmoji?.emoji,
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 8),
-                              child: Icon(Icons.add),
-                            ),
-                            _EmojiSlot(
-                              label: l10n.emojiMashupSecond,
-                              emoji: secondEmoji?.emoji,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _GoogleEmojiKitchenPreview(
-                                firstEmoji: firstEmoji?.emoji,
-                                secondEmoji: secondEmoji?.emoji,
-                                snapshot: snapshot,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                statusText,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.bodySmall,
-                              ),
-                            ),
-                            TextButton.icon(
-                              onPressed: _canCompose ? onInsertText : null,
-                              icon: const Icon(Icons.text_fields),
-                              label: Text(l10n.emojiMashupInsertText),
-                            ),
-                            const SizedBox(width: 8),
-                            FilledButton.icon(
-                              onPressed: isReady && !sending
-                                  ? () => onSendMatch(match)
-                                  : null,
-                              icon: sending
-                                  ? const SizedBox.square(
-                                      dimension: 16,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Icon(Icons.send),
-                              label: Text(l10n.emojiMashupSend),
-                            ),
-                          ],
-                        ),
-                      ],
-                    );
-                  },
-                ),
               ],
-            ],
+            ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _EmojiSlot extends StatelessWidget {
-  final String label;
-  final String? emoji;
-
-  const _EmojiSlot({required this.label, required this.emoji});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      width: 68,
-      height: 68,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: theme.colorScheme.outlineVariant),
-        color: theme.colorScheme.surface,
-      ),
-      child: emoji == null
-          ? Text(
-              label,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.labelSmall,
-            )
-          : Text(
-              emoji!,
-              style: const TextStyle(
-                fontSize: 30,
-                fontFamilyFallback: [
-                  ...FluffyThemes.fontFallbacks,
-                  'Apple Color Emoji',
-                  'Noto Color Emoji',
-                  'Segoe UI Emoji',
-                ],
+          Expanded(
+            child: EmojiPicker(
+              onEmojiSelected: _onEmojiSelected,
+              onBackspacePressed: null,
+              config: Config(
+                checkPlatformCompatibility: false,
+                locale: Localizations.localeOf(context),
+                emojiSet: emojiSetWithUnicode17,
+                emojiTextStyle: const TextStyle(
+                  fontFamilyFallback: [
+                    ...FluffyThemes.fontFallbacks,
+                    'Apple Color Emoji',
+                    'Noto Color Emoji',
+                    'Segoe UI Emoji',
+                  ],
+                ),
+                emojiViewConfig: EmojiViewConfig(
+                  noRecents: const NoRecent(),
+                  backgroundColor: theme.colorScheme.surface,
+                ),
+                bottomActionBarConfig: const BottomActionBarConfig(enabled: false),
+                categoryViewConfig: CategoryViewConfig(
+                  backspaceColor: theme.colorScheme.primary,
+                  iconColor: theme.colorScheme.primary.withAlpha(128),
+                  iconColorSelected: theme.colorScheme.primary,
+                  indicatorColor: theme.colorScheme.primary,
+                  backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                ),
+                skinToneConfig: SkinToneConfig(
+                  dialogBackgroundColor: Color.lerp(
+                    theme.colorScheme.surface,
+                    theme.colorScheme.primaryContainer,
+                    0.75,
+                  )!,
+                  indicatorColor: theme.colorScheme.onSurface,
+                ),
               ),
             ),
-    );
-  }
-}
-
-class _GoogleEmojiKitchenPreview extends StatelessWidget {
-  final String? firstEmoji;
-  final String? secondEmoji;
-  final AsyncSnapshot<GoogleEmojiKitchenImage?> snapshot;
-
-  const _GoogleEmojiKitchenPreview({
-    required this.firstEmoji,
-    required this.secondEmoji,
-    required this.snapshot,
-  });
-
-  bool get _canCompose => firstEmoji != null && secondEmoji != null;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final match = snapshot.data;
-    final isWaiting =
-        _canCompose && snapshot.connectionState == ConnectionState.waiting;
-
-    Widget child;
-    if (!_canCompose) {
-      child = Icon(
-        Icons.auto_awesome,
-        color: theme.colorScheme.onSurfaceVariant,
-      );
-    } else if (isWaiting) {
-      child = SizedBox.square(
-        dimension: 22,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          color: theme.colorScheme.primary,
-        ),
-      );
-    } else if (match == null) {
-      child = Icon(Icons.cloud_off, color: theme.colorScheme.onSurfaceVariant);
-    } else {
-      child = SizedBox.expand(
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Image.memory(
-            match.bytes,
-            fit: BoxFit.contain,
-            gaplessPlayback: true,
-            errorBuilder: (_, _, _) => Icon(
-              Icons.cloud_off,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
           ),
-        ),
-      );
-    }
-
-    return AnimatedContainer(
-      duration: FluffyThemes.animationDuration,
-      curve: FluffyThemes.animationCurve,
-      height: 88,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: theme.colorScheme.outlineVariant),
-        color: theme.colorScheme.surface,
+        ],
       ),
-      child: match == null ? Center(child: child) : child,
     );
   }
 }
