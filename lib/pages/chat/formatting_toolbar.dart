@@ -5,12 +5,14 @@ class FormattingToolbar extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback? onFormatApplied;
   final VoidCallback? onSendUnencrypted;
+  final VoidCallback? onEmojiMashup;
   final bool showSendUnencryptedAction;
 
   const FormattingToolbar({
     required this.controller,
     this.onFormatApplied,
     this.onSendUnencrypted,
+    this.onEmojiMashup,
     this.showSendUnencryptedAction = false,
     super.key,
   });
@@ -113,6 +115,12 @@ class FormattingToolbar extends StatelessWidget {
                   tooltip: l10n.quote,
                   onPressed: () => _wrapSelection('> ', ''),
                 ),
+                if (onEmojiMashup != null)
+                  _FormatButton(
+                    icon: Icons.auto_awesome,
+                    tooltip: l10n.emojiMashup,
+                    onPressed: onEmojiMashup!,
+                  ),
               ],
             ),
           ),
