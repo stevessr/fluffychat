@@ -37,6 +37,7 @@ import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:fluffychat/widgets/share_scaffold_dialog.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -793,6 +794,26 @@ class ChatController extends State<ChatPageWithRoom>
       context: context,
       builder: (c) => SendFileDialog(
         files: files,
+        room: room,
+        outerContext: context,
+        threadRootEventId: activeThreadId,
+        threadLastEventId: threadLastEventId,
+      ),
+    );
+  }
+
+  Future<void> sendImageFromClipBoard(Uint8List image) async {
+    if (!mounted) return;
+    await showAdaptiveDialog(
+      context: context,
+      builder: (c) => SendFileDialog(
+        files: [
+          XFile.fromData(
+            image,
+            mimeType: 'image/png',
+            name: 'clipboard-image.png',
+          ),
+        ],
         room: room,
         outerContext: context,
         threadRootEventId: activeThreadId,
