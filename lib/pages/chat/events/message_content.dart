@@ -200,7 +200,6 @@ class MessageContent extends StatelessWidget {
                     fontSize: AppSettings.fontSizeFactor.value *
                         AppConfig.messageFontSize *
                         (bigEmotes ? 5 : 1),
-                    limitHeight: !selected,
                     linkStyle: TextStyle(
                       color: linkColor,
                       fontSize: AppSettings.fontSizeFactor.value *
