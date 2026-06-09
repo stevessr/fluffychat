@@ -10,6 +10,7 @@ import 'package:cross_file/cross_file.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view.dart';
+import 'package:fluffychat/utils/dynamic_font_loader.dart';
 import 'package:fluffychat/utils/error_reporter.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -381,6 +382,10 @@ class ChatListController extends State<ChatList>
     scrollController.addListener(_onScroll);
     _waitForFirstSync();
     Matrix.of(context).voipPlugin?.context = context;
+
+    // 预加载扩展字体以加速后续页面
+    DynamicFontLoader().preloadExtendedCJK();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         searchServer = Matrix.of(
