@@ -960,8 +960,6 @@
     "customReactionEmoteSearchHint",
     "customReactionEmotesJumpLabel",
     "customReactionEmotesJumpAll",
-    "showMore",
-    "showLess",
     "underlineText",
     "spoilerText",
     "inlineCode",
@@ -979,22 +977,7 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle",
-    "hideRoomsInSpaces",
-    "possibleByYou",
-    "showThumbnailsInTimeline",
-    "appSubtitle",
-    "appDescription",
-    "interactiveVerification",
-    "interactiveVerificationDescription",
-    "countUnverifiedDevices",
-    "check",
-    "encryptedMessage",
-    "unencryptedMessage",
-    "allow",
-    "allowEncryptedCommunicationWith",
-    "publicKey",
-    "deviceIdentityKey"
+    "emojiMashupStyleSparkle"
   ],
 
   "ga": [
@@ -1610,7 +1593,6 @@
     "customReactionEmoteSearchHint",
     "customReactionEmotesJumpLabel",
     "customReactionEmotesJumpAll",
-    "showMore",
     "showLess",
     "underlineText",
     "spoilerText",
@@ -1643,7 +1625,6 @@
     "unencryptedMessage",
     "allow",
     "allowEncryptedCommunicationWith",
-    "publicKey",
     "deviceIdentityKey"
   ],
 
