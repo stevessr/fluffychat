@@ -44,7 +44,18 @@ abstract class AppConfig {
   static const String helpUrl =
       'https://fluffychat.im/faq/#how_can_i_support_fluffychat';
 
-  static const Set<String> defaultReactions = {'👍', '❤️', '😂', '😮', '😢'};
+  static const Set<String> defaultReactions = {
+    '👍',
+    '❤️',
+    '😂',
+    '🥹',
+    '😭',
+    '🫪',
+    '🌲',
+    '🪨',
+    '💩',
+    '📦'
+  };
 
   static final Uri newIssueUrl = Uri(
     scheme: 'https',
