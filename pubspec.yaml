@@ -107,21 +107,18 @@ flutter:
     - assets/
     - assets/logo/mini/
     - assets/emoji_kitchen_index/
+    - assets/fonts/
+    - assets/logo/img/
+    - assets/sas-emoji.json
     - assets/sounds/
     - assets/vodozemac/
   fonts:
     - family: Unicode18
       fonts:
         - asset: assets/fonts/NotoSansSC-Base.ttf
-    - family: Unicode18Extended
-      fonts:
-        - asset: assets/fonts/NotoSansSC-Extended.ttf
     - family: NotoColorEmoji
       fonts:
         - asset: assets/fonts/NotoColorEmoji-Base.ttf
-    - family: NotoColorEmojiExtended
-      fonts:
-        - asset: assets/fonts/NotoColorEmoji-Extended.ttf
     - family: GoogleSansCode
       fonts:
         - asset: assets/fonts/GoogleSansCode.ttf
