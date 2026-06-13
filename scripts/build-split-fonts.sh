@@ -11,7 +11,9 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 echo "正在拆分字体文件..."
 
 # 检查虚拟环境
-if [ -d "/tmp/font_venv" ]; then
+if [ -x "${ROOT_DIR}/.venv/bin/python" ]; then
+  PYTHON="${ROOT_DIR}/.venv/bin/python"
+elif [ -d "/tmp/font_venv" ]; then
   PYTHON="/tmp/font_venv/bin/python3"
 else
   # 尝试系统 Python
@@ -26,13 +28,14 @@ else
 fi
 
 "${PYTHON}" "${ROOT_DIR}/scripts/split-fonts.py"
+"${PYTHON}" "${ROOT_DIR}/scripts/split-fonts-unicode.py"
 
 echo ""
 echo "✓ 字体拆分完成"
 echo ""
 echo "基础字体大小对比:"
-echo "  NotoSansSC: 16.9MB -> 813KB (节省 95%)"
-echo "  NotoColorEmoji: 10.2MB -> 5.3MB (节省 48%)"
-echo "  总节省: ~21MB"
+echo "  NotoSansSC: 源字体放在 tooling/fonts，不进入 Flutter assets"
+echo "  NotoColorEmoji: 源字体放在 tooling/fonts，不进入 Flutter assets"
+echo "  Extended 完整副本不再生成；Web 优先走 Google Fonts CDN，失败后再走本地分块"
 echo ""
 echo "下一步: flutter pub get && flutter run"

@@ -8,13 +8,17 @@
 字体拆分工具 - 将大字体文件拆分为基础集和扩展集
 
 目标：
-- NotoSansSC: 16.9MB -> 基础 3MB + 扩展 13MB
-- NotoColorEmoji: 10.2MB -> 基础 2MB + 扩展 8MB
+- NotoSansSC: 17MB 源字体 -> 小型本地基础字体
+- NotoColorEmoji: 11MB 源字体 -> 小型本地基础 Emoji 字体
 
 基础集包含：
 - ASCII + 常用标点
 - GB2312 3500 常用汉字
 - 常用 Emoji（~800 个）
+
+注意：不再生成 *-Extended.ttf 的完整副本。Web 端先走 Flutter
+Google Fonts fallback CDN，CDN 不可用时再由 split-fonts-unicode.py 生成的
+本地分块兜底。
 """
 
 import json
@@ -160,16 +164,6 @@ def subset_font(source_path, target_path, chars, font_name):
     finally:
         temp_file.unlink(missing_ok=True)
 
-def create_extended_font(source_path, base_chars, target_path, font_name):
-    """创建扩展字体（排除基础字符）"""
-    # fonttools 不直接支持"排除"，我们需要提取所有字符再过滤
-    # 这里简化处理：让扩展字体包含完整字体，运行时优先使用基础字体
-    import shutil
-    shutil.copy(source_path, target_path)
-
-    size = target_path.stat().st_size
-    print(f"{font_name} (扩展): {size:,} bytes (完整副本)")
-
 def main():
     parser = argparse.ArgumentParser(description='拆分字体文件为基础集和扩展集')
     parser.add_argument('--root', type=pathlib.Path, default=pathlib.Path.cwd(),
@@ -182,8 +176,8 @@ def main():
     args = parser.parse_args()
 
     root_dir = args.root.resolve()
-    source_dir = args.source_dir or root_dir / 'assets' / 'fonts'
-    target_dir = args.target_dir or source_dir
+    source_dir = args.source_dir or root_dir / 'tooling' / 'fonts'
+    target_dir = args.target_dir or root_dir / 'assets' / 'fonts'
 
     if not ensure_fonttools():
         print("错误：无法安装 fonttools", file=sys.stderr)
@@ -222,25 +216,9 @@ def main():
         'NotoColorEmoji-Base'
     )
 
-    # 创建扩展字体（暂时使用完整副本）
-    print("\n创建扩展字体...")
-    create_extended_font(
-        noto_sans_src,
-        cjk_chars,
-        target_dir / 'NotoSansSC-Extended.ttf',
-        'NotoSansSC-Extended'
-    )
-
-    create_extended_font(
-        noto_emoji_src,
-        emoji_chars,
-        target_dir / 'NotoColorEmoji-Extended.ttf',
-        'NotoColorEmoji-Extended'
-    )
-
     print("\n✓ 字体拆分完成")
     print(f"  基础字体：{target_dir}")
-    print(f"  下一步：更新 pubspec.yaml 使用基础字体")
+    print("  未生成 *-Extended.ttf 完整副本；扩展字符请运行 split-fonts-unicode.py 生成分块")
 
     return 0
 
