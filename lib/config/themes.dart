@@ -18,10 +18,21 @@ abstract class FluffyThemes {
   static const List<String> fontFallbacks = [
     'GoogleSansCode',
     'GoogleSansCodeItalic',
+    // Prefer Flutter Web's Google Fonts fallback CDN before local chunks.
+    'Noto Sans SC',
+    'Noto Color Emoji',
+    'Noto Sans Symbols',
+    'Noto Sans Symbols 2',
+    // Local small chunks remain as sub-deployment fallback when CDN fails.
     'Unicode18',
-    'Unicode18Extended',
+    'Unicode18-Common',
+    'Unicode18-ExtA',
+    'Unicode18-ExtB',
+    'Unicode18-ExtCDE',
     'NotoColorEmoji',
-    'NotoColorEmojiExtended',
+    'NotoColorEmoji-Extended',
+    'Apple Color Emoji',
+    'Segoe UI Emoji',
   ];
 
   static bool isColumnModeByWidth(double width) =>
