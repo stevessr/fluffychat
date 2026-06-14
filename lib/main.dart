@@ -11,6 +11,7 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/notification_background_handler.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/web_paths.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -27,10 +28,9 @@ ReceivePort? mainIsolateReceivePort;
 Future<void>? _vodozemacInitFuture;
 const _webMainGuardAttribute = 'data-fluffy-main-started';
 
-Future<void> _ensureVodozemacInitialized() =>
-    _vodozemacInitFuture ??= vod.init(wasmPath: './assets/assets/vodozemac/');
-
-bool _vodozemacInitialized = false;
+Future<void> _ensureVodozemacInitialized() => _vodozemacInitFuture ??= vod.init(
+  wasmPath: resolveWebPath('assets/assets/vodozemac/'),
+);
 
 bool isIntegrationTest = false;
 
