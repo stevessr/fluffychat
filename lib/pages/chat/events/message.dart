@@ -244,9 +244,73 @@ class Message extends StatelessWidget {
           ];
     final eventStateTextColor = theme.colorScheme.onSurface;
     final showSenderHeader =
-        !previousEventSameSender && !ownMessage && !event.room.isDirectChat;
+        !nextEventSameSender && !ownMessage && !event.room.isDirectChat;
     final showSenderPowerLevelIcon =
         showSenderHeader && sender.powerLevel.role != PowerLevelRole.user;
+    final eventStateWidgets = <Widget>[
+      if (event.status.isSent &&
+          (displayTime || !previousEventSameSender || selected))
+        Text(
+          event.originServerTs.localizedTimeOfDay(context),
+          style: TextStyle(
+            color: eventStateTextColor,
+            fontSize: 11,
+            shadows: wallpaperTextShadow,
+          ),
+        ),
+      if (event.hasAggregatedEvents(timeline, RelationshipTypes.edit)) ...[
+        Text(' ', style: TextStyle(fontSize: 11)),
+        Text(
+          L10n.of(context).edited,
+          style: TextStyle(
+            color: eventStateTextColor,
+            fontSize: 11,
+            shadows: wallpaperTextShadow,
+          ),
+        ),
+      ],
+      if (event.status == EventStatus.error) ...[
+        Text(' ', style: TextStyle(fontSize: 11)),
+        Text(
+          L10n.of(context).couldNotBeSent,
+          style: TextStyle(
+            fontSize: 11,
+            color: theme.colorScheme.error,
+            shadows: wallpaperTextShadow,
+          ),
+        ),
+        Text(' ', style: TextStyle(fontSize: 11)),
+        Icon(
+          Icons.error_outlined,
+          size: 14,
+          color: theme.colorScheme.error,
+          shadows: wallpaperTextShadow,
+        ),
+      ],
+      if (event.status == EventStatus.sending) ...[
+        Text(
+          switch (event.fileSendingStatus) {
+            null => L10n.of(context).sending,
+            FileSendingStatus.generatingThumbnail => L10n.of(
+              context,
+            ).generatingThumbnail,
+            FileSendingStatus.encrypting => L10n.of(context).encrypting,
+            FileSendingStatus.uploading => L10n.of(context).uploading,
+          },
+          style: TextStyle(
+            color: eventStateTextColor,
+            fontSize: 11,
+            shadows: wallpaperTextShadow,
+          ),
+        ),
+        Text(' ', style: TextStyle(fontSize: 11)),
+        SizedBox.square(
+          dimension: 11,
+          child: CircularProgressIndicator(strokeWidth: 1),
+        ),
+      ],
+    ];
+    final showEventState = eventStateWidgets.isNotEmpty;
 
     return Center(
       child: Swipeable(
@@ -321,7 +385,7 @@ class Message extends StatelessWidget {
                             onPressed: () => onSelect(event),
                           ),
                         )
-                      else if (previousEventSameSender || ownMessage)
+                      else if (nextEventSameSender || ownMessage)
                         SizedBox(width: avatarSize)
                       else
                         Padding(
@@ -537,105 +601,6 @@ class Message extends StatelessWidget {
                               ),
                             ),
 
-                            AnimatedSize(
-                              duration: FluffyThemes.animationDuration,
-                              curve: FluffyThemes.animationCurve,
-                              alignment: Alignment.bottomCenter,
-                              child: !hasReactions
-                                  ? const SizedBox.shrink()
-                                  : Container(
-                                      alignment: ownMessage
-                                          ? Alignment.centerRight
-                                          : Alignment.centerLeft,
-                                      padding: EdgeInsets.only(
-                                        top: 1.0,
-                                        left: 8.0,
-                                        right: ownMessage ? 0 : 12.0,
-                                      ),
-                                      child: MessageReactions(event, timeline),
-                                    ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(left: 8.0),
-                              child: Row(
-                                mainAxisAlignment: ownMessage ? .end : .start,
-                                children: [
-                                  if (event.status.isSent &&
-                                      (displayTime ||
-                                          !previousEventSameSender ||
-                                          selected))
-                                    Text(
-                                      selected
-                                          ? event.originServerTs.localizedTime(
-                                              context,
-                                            )
-                                          : event.originServerTs
-                                                .localizedTimeOfDay(context),
-                                      style: TextStyle(
-                                        color: eventStateTextColor,
-                                        fontSize: 11,
-                                        shadows: wallpaperTextShadow,
-                                      ),
-                                    ),
-                                  if (isEdited) ...[
-                                    Text(' ', style: TextStyle(fontSize: 11)),
-                                    Text(
-                                      L10n.of(context).edited,
-                                      style: TextStyle(
-                                        color: eventStateTextColor,
-                                        fontSize: 11,
-                                        shadows: wallpaperTextShadow,
-                                      ),
-                                    ),
-                                  ],
-                                  if (event.status == EventStatus.error) ...[
-                                    Text(' ', style: TextStyle(fontSize: 11)),
-                                    Text(
-                                      L10n.of(context).couldNotBeSent,
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: theme.colorScheme.error,
-                                        shadows: wallpaperTextShadow,
-                                      ),
-                                    ),
-                                    Text(' ', style: TextStyle(fontSize: 11)),
-                                    Icon(
-                                      Icons.error_outlined,
-                                      size: 14,
-                                      color: theme.colorScheme.error,
-                                      shadows: wallpaperTextShadow,
-                                    ),
-                                  ],
-                                  if (event.status == EventStatus.sending) ...[
-                                    Text(
-                                      switch (event.fileSendingStatus) {
-                                        null => L10n.of(context).sending,
-                                        FileSendingStatus.generatingThumbnail =>
-                                          L10n.of(context).generatingThumbnail,
-                                        FileSendingStatus.encrypting => L10n.of(
-                                          context,
-                                        ).encrypting,
-                                        FileSendingStatus.uploading => L10n.of(
-                                          context,
-                                        ).uploading,
-                                      },
-                                      style: TextStyle(
-                                        color: eventStateTextColor,
-                                        fontSize: 11,
-                                        shadows: wallpaperTextShadow,
-                                      ),
-                                    ),
-                                    Text(' ', style: TextStyle(fontSize: 11)),
-                                    SizedBox.square(
-                                      dimension: 11,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 1,
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
                             Align(
                               alignment: ownMessage
                                   ? Alignment.bottomRight
@@ -872,6 +837,61 @@ class Message extends StatelessWidget {
                     ],
                   ),
                 ],
+              ),
+
+              AnimatedSize(
+                duration: FluffyThemes.animationDuration,
+                curve: FluffyThemes.animationCurve,
+                alignment: Alignment.bottomCenter,
+                child: !hasReactions && !showEventState
+                    ? const SizedBox.shrink()
+                    : Padding(
+                        padding: const EdgeInsets.only(
+                          top: 1.0,
+                          left: avatarSize + 8.0,
+                          right: 12.0,
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: ownMessage
+                              ? [
+                                  if (showEventState)
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: eventStateWidgets,
+                                    ),
+                                  const Spacer(),
+                                  if (hasReactions)
+                                    Flexible(
+                                      child: Align(
+                                        alignment: Alignment.centerRight,
+                                        child: MessageReactions(
+                                          event,
+                                          timeline,
+                                        ),
+                                      ),
+                                    ),
+                                ]
+                              : [
+                                  if (hasReactions)
+                                    Flexible(
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: MessageReactions(
+                                          event,
+                                          timeline,
+                                        ),
+                                      ),
+                                    ),
+                                  const Spacer(),
+                                  if (showEventState)
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: eventStateWidgets,
+                                    ),
+                                ],
+                        ),
+                      ),
               ),
               if (enterThread != null)
                 AnimatedSize(
