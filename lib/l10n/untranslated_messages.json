@@ -76,7 +76,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "be": [
@@ -156,7 +164,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "bn": [
@@ -237,7 +253,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "bo": [
@@ -318,7 +342,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "ca": [
@@ -398,7 +430,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "cs": [
@@ -478,7 +518,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "da": [
@@ -559,7 +607,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "de": [
@@ -622,7 +678,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "el": [
@@ -710,7 +774,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "eo": [
@@ -790,7 +862,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "es": [
@@ -870,7 +950,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "et": [
@@ -933,7 +1021,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "eu": [
@@ -997,7 +1093,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "fa": [
@@ -1077,7 +1181,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "fi": [
@@ -1157,7 +1269,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "fil": [
@@ -1238,7 +1358,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "fr": [
@@ -1301,7 +1429,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "ga": [
@@ -1364,7 +1500,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "gl": [
@@ -1444,7 +1588,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "he": [
@@ -1524,7 +1676,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "hi": [
@@ -1605,7 +1765,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "hr": [
@@ -1685,7 +1853,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "hu": [
@@ -1765,7 +1941,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "ia": [
@@ -1846,7 +2030,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "id": [
@@ -1926,7 +2118,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "ie": [
@@ -2007,7 +2207,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "it": [
@@ -2087,7 +2295,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "ja": [
@@ -2169,7 +2385,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "ka": [
@@ -2249,7 +2473,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "kab": [
@@ -2327,7 +2559,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "ko": [
@@ -2407,7 +2647,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "lt": [
@@ -2487,7 +2735,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "lv": [
@@ -2552,7 +2808,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "nb": [
@@ -2632,7 +2896,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "nl": [
@@ -2695,7 +2967,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "pl": [
@@ -2775,7 +3055,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "pt": [
@@ -2856,7 +3144,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "pt_BR": [
@@ -2936,7 +3232,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "pt_PT": [
@@ -3016,7 +3320,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "ro": [
@@ -3096,7 +3408,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "ru": [
@@ -3176,7 +3496,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "sk": [
@@ -3257,7 +3585,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "sl": [
@@ -3338,7 +3674,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "sq": [
@@ -3419,7 +3763,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "sr": [
@@ -3499,7 +3851,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "sv": [
@@ -3579,7 +3939,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "ta": [
@@ -3659,7 +4027,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "te": [
@@ -3740,7 +4116,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "th": [
@@ -3822,7 +4206,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "tr": [
@@ -3902,7 +4294,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "uk": [
@@ -3965,7 +4365,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "uz": [
@@ -4045,7 +4453,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "vi": [
@@ -4126,7 +4542,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "yue": [
@@ -4207,7 +4631,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "zh": [
@@ -4240,7 +4672,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
 
   "zh_Hant": [
@@ -4316,6 +4756,14 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ]
 }
