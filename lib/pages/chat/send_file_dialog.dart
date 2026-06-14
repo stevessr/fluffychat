@@ -78,15 +78,17 @@ class SendFileDialogState extends State<SendFileDialog> {
     if (!context.mounted || !proceed) return;
 
     Future<void> sendAction(void Function(double progress) setProgress) async {
+      final outerContext = widget.outerContext;
       if (!widget.room.otherPartyCanReceiveMessages) {
         throw OtherPartyCanNotReceiveMessages();
       }
       Navigator.of(context, rootNavigator: false).pop();
       final clientConfig = await Result.capture(widget.room.client.getConfig());
+      if (!mounted || !outerContext.mounted) return;
       final maxUploadSize =
           clientConfig.asValue?.value.mUploadSize ?? 100 * 1000 * 1000;
 
-      final scaffoldMessenger = ScaffoldMessenger.of(widget.outerContext);
+      final scaffoldMessenger = ScaffoldMessenger.of(outerContext);
       final fileCount = widget.files.length;
       var sentFiles = 0;
 
@@ -134,9 +136,6 @@ class SendFileDialogState extends State<SendFileDialog> {
         if (file.bytes.length > maxUploadSize) {
           throw FileTooBigMatrixException(file.bytes.length, maxUploadSize);
         }
-          if (widget.files.length > 1) {
-            setProgress(sentFiles / totalFiles + 0.4);
-          }
 
         // Show progress / notification when sending multiple files
         if (fileCount > 1) {
@@ -177,7 +176,6 @@ class SendFileDialogState extends State<SendFileDialog> {
               spoiler: isSpoiler,
             );
           }
-          sentFiles++;
         }
 
         try {
@@ -197,8 +195,8 @@ class SendFileDialogState extends State<SendFileDialog> {
           // Retry once after waiting
           await sendFileEvent();
         }
-        sentFiles++;
         setProgress(progressFor(1));
+        sentFiles++;
       }
     }
 
