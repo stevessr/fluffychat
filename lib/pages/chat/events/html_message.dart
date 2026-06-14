@@ -8,6 +8,7 @@ import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/code_highlight_theme.dart';
+import 'package:fluffychat/utils/custom_emote_shortcodes.dart';
 import 'package:fluffychat/utils/event_checkbox_extension.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
@@ -159,6 +160,84 @@ class HtmlMessage extends StatelessWidget {
     );
   }
 
+  InlineSpan _renderText(String text, BuildContext context) {
+    // Single linebreak nodes between Elements are ignored:
+    if (text == '\n') text = '';
+
+    InlineSpan renderPlainText(String plainText) => LinkifySpan(
+      text: plainText,
+      options: const LinkifyOptions(humanize: false),
+      linkStyle: linkStyle,
+      onOpen: onOpen,
+    );
+
+    if (!text.contains(':')) {
+      return renderPlainText(text);
+    }
+
+    final emotePacks = room.getImagePacks(ImagePackUsage.emoticon);
+    if (emotePacks.isEmpty) {
+      return renderPlainText(text);
+    }
+
+    final spans = <InlineSpan>[];
+    var lastIndex = 0;
+    var foundEmote = false;
+
+    for (final match in CustomEmoteShortcodes.shortcodeRegex.allMatches(text)) {
+      final uri = CustomEmoteShortcodes.resolve(
+        emotePacks,
+        pack: match[1],
+        shortcode: match[2]!,
+      );
+      if (uri == null) {
+        continue;
+      }
+
+      if (match.start > lastIndex) {
+        spans.add(renderPlainText(text.substring(lastIndex, match.start)));
+      }
+
+      final label = match[0]!;
+      spans.add(
+        WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: Tooltip(
+            message: label,
+            child: Semantics(
+              label: label,
+              image: true,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 1),
+                child: MxcImage(
+                  key: ValueKey('inline_custom_emote_$uri'),
+                  cacheName: room.id,
+                  cacheKey: 'inline_custom_emote:$uri',
+                  uri: uri,
+                  fit: BoxFit.contain,
+                  animated: AppSettings.autoplayImages.value,
+                  isThumbnail: true,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      lastIndex = match.end;
+      foundEmote = true;
+    }
+
+    if (!foundEmote) {
+      return renderPlainText(text);
+    }
+
+    if (lastIndex < text.length) {
+      spans.add(renderPlainText(text.substring(lastIndex)));
+    }
+
+    return TextSpan(children: spans);
+  }
+
   /// Transforms a Node to an InlineSpan.
   InlineSpan _renderHtml(dom.Node node, BuildContext context, {int depth = 1}) {
     // We must not render elements nested more than 100 elements deep:
@@ -171,16 +250,7 @@ class HtmlMessage extends StatelessWidget {
 
     // This is a text node or not permitted node, so we render it as text:
     if (node is! dom.Element || !allowedHtmlTags.contains(node.localName)) {
-      var text = node.text ?? '';
-      // Single linebreak nodes between Elements are ignored:
-      if (text == '\n') text = '';
-
-      return LinkifySpan(
-        text: text,
-        options: const LinkifyOptions(humanize: false),
-        linkStyle: linkStyle,
-        onOpen: onOpen,
-      );
+      return _renderText(node.text ?? '', context);
     }
 
     switch (node.localName) {
