@@ -244,6 +244,74 @@ class Message extends StatelessWidget {
             ),
           ];
     final eventStateTextColor = theme.colorScheme.onSurface;
+    final showSenderHeader =
+        !nextEventSameSender && !ownMessage && !event.room.isDirectChat;
+    final showSenderPowerLevelIcon =
+        showSenderHeader && sender.powerLevel.role != PowerLevelRole.user;
+    final eventStateWidgets = <Widget>[
+      if (event.status.isSent &&
+          (displayTime || !previousEventSameSender || selected))
+        Text(
+          event.originServerTs.localizedTimeOfDay(context),
+          style: TextStyle(
+            color: eventStateTextColor,
+            fontSize: 11,
+            shadows: wallpaperTextShadow,
+          ),
+        ),
+      if (event.hasAggregatedEvents(timeline, RelationshipTypes.edit)) ...[
+        Text(' ', style: TextStyle(fontSize: 11)),
+        Text(
+          L10n.of(context).edited,
+          style: TextStyle(
+            color: eventStateTextColor,
+            fontSize: 11,
+            shadows: wallpaperTextShadow,
+          ),
+        ),
+      ],
+      if (event.status == EventStatus.error) ...[
+        Text(' ', style: TextStyle(fontSize: 11)),
+        Text(
+          L10n.of(context).couldNotBeSent,
+          style: TextStyle(
+            fontSize: 11,
+            color: theme.colorScheme.error,
+            shadows: wallpaperTextShadow,
+          ),
+        ),
+        Text(' ', style: TextStyle(fontSize: 11)),
+        Icon(
+          Icons.error_outlined,
+          size: 14,
+          color: theme.colorScheme.error,
+          shadows: wallpaperTextShadow,
+        ),
+      ],
+      if (event.status == EventStatus.sending) ...[
+        Text(
+          switch (event.fileSendingStatus) {
+            null => L10n.of(context).sending,
+            FileSendingStatus.generatingThumbnail => L10n.of(
+              context,
+            ).generatingThumbnail,
+            FileSendingStatus.encrypting => L10n.of(context).encrypting,
+            FileSendingStatus.uploading => L10n.of(context).uploading,
+          },
+          style: TextStyle(
+            color: eventStateTextColor,
+            fontSize: 11,
+            shadows: wallpaperTextShadow,
+          ),
+        ),
+        Text(' ', style: TextStyle(fontSize: 11)),
+        SizedBox.square(
+          dimension: 11,
+          child: CircularProgressIndicator(strokeWidth: 1),
+        ),
+      ],
+    ];
+    final showEventState = eventStateWidgets.isNotEmpty;
 
     return Center(
       child: Swipeable(
@@ -346,34 +414,31 @@ class Message extends StatelessWidget {
                           crossAxisAlignment: .start,
                           mainAxisSize: .min,
                           children: [
-                            Padding(
-                              padding: EdgeInsets.only(left: 8.0),
-                              child: Row(
-                                mainAxisAlignment: ownMessage ? .end : .start,
-                                children: [
-                                  if (sender.powerLevel.role !=
-                                          PowerLevelRole.user &&
-                                      !nextEventSameSender &&
-                                      !ownMessage &&
-                                      !event.room.isDirectChat)
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        right: 2.0,
+                            if (showSenderHeader)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 8.0,
+                                  bottom: 2.0,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (showSenderPowerLevelIcon)
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: 2.0,
+                                        ),
+                                        child: Icon(
+                                          sender.powerLevel.role ==
+                                                  PowerLevelRole.moderator
+                                              ? Icons.add_moderator_outlined
+                                              : Icons.admin_panel_settings,
+                                          size: 14,
+                                          color: theme
+                                              .colorScheme
+                                              .onPrimaryContainer,
+                                        ),
                                       ),
-                                      child: Icon(
-                                        sender.powerLevel.role ==
-                                                PowerLevelRole.moderator
-                                            ? Icons.add_moderator_outlined
-                                            : Icons.admin_panel_settings,
-                                        size: 14,
-                                        color: theme
-                                            .colorScheme
-                                            .onPrimaryContainer,
-                                      ),
-                                    ),
-                                  if ((!nextEventSameSender) &&
-                                      !ownMessage &&
-                                      !event.room.isDirectChat)
                                     FutureBuilder<User?>(
                                       future: event.fetchSenderUser(),
                                       builder: (context, snapshot) {
@@ -381,22 +446,18 @@ class Message extends StatelessWidget {
                                             snapshot.data?.calcDisplayname() ??
                                             sender.calcDisplayname();
                                         return ConstrainedBox(
-                                          constraints: BoxConstraints(
+                                          constraints: const BoxConstraints(
                                             maxWidth: 200,
                                           ),
                                           child: Text(
                                             displayname,
                                             style: TextStyle(
                                               fontWeight: FontWeight.bold,
-                                              color:
-                                                  (theme.brightness ==
-                                                      Brightness.light
-                                                  ? displayname
-                                                        .colorScheme
-                                                        .primary
-                                                  : displayname
-                                                        .colorScheme
-                                                        .primaryContainer),
+                                              color: event.room.isDirectChat
+                                                  ? Colors.transparent
+                                                  : (theme.brightness == Brightness.light
+                                                      ? displayname.colorScheme.primary
+                                                      : displayname.colorScheme.primaryContainer),
                                               fontSize: 11,
                                               shadows: wallpaperTextShadow,
                                             ),
@@ -406,10 +467,9 @@ class Message extends StatelessWidget {
                                         );
                                       },
                                     ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-
                             Container(
                               alignment: alignment,
                               padding: const EdgeInsets.only(left: 8),
@@ -905,6 +965,61 @@ class Message extends StatelessWidget {
                     ],
                   ),
                 ],
+              ),
+
+              AnimatedSize(
+                duration: FluffyThemes.animationDuration,
+                curve: FluffyThemes.animationCurve,
+                alignment: Alignment.bottomCenter,
+                child: !hasReactions && !showEventState
+                    ? const SizedBox.shrink()
+                    : Padding(
+                        padding: const EdgeInsets.only(
+                          top: 1.0,
+                          left: avatarSize + 8.0,
+                          right: 12.0,
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: ownMessage
+                              ? [
+                                  if (showEventState)
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: eventStateWidgets,
+                                    ),
+                                  const Spacer(),
+                                  if (hasReactions)
+                                    Flexible(
+                                      child: Align(
+                                        alignment: Alignment.centerRight,
+                                        child: MessageReactions(
+                                          event,
+                                          timeline,
+                                        ),
+                                      ),
+                                    ),
+                                ]
+                              : [
+                                  if (hasReactions)
+                                    Flexible(
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: MessageReactions(
+                                          event,
+                                          timeline,
+                                        ),
+                                      ),
+                                    ),
+                                  const Spacer(),
+                                  if (showEventState)
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: eventStateWidgets,
+                                    ),
+                                ],
+                        ),
+                      ),
               ),
               if (enterThread != null)
                 AnimatedSize(
