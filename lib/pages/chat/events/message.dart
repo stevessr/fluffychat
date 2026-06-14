@@ -243,6 +243,10 @@ class Message extends StatelessWidget {
             ),
           ];
     final eventStateTextColor = theme.colorScheme.onSurface;
+    final showSenderHeader =
+        !previousEventSameSender && !ownMessage && !event.room.isDirectChat;
+    final showSenderPowerLevelIcon =
+        showSenderHeader && sender.powerLevel.role != PowerLevelRole.user;
 
     return Center(
       child: Swipeable(
@@ -321,7 +325,7 @@ class Message extends StatelessWidget {
                         SizedBox(width: avatarSize)
                       else
                         Padding(
-                          // Align with bottom line of displayname:
+                          // Align with the bottom of the message stack.
                           padding: const EdgeInsets.only(bottom: 2.0),
                           child: FutureBuilder<User?>(
                             future: event.fetchSenderUser(),
@@ -349,6 +353,62 @@ class Message extends StatelessWidget {
                           crossAxisAlignment: .start,
                           mainAxisSize: .min,
                           children: [
+                            if (showSenderHeader)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 8.0,
+                                  bottom: 2.0,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (showSenderPowerLevelIcon)
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: 2.0,
+                                        ),
+                                        child: Icon(
+                                          sender.powerLevel.role ==
+                                                  PowerLevelRole.moderator
+                                              ? Icons.add_moderator_outlined
+                                              : Icons.admin_panel_settings,
+                                          size: 14,
+                                          color: theme
+                                              .colorScheme
+                                              .onPrimaryContainer,
+                                        ),
+                                      ),
+                                    FutureBuilder<User?>(
+                                      future: event.fetchSenderUser(),
+                                      builder: (context, snapshot) {
+                                        final displayname =
+                                            snapshot.data?.calcDisplayname() ??
+                                            sender.calcDisplayname();
+                                        return ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            maxWidth: 200,
+                                          ),
+                                          child: Text(
+                                            displayname,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color:
+                                                  (theme.brightness ==
+                                                      Brightness.light
+                                                  ? displayname.color
+                                                  : displayname.lightColorText),
+                                              fontSize: 11,
+                                              shadows: wallpaperTextShadow,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
                             Container(
                               alignment: alignment,
                               padding: const EdgeInsets.only(left: 8),
@@ -500,65 +560,17 @@ class Message extends StatelessWidget {
                               child: Row(
                                 mainAxisAlignment: ownMessage ? .end : .start,
                                 children: [
-                                  if (sender.powerLevel.role !=
-                                          PowerLevelRole.user &&
-                                      !previousEventSameSender &&
-                                      !ownMessage &&
-                                      !event.room.isDirectChat)
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        right: 2.0,
-                                      ),
-                                      child: Icon(
-                                        sender.powerLevel.role ==
-                                                PowerLevelRole.moderator
-                                            ? Icons.add_moderator_outlined
-                                            : Icons.admin_panel_settings,
-                                        size: 14,
-                                        color: theme
-                                            .colorScheme
-                                            .onPrimaryContainer,
-                                      ),
-                                    ),
-                                  if ((selected ||
-                                          !previousEventSameSender ||
-                                          isEdited) &&
-                                      !ownMessage &&
-                                      !event.room.isDirectChat)
-                                    FutureBuilder<User?>(
-                                      future: event.fetchSenderUser(),
-                                      builder: (context, snapshot) {
-                                        final displayname =
-                                            snapshot.data?.calcDisplayname() ??
-                                            sender.calcDisplayname();
-                                        return ConstrainedBox(
-                                          constraints: BoxConstraints(
-                                            maxWidth: 200,
-                                          ),
-                                          child: Text(
-                                            displayname,
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color:
-                                                  (theme.brightness ==
-                                                      Brightness.light
-                                                  ? displayname.color
-                                                  : displayname.lightColorText),
-                                              fontSize: 11,
-                                              shadows: wallpaperTextShadow,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        );
-                                      },
-                                    ),
                                   if (event.status.isSent &&
                                       (displayTime ||
                                           !previousEventSameSender ||
                                           selected))
                                     Text(
-                                      ' ${selected ? event.originServerTs.localizedTime(context) : event.originServerTs.localizedTimeOfDay(context)}',
+                                      selected
+                                          ? event.originServerTs.localizedTime(
+                                              context,
+                                            )
+                                          : event.originServerTs
+                                                .localizedTimeOfDay(context),
                                       style: TextStyle(
                                         color: eventStateTextColor,
                                         fontSize: 11,
