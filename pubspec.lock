@@ -601,7 +601,7 @@ packages:
     source: hosted
     version: "2.0.35"
   flutter_rust_bridge:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_rust_bridge
       sha256: "37ef40bc6f863652e865f0b2563ea07f0d3c58d8efad803cc01933a4b2ee067e"
@@ -2187,7 +2187,7 @@ packages:
     source: hosted
     version: "15.2.0"
   vodozemac:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: vodozemac
       sha256: bbe7dd31d7f623e2aeedb92e4b71a8b519e6109ce1e2911b5a220f6752b65cda
