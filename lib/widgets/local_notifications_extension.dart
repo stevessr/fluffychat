@@ -7,6 +7,7 @@ import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/client_download_content_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/room_notification_sound_extension.dart';
 import 'package:fluffychat/utils/notification_background_handler.dart';
 import 'package:fluffychat/utils/push_helper.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -64,6 +65,8 @@ extension LocalNotificationsExtension on MatrixState {
       }
     }
 
+    final playNotificationSound = !event.room.isNotificationSoundMuted;
+
     if (kIsWeb) {
       final thumbnailUri = await avatarUrl?.getThumbnailUri(
         client,
@@ -72,7 +75,9 @@ extension LocalNotificationsExtension on MatrixState {
         method: thumbnailMethod,
       );
 
-      if (AppSettings.webNotificationSound.value) _audioPlayer.play();
+      if (AppSettings.webNotificationSound.value && playNotificationSound) {
+        _audioPlayer.play();
+      }
 
       html.Notification(
         title,
@@ -89,7 +94,10 @@ extension LocalNotificationsExtension on MatrixState {
       body: body,
       notificationDetails: NotificationDetails(
         linux: LinuxNotificationDetails(
-          sound: ThemeLinuxSound('message-new-instant'),
+          sound: playNotificationSound
+              ? ThemeLinuxSound('message-new-instant')
+              : null,
+          suppressSound: !playNotificationSound,
           actions: [
             LinuxNotificationAction(
               key: FluffyChatNotificationActions.markAsRead.name,

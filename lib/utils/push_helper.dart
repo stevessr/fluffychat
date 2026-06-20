@@ -15,6 +15,7 @@ import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/client_download_content_extension.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/room_notification_sound_extension.dart';
 import 'package:fluffychat/utils/notification_background_handler.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
@@ -214,6 +215,12 @@ Future<void> _tryPushHelper(
   }
 
   final matrixLocals = MatrixLocals(l10n);
+  final isNotificationSoundMuted = event.room.isNotificationSoundMuted;
+  if (isNotificationSoundMuted) {
+    Logs().v(
+      'Push helper: notification sound muted by room or parent space push rules.',
+    );
+  }
 
   // Calculate the body
   final body = event.type == EventTypes.Encrypted
@@ -325,6 +332,7 @@ Future<void> _tryPushHelper(
     ),
     importance: Importance.high,
     priority: Priority.max,
+    silent: isNotificationSoundMuted,
     groupKey: client.clientName,
     actions: event.type == EventTypes.RoomMember || !useNotificationActions
         ? null
@@ -352,6 +360,7 @@ Future<void> _tryPushHelper(
   );
   final iOSPlatformChannelSpecifics = DarwinNotificationDetails(
     threadIdentifier: event.room.id,
+    presentSound: !isNotificationSoundMuted,
   );
   final platformChannelSpecifics = NotificationDetails(
     android: androidPlatformChannelSpecifics,
@@ -434,6 +443,7 @@ Future<void> updateSummaryNotification({
           activeNotifications.map((n) => n.body ?? '').toList(),
         ),
         autoCancel: false,
+        silent: true,
       ),
     ),
   );
