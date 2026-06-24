@@ -4,11 +4,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:async/async.dart' as async;
+import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/size_string.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img;
 import 'package:matrix/matrix.dart';
+import 'package:pasteboard/pasteboard.dart';
 
 import 'matrix_file_extension.dart';
 
@@ -32,6 +35,15 @@ String? _mapSpoilerReason(Map<String, Object?>? map) {
     }
   }
   return null;
+}
+
+Uint8List _clipboardPngBytes(MatrixFile file) {
+  if (file.mimeType == 'image/png') return file.bytes;
+
+  final decodedImage = img.decodeImage(file.bytes);
+  if (decodedImage == null) return file.bytes;
+
+  return Uint8List.fromList(img.encodePng(decodedImage));
 }
 
 extension LocalizedBody on Event {
@@ -62,6 +74,21 @@ extension LocalizedBody on Event {
     if (!context.mounted) return;
 
     matrixFile.result?.share(context);
+  }
+
+  Future<void> copyImageToClipboard(BuildContext context) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final l10n = L10n.of(context);
+    final matrixFile = await _getFile(context);
+    if (!context.mounted) return;
+
+    final file = matrixFile.result;
+    if (file == null) return;
+
+    await Pasteboard.writeImage(_clipboardPngBytes(file));
+    scaffoldMessenger.showSnackBar(
+      SnackBar(showCloseIcon: true, content: Text(l10n.copiedToClipboard)),
+    );
   }
 
   bool get isAttachmentSmallEnough =>
