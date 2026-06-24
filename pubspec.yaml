@@ -89,9 +89,9 @@ dependencies:
   unifiedpush_ui: ^0.2.0
   universal_html: ^2.3.0
   url_launcher: ^6.3.2
-  vodozemac: ^0.5.0
   video_compress: ^3.1.4
   video_player: ^2.14.0
+  vodozemac: ^0.5.0
   wakelock_plus: ^1.7.0
   web: ^1.1.1
   webrtc_interface: ^1.5.1
