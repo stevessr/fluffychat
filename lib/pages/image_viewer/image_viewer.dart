@@ -53,12 +53,15 @@ class ImageViewerController extends State<ImageViewer> {
       (event) => event.eventId == widget.event.eventId,
     );
     if (index < 0) index = 0;
+    currentIndex = index;
     pageController = PageController(initialPage: index);
   }
 
   late final PageController pageController;
 
   late final List<Event> allEvents;
+
+  late int currentIndex;
 
   void onKeyEvent(KeyEvent event) {
     switch (event.logicalKey) {
@@ -89,9 +92,14 @@ class ImageViewerController extends State<ImageViewer> {
     setState(() {});
   }
 
-  int get _index => pageController.page?.toInt() ?? 0;
+  int get _index => currentIndex;
 
   Event get currentEvent => allEvents[_index];
+
+  bool get canCopyImage => {
+    MessageTypes.Image,
+    MessageTypes.Sticker,
+  }.contains(currentEvent.messageType);
 
   bool get canGoNext => _index < allEvents.length - 1;
 
@@ -109,6 +117,12 @@ class ImageViewerController extends State<ImageViewer> {
 
   /// Save this file with a system call.
   void shareFileAction(BuildContext context) => currentEvent.shareFile(context);
+
+  /// Copy this image to the system clipboard.
+  void copyImageAction(BuildContext context) =>
+      currentEvent.copyImageToClipboard(context);
+
+  void onPageChanged(int index) => setState(() => currentIndex = index);
 
   static const maxScaleFactor = 1.5;
 
