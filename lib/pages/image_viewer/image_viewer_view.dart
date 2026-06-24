@@ -56,6 +56,16 @@ class ImageViewerView extends StatelessWidget {
               tooltip: L10n.of(context).downloadFile,
             ),
             const SizedBox(width: 8),
+            if (controller.canCopyImage) ...[
+              IconButton(
+                style: iconButtonStyle,
+                icon: const Icon(Icons.copy_outlined),
+                onPressed: () => controller.copyImageAction(context),
+                color: Colors.white,
+                tooltip: L10n.of(context).copyToClipboard,
+              ),
+              const SizedBox(width: 8),
+            ],
             if (PlatformInfos.isMobile)
               // Use builder context to correctly position the share dialog on iPad
               Padding(
@@ -81,6 +91,7 @@ class ImageViewerView extends StatelessWidget {
                 child: PageView.builder(
                   scrollDirection: Axis.vertical,
                   controller: controller.pageController,
+                  onPageChanged: controller.onPageChanged,
                   itemCount: controller.allEvents.length,
                   itemBuilder: (context, i) {
                     final event = controller.allEvents[i];
