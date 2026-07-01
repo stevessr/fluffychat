@@ -30,14 +30,12 @@ runs:
         restore-keys: |
           ${{ runner.os }}-cargo-
 
-    - name: Cache Dart/Flutter pub packages
+    - name: Cache Dart/Flutter hosted pub packages
       uses: actions/cache@v4
       with:
         path: |
-          ~/.pub-cache
-        key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-pub-
+          ~/.pub-cache/hosted
+        key: ${{ runner.os }}-pub-hosted-${{ hashFiles('pubspec.lock') }}
 
     - name: Cache Python fonttools packages
       uses: actions/cache@v4
