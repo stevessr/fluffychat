@@ -597,24 +597,6 @@ class Message extends StatelessWidget {
                               ),
                             ),
 
-                            AnimatedSize(
-                              duration: FluffyThemes.animationDuration,
-                              curve: FluffyThemes.animationCurve,
-                              alignment: Alignment.bottomCenter,
-                              child: !hasReactions
-                                  ? const SizedBox.shrink()
-                                  : Container(
-                                      alignment: ownMessage
-                                          ? Alignment.centerRight
-                                          : Alignment.centerLeft,
-                                      padding: EdgeInsets.only(
-                                        top: 1.0,
-                                        left: 8.0,
-                                        right: ownMessage ? 0 : 12.0,
-                                      ),
-                                      child: MessageReactions(event, timeline),
-                                    ),
-                            ),
                             Row(
                               mainAxisAlignment: ownMessage ? .end : .start,
                               children: [
