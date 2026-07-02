@@ -69,6 +69,10 @@ class SettingsChatView extends StatelessWidget {
                 title: L10n.of(context).showThumbnailsInTimeline,
                 setting: AppSettings.showThumbnailsInTimeline,
               ),
+              SettingsSwitchListTile.adaptive(
+                title: L10n.of(context).presencesToggle,
+                setting: AppSettings.showPresences,
+              ),
               Divider(color: theme.dividerColor),
               ListTile(
                 title: Text(
