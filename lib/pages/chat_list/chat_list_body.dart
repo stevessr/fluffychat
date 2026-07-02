@@ -10,6 +10,7 @@ import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
 import 'package:fluffychat/pages/chat_list/dummy_chat_list_item.dart';
 import 'package:fluffychat/pages/chat_list/search_title.dart';
 import 'package:fluffychat/pages/chat_list/space_view.dart';
+import 'package:fluffychat/pages/chat_list/status_msg_list.dart';
 import 'package:fluffychat/utils/stream_extension.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/public_room_dialog.dart';
 import 'package:fluffychat/widgets/avatar.dart';
@@ -123,11 +124,15 @@ class ChatListViewBody extends StatelessWidget {
                               onPressed: () => UserDialog.show(
                                 context: context,
                                 profile: userSearchResult.results[i],
-                              ),
                             ),
                           ),
                   ),
-                ],
+                ),
+                  ],
+                if (AppSettings.showPresences.value &&
+                    client.prevBatch != null &&
+                    !controller.isSearchMode)
+                  StatusMessageList(onStatusEdit: controller.setStatus),
                 if (client.rooms.isNotEmpty && !controller.isSearchMode)
                   Container(
                     height: 36 + 8 + 8,

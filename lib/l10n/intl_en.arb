@@ -2148,6 +2148,7 @@
     "createNewAddress": "Create new address",
     "joinSpace": "Join space",
     "publicSpaces": "Public spaces",
+    "presencesToggle": "Show status messages from other users",
     "addChatOrSubSpace": "Add chat or sub space",
     "thisDevice": "This device:",
     "initAppError": "An error occured while init the app",
