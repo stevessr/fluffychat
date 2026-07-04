@@ -2482,6 +2482,7 @@
     "answersWillBeVisibleWhenPollHasEnded": "投票结束后将显示结果",
     "thread": "嘟文串",
     "replyInThread": "在嘟文串中回复",
+    "replyWithImage": "用图片回复",
     "countReplies": "{count, plural, =1{则回复} other{{count} 则回复}}",
     "@countReplies": {
         "type": "int",
