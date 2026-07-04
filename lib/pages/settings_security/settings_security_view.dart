@@ -204,6 +204,21 @@ class SettingsSecurityView extends StatelessWidget {
                     ),
                   Divider(color: theme.dividerColor),
                   ListTile(
+                    leading: const Icon(Icons.download_for_offline_outlined),
+                    trailing: const Icon(Icons.chevron_right_outlined),
+                    title: Text(L10n.of(context).exportAccount),
+                    subtitle: Text(L10n.of(context).exportAccountDescription),
+                    onTap: controller.exportAccountAction,
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.upload_file_outlined),
+                    trailing: const Icon(Icons.chevron_right_outlined),
+                    title: Text(L10n.of(context).importAccount),
+                    subtitle: Text(L10n.of(context).importAccountDescription),
+                    onTap: controller.importAccountAction,
+                  ),
+                  Divider(color: theme.dividerColor),
+                  ListTile(
                     iconColor: Colors.orange,
                     leading: const Icon(Icons.delete_sweep_outlined),
                     title: Text(
