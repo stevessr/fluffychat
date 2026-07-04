@@ -1094,6 +1094,11 @@
     "dehydrate": "Export session and wipe device",
     "dehydrateWarning": "This action cannot be undone. Ensure you safely store the backup file.",
     "hydrate": "Restore from backup file",
+    "exportAccount": "Export account (experimental)",
+    "exportAccountWarning": "Exports your access token, session metadata and locally cached recovery secrets to a portable file. Anyone with this file can fully access your account. Store it securely and delete it once you no longer need it.",
+    "exportAccountDescription": "Save this account to a portable file for transferring to another device.",
+    "importAccount": "Import account (experimental)",
+    "importAccountDescription": "Restore an account from a previously exported file.",
     "loadingPleaseWait": "Loading… Please wait.",
     "@loadingPleaseWait": {
         "type": "String",
