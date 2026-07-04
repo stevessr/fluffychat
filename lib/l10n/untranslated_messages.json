@@ -11766,7 +11766,6 @@
     "emojiMashupStyleSparkle",
     "restoreBootstrapEmptyDevicesDescription",
     "restoreBootstrapDevicesDescription",
-    "resetAccount",
     "restoreCryptoIdentity",
     "resetCryptoIdentity",
     "setUpCryptoIdentity",
@@ -11776,22 +11775,9 @@
     "newPassphraseDescription",
     "newPassphrase",
     "storeRecoveryKeyDescription",
-    "saveAsFile",
     "youAreReadyToStart",
     "noUserKeyFound",
     "knownSince",
-    "unsignedDevice",
-    "signedDevice",
-    "noCurve25519KeyFound",
-    "pleaseEnter6Digits",
-    "disableAppLock",
-    "disableAppLockAreYouSure",
-    "enableBiometrics",
-    "disableBiometrics",
-    "biometricsDescription",
-    "useAppLock",
-    "unlockWithBiometrics",
-    "resetPin",
     "forwardCountMessages"
   ],
 
@@ -11930,17 +11916,7 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle",
-    "pleaseEnter6Digits",
-    "disableAppLock",
-    "disableAppLockAreYouSure",
-    "enableBiometrics",
-    "disableBiometrics",
-    "biometricsDescription",
-    "useAppLock",
-    "unlockWithBiometrics",
-    "resetPin",
-    "forwardCountMessages"
+    "emojiMashupStyleSparkle"
   ],
 
   "pl": [
@@ -11976,12 +11952,7 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle",
-    "biometricsDescription",
-    "useAppLock",
-    "unlockWithBiometrics",
-    "resetPin",
-    "forwardCountMessages"
+    "emojiMashupStyleSparkle"
   ],
 
   "pt": [
