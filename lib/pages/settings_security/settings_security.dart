@@ -154,6 +154,12 @@ class SettingsSecurityController extends State<SettingsSecurity> {
 
   Future<void> dehydrateAction() => Matrix.of(context).dehydrateAction(context);
 
+  Future<void> exportAccountAction() =>
+      Matrix.of(context).exportAccountAction(context);
+
+  Future<void> importAccountAction() =>
+      Matrix.of(context).importAccountAction(context);
+
   Future<void> changeShareKeysWith(ShareKeysWith? shareKeysWith) async {
     if (shareKeysWith == null) return;
     AppSettings.shareKeysWith.setItem(shareKeysWith.name);
