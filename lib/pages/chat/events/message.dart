@@ -707,6 +707,12 @@ class Message extends StatelessWidget {
                                                                           .eventId,
                                                                       key,
                                                                     );
+                                                                // 选择表情后关闭整个弹窗（包括外层的 emoji picker sheet）
+                                                                if (context.mounted) {
+                                                                  Navigator.of(
+                                                                    context,
+                                                                  ).pop(null);
+                                                                }
                                                               },
                                                             ),
                                                           ],
