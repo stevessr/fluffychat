@@ -8,7 +8,9 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/utils/account_export_import.dart';
 import 'package:fluffychat/utils/client_manager.dart';
+import 'package:fluffychat/utils/file_selector.dart';
 import 'package:fluffychat/utils/init_with_restore.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/notification_background_handler.dart';
@@ -21,6 +23,7 @@ import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:matrix/encryption.dart';
@@ -439,5 +442,94 @@ class MatrixState extends State<Matrix> {
     final file = MatrixFile(bytes: exportBytes, name: exportFileName);
     if (!context.mounted) return;
     file.save(context);
+  }
+
+  /// Experimental: exports the active account's token, session metadata,
+  /// pickled Olm account and any locally-cached cross-signing secrets to a
+  /// portable JSON file (`.fluffyaccount`).
+  ///
+  /// Unlike [dehydrateAction] this does *not* wipe the local device — it is a
+  /// pure export suitable for migrating to another device while keeping this
+  /// one logged in. The resulting file grants full account access and must be
+  /// stored securely.
+  Future<void> exportAccountAction(BuildContext context) async {
+    final l10n = L10n.of(context);
+    final consent = await showOkCancelAlertDialog(
+      context: context,
+      isDestructive: true,
+      title: l10n.exportAccount,
+      message: l10n.exportAccountWarning,
+    );
+    if (consent != OkCancelResult.ok) return;
+    if (!context.mounted) return;
+
+    final export = await showFutureLoadingDialog(
+      context: context,
+      future: () => client.exportAccount(
+        generatedAt: DateTime.now().millisecondsSinceEpoch,
+      ),
+    );
+    final accountExport = export.result;
+    if (accountExport == null) return;
+
+    final fileName =
+        'fluffychat-account-${DateFormat(DateFormat.YEAR_MONTH_DAY).format(DateTime.now())}.fluffyaccount';
+    final file = MatrixFile(bytes: accountExport.bytes, name: fileName);
+    if (!context.mounted) return;
+    await file.save(context);
+  }
+
+  /// Experimental: imports an account from a previously exported
+  /// `.fluffyaccount` JSON file and activates it as a new client.
+  Future<void> importAccountAction(BuildContext context) async {
+    final l10n = L10n.of(context);
+    final picked = await selectFiles(context, title: l10n.importAccount);
+    final xfile = picked.firstOrNull;
+    if (xfile == null) return;
+    if (!context.mounted) return;
+
+    await showFutureLoadingDialog(
+      context: context,
+      future: () async {
+        final raw = await xfile.readAsBytes();
+        final export = AccountExport.fromJsonString(
+          String.fromCharCodes(raw),
+        );
+        final newClientName =
+            '${AppSettings.applicationName.value}-import-${DateTime.now().millisecondsSinceEpoch}';
+        final newClient = await ClientManager.createClient(newClientName, store);
+        await newClient.importAccount(export);
+
+        if (!widget.clients.contains(newClient)) {
+          widget.clients.add(newClient);
+        }
+        await ClientManager.addClientNameToStore(newClientName, store);
+        _registerSubs(newClientName);
+        setActiveClient(newClient);
+
+        // Persist a session backup so the imported session survives restarts,
+        // mirroring the regular login path in init_with_restore.dart.
+        final storage = PlatformInfos.isMobile || PlatformInfos.isLinux
+            ? const FlutterSecureStorage()
+            : null;
+        final storageKey =
+            '${AppSettings.applicationName.value}_session_backup_$newClientName';
+        await storage?.write(
+          key: storageKey,
+          value: SessionBackup(
+            olmAccount: export.olmAccount,
+            accessToken: export.token!,
+            deviceId: export.deviceId,
+            homeserver: export.homeserver!,
+            deviceName: export.deviceName,
+            userId: export.userId!,
+          ).toString(),
+        );
+
+        // Give the new device a chance to restore its crypto identity if the
+        // account already had chat backup set up.
+        FluffyChatApp.router.go('/backup');
+      },
+    );
   }
 }

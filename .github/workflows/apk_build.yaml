@@ -1,7 +1,37 @@
-name: Manual Android APK Build
+name: Build Android APK
 
 on:
   workflow_dispatch:
+    inputs:
+      build_debug:
+        description: "构建 debug 变体（不签名，便于测试安装）"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "true"
+          - "false"
+      split_per_abi:
+        description: "按 ABI 拆分 APK（arm64-v8a / armeabi-v7a / x86_64）"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "true"
+          - "false"
+      upload_to_release:
+        description: "上传到指定 GitHub Release（需填写 release_tag）"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "true"
+          - "false"
+      release_tag:
+        description: "目标 Release tag（仅当 upload_to_release=true 时生效）"
+        required: false
+        default: ""
+        type: string
 
 concurrency:
   group: apk_build
@@ -10,6 +40,8 @@ concurrency:
 jobs:
   build_apk:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-java@v4
@@ -29,30 +61,96 @@ jobs:
       - uses: ./.github/actions/free_up_space
       - uses: moonrepo/setup-rust@v1
       - run: flutter pub get
-      - name: Build APK
-        run: flutter build apk --release --target-platform android-arm,android-arm64
-      - name: Locate APK
-        id: locate_apk
-        run: |
-          apk_path=""
-          if [[ -f build/app/outputs/flutter-apk/app-release.apk ]]; then
-            apk_path=build/app/outputs/flutter-apk/app-release.apk
-          elif [[ -f build/app/outputs/apk/release/app-release.apk ]]; then
-            apk_path=build/app/outputs/apk/release/app-release.apk
-          else
-            apk_path="$(find build/app/outputs -name 'app-release.apk' | sort | head -n 1)"
-          fi
 
-          if [[ -z "$apk_path" ]]; then
-            echo "Unable to find app-release.apk"
+      - name: Prepare release signing (if secrets available)
+        if: github.event.inputs.build_debug != 'true'
+        env:
+          FDROID_KEY: ${{ secrets.FDROID_KEY }}
+          FDROID_KEY_PASS: ${{ secrets.FDROID_KEY_PASS }}
+        run: ./scripts/prepare-android-release.sh
+
+      - name: Build release APK (single)
+        if: github.event.inputs.split_per_abi != 'true' && github.event.inputs.build_debug != 'true'
+        run: flutter build apk --release --target-platform android-arm,android-arm64
+
+      - name: Build release APK (split per ABI)
+        if: github.event.inputs.split_per_abi == 'true' && github.event.inputs.build_debug != 'true'
+        run: flutter build apk --release --split-per-abi --target-platform android-arm,android-arm64
+
+      - name: Build debug APK
+        if: github.event.inputs.build_debug == 'true'
+        run: flutter build apk --debug --target-platform android-arm,android-arm64
+
+      - name: Collect APK artifacts
+        id: collect_apk
+        run: |
+          set -e
+          mkdir -p artifacts
+          variant="${{ github.event.inputs.build_debug == 'true' && 'debug' || 'release' }}"
+
+          # Find all APK files produced by the build
+          mapfile -t apk_files < <(find build/app/outputs -name "*.apk" -type f | sort)
+
+          if [[ ${#apk_files[@]} -eq 0 ]]; then
+            echo "No APK files found in build/app/outputs"
             find build/app/outputs -type f | sort
             exit 1
           fi
 
-          echo "apk_path=$apk_path" >> "$GITHUB_OUTPUT"
+          artifact_names=()
+          for apk in "${apk_files[@]}"; do
+            base="$(basename "$apk")"
+            # Prefix debug builds so they can be told apart from release artifacts
+            if [[ "$variant" == "debug" ]]; then
+              dest="artifacts/fluffychat-debug-${base}"
+            else
+              dest="artifacts/fluffychat-${base}"
+            fi
+            cp "$apk" "$dest"
+            artifact_names+=("$dest")
+            echo "Collected: $dest ($(du -h "$apk" | cut -f1))"
+          done
+
+          # Emit a multiline output for the upload step
+          {
+            echo "apk_files<<EOF"
+            for n in "${artifact_names[@]}"; do echo "$n"; done
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          echo "variant=$variant" >> "$GITHUB_OUTPUT"
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v7
         with:
-          name: fluffychat-release-apk
-          path: ${{ steps.locate_apk.outputs.apk_path }}
+          name: fluffychat-${{ steps.collect_apk.outputs.variant }}-apk
+          path: artifacts/*.apk
           if-no-files-found: error
+          retention-days: 30
+
+      - name: Generate SHA256 checksums
+        run: |
+          cd artifacts
+          sha256sum *.apk > checksums-sha256.txt
+          cat checksums-sha256.txt
+
+      - name: Upload checksums
+        uses: actions/upload-artifact@v7
+        with:
+          name: fluffychat-${{ steps.collect_apk.outputs.variant }}-checksums
+          path: artifacts/checksums-sha256.txt
+          if-no-files-found: error
+
+      - name: Upload APKs to GitHub Release
+        if: github.event.inputs.upload_to_release == 'true' && github.event.inputs.release_tag != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          tag="${{ github.event.inputs.release_tag }}"
+          echo "Uploading APKs to release $tag"
+          for f in artifacts/*.apk artifacts/checksums-sha256.txt; do
+            [[ -f "$f" ]] || continue
+            name="$(basename "$f")"
+            echo " -> $name"
+            gh release upload "$tag" "$f" --clobber
+          done
