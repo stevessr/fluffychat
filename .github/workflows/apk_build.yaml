@@ -35,11 +35,12 @@ on:
 
 concurrency:
   group: apk_build
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build_apk:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     permissions:
       contents: write
     steps:
@@ -59,7 +60,10 @@ jobs:
       - name: Enable Firebase Messaging
         run: bash ./scripts/add-firebase-messaging.sh
       - uses: ./.github/actions/free_up_space
-      - uses: moonrepo/setup-rust@v1
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
       - run: flutter pub get
 
       - name: Prepare release signing (if secrets available)
@@ -67,7 +71,18 @@ jobs:
         env:
           FDROID_KEY: ${{ secrets.FDROID_KEY }}
           FDROID_KEY_PASS: ${{ secrets.FDROID_KEY_PASS }}
-        run: ./scripts/prepare-android-release.sh
+        run: |
+          # prepare-android-release.sh assumes signing secrets and a Ruby/fastlane
+          # environment are present. When the secrets are empty (e.g. fork builds)
+          # we skip it and fall back to Flutter's built-in debug signing so the
+          # release APK can still be produced for testing. Set the secrets to get
+          # a properly signed, F-Droid-compatible build.
+          if [[ -z "$FDROID_KEY" || -z "$FDROID_KEY_PASS" ]]; then
+            echo "FDROID_KEY / FDROID_KEY_PASS not set — skipping release signing setup."
+            echo "The release APK will be signed with Flutter's default debug key."
+            exit 0
+          fi
+          ./scripts/prepare-android-release.sh
 
       - name: Build release APK (single)
         if: github.event.inputs.split_per_abi != 'true' && github.event.inputs.build_debug != 'true'
