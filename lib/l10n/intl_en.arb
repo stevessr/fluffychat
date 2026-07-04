@@ -2544,6 +2544,7 @@
     },
     "answersWillBeVisibleWhenPollHasEnded": "Answers will be visible when poll has ended",
     "replyInThread": "Reply in thread",
+    "replyWithImage": "Reply with image",
     "countReplies": "{count, plural, =1{One reply} other{{count} replies}}",
     "@countReplies": {
         "type": "int",

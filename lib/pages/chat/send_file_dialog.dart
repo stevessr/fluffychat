@@ -33,6 +33,8 @@ class SendFileDialog extends StatefulWidget {
   final List<XFile> files;
   final BuildContext outerContext;
   final String? threadLastEventId, threadRootEventId;
+  final Event? inReplyTo;
+  final String? editEventId;
 
   const SendFileDialog({
     required this.room,
@@ -40,6 +42,8 @@ class SendFileDialog extends StatefulWidget {
     required this.outerContext,
     required this.threadLastEventId,
     required this.threadRootEventId,
+    this.inReplyTo,
+    this.editEventId,
     super.key,
   });
 
@@ -198,6 +202,8 @@ class SendFileDialogState extends State<SendFileDialog> {
               thumbnail: thumbnail,
               shrinkImageMaxDimension: compress ? 1600 : null,
               extraContent: extraContent,
+              inReplyTo: widget.inReplyTo,
+              editEventId: widget.editEventId,
               threadRootEventId: widget.threadRootEventId,
               threadLastEventId: widget.threadLastEventId,
             );
@@ -300,13 +306,35 @@ class SendFileDialogState extends State<SendFileDialog> {
       if (spoiler) ...{_mscSpoilerKey: true, _spoilerKey: true},
     };
 
-    if (widget.threadRootEventId != null) {
+    final inReplyTo = widget.inReplyTo;
+    final editEventId = widget.editEventId;
+
+    if (editEventId != null) {
+      content['m.new_content'] = Map<String, Object?>.from(content);
+      content['m.relates_to'] = {
+        'event_id': editEventId,
+        'rel_type': RelationshipTypes.edit,
+      };
+      if (content['body'] is String) {
+        content['body'] = '* ${content['body']}';
+      }
+    } else if (widget.threadRootEventId != null) {
       content['m.relates_to'] = {
         'event_id': widget.threadRootEventId!,
         'rel_type': RelationshipTypes.thread,
         'is_falling_back': true,
         if (widget.threadLastEventId != null)
           'm.in_reply_to': {'event_id': widget.threadLastEventId!},
+      };
+    }
+
+    if (inReplyTo != null && content['m.relates_to'] == null) {
+      content['m.relates_to'] = {
+        'm.in_reply_to': {'event_id': inReplyTo.eventId},
+      };
+    } else if (inReplyTo != null && content['m.relates_to'] is Map) {
+      (content['m.relates_to'] as Map)['m.in_reply_to'] = {
+        'event_id': inReplyTo.eventId,
       };
     }
 

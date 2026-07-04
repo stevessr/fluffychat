@@ -806,8 +806,11 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
-  Future<void> sendImageFromClipBoard(Uint8List image) async {
+  Future<void> sendImageFromClipBoard(Uint8List image, {Event? inReplyTo}) async {
     if (!mounted) return;
+    if (inReplyTo == null && selectedEvents.length == 1) {
+      inReplyTo = selectedEvents.first;
+    }
     await showAdaptiveDialog(
       context: context,
       builder: (c) => SendFileDialog(
@@ -820,6 +823,7 @@ class ChatController extends State<ChatPageWithRoom>
         ],
         room: room,
         outerContext: context,
+        inReplyTo: inReplyTo,
         threadRootEventId: activeThreadId,
         threadLastEventId: threadLastEventId,
       ),
@@ -875,12 +879,14 @@ class ChatController extends State<ChatPageWithRoom>
     if (xFiles == null || xFiles.isEmpty) return;
 
     if (!mounted) return;
+    final replyEvent = selectedEvents.length == 1 ? selectedEvents.first : null;
     showAdaptiveDialog(
       context: context,
       builder: (c) => SendFileDialog(
         files: xFiles,
         room: room,
         outerContext: context,
+        inReplyTo: replyEvent,
         threadRootEventId: activeThreadId,
         threadLastEventId: threadLastEventId,
       ),
@@ -891,12 +897,14 @@ class ChatController extends State<ChatPageWithRoom>
     final files = await Pasteboard.files();
     if (files.isNotEmpty) {
       if (!mounted) return;
+      final replyEvent = selectedEvents.length == 1 ? selectedEvents.first : null;
       await showAdaptiveDialog(
         context: context,
         builder: (c) => SendFileDialog(
           files: files.map(XFile.new).toList(),
           room: room,
           outerContext: context,
+          inReplyTo: replyEvent,
           threadRootEventId: activeThreadId,
           threadLastEventId: threadLastEventId,
         ),
@@ -1241,6 +1249,27 @@ class ChatController extends State<ChatPageWithRoom>
     inputFocus.requestFocus();
   }
 
+  Future<void> replyWithImageAction(Event event) async {
+    // 先退出选择模式，让 UI 恢复正常
+    setState(() => selectedEvents.clear());
+
+    final result = await FilePicker.pickFile(type: FileType.image);
+    if (result == null) return;
+    final files = [result.xFile];
+    if (!mounted) return;
+    await showAdaptiveDialog(
+      context: context,
+      builder: (c) => SendFileDialog(
+        files: files,
+        room: room,
+        outerContext: context,
+        inReplyTo: event,
+        threadRootEventId: activeThreadId,
+        threadLastEventId: threadLastEventId,
+      ),
+    );
+  }
+
   Future<void> scrollToEventId(
     String eventId, {
     bool highlightEvent = true,
@@ -1372,7 +1401,54 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void editSelectedEventAction() {
-    _startEditingEvent(selectedEvents.first, clearSelection: true);
+    final timeline = this.timeline;
+    if (timeline == null) return;
+    final event = selectedEvents.first;
+    final displayEvent = event.getDisplayEvent(timeline);
+    // For image/file/sticker events, open SendFileDialog with editEventId
+    if ({
+      MessageTypes.Image,
+      MessageTypes.Sticker,
+      MessageTypes.File,
+      MessageTypes.Video,
+      MessageTypes.Audio,
+    }.contains(displayEvent.messageType)) {
+      // ignore: unawaited_futures
+      editFileEventAction(displayEvent);
+      return;
+    }
+    _startEditingEvent(displayEvent, clearSelection: true);
+  }
+
+  Future<void> editFileEventAction(Event event) async {
+    final client = currentRoomBundle.firstWhere(
+      (c) => c?.userID == event.senderId,
+      orElse: () => null,
+    );
+    if (client == null) return;
+    setSendingClient(client);
+    final files = await selectFiles(
+      context,
+      allowMultiple: false,
+      type: FileType.any,
+    );
+    if (files.isEmpty) return;
+    if (!mounted) return;
+    await showAdaptiveDialog(
+      context: context,
+      builder: (c) => SendFileDialog(
+        files: files,
+        room: room,
+        outerContext: context,
+        editEventId: event.eventId,
+        threadRootEventId: activeThreadId,
+        threadLastEventId: threadLastEventId,
+      ),
+    );
+    if (!mounted) return;
+    setState(() {
+      selectedEvents.clear();
+    });
   }
 
   void _editLastSentMessage() {
@@ -1386,7 +1462,6 @@ class ChatController extends State<ChatPageWithRoom>
     final lastOwnMessage = events.firstWhereOrNull(
       (e) =>
           e.type == EventTypes.Message &&
-          e.messageType == MessageTypes.Text &&
           e.status.isSent &&
           !e.redacted &&
           currentRoomBundle.any((c) => c?.userID == e.senderId),
@@ -1394,6 +1469,19 @@ class ChatController extends State<ChatPageWithRoom>
 
     if (lastOwnMessage == null) return;
 
+    // If it's an image/file event, use editFileEventAction instead
+    if ({
+      MessageTypes.Image,
+      MessageTypes.Sticker,
+      MessageTypes.File,
+      MessageTypes.Video,
+      MessageTypes.Audio,
+    }.contains(lastOwnMessage.messageType)) {
+      editFileEventAction(lastOwnMessage);
+      return;
+    }
+
+    // Text, emote, notice, etc. — edit as text in input bar
     _startEditingEvent(lastOwnMessage);
   }
 
