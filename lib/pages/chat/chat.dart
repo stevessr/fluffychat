@@ -149,6 +149,7 @@ class ChatController extends State<ChatPageWithRoom>
         files: files,
         room: room,
         outerContext: context,
+        inReplyTo: _attachmentReplyEvent,
         threadRootEventId: activeThreadId,
         threadLastEventId: threadLastEventId,
       ),
@@ -197,6 +198,9 @@ class ChatController extends State<ChatPageWithRoom>
         .firstOrNull
         ?.eventId;
   }
+
+  Event? get _attachmentReplyEvent =>
+      replyEvent ?? (selectedEvents.length == 1 ? selectedEvents.single : null);
 
   void enterThread(String eventId) => setState(() {
     activeThreadId = eventId;
@@ -800,17 +804,19 @@ class ChatController extends State<ChatPageWithRoom>
         files: files,
         room: room,
         outerContext: context,
+        inReplyTo: _attachmentReplyEvent,
         threadRootEventId: activeThreadId,
         threadLastEventId: threadLastEventId,
       ),
     );
   }
 
-  Future<void> sendImageFromClipBoard(Uint8List image, {Event? inReplyTo}) async {
+  Future<void> sendImageFromClipBoard(
+    Uint8List image, {
+    Event? inReplyTo,
+  }) async {
     if (!mounted) return;
-    if (inReplyTo == null && selectedEvents.length == 1) {
-      inReplyTo = selectedEvents.first;
-    }
+    final effectiveReplyEvent = inReplyTo ?? _attachmentReplyEvent;
     await showAdaptiveDialog(
       context: context,
       builder: (c) => SendFileDialog(
@@ -823,7 +829,7 @@ class ChatController extends State<ChatPageWithRoom>
         ],
         room: room,
         outerContext: context,
-        inReplyTo: inReplyTo,
+        inReplyTo: effectiveReplyEvent,
         threadRootEventId: activeThreadId,
         threadLastEventId: threadLastEventId,
       ),
@@ -879,14 +885,13 @@ class ChatController extends State<ChatPageWithRoom>
     if (xFiles == null || xFiles.isEmpty) return;
 
     if (!mounted) return;
-    final replyEvent = selectedEvents.length == 1 ? selectedEvents.first : null;
     showAdaptiveDialog(
       context: context,
       builder: (c) => SendFileDialog(
         files: xFiles,
         room: room,
         outerContext: context,
-        inReplyTo: replyEvent,
+        inReplyTo: _attachmentReplyEvent,
         threadRootEventId: activeThreadId,
         threadLastEventId: threadLastEventId,
       ),
@@ -897,14 +902,13 @@ class ChatController extends State<ChatPageWithRoom>
     final files = await Pasteboard.files();
     if (files.isNotEmpty) {
       if (!mounted) return;
-      final replyEvent = selectedEvents.length == 1 ? selectedEvents.first : null;
       await showAdaptiveDialog(
         context: context,
         builder: (c) => SendFileDialog(
           files: files.map(XFile.new).toList(),
           room: room,
           outerContext: context,
-          inReplyTo: replyEvent,
+          inReplyTo: _attachmentReplyEvent,
           threadRootEventId: activeThreadId,
           threadLastEventId: threadLastEventId,
         ),
