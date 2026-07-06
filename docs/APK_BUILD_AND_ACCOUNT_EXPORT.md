@@ -21,26 +21,46 @@
 | `build_debug` | 构建未签名的 debug 变体（便于测试安装，无需签名密钥） | `false` |
 | `upload_to_release` | 是否将产物上传到指定 GitHub Release | `false` |
 | `release_tag` | 目标 Release tag（仅当 `upload_to_release=true` 时生效） | 空 |
+| `target_abi` | 目标 ABI：`armeabi-v7a` / `arm64-v8a` 各构建一个单架构包，或 `both` 并行构建两个独立包 | `both` |
 
 ### 构建矩阵
 
-- **release**：`flutter build apk --release --target-platform android-arm,android-arm64`
-  - 当 `FDROID_KEY` / `FDROID_KEY_PASS` secret 存在时，会先调用
+工作流分三个 job：`prepare` → `build_apk`（matrix）→ `collect`。
+
+- **`prepare`**：根据 `target_abi` 输入生成 ABI 列表 JSON 和 `variant`，
+  供下游 matrix 展开。
+- **`build_apk`**：以 `strategy.matrix.abi` 并行（`max-parallel: 2`、
+  `fail-fast: false`）为每个 ABI 起一个 runner，各自执行：
+  `flutter build apk --<variant> --target-platform android-arm|android-arm64`
+  并把 `app-<variant>.apk` 重命名为 `app-<variant>-<abi>.apk`。每个 job 上传
+  独立 artifact `fluffychat-<variant>-<abi>-apk`。
+  - **release**：当 `FDROID_KEY` / `FDROID_KEY_PASS` secret 存在时，会先调用
     `scripts/prepare-android-release.sh` 配置签名；否则退回 Flutter 默认 debug 签名。
-- **debug**：`flutter build apk --debug ...`（跳过签名准备）
+    各矩阵 job 独立 checkout、独立签名准备，使用同一 secret/keystore 内容。
+  - **debug**：`flutter build apk --debug ...`（跳过签名准备）
+- **`collect`**：下载所有 per-ABI artifact，合并为统一 artifact
+  `fluffychat-<variant>-apk` 与 `fluffychat-<variant>-checksums`，
+  并在 `upload_to_release=true` 时上传到指定 Release。
 
 > 注：本项目 `android/app/build.gradle.kts` 设置了 `ndk.abiFilters`
 > （Flutter issue #162153 的 workaround），与 Gradle 的 `--split-per-abi`
-> 不兼容，因此不提供按 ABI 拆分选项。需要单架构包时，分别用
-> `--target-platform android-arm64` / `android-arm` 触发即可。
+> 不兼容，因此不使用按 ABI 拆分。改为对每个 ABI **单独运行一次**
+> `flutter build apk`（通过 matrix 并行），单次 `--target-platform` 仍产出单个
+> `app-<variant>.apk`，构建后立即重命名为 `app-<variant>-<abi>.apk`，
+> 从而在保留 `abiFilters` workaround 的同时得到分架构的独立 APK。
 
 ### 产物
 
-- 所有产出的 `.apk` 文件统一上传为 artifact
-  `fluffychat-{variant}-apk`（retention 30 天）。
-- 生成 `checksums-sha256.txt` 校验文件，上传为单独 artifact。
-- 若开启 `upload_to_release`，则用 `gh release upload --clobber` 把 APK
-  与校验文件上传到指定的 Release tag。
+- 每个 ABI 产出一个 `fluffychat-<variant>-<abi>.apk`
+  （如 `fluffychat-release-arm64-v8a.apk`、
+  `fluffychat-release-armeabi-v7a.apk`；debug 变体为
+  `fluffychat-debug-<abi>.apk`）。
+- 各矩阵 job 先上传独立 per-ABI artifact；`collect` job 再合并为统一
+  artifact `fluffychat-{variant}-apk`（retention 30 天）。
+- 合并后的 `checksums-sha256.txt` 校验文件上传为单独 artifact
+  `fluffychat-{variant}-checksums`。
+- 若开启 `upload_to_release`，`collect` job 用 `gh release upload --clobber`
+  把 APK 与校验文件上传到指定的 Release tag。
 
 ### 所需 Secrets（可选）
 
