@@ -24,15 +24,55 @@ on:
         required: false
         default: ""
         type: string
+      target_abi:
+        description: "目标 ABI：分别构建 armeabi-v7a / arm64-v8a 单架构包，或 both 串联构建两个独立包"
+        required: false
+        default: "both"
+        type: choice
+        options:
+          - "both"
+          - "armeabi-v7a"
+          - "arm64-v8a"
 
 concurrency:
   group: apk_build
   cancel-in-progress: false
 
 jobs:
+  # Translate the target_abi input into a JSON matrix array so the build job
+  # only spawns runners for the requested ABIs (both -> 2 parallel, single -> 1).
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      abis: ${{ steps.m.outputs.abis }}
+      variant: ${{ steps.m.outputs.variant }}
+    steps:
+      - id: m
+        run: |
+          case "${{ github.event.inputs.target_abi || 'both' }}" in
+            both)
+              echo 'abis=["armeabi-v7a","arm64-v8a"]' >> "$GITHUB_OUTPUT"
+              ;;
+            armeabi-v7a|arm64-v8a)
+              echo "abis=[\"${{ github.event.inputs.target_abi }}\"]" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "Unsupported target_abi: ${{ github.event.inputs.target_abi }}" >&2
+              exit 1
+              ;;
+          esac
+          variant="${{ github.event.inputs.build_debug == 'true' && 'debug' || 'release' }}"
+          echo "variant=$variant" >> "$GITHUB_OUTPUT"
+
   build_apk:
+    needs: prepare
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        abi: ${{ fromJSON(needs.prepare.outputs.abis) }}
     permissions:
       contents: write
     steps:
@@ -59,87 +99,127 @@ jobs:
       - run: flutter pub get
 
       - name: Prepare release signing (if secrets available)
-        if: github.event.inputs.build_debug != 'true'
+        if: needs.prepare.outputs.variant != 'debug'
         env:
           FDROID_KEY: ${{ secrets.FDROID_KEY }}
           FDROID_KEY_PASS: ${{ secrets.FDROID_KEY_PASS }}
         run: |
           # prepare-android-release.sh assumes signing secrets and a Ruby/fastlane
           # environment are present. When the secrets are empty (e.g. fork builds)
-          # we skip it and fall back to Flutter's built-in debug signing so the
-          # release APK can still be produced for testing. Set the secrets to get
-          # a properly signed, F-Droid-compatible build.
+          # we skip it: app/build.gradle.kts' signingConfigs.release falls back to
+          # the bundled android/app/dummy.keystore (committed to the repo), so the
+          # release APK is still produced, signed with that throwaway key. Set the
+          # secrets to get a properly signed, F-Droid-compatible build.
           if [[ -z "$FDROID_KEY" || -z "$FDROID_KEY_PASS" ]]; then
             echo "FDROID_KEY / FDROID_KEY_PASS not set — skipping release signing setup."
-            echo "The release APK will be signed with Flutter's default debug key."
+            echo "The release APK will be signed with the bundled dummy.keystore."
             exit 0
           fi
           ./scripts/prepare-android-release.sh
 
-      - name: Build release APK
-        if: github.event.inputs.build_debug != 'true'
-        run: flutter build apk --release --target-platform android-arm,android-arm64
+      - name: Build APK
+        id: build_apk
+        env:
+          VARIANT: ${{ needs.prepare.outputs.variant }}
+          ABI: ${{ matrix.abi }}
+        run: |
+          set -e
+          # Map ABI to Flutter --target-platform. A single --target-platform build
+          # is NOT split-per-abi (which conflicts with build.gradle.kts' ndk.abiFilters
+          # workaround for Flutter #162153), so Flutter writes a single app-<variant>.apk
+          # which we immediately rename per-ABI.
+          case "$ABI" in
+            armeabi-v7a) platform="android-arm" ;;
+            arm64-v8a)   platform="android-arm64" ;;
+            *) echo "Unknown ABI: $ABI" >&2; exit 1 ;;
+          esac
+          echo "::group::Build $VARIANT APK for $ABI (--target-platform $platform)"
+          flutter build apk --"$VARIANT" --target-platform "$platform"
+          mv "build/app/outputs/flutter-apk/app-${VARIANT}.apk" \
+             "build/app/outputs/flutter-apk/app-${VARIANT}-${ABI}.apk"
+          echo "::endgroup::"
 
-      - name: Build debug APK
-        if: github.event.inputs.build_debug == 'true'
-        run: flutter build apk --debug --target-platform android-arm,android-arm64
-
-      - name: Collect APK artifacts
-        id: collect_apk
+      - name: Collect APK artifact
         run: |
           set -e
           mkdir -p artifacts
-          variant="${{ github.event.inputs.build_debug == 'true' && 'debug' || 'release' }}"
-
-          # Find all APK files produced by the build
-          mapfile -t apk_files < <(find build/app/outputs -name "*.apk" -type f | sort)
-
-          if [[ ${#apk_files[@]} -eq 0 ]]; then
-            echo "No APK files found in build/app/outputs"
-            find build/app/outputs -type f | sort
+          variant="${{ needs.prepare.outputs.variant }}"
+          abi="${{ matrix.abi }}"
+          apk="build/app/outputs/flutter-apk/app-${variant}-${abi}.apk"
+          if [[ ! -f "$apk" ]]; then
+            echo "Expected APK not found: $apk" >&2
+            find build/app/outputs -type f | sort >&2
             exit 1
           fi
+          # Rename app-<variant>-<abi>.apk -> fluffychat-<variant>-<abi>.apk
+          dest="artifacts/fluffychat-${variant}-${abi}.apk"
+          cp "$apk" "$dest"
+          echo "Collected: $dest ($(du -h "$apk" | cut -f1))"
 
-          artifact_names=()
-          for apk in "${apk_files[@]}"; do
-            base="$(basename "$apk")"
-            # Prefix debug builds so they can be told apart from release artifacts
-            if [[ "$variant" == "debug" ]]; then
-              dest="artifacts/fluffychat-debug-${base}"
-            else
-              dest="artifacts/fluffychat-${base}"
-            fi
-            cp "$apk" "$dest"
-            artifact_names+=("$dest")
-            echo "Collected: $dest ($(du -h "$apk" | cut -f1))"
-          done
+      - name: Generate SHA256 checksum
+        run: |
+          cd artifacts
+          sha256sum "fluffychat-${{ needs.prepare.outputs.variant }}-${{ matrix.abi }}.apk" > "checksums-sha256-${{ matrix.abi }}.txt"
+          cat "checksums-sha256-${{ matrix.abi }}.txt"
 
-          # Emit a multiline output for the upload step
-          {
-            echo "apk_files<<EOF"
-            for n in "${artifact_names[@]}"; do echo "$n"; done
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
-          echo "variant=$variant" >> "$GITHUB_OUTPUT"
-
-      - name: Upload APK artifact
+      - name: Upload per-ABI artifact
         uses: actions/upload-artifact@v7
         with:
-          name: fluffychat-${{ steps.collect_apk.outputs.variant }}-apk
+          name: fluffychat-${{ needs.prepare.outputs.variant }}-${{ matrix.abi }}-apk
+          path: |
+            artifacts/fluffychat-${{ needs.prepare.outputs.variant }}-${{ matrix.abi }}.apk
+            artifacts/checksums-sha256-${{ matrix.abi }}.txt
+          if-no-files-found: error
+          retention-days: 30
+
+  # Aggregate per-ABI artifacts into one combined upload, and optionally push
+  # everything to a GitHub Release. Runs only if at least one build succeeded.
+  collect:
+    needs: build_apk
+    runs-on: ubuntu-latest
+    if: always() && needs.build_apk.result != 'skipped'
+    permissions:
+      contents: write
+    steps:
+      - name: Download all per-ABI artifacts
+        uses: actions/download-artifact@v7
+        with:
+          path: artifacts
+          pattern: fluffychat-*-apk
+          merge-multiple: true
+
+      - name: Verify and list collected artifacts
+        run: |
+          set -e
+          cd artifacts
+          echo "--- collected APKs ---"
+          find . -name "*.apk" -type f | sort
+          apk_count=$(find . -name "*.apk" -type f | wc -l)
+          if [[ "$apk_count" -eq 0 ]]; then
+            echo "No APK artifacts were produced; all matrix jobs failed." >&2
+            exit 1
+          fi
+          echo "Total APKs: $apk_count"
+
+      - name: Merge SHA256 checksums
+        run: |
+          cd artifacts
+          cat checksums-sha256-*.txt > checksums-sha256.txt
+          rm -f checksums-sha256-*.txt
+          cat checksums-sha256.txt
+
+      - name: Upload combined APKs
+        uses: actions/upload-artifact@v7
+        with:
+          name: fluffychat-${{ needs.prepare.outputs.variant }}-apk
           path: artifacts/*.apk
           if-no-files-found: error
           retention-days: 30
 
-      - name: Generate SHA256 checksums
-        run: |
-          cd artifacts
-          sha256sum *.apk > checksums-sha256.txt
-          cat checksums-sha256.txt
-
-      - name: Upload checksums
+      - name: Upload combined checksums
         uses: actions/upload-artifact@v7
         with:
-          name: fluffychat-${{ steps.collect_apk.outputs.variant }}-checksums
+          name: fluffychat-${{ needs.prepare.outputs.variant }}-checksums
           path: artifacts/checksums-sha256.txt
           if-no-files-found: error
 
