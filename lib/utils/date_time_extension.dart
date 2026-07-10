@@ -148,8 +148,8 @@ extension DateTimeExtension on DateTime {
   bool use24HourFormat(BuildContext context) {
     final mediaQuery24h = MediaQuery.alwaysUse24HourFormatOf(context);
 
-    // For Android this should always work.
-    if (PlatformInfos.isAndroid) return mediaQuery24h;
+    // For Android: prefer 24h if the locale typically uses it
+    if (PlatformInfos.isAndroid) return mediaQuery24h || l10n24h;
 
     final locale = Localizations.localeOf(context).languageCode;
     // Note: I don't like maintaining my own list but I haven't found a way to
