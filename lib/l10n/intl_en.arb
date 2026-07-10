@@ -2856,5 +2856,15 @@
             }
         }
     },
-    "loadingMessages": "Loading messages..."
+    "loadingMessages": "Loading messages...",
+    "compressVideo": "Compress video",
+    "@compressVideo": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "ignoreUser": "Ignore user",
+    "@ignoreUser": {
+        "type": "String",
+        "placeholders": {}
+    }
 }
