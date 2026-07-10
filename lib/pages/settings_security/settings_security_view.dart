@@ -103,13 +103,28 @@ class SettingsSecurityView extends StatelessWidget {
                       subtitle: Text(L10n.of(context).appLockDescription),
                     ),
                     SwitchListTile.adaptive(
-                      value: AppLock.of(context).isActive,
+                      value: AppLock.of(context).isActive &&
+                          !AppLock.of(context).isBiometricsOnly,
                       title: Text(L10n.of(context).useAppLock),
                       onChanged: (active) => active
                           ? controller.setAppLockAction()
                           : controller.disableAppLockAction(),
                     ),
-                    if (AppLock.of(context).isActive) ...[
+                    FutureBuilder(
+                      future: LocalAuthentication().canCheckBiometrics,
+                      builder: (context, snapshot) {
+                        if (snapshot.data != true) return SizedBox.shrink();
+                        return SwitchListTile.adaptive(
+                          value: AppLock.of(context).isBiometricsOnly,
+                          title: Text(L10n.of(context).useBiometricsOnly),
+                          subtitle: Text(L10n.of(context).biometricsOnlyDescription),
+                          onChanged: (_) =>
+                              controller.toggleBiometricsOnlyAction(),
+                        );
+                      },
+                    ),
+                    if (AppLock.of(context).isActive &&
+                        !AppLock.of(context).isBiometricsOnly) ...[
                       FutureBuilder(
                         future: LocalAuthentication().canCheckBiometrics,
                         builder: (context, snapshot) {

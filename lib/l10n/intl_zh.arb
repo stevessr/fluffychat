@@ -2145,7 +2145,7 @@
             }
         }
     },
-    "appLockDescription": "用 pin 码在不用 FluffyChat 时锁定它",
+    "appLockDescription": "在不使用 FluffyChat 时锁定它",
     "globalChatId": "全局聊天 ID",
     "accessAndVisibility": "访问和可见性",
     "accessAndVisibilityDescription": "谁可以加入此聊天以及怎样发现该聊天。",
@@ -2752,6 +2752,8 @@
     "biometricsDescription": "借助生物识别身份认证，你可以用脸或指纹解锁应用。该功能是否可用取决于你的设备。",
     "useAppLock": "使用应用锁",
     "unlockWithBiometrics": "用生物识别身份认证解锁",
+    "useBiometricsOnly": "仅使用生物识别",
+    "biometricsOnlyDescription": "直接用指纹或面部解锁应用，无需设置 PIN 码",
     "resetPin": "重置 pin 码",
     "forwardCountMessages": "转发 {count, plural, =1{条消息} other{{count} 条消息}}？",
     "@forwardCountMessages": {
