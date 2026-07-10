@@ -189,8 +189,8 @@ class SettingsSecurityController extends State<SettingsSecurity> {
 
   Future<void> dehydrateAction() => Matrix.of(context).dehydrateAction(context);
 
-  Future<void> toggleBlockScreenshots() async {
-    await ScreenshotBlocker.setBlocked(!AppSettings.blockScreenshots.value);
+  Future<void> toggleBlockScreenshots(bool newValue) async {
+    await ScreenshotBlocker.setBlocked(newValue);
   }
 
   Future<void> exportAccountAction() =>
