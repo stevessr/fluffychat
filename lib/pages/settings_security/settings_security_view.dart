@@ -146,8 +146,8 @@ class SettingsSecurityView extends StatelessWidget {
 
                   if (PlatformInfos.isAndroid)
                     SettingsSwitchListTile.adaptive(
-                      title: Text(L10n.of(context).blockScreenshots),
-                      subtitle: Text(L10n.of(context).blockScreenshotsDescription),
+                      title: L10n.of(context).blockScreenshots,
+                      subtitle: L10n.of(context).blockScreenshotsDescription,
                       setting: AppSettings.blockScreenshots,
                       onChanged: (_) => controller.toggleBlockScreenshots(),
                     ),
