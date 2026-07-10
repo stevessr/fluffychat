@@ -5,6 +5,7 @@
 
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/utils/screenshot_blocker.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart';
 import 'package:fluffychat/widgets/app_lock.dart';
@@ -187,6 +188,10 @@ class SettingsSecurityController extends State<SettingsSecurity> {
   }
 
   Future<void> dehydrateAction() => Matrix.of(context).dehydrateAction(context);
+
+  Future<void> toggleBlockScreenshots() async {
+    await ScreenshotBlocker.setBlocked(!AppSettings.blockScreenshots.value);
+  }
 
   Future<void> exportAccountAction() =>
       Matrix.of(context).exportAccountAction(context);
