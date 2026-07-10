@@ -2801,5 +2801,15 @@
     "addTag": "添加标签",
     "removeTag": "删除标签",
     "tagName": "标签名称",
-    "createNewTag": "创建新标签"
+    "createNewTag": "创建新标签",
+    "compressVideo": "压缩视频",
+    "@compressVideo": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "ignoreUser": "忽略用户",
+    "@ignoreUser": {
+        "type": "String",
+        "placeholders": {}
+    }
 }

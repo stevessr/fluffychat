@@ -2859,5 +2859,15 @@
     "loadingMessages": "Loading messages...",
     "buildDoesNotSupportFirebase": "This build does not support firebase cloud messaging.",
     "unableToRegisterDeviceForFirebase": "Unable to register device for firebase cloud messaging.",
-    "unifiedPushDistributors": "Unified Push distributors:"
+    "unifiedPushDistributors": "Unified Push distributors:",
+    "compressVideo": "Compress video",
+    "@compressVideo": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "ignoreUser": "Ignore user",
+    "@ignoreUser": {
+        "type": "String",
+        "placeholders": {}
+    }
 }
