@@ -87,6 +87,9 @@ enum AppSettings<T> {
   ),
   customLiveKitInstance<String>('chat.fluffy.custom_live_kit_instance', '');
 
+  /// Block screenshots and screen recording on Android
+  blockScreenshots<bool>('chat.fluffy.block_screenshots', false);
+
   final String key;
   final T defaultValue;
 
