@@ -2857,6 +2857,7 @@
     "buildDoesNotSupportFirebase": "This build does not support firebase cloud messaging.",
     "unableToRegisterDeviceForFirebase": "Unable to register device for firebase cloud messaging.",
     "unifiedPushDistributors": "Unified Push distributors:",
+
     "doubleTapToReact": "Double-tap to react",
     "doubleTapToReactDescription": "Double-tap a message to react instead of selecting text",
     "doubleTapReaction": "Double-tap reaction",
@@ -2883,5 +2884,15 @@
     },
     "enterCall": "Enter call",
     "videoCallsBetaWarning": "Video calls are a beta feature. There might be bugs or unexpected behavior. We would be happy to hear about your feedback.",
-    "noDevicesFound": "No devices found"
+    "noDevicesFound": "No devices found",
+    "compressVideo": "Compress video",
+    "@compressVideo": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "ignoreUser": "Ignore user",
+    "@ignoreUser": {
+        "type": "String",
+        "placeholders": {}
+    }
 }
