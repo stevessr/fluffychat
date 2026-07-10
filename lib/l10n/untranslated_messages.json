@@ -250,10 +250,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "az": [
@@ -1032,10 +1036,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "be": [
@@ -1139,10 +1147,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "bn": [
@@ -1901,10 +1913,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "bo": [
@@ -2691,10 +2707,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "ca": [
@@ -2802,10 +2822,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "cs": [
@@ -2989,10 +3013,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "da": [
@@ -3750,10 +3778,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "de": [
@@ -3803,10 +3835,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "el": [
@@ -4517,10 +4553,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "eo": [
@@ -5027,10 +5067,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "es": [
@@ -5118,10 +5162,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "et": [
@@ -5163,8 +5211,12 @@
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "eu": [
@@ -5253,10 +5305,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "fa": [
@@ -5365,10 +5421,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "fi": [
@@ -5523,10 +5583,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "fil": [
@@ -6147,10 +6211,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "fr": [
@@ -6192,8 +6260,12 @@
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "ga": [
@@ -6243,10 +6315,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "gl": [
@@ -6288,8 +6364,12 @@
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "he": [
@@ -6875,10 +6955,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "hi": [
@@ -7648,10 +7732,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "hr": [
@@ -7783,10 +7871,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "hu": [
@@ -7968,10 +8060,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "ia": [
@@ -8744,10 +8840,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "id": [
@@ -8806,10 +8906,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "ie": [
@@ -9422,10 +9526,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "it": [
@@ -9597,10 +9705,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "ja": [
@@ -9888,10 +10000,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "ka": [
@@ -10547,10 +10663,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "kab": [
@@ -10808,10 +10928,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "ko": [
@@ -11025,10 +11149,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "lt": [
@@ -11440,10 +11568,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "lv": [
@@ -11499,9 +11631,13 @@
     "youAreReadyToStart",
     "noUserKeyFound",
     "knownSince",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "nb": [
@@ -11605,10 +11741,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "nl": [
@@ -11650,8 +11790,12 @@
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "pl": [
@@ -11693,8 +11837,12 @@
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "pt": [
@@ -12459,10 +12607,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "pt_BR": [
@@ -12603,10 +12755,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "pt_PT": [
@@ -13030,10 +13186,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "ro": [
@@ -13453,10 +13613,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "ru": [
@@ -13507,10 +13671,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "sk": [
@@ -14102,10 +14270,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "sl": [
@@ -14802,10 +14974,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "sq": [
@@ -15592,10 +15768,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "sr": [
@@ -16117,10 +16297,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "sv": [
@@ -16323,10 +16507,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "ta": [
@@ -16439,10 +16627,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "te": [
@@ -17226,10 +17418,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "th": [
@@ -17969,10 +18165,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "tr": [
@@ -18224,10 +18424,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "uk": [
@@ -18316,10 +18520,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "uz": [
@@ -18451,10 +18659,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "vi": [
@@ -19107,10 +19319,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "yue": [
@@ -19841,10 +20057,14 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
 
   "zh": [
@@ -20032,9 +20252,13 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ]
 }

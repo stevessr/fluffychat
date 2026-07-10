@@ -79,6 +79,9 @@ enum AppSettings<T> {
   hideRoomsInSpaces<bool>('chat.fluffy.hideRoomsInSpaces', false),
   showThumbnailsInTimeline<bool>('chat.fluffy.showThumbnailsInTimeline', true);
 
+  /// Block screenshots and screen recording on Android
+  blockScreenshots<bool>('chat.fluffy.block_screenshots', false);
+
   final String key;
   final T defaultValue;
 

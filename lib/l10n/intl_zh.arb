@@ -2813,5 +2813,15 @@
     "@ignoreUser": {
         "type": "String",
         "placeholders": {}
+    },
+    "blockScreenshots": "禁止截屏和录屏",
+    "@blockScreenshots": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "blockScreenshotsDescription": "防止他人在应用中截屏或录屏",
+    "@blockScreenshotsDescription": {
+        "type": "String",
+        "placeholders": {}
     }
 }
