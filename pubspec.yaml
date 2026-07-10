@@ -39,6 +39,7 @@ dependencies:
     sdk: flutter
   flutter_map: ^8.3.1
   flutter_new_badger: ^2.0.0
+  flutter_math_fork: ^0.7.4
   flutter_secure_storage: ^10.3.1
   flutter_shortcuts_new: ^2.0.0
   flutter_vodozemac: ^0.6.0

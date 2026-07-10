@@ -16,6 +16,7 @@ import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:flutter_math_fork/flutter_math.dart' show Math, MathStyle;
 import 'package:highlight/highlight.dart' show highlight;
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
@@ -236,6 +237,38 @@ class HtmlMessage extends StatelessWidget {
     }
 
     return TextSpan(children: spans);
+  }
+
+  /// Renders a LaTeX math expression carried by a `data-mx-maths` attribute.
+  ///
+  /// See: https://spec.matrix.org/latest/client-server-api/#mathematical-messages
+  ///
+  /// [displayMode] selects display (block) vs. text (inline) style. If the
+  /// LaTeX cannot be parsed, we fall back to [fallbackText], which is the
+  /// plaintext the sender put inside the `<code>`/`<pre>` element for exactly
+  /// this purpose.
+  InlineSpan _renderMath(
+    String tex, {
+    required bool displayMode,
+    required String fallbackText,
+  }) {
+    final fallback = fallbackText.trim().isNotEmpty ? fallbackText : tex;
+    return WidgetSpan(
+      alignment: PlaceholderAlignment.middle,
+      child: Math.tex(
+        tex,
+        mathStyle: displayMode ? MathStyle.display : MathStyle.text,
+        textStyle: TextStyle(fontSize: fontSize, color: textColor),
+        onErrorFallback: (_) => Text(
+          fallback,
+          style: TextStyle(
+            fontSize: fontSize,
+            color: textColor,
+            fontFamilyFallback: const ['monospace'],
+          ),
+        ),
+      ),
+    );
   }
 
   /// Transforms a Node to an InlineSpan.
@@ -615,7 +648,27 @@ class HtmlMessage extends StatelessWidget {
             ),
           ),
         );
+      case 'div':
+        // Block (display) math: <div data-mx-maths="..."><pre><code>..</code></pre></div>
+        final blockMaths = node.attributes['data-mx-maths'];
+        if (blockMaths != null && blockMaths.trim().isNotEmpty) {
+          return _renderMath(
+            blockMaths,
+            displayMode: true,
+            fallbackText: node.text,
+          );
+        }
+        continue block;
       case 'span':
+        // Inline math: <span data-mx-maths="..."><code>..</code></span>
+        final inlineMaths = node.attributes['data-mx-maths'];
+        if (inlineMaths != null && inlineMaths.trim().isNotEmpty) {
+          return _renderMath(
+            inlineMaths,
+            displayMode: false,
+            fallbackText: node.text,
+          );
+        }
         if (!node.attributes.containsKey('data-mx-spoiler')) {
           continue block;
         }
