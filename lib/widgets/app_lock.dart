@@ -33,10 +33,13 @@ class AppLock extends State<AppLockWidget> with WidgetsBindingObserver {
   bool _triedAutoBiometrics = false;
   bool _paused = false;
   bool get isActive =>
-      _pincode != null &&
-      int.tryParse(_pincode!) != null &&
-      _pincode!.length >= 4 &&
-      !_paused;
+      !_paused &&
+      (_useBiometrics ||
+          (_pincode != null &&
+              int.tryParse(_pincode!) != null &&
+              _pincode!.length >= 4));
+
+  bool get isBiometricsOnly => _useBiometrics && _pincode == null;
   bool get useBiometrics => _useBiometrics;
 
   @override
@@ -47,7 +50,9 @@ class AppLock extends State<AppLockWidget> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback(_checkLoggedIn);
-    if (isActive && useBiometrics) unlockWithBiometrics();
+    if (isActive && useBiometrics) {
+      unlockWithBiometrics();
+    }
   }
 
   Future<void> _checkLoggedIn(_) async {
@@ -66,9 +71,10 @@ class AppLock extends State<AppLockWidget> with WidgetsBindingObserver {
     }
     if (_isLocked &&
         state == AppLifecycleState.resumed &&
-        useBiometrics &&
         !_triedAutoBiometrics) {
-      unlockWithBiometrics();
+      if (useBiometrics) {
+        unlockWithBiometrics();
+      }
     }
   }
 
