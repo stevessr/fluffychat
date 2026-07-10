@@ -2868,5 +2868,15 @@
     "@ignoreUser": {
         "type": "String",
         "placeholders": {}
+    },
+    "blockScreenshots": "Block screenshots",
+    "@blockScreenshots": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "blockScreenshotsDescription": "Prevent others from taking screenshots or recording the screen",
+    "@blockScreenshotsDescription": {
+        "type": "String",
+        "placeholders": {}
     }
 }
