@@ -18,7 +18,7 @@ import 'package:fluffychat/pages/chat/event_info_dialog.dart';
 import 'package:fluffychat/pages/chat/recording_view_model.dart';
 import 'package:fluffychat/pages/chat/start_poll_bottom_sheet.dart';
 import 'package:fluffychat/pages/chat/trust_user_key_dialog.dart';
-import 'package:fluffychat/pages/chat/utils/web_file_to_x_file.dart';
+import 'package:fluffychat/pages/chat/utils/web_clipboard_file_paste_listener.dart';
 import 'package:fluffychat/pages/chat_details/chat_details.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/dynamic_font_loader.dart';
@@ -47,7 +47,6 @@ import 'package:matrix/matrix.dart';
 import 'package:mime/mime.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:universal_html/universal_html.dart' as web;
 
 import '../../utils/account_bundles.dart';
 import '../../utils/localized_exception_extension.dart';
@@ -125,6 +124,7 @@ class ChatController extends State<ChatPageWithRoom>
   final AutoScrollController scrollController = AutoScrollController();
 
   late final FocusNode inputFocus;
+  late final WebClipboardFilePasteListener _webClipboardFilePasteListener;
 
   Timer? typingCoolDown;
   Timer? typingTimeout;
@@ -400,7 +400,9 @@ class ChatController extends State<ChatPageWithRoom>
 
     _loadDraft();
     WidgetsBinding.instance.addPostFrameCallback(_shareItems);
-    web.window.addEventListener('paste', _handleClipboardFilePasteWeb);
+    _webClipboardFilePasteListener = WebClipboardFilePasteListener(
+      _handleWebClipboardFiles,
+    )..start();
     super.initState();
     _displayChatDetailsColumn = ValueNotifier(
       AppSettings.displayChatDetailsColumn.value,
@@ -616,6 +618,7 @@ class ChatController extends State<ChatPageWithRoom>
     inputFocus.dispose();
     _displayChatDetailsColumn.dispose();
     web.window.removeEventListener('paste', _handleClipboardFilePasteWeb);
+    _webClipboardFilePasteListener.dispose();
     if (currentlyTyping) room.setTyping(false);
     MxcImage.clearCache(widget.room.id);
     super.dispose();
@@ -902,48 +905,9 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
-  Future<void> _handleClipboardFilePasteWeb(web.Event event) async {
-    if (event is! web.ClipboardEvent) return;
-
-    final clipboardFiles = event.clipboardData?.files;
-    final length = clipboardFiles?.length ?? 0;
-    if (clipboardFiles == null || length < 1) return;
-
-    // Browser will clear clipboardData when we await!
-    // We MUST extract the files synchronously first.
-    final localFiles = clipboardFiles.toList();
-
-    if (localFiles.isEmpty) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    final xFilesResult = await showFutureLoadingDialog(
-      context: context,
-      future: () async {
-        // Convert one after another seems to be more stable
-        final xFiles = <XFile>[];
-        for (final file in localFiles) {
-          xFiles.add(await webToXFile(file));
-        }
-        return xFiles;
-      },
-    );
-    final xFiles = xFilesResult.result;
-    if (xFiles == null || xFiles.isEmpty) return;
-
+  Future<void> _handleWebClipboardFiles(List<XFile> files) async {
     if (!mounted) return;
-    showAdaptiveDialog(
-      context: context,
-      builder: (c) => SendFileDialog(
-        files: xFiles,
-        room: room,
-        outerContext: context,
-        inReplyTo: _attachmentReplyEvent,
-        threadRootEventId: activeThreadId,
-        threadLastEventId: threadLastEventId,
-      ),
-    );
+    await onFilesDropped(files);
   }
 
   Future<void> _handleClipboardImagePaste() async {

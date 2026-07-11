@@ -11,6 +11,7 @@ import 'package:fluffychat/pages/sign_in/view_model/model/public_homeserver_data
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/oidc_session_json_extension.dart';
 import 'package:fluffychat/utils/sign_in_flows/check_homeserver.dart';
+import 'package:fluffychat/utils/web_platform.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +19,6 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix_api_lite/utils/logs.dart';
 import 'package:matrix/msc_extensions/msc_2964_oidc_login_flow/msc_2964_oidc_login_flow.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:universal_html/universal_html.dart' as web;
 
 class IntroPagePresenter extends StatefulWidget {
   const IntroPagePresenter({super.key});
@@ -70,7 +70,7 @@ class _IntroPagePresenterState extends State<IntroPagePresenter> {
     });
 
     try {
-      final returnUrl = Uri.parse(web.window.location.href);
+      final returnUrl = Uri.parse(webLocationHref);
       final queryParameters = returnUrl.hasFragment
           ? Uri.parse(returnUrl.fragment).queryParameters
           : returnUrl.queryParameters;

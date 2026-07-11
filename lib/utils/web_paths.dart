@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:flutter/foundation.dart';
-import 'package:universal_html/html.dart' as html;
+
+import 'web_platform.dart';
 
 /// Resolves a Flutter Web asset/config path against the document `<base>`.
 ///
@@ -15,6 +16,6 @@ import 'package:universal_html/html.dart' as html;
 String resolveWebPath(String path) {
   if (!kIsWeb) return path;
 
-  final baseUri = Uri.tryParse(html.document.baseUri ?? '') ?? Uri.base;
+  final baseUri = Uri.tryParse(webDocumentBaseUri) ?? Uri.base;
   return baseUri.resolve(path).toString();
 }

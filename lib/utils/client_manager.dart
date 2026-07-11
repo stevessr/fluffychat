@@ -13,13 +13,13 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/rainbow_command_extension.dart';
 import 'package:fluffychat/utils/room_management_command_extension.dart';
 import 'package:fluffychat/utils/web_paths.dart';
+import 'package:fluffychat/utils/web_platform.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:universal_html/html.dart' as html;
 
 import 'matrix_sdk_extensions/flutter_matrix_dart_sdk_database/builder.dart';
 import 'matrix_sdk_extensions/on_soft_logout.dart';
@@ -158,7 +158,7 @@ abstract class ClientManager {
 
   static Future<void> sendInitNotification(String title, String body) async {
     if (kIsWeb) {
-      html.Notification(title, body: body);
+      showWebNotification(title, body: body);
       return;
     }
 
