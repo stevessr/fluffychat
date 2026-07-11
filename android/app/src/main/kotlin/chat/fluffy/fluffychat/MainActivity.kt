@@ -23,15 +23,21 @@ class MainActivity : FlutterFragmentActivity() {
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             "chat.fluffy.fluffychat/screenshot",
-        ).setMethodCallHandler { call, _ ->
-            if (call.method == "setSecureFlag") {
-                val blocked = call.arguments as? Boolean ?: false
-                if (blocked) {
-                    window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
-                } else {
-                    window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
-                }
+        ).setMethodCallHandler { call, result ->
+            if (call.method != "setSecureFlag") {
+                result.notImplemented()
+                return@setMethodCallHandler
             }
+
+            val blocked = call.arguments as? Boolean ?: false
+            if (blocked) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+            } else {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+            }
+            // Every MethodChannel call must receive a reply. Without this the
+            // Dart Future never completes and startup remains before runApp().
+            result.success(null)
         }
     }
 
