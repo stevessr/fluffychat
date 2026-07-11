@@ -5,13 +5,13 @@
 
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
-import 'package:emoji_picker_flutter/locales/default_emoji_set_locale.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat/recording_input_row.dart';
 import 'package:fluffychat/pages/chat/recording_view_model.dart';
 import 'package:fluffychat/utils/other_party_can_receive.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/unicode_17_emoji_set.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -32,17 +32,7 @@ class ChatInputRow extends StatelessWidget {
     final locale = AppSettings.emojiSuggestionLocale.value.isNotEmpty
         ? Locale(AppSettings.emojiSuggestionLocale.value)
         : Localizations.localeOf(context);
-    final localizedEmojiByValue = <String, Emoji>{
-      for (final category in getDefaultEmojiLocale(locale))
-        for (final emoji in category.emoji) emoji.emoji: emoji,
-    };
-    final merged = <Emoji>[];
-    for (final category in emojiSetEnglish) {
-      for (final emoji in category.emoji) {
-        merged.add(localizedEmojiByValue[emoji.emoji] ?? emoji);
-      }
-    }
-    return merged;
+    return emojiSuggestionsWithUnicode17(locale);
   }
 
   @override
