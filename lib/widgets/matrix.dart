@@ -17,6 +17,7 @@ import 'package:fluffychat/utils/notification_background_handler.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/uia_request_manager.dart';
 import 'package:fluffychat/utils/voip_plugin.dart';
+import 'package:fluffychat/utils/web_platform.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/fluffy_chat_app.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
@@ -30,7 +31,6 @@ import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:universal_html/html.dart' as html;
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../config/setting_keys.dart';
@@ -299,7 +299,7 @@ class MatrixState extends State<Matrix> {
         ),
       );
       c.onSync.stream.first.then((s) {
-        html.Notification.requestPermission();
+        requestWebNotificationPermission();
         onNotification[name] ??= c.onNotification.stream.listen(
           showLocalNotification,
         );
@@ -492,12 +492,13 @@ class MatrixState extends State<Matrix> {
       context: context,
       future: () async {
         final raw = await xfile.readAsBytes();
-        final export = AccountExport.fromJsonString(
-          String.fromCharCodes(raw),
-        );
+        final export = AccountExport.fromJsonString(String.fromCharCodes(raw));
         final newClientName =
             '${AppSettings.applicationName.value}-import-${DateTime.now().millisecondsSinceEpoch}';
-        final newClient = await ClientManager.createClient(newClientName, store);
+        final newClient = await ClientManager.createClient(
+          newClientName,
+          store,
+        );
         await newClient.importAccount(export);
 
         if (!widget.clients.contains(newClient)) {

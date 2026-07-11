@@ -8,7 +8,10 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:matrix/matrix.dart';
-import 'package:native_imaging/native_imaging.dart' as native;
+
+import 'custom_image_resizer_backend_native.dart'
+    if (dart.library.js_interop) 'custom_image_resizer_backend_web.dart'
+    as native;
 
 (int, int) _scaleToBox(int width, int height, {required int boxSize}) {
   final fit = applyBoxFit(

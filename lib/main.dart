@@ -13,12 +13,12 @@ import 'package:fluffychat/utils/notification_background_handler.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/vodozemac_bootstrap.dart';
 import 'package:fluffychat/utils/web_paths.dart';
+import 'package:fluffychat/utils/web_platform.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:universal_html/universal_html.dart' as web;
 
 import 'config/setting_keys.dart';
 import 'utils/background_push.dart';
@@ -37,15 +37,10 @@ bool isIntegrationTest = false;
 void main(List<String> args) async {
   isIntegrationTest = args.singleOrNull == 'integration_test';
   if (kIsWeb) {
-    final htmlElement = web.window.document.documentElement;
-    final alreadyStarted =
-        htmlElement?.getAttribute(_webMainGuardAttribute) == '1';
-    if (alreadyStarted) {
+    if (markWebMainStarted(_webMainGuardAttribute)) {
       Logs().w('Duplicate web startup detected. Ignoring this bootstrap.');
       return;
     }
-    // Guard against double bootstrap (e.g. script optimizer/reloader quirks).
-    htmlElement?.setAttribute(_webMainGuardAttribute, '1');
   }
 
   if (PlatformInfos.isAndroid) {
@@ -60,9 +55,9 @@ void main(List<String> args) async {
 
   // Sanitize hash for OIDC:
   if (kIsWeb) {
-    final hash = web.window.location.hash;
+    final hash = webLocationHash;
     if (hash.isNotEmpty && !hash.startsWith('/')) {
-      web.window.location.hash = hash.replaceFirst('#', '#?');
+      webLocationHash = hash.replaceFirst('#', '#?');
     }
   }
 

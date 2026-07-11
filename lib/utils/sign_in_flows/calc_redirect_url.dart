@@ -5,14 +5,14 @@
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/web_platform.dart';
 import 'package:flutter/foundation.dart';
-import 'package:universal_html/html.dart' as html;
 
 (Uri redirectUrl, String urlScheme) calcRedirectUrl({
   bool withAuthHtmlPath = false,
 }) {
   var redirectUrl = kIsWeb
-      ? Uri.parse(html.window.location.href.split('#').first.split('?').first)
+      ? Uri.parse(webLocationHref.split('#').first.split('?').first)
       : (PlatformInfos.isMobile || PlatformInfos.isMacOS)
       ? Uri.parse('${AppConfig.appSsoUrlScheme.toLowerCase()}:/login')
       : Uri.parse('http://localhost:3001/login');

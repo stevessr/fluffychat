@@ -1,11 +1,11 @@
+import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
-
 // Conditional imports for web-specific code
-import 'iframe_widget_stub.dart' if (dart.library.html) 'iframe_widget_web.dart'
+import 'iframe_widget_stub.dart'
+    if (dart.library.js_interop) 'iframe_widget_web.dart'
     as iframe_impl;
 
 /// Widget for rendering iframe elements in messages
@@ -60,14 +60,10 @@ class _IframeWidgetState extends State<IframeWidget> {
         decoration: BoxDecoration(
           color: widget.backgroundColor,
           borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-          border: Border.all(
-            color: theme.colorScheme.outline.withAlpha(100),
-          ),
+          border: Border.all(color: theme.colorScheme.outline.withAlpha(100)),
         ),
         clipBehavior: Clip.antiAlias,
-        child: HtmlElementView(
-          viewType: _iframeId,
-        ),
+        child: HtmlElementView(viewType: _iframeId),
       );
     } else {
       // On mobile platforms, show a placeholder with a button to open in browser
@@ -77,9 +73,7 @@ class _IframeWidgetState extends State<IframeWidget> {
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-          border: Border.all(
-            color: theme.colorScheme.outline.withAlpha(100),
-          ),
+          border: Border.all(color: theme.colorScheme.outline.withAlpha(100)),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -179,8 +173,9 @@ class SafeIframeWidget extends StatelessWidget {
       }
 
       // Check against allowed domains
-      final domainsToCheck =
-          allowedDomains.isEmpty ? defaultAllowedDomains : allowedDomains;
+      final domainsToCheck = allowedDomains.isEmpty
+          ? defaultAllowedDomains
+          : allowedDomains;
 
       for (final domain in domainsToCheck) {
         if (uri.host == domain || uri.host.endsWith('.$domain')) {

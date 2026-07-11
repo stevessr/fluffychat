@@ -2,7 +2,7 @@ import 'package:cross_file/cross_file.dart';
 import 'package:flutter/widgets.dart';
 
 import 'chat_drop_target_native.dart'
-    if (dart.library.html) 'chat_drop_target_web.dart'
+    if (dart.library.js_interop) 'chat_drop_target_web.dart'
     as impl;
 
 typedef ChatFilesDroppedCallback = Future<void> Function(List<XFile> files);

@@ -10,18 +10,14 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/room_notification_sound_extension.dart';
 import 'package:fluffychat/utils/notification_background_handler.dart';
 import 'package:fluffychat/utils/push_helper.dart';
+import 'package:fluffychat/utils/web_platform.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:matrix/matrix.dart';
-import 'package:universal_html/html.dart' as html;
 
 extension LocalNotificationsExtension on MatrixState {
-  static final html.AudioElement _audioPlayer = html.AudioElement()
-    ..src = 'assets/assets/sounds/notification.ogg'
-    ..load();
-
   Future<void> showLocalNotification(Event event) async {
     final l10n = L10n.of(context);
     final roomId = event.room.id;
@@ -76,10 +72,10 @@ extension LocalNotificationsExtension on MatrixState {
       );
 
       if (AppSettings.webNotificationSound.value && playNotificationSound) {
-        _audioPlayer.play();
+        playWebNotificationSound();
       }
 
-      html.Notification(
+      showWebNotification(
         title,
         body: body,
         icon: thumbnailUri?.toString(),
