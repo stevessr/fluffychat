@@ -59,6 +59,18 @@ Future<void> main() async {
       (await fragments.get('room,SENDING'))?.single != r'$local') {
     throw StateError('Transactional encrypted media state did not persist');
   }
+  await collection.clear();
+  box.clearQuickAccessCache();
+  events.clearQuickAccessCache();
+  fragments.clearQuickAccessCache();
+  files.clearQuickAccessCache();
+  if (await box.get('m.cross_signing.self_signing') != null ||
+      await events.get('room,event') != null ||
+      await fragments.get('room,SENDING') != null ||
+      await files.get('cache://file/transaction') != null) {
+    throw StateError('IndexedDB collection clear did not remove all values');
+  }
+  await collection.deleteDatabase('fluffychat_wasm_indexeddb_smoke');
 
   // Exercise the exact post-login Cross Signing/SSSS call path as well.
   const sdkDatabaseName = 'fluffychat_wasm_ssss_sdk_smoke';
