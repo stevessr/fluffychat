@@ -5,17 +5,12 @@
 
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
-
-import 'package:geolocator/geolocator.dart';
-import 'package:matrix/matrix.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat/events/map_bubble.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:matrix/matrix.dart';
@@ -35,6 +30,7 @@ class SendLocationDialogState extends State<SendLocationDialog> {
   bool isSending = false;
   Position? position;
   Object? error;
+  int _locationRequestGeneration = 0;
 
   @override
   void initState() {
@@ -51,73 +47,100 @@ class SendLocationDialogState extends State<SendLocationDialog> {
     return uri.scheme != 'https' && !isLocalhost;
   }
 
+  bool _isCurrentLocationRequest(int generation) =>
+      mounted && generation == _locationRequestGeneration;
+
+  @override
+  void dispose() {
+    _locationRequestGeneration++;
+    super.dispose();
+  }
+
   Future<void> requestLocation() async {
-    if (_isWebInsecureContext) {
-      setState(
-        () => error = 'Location sharing on web requires HTTPS or localhost.',
-      );
-      return;
-    }
-    if (!(await Geolocator.isLocationServiceEnabled())) {
-      setState(() => disabled = true);
-      return;
-    }
-    var permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
+    final generation = ++_locationRequestGeneration;
+    try {
+      if (_isWebInsecureContext) {
+        if (!_isCurrentLocationRequest(generation)) return;
+        setState(
+          () => error = 'Location sharing on web requires HTTPS or localhost.',
+        );
+        return;
+      }
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!_isCurrentLocationRequest(generation)) return;
+      if (!serviceEnabled) {
+        setState(() => disabled = true);
+        return;
+      }
+      var permission = await Geolocator.checkPermission();
+      if (!_isCurrentLocationRequest(generation)) return;
       if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (!_isCurrentLocationRequest(generation)) return;
+        if (permission == LocationPermission.denied) {
+          setState(() => denied = true);
+          return;
+        }
+      }
+      if (permission == LocationPermission.deniedForever) {
         setState(() => denied = true);
         return;
       }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      setState(() => denied = true);
-      return;
-    }
-    try {
-      Position position;
+      Position currentPosition;
       try {
-        position = await Geolocator.getCurrentPosition(
+        currentPosition = await Geolocator.getCurrentPosition(
           locationSettings: const LocationSettings(
             accuracy: LocationAccuracy.best,
             timeLimit: Duration(seconds: 30),
           ),
         );
       } on TimeoutException {
-        position = await Geolocator.getCurrentPosition(
+        if (!_isCurrentLocationRequest(generation)) return;
+        currentPosition = await Geolocator.getCurrentPosition(
           locationSettings: const LocationSettings(
             accuracy: LocationAccuracy.medium,
             timeLimit: Duration(seconds: 30),
           ),
         );
       }
-      setState(() => this.position = position);
-    } catch (e) {
-      setState(() => error = e);
+      if (!_isCurrentLocationRequest(generation)) return;
+      setState(() => position = currentPosition);
+    } catch (exception, stackTrace) {
+      Logs().w('Unable to obtain location', exception, stackTrace);
+      if (!_isCurrentLocationRequest(generation)) return;
+      setState(() => error = exception);
     }
   }
 
   Future<void> sendAction() async {
+    if (isSending) return;
+    final selectedPosition = position;
+    if (selectedPosition == null) return;
     setState(() => isSending = true);
     final body =
-        'https://www.openstreetmap.org/?mlat=${position!.latitude}&mlon=${position!.longitude}#map=16/${position!.latitude}/${position!.longitude}';
+        'https://www.openstreetmap.org/?mlat=${selectedPosition.latitude}&mlon=${selectedPosition.longitude}#map=16/${selectedPosition.latitude}/${selectedPosition.longitude}';
     final uri =
-        'geo:${position!.latitude},${position!.longitude};u=${position!.accuracy}';
-    await showFutureLoadingDialog(
+        'geo:${selectedPosition.latitude},${selectedPosition.longitude};u=${selectedPosition.accuracy}';
+    final result = await showFutureLoadingDialog(
       context: context,
       future: () => widget.room.sendLocation(body, uri),
     );
     if (!mounted) return;
+    if (result.error != null) {
+      setState(() => isSending = false);
+      return;
+    }
     Navigator.of(context, rootNavigator: false).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     Widget contentWidget;
-    if (position != null) {
+    final currentPosition = position;
+    if (currentPosition != null) {
       contentWidget = MapBubble(
-        latitude: position!.latitude,
-        longitude: position!.longitude,
+        latitude: currentPosition.latitude,
+        longitude: currentPosition.longitude,
       );
     } else if (disabled) {
       contentWidget = Text(L10n.of(context).locationDisabledNotice);
