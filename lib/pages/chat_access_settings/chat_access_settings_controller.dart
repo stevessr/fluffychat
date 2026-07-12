@@ -28,21 +28,29 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
   bool visibilityLoading = false;
   bool historyVisibilityLoading = false;
   bool guestAccessLoading = false;
-  Room get room => Matrix.of(context).client.getRoomById(widget.roomId)!;
-  Set<Room> get knownSpaceParents => {
-    ...room.client.rooms.where(
-      (space) =>
-          space.isSpace &&
-          space.spaceChildren.any((child) => child.roomId == room.id),
-    ),
-    ...room.spaceParents
-        .map((parent) => room.client.getRoomById(parent.roomId ?? ''))
-        .whereType<Room>(),
-  };
+  Future<List<String>>? _localAliasesFuture;
+  Future<Visibility?>? _directoryVisibilityFuture;
+
+  Room? get roomOrNull => Matrix.of(context).client.getRoomById(widget.roomId);
+
+  Set<Room> get knownSpaceParents {
+    final room = roomOrNull;
+    if (room == null) return {};
+    return {
+      ...room.client.rooms.where(
+        (space) =>
+            space.isSpace &&
+            space.spaceChildren.any((child) => child.roomId == room.id),
+      ),
+      ...room.spaceParents
+          .map((parent) => room.client.getRoomById(parent.roomId ?? ''))
+          .whereType<Room>(),
+    };
+  }
 
   String get roomVersion =>
-      room
-          .getState(EventTypes.RoomCreate)
+      roomOrNull
+          ?.getState(EventTypes.RoomCreate)
           ?.content
           .tryGet<String>('room_version') ??
       'Unknown';
@@ -50,6 +58,8 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
   /// Calculates which join rules are available based on the information on
   /// https://spec.matrix.org/v1.11/rooms/#feature-matrix
   List<JoinRules> get availableJoinRules {
+    final room = roomOrNull;
+    if (room == null) return const [];
     final joinRules = Set<JoinRules>.from(JoinRules.values);
 
     final roomVersionInt = int.tryParse(roomVersion);
@@ -83,6 +93,9 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
 
   Future<void> setJoinRule(JoinRules? newJoinRules) async {
     if (newJoinRules == null) return;
+    final room = roomOrNull;
+    if (room == null) return;
+    final knownSpaceParents = this.knownSpaceParents;
     setState(() {
       joinRulesLoading = true;
     });
@@ -118,6 +131,8 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
     HistoryVisibility? historyVisibility,
   ) async {
     if (historyVisibility == null) return;
+    final room = roomOrNull;
+    if (room == null) return;
     setState(() {
       historyVisibilityLoading = true;
     });
@@ -142,6 +157,8 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
 
   Future<void> setGuestAccess(GuestAccess? guestAccess) async {
     if (guestAccess == null) return;
+    final room = roomOrNull;
+    if (room == null) return;
     setState(() {
       guestAccessLoading = true;
     });
@@ -165,6 +182,8 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
   }
 
   Future<void> updateRoomAction() async {
+    final room = roomOrNull;
+    if (room == null) return;
     final l10n = L10n.of(context);
     final roomVersion = room
         .getState(EventTypes.RoomCreate)
@@ -262,6 +281,8 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
   }
 
   Future<void> addAlias() async {
+    final room = roomOrNull;
+    if (room == null) return;
     final l10n = L10n.of(context);
     final domain = room.client.userID?.domain;
     if (domain == null) {
@@ -287,6 +308,7 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
     );
     if (result.error != null) return;
     if (!mounted) return;
+    _localAliasesFuture = null;
     setState(() {});
 
     if (!room.canChangeStateEvent(EventTypes.RoomCanonicalAlias)) return;
@@ -328,16 +350,21 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
   }
 
   Future<void> deleteAlias(String alias) async {
+    final room = roomOrNull;
+    if (room == null) return;
     final result = await showFutureLoadingDialog(
       context: context,
       future: () => room.client.deleteRoomAlias(alias),
     );
     if (result.error != null || !mounted) return;
+    _localAliasesFuture = null;
     setState(() {});
   }
 
   Future<void> setChatVisibilityOnDirectory(bool? visibility) async {
     if (visibility == null) return;
+    final room = roomOrNull;
+    if (room == null) return;
     setState(() {
       visibilityLoading = true;
     });
@@ -347,6 +374,7 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
         room.id,
         visibility: visibility == true ? Visibility.public : Visibility.private,
       );
+      _directoryVisibilityFuture = null;
     } catch (e, s) {
       Logs().w('Unable to change visibility', e, s);
       if (mounted) {
@@ -362,6 +390,14 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
       }
     }
   }
+
+  Future<List<String>> getLocalAliases(Room room) =>
+      _localAliasesFuture ??= room.client.getLocalAliases(room.id);
+
+  Future<Visibility?> getDirectoryVisibility(Room room) =>
+      _directoryVisibilityFuture ??= room.client.getRoomVisibilityOnDirectory(
+        room.id,
+      );
 
   @override
   Widget build(BuildContext context) {
