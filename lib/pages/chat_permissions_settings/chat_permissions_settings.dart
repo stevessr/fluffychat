@@ -29,7 +29,10 @@ class ChatPermissionsSettingsController extends State<ChatPermissionsSettings> {
     int? newLevel,
     String? category,
   }) async {
-    final room = Matrix.of(context).client.getRoomById(roomId!)!;
+    final roomId = this.roomId;
+    if (roomId == null) return;
+    final room = Matrix.of(context).client.getRoomById(roomId);
+    if (room == null) return;
     if (!room.canSendEvent(EventTypes.RoomPowerLevels)) {
       ScaffoldMessenger.of(
         context,
@@ -43,13 +46,14 @@ class ChatPermissionsSettingsController extends State<ChatPermissionsSettings> {
     if (newLevel == null) return;
     if (!context.mounted) return;
     final content = Map<String, dynamic>.from(
-      room.getState(EventTypes.RoomPowerLevels)!.content,
+      room.getState(EventTypes.RoomPowerLevels)?.content ?? const {},
     );
     if (category != null) {
-      if (!content.containsKey(category)) {
-        content[category] = <String, dynamic>{};
-      }
-      content[category][key] = newLevel;
+      final categoryContent = content[category] is Map
+          ? Map<String, dynamic>.from(content[category] as Map)
+          : <String, dynamic>{};
+      categoryContent[key] = newLevel;
+      content[category] = categoryContent;
     } else {
       content[key] = newLevel;
     }
@@ -64,14 +68,17 @@ class ChatPermissionsSettingsController extends State<ChatPermissionsSettings> {
     );
   }
 
-  Stream get onChanged => Matrix.of(context).client.onSync.stream.where(
-    (e) =>
-        (e.rooms?.join?.containsKey(roomId) ?? false) &&
-        (e.rooms!.join![roomId!]?.timeline?.events?.any(
-              (s) => s.type == EventTypes.RoomPowerLevels,
-            ) ??
-            false),
-  );
+  Stream get onChanged {
+    final roomId = this.roomId;
+    if (roomId == null) return const Stream.empty();
+    return Matrix.of(context).client.onSync.stream.where(
+      (event) =>
+          event.rooms?.join?[roomId]?.timeline?.events?.any(
+            (state) => state.type == EventTypes.RoomPowerLevels,
+          ) ??
+          false,
+    );
+  }
 
   @override
   Widget build(BuildContext context) => ChatPermissionsSettingsView(this);
