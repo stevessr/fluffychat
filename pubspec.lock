@@ -611,10 +611,9 @@ packages:
   flutter_rust_bridge:
     dependency: "direct main"
     description:
-      name: flutter_rust_bridge
-      sha256: "37ef40bc6f863652e865f0b2563ea07f0d3c58d8efad803cc01933a4b2ee067e"
-      url: "https://pub.dev"
-    source: hosted
+      path: "third_party/flutter_rust_bridge"
+      relative: true
+    source: path
     version: "2.11.1"
   flutter_secure_storage:
     dependency: "direct main"

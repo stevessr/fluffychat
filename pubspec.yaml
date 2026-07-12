@@ -158,6 +158,12 @@ flutter_launcher_icons:
 # 2. Always link an (upstream?) issue
 # 3. Explain how and when this can be removed (overrides must be temporarily)
 dependency_overrides:
+  # flutter_rust_bridge 2.11.1 exposes synchronous DCO results as Dart Lists.
+  # dart2wasm receives those values as JS arrays, causing a runtime type check
+  # when vodozemac creates the first Olm account. Keep this local compatibility
+  # patch until an upstream release explicitly supports this WasmGC boundary.
+  flutter_rust_bridge:
+    path: third_party/flutter_rust_bridge
   # To fix 16kb compatiblity in PlayStore. It is fixed in main branch but
   # not yet published:
   # https://github.com/google/webcrypto.dart/issues/207
