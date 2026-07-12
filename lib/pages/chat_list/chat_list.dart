@@ -932,16 +932,21 @@ class ChatListController extends State<ChatList>
   }
 
   void setActiveBundle(String bundle) {
+    final matrix = Matrix.of(context);
+    final clients = (matrix.accountBundles[bundle] ?? const <Client?>[])
+        .whereType<Client>()
+        .where((client) => client.isLogged())
+        .toList();
+    if (clients.isEmpty) {
+      Logs().w('Attempted to activate empty account bundle $bundle');
+      return;
+    }
     context.go('/rooms');
     setState(() {
       _activeSpaceId = null;
-      Matrix.of(context).activeBundle = bundle;
-      if (!Matrix.of(
-        context,
-      ).currentBundle!.any((client) => client == Matrix.of(context).client)) {
-        Matrix.of(
-          context,
-        ).setActiveClient(Matrix.of(context).currentBundle!.first);
+      matrix.activeBundle = bundle;
+      if (!clients.contains(matrix.client)) {
+        matrix.setActiveClient(clients.first);
       }
     });
   }
@@ -950,10 +955,16 @@ class ChatListController extends State<ChatList>
     String? userId,
     String? activeBundle,
   ) async {
+    if (userId == null) return;
     final l10n = L10n.of(context);
-    final client = Matrix.of(
-      context,
-    ).widget.clients[Matrix.of(context).getClientIndexByMatrixId(userId!)];
+    final matrix = Matrix.of(context);
+    final client = matrix.widget.clients.firstWhereOrNull(
+      (client) => client.userID == userId,
+    );
+    if (client == null) {
+      Logs().w('Unable to edit bundles for missing account $userId');
+      return;
+    }
     final action = await showModalActionPopup<EditBundleAction>(
       context: context,
       title: L10n.of(context).editBundlesForAccount,
@@ -963,7 +974,7 @@ class ChatListController extends State<ChatList>
           value: EditBundleAction.addToBundle,
           label: L10n.of(context).addToBundle,
         ),
-        if (activeBundle != client.userID)
+        if (activeBundle != null && activeBundle != client.userID)
           AdaptiveModalAction(
             value: EditBundleAction.removeFromBundle,
             label: L10n.of(context).removeFromBundle,
@@ -979,7 +990,7 @@ class ChatListController extends State<ChatList>
           title: l10n.bundleName,
           hintText: l10n.bundleName,
         );
-        if (bundle == null || bundle.isEmpty || bundle.isEmpty) return;
+        if (bundle == null || bundle.isEmpty) return;
         if (!mounted) return;
         await showFutureLoadingDialog(
           context: context,
@@ -987,10 +998,10 @@ class ChatListController extends State<ChatList>
         );
         break;
       case EditBundleAction.removeFromBundle:
-        if (!mounted) return;
+        if (!mounted || activeBundle == null) return;
         await showFutureLoadingDialog(
           context: context,
-          future: () => client.removeFromAccountBundle(activeBundle!),
+          future: () => client.removeFromAccountBundle(activeBundle),
         );
     }
   }
@@ -1004,13 +1015,14 @@ class ChatListController extends State<ChatList>
         !Matrix.of(
           context,
         ).accountBundles.keys.contains(Matrix.of(context).activeBundle)) {
-      return Matrix.of(context).accountBundles.keys.first;
+      return Matrix.of(context).accountBundles.keys.firstOrNull;
     }
     return Matrix.of(context).activeBundle;
   }
 
   void resetActiveBundle() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      if (!mounted) return;
       setState(() {
         Matrix.of(context).activeBundle = null;
       });
