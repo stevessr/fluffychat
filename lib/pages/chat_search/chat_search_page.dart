@@ -32,8 +32,11 @@ class ChatSearchController extends State<ChatSearchPage>
   bool filesEndReached = false;
   bool isLoading = false;
   DateTime? searchedUntil;
+  int _searchGeneration = 0;
 
   void restartSearch() {
+    if (!mounted) return;
+    _searchGeneration++;
     setState(() {
       messages.clear();
       images.clear();
@@ -42,71 +45,77 @@ class ChatSearchController extends State<ChatSearchPage>
           null;
       messagesEndReached = imagesEndReached = filesEndReached = false;
     });
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       startSearch();
     });
   }
 
   Future<void> startSearch() async {
-    switch (tabController.index) {
-      case 0:
-        final searchQuery = searchController.text.trim();
-        if (searchQuery.isEmpty) return;
-        setState(() {
-          isLoading = true;
-        });
-        final result = await room!.searchEvents(
-          searchTerm: searchController.text.trim(),
-          nextBatch: messagesNextBatch,
-        );
-        setState(() {
-          isLoading = false;
-          messages.addAll(result.events);
-          messagesNextBatch = result.nextBatch;
-          messagesEndReached = result.nextBatch == null;
-          searchedUntil = result.searchedUntil;
-        });
-        return;
-      case 1:
-        setState(() {
-          isLoading = true;
-        });
-        final result = await room!.searchEvents(
-          searchFunc: (event) => {
-            MessageTypes.Image,
-            MessageTypes.Video,
-          }.contains(event.messageType),
-          nextBatch: imagesNextBatch,
-        );
-        setState(() {
-          isLoading = false;
-          images.addAll(result.events);
-          imagesNextBatch = result.nextBatch;
-          imagesEndReached = result.nextBatch == null;
-          searchedUntil = result.searchedUntil;
-        });
-        return;
-      case 2:
-        setState(() {
-          isLoading = true;
-        });
-        final result = await room!.searchEvents(
-          searchFunc: (event) =>
-              event.messageType == MessageTypes.File ||
-              (event.messageType == MessageTypes.Audio &&
-                  !event.content.containsKey('org.matrix.msc3245.voice')),
-          nextBatch: filesNextBatch,
-        );
-        setState(() {
-          isLoading = false;
-          files.addAll(result.events);
-          filesNextBatch = result.nextBatch;
-          filesEndReached = result.nextBatch == null;
-          searchedUntil = result.searchedUntil;
-        });
-        return;
-      default:
-        return;
+    if (!mounted) return;
+    final room = this.room;
+    if (room == null) return;
+    final tabIndex = tabController.index;
+    final searchQuery = searchController.text.trim();
+    if (tabIndex == 0 && searchQuery.isEmpty) return;
+    final generation = ++_searchGeneration;
+    setState(() => isLoading = true);
+    try {
+      switch (tabIndex) {
+        case 0:
+          final result = await room.searchEvents(
+            searchTerm: searchQuery,
+            nextBatch: messagesNextBatch,
+          );
+          if (!mounted || generation != _searchGeneration) return;
+          setState(() {
+            messages.addAll(result.events);
+            messagesNextBatch = result.nextBatch;
+            messagesEndReached = result.nextBatch == null;
+            searchedUntil = result.searchedUntil;
+          });
+          return;
+        case 1:
+          final result = await room.searchEvents(
+            searchFunc: (event) => {
+              MessageTypes.Image,
+              MessageTypes.Video,
+            }.contains(event.messageType),
+            nextBatch: imagesNextBatch,
+          );
+          if (!mounted || generation != _searchGeneration) return;
+          setState(() {
+            images.addAll(result.events);
+            imagesNextBatch = result.nextBatch;
+            imagesEndReached = result.nextBatch == null;
+            searchedUntil = result.searchedUntil;
+          });
+          return;
+        case 2:
+          final result = await room.searchEvents(
+            searchFunc: (event) =>
+                event.messageType == MessageTypes.File ||
+                (event.messageType == MessageTypes.Audio &&
+                    !event.content.containsKey('org.matrix.msc3245.voice')),
+            nextBatch: filesNextBatch,
+          );
+          if (!mounted || generation != _searchGeneration) return;
+          setState(() {
+            files.addAll(result.events);
+            filesNextBatch = result.nextBatch;
+            filesEndReached = result.nextBatch == null;
+            searchedUntil = result.searchedUntil;
+          });
+          return;
+        default:
+          return;
+      }
+    } catch (e, s) {
+      Logs().w('Unable to search room timeline', e, s);
+    } finally {
+      if (mounted && generation == _searchGeneration) {
+        setState(() => isLoading = false);
+      }
     }
   }
 
@@ -132,9 +141,10 @@ class ChatSearchController extends State<ChatSearchPage>
 
   @override
   void dispose() {
+    _searchGeneration++;
     tabController.removeListener(_onTabChanged);
-    searchController.dispose();
     tabController.dispose();
+    searchController.dispose();
     super.dispose();
   }
 
