@@ -108,7 +108,9 @@ class _MxcImageState extends State<MxcImage> {
       });
     }
 
-    if (event != null) {
+    if (event != null &&
+        event.attachmentOrThumbnailMxcUrl(getThumbnail: widget.isThumbnail) !=
+            null) {
       final useThumbnail = widget.isThumbnail && event.hasThumbnail;
       if (!useThumbnail &&
           !{
@@ -202,7 +204,9 @@ class _MxcImageState extends State<MxcImage> {
                           width: widget.width,
                           height: widget.height,
                           child: Material(
-                            color: Theme.of(context).colorScheme.surfaceContainer,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainer,
                             child: Icon(
                               Icons.broken_image_outlined,
                               size: min(widget.height ?? 64, 64),

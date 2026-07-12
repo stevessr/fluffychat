@@ -15,7 +15,11 @@ extension MxcUriExtension on Uri {
   ///
   /// Scanner and authenticated media URLs may need an authorization header:
   /// `headers: {"authorization": "Bearer ${client.accessToken}"}`
-  Future<Uri> getDownloadUri(Client client, {bool skipScanner = false}) async {
+  Future<Uri> getDownloadUri(
+    Client client, {
+    bool skipScanner = false,
+    bool forceLegacy = false,
+  }) async {
     if (!isScheme('mxc')) return Uri();
 
     final scanner = skipScanner ? null : client.contentScannerConfig;
@@ -25,7 +29,7 @@ extension MxcUriExtension on Uri {
 
     String uriPath;
 
-    if (await client.authenticatedMediaSupported()) {
+    if (!forceLegacy && await client.authenticatedMediaSupported()) {
       uriPath =
           '_matrix/client/v1/media/download/$host${hasPort ? ':$port' : ''}$path';
     } else {
@@ -67,6 +71,7 @@ extension MxcUriExtension on Uri {
     ThumbnailMethod? method = ThumbnailMethod.crop,
     bool? animated = false,
     bool skipScanner = false,
+    bool forceLegacy = false,
   }) async {
     if (!isScheme('mxc')) return Uri();
 
@@ -90,7 +95,7 @@ extension MxcUriExtension on Uri {
     }
 
     String requestPath;
-    if (await client.authenticatedMediaSupported()) {
+    if (!forceLegacy && await client.authenticatedMediaSupported()) {
       requestPath =
           '/_matrix/client/v1/media/thumbnail/$host${hasPort ? ':$port' : ''}$path';
     } else {
