@@ -250,10 +250,16 @@ class ChatController extends State<ChatPageWithRoom>
     final mostRecentEvent = timeline.events.filterByVisibleInGui().firstOrNull;
 
     await timeline.requestFuture(historyCount: _loadHistoryCount);
+    if (!mounted || this.timeline != timeline) return;
 
     if (mostRecentEvent != null) {
       setReadMarker(eventId: mostRecentEvent.eventId);
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted ||
+            this.timeline != timeline ||
+            !scrollController.hasClients) {
+          return;
+        }
         final index = timeline.events.filterByVisibleInGui().indexOf(
           mostRecentEvent,
         );
@@ -539,6 +545,7 @@ class ChatController extends State<ChatPageWithRoom>
     final matrix = Matrix.of(context);
     await matrix.client.roomsLoading;
     await matrix.client.accountDataLoading;
+    if (!mounted) return;
     if (eventContextId != null &&
         (!eventContextId.isValidMatrixIdStrict() ||
             eventContextId.sigil != '\$')) {
@@ -556,11 +563,14 @@ class ChatController extends State<ChatPageWithRoom>
       if (!mounted) return;
       timeline = await room.getTimeline(onUpdate: updateView);
       if (!mounted) return;
-      if (e is TimeoutException || e is IOException) {
-        _showScrollUpMaterialBanner(eventContextId!);
+      if ((e is TimeoutException || e is IOException) &&
+          eventContextId != null) {
+        _showScrollUpMaterialBanner(eventContextId);
       }
     }
-    timeline!.requestKeys(onlineKeyBackupOnly: false);
+    final loadedTimeline = timeline;
+    if (!mounted || loadedTimeline == null) return;
+    loadedTimeline.requestKeys(onlineKeyBackupOnly: false);
     if (room.markedUnread) room.markUnread(false);
 
     return;
