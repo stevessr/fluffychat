@@ -99,11 +99,19 @@ class LoginController extends State<Login> {
         context.go('/backup');
       }
     } on MatrixException catch (exception) {
-      setState(() => passwordError = exception.errorMessage);
-      return setState(() => loading = false);
+      if (!mounted) return;
+      setState(() {
+        passwordError = exception.errorMessage;
+        loading = false;
+      });
+      return;
     } catch (exception) {
-      setState(() => passwordError = exception.toString());
-      return setState(() => loading = false);
+      if (!mounted) return;
+      setState(() {
+        passwordError = exception.toString();
+        loading = false;
+      });
+      return;
     }
 
     if (mounted) setState(() => loading = false);

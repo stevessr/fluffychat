@@ -40,7 +40,7 @@ class SettingsIgnoreListController extends State<SettingsIgnoreList> {
 
   String? errorText;
 
-  void ignoreUser(BuildContext context) {
+  Future<void> ignoreUser(BuildContext context) async {
     final userId = controller.text.trim();
     if (userId.isEmpty) return;
     if (!userId.isValidMatrixIdStrict() || userId.sigil != '@') {
@@ -54,11 +54,11 @@ class SettingsIgnoreListController extends State<SettingsIgnoreList> {
     });
 
     final client = Matrix.of(context).client;
-    showFutureLoadingDialog(
+    final result = await showFutureLoadingDialog(
       context: context,
       future: () => client.ignoreUser(userId),
     );
-    setState(() {});
+    if (!context.mounted || result.error != null) return;
     controller.clear();
   }
 

@@ -68,6 +68,7 @@ class NewGroupController extends State<NewGroup> {
       allowMultiple: false,
     );
     final bytes = await photo.singleOrNull?.readAsBytes();
+    if (!mounted) return;
 
     setState(() {
       avatarUrl = null;
@@ -167,6 +168,7 @@ class NewGroupController extends State<NewGroup> {
       }
     } catch (e, s) {
       sdk.Logs().d('Unable to create group', e, s);
+      if (!mounted) return;
       setState(() {
         error = e;
         loading = false;
