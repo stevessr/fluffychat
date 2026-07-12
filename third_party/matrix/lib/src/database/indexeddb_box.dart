@@ -72,9 +72,11 @@ class BoxCollection with ZoneTransactionMixin {
 
     request.onerror = (Event event) {
       Logs().e('[IndexedDBBox] Error loading database - ${request.error}');
-      dbOpenCompleter.completeError(
-        _indexedDbError('Error loading database', request.error),
-      );
+      if (!dbOpenCompleter.isCompleted) {
+        dbOpenCompleter.completeError(
+          _indexedDbError('Error loading database', request.error),
+        );
+      }
     }.toJS;
 
     request.onupgradeneeded = (IDBVersionChangeEvent event) {
@@ -82,9 +84,11 @@ class BoxCollection with ZoneTransactionMixin {
 
       db.onerror = (Event event) {
         Logs().e('[IndexedDBBox] [onupgradeneeded] Error loading database');
-        dbOpenCompleter.completeError(
-          _indexedDbError('Error loading database onupgradeneeded', null),
-        );
+        if (!dbOpenCompleter.isCompleted) {
+          dbOpenCompleter.completeError(
+            _indexedDbError('Error loading database onupgradeneeded', null),
+          );
+        }
       }.toJS;
 
       for (final name in boxNames) {
@@ -98,7 +102,13 @@ class BoxCollection with ZoneTransactionMixin {
 
     request.onsuccess = (Event event) {
       final db = request.result as IDBDatabase;
-      dbOpenCompleter.complete(BoxCollection(db, boxNames, name));
+      if (!dbOpenCompleter.isCompleted) {
+        dbOpenCompleter.complete(BoxCollection(db, boxNames, name));
+      } else {
+        // An upgrade error may have completed the Future before the open
+        // request reports success. Do not leak that database connection.
+        db.close();
+      }
     }.toJS;
     return dbOpenCompleter.future;
   }
@@ -122,40 +132,49 @@ class BoxCollection with ZoneTransactionMixin {
   }
 
   Future<void> clear() async {
-    final transactionCompleter = Completer();
+    final transactionCompleter = Completer<void>();
+    final operationFutures = <Future<void>>[];
     final txn = _db.transaction(boxNames.toList().jsify()!, 'readwrite');
     for (final name in boxNames) {
-      final objStoreClearCompleter = Completer();
+      final objStoreClearCompleter = Completer<void>();
       final request = txn.objectStore(name).clear();
       request.onerror = (Event event) {
         Logs().e(
           '[IndexedDBBox] [clear] Object store clear error - ${request.error}',
         );
-        objStoreClearCompleter.completeError(
-          _indexedDbError(
-            'Object store clear not completed due to an error',
-            request.error,
-          ),
-        );
+        if (!objStoreClearCompleter.isCompleted) {
+          objStoreClearCompleter.completeError(
+            _indexedDbError(
+              'Object store clear not completed due to an error',
+              request.error,
+            ),
+          );
+        }
       }.toJS;
       request.onsuccess = (Event event) {
-        objStoreClearCompleter.complete();
+        if (!objStoreClearCompleter.isCompleted) {
+          objStoreClearCompleter.complete();
+        }
       }.toJS;
-      unawaited(objStoreClearCompleter.future);
+      operationFutures.add(objStoreClearCompleter.future);
     }
     txn.onerror = (Event event) {
       Logs().e('[IndexedDBBox] [clear] Error - ${txn.error}');
-      transactionCompleter.completeError(
-        _indexedDbError(
-          'DB clear transaction not completed due to an error',
-          txn.error,
-        ),
-      );
+      if (!transactionCompleter.isCompleted) {
+        transactionCompleter.completeError(
+          _indexedDbError(
+            'DB clear transaction not completed due to an error',
+            txn.error,
+          ),
+        );
+      }
     }.toJS;
     txn.oncomplete = (Event event) {
-      transactionCompleter.complete();
+      if (!transactionCompleter.isCompleted) {
+        transactionCompleter.complete();
+      }
     }.toJS;
-    return transactionCompleter.future;
+    await Future.wait<void>([transactionCompleter.future, ...operationFutures]);
   }
 
   Future<void> close() async {
