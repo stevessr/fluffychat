@@ -76,6 +76,7 @@ class SettingsPasswordController extends State<SettingsPassword> {
       );
       if (mounted) context.pop();
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         newPassword2Error = e.toLocalizedString(
           context,
@@ -83,9 +84,7 @@ class SettingsPasswordController extends State<SettingsPassword> {
         );
       });
     } finally {
-      setState(() {
-        loading = false;
-      });
+      if (mounted) setState(() => loading = false);
     }
   }
 
