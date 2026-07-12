@@ -19,7 +19,21 @@ class ChatAccessSettingsPageView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final room = controller.room;
+    final room = controller.roomOrNull;
+    if (room == null) {
+      return Scaffold(
+        appBar: AppBar(
+          leading: const Center(child: BackButton()),
+          title: Text(L10n.of(context).accessAndVisibility),
+        ),
+        body: Center(
+          child: Text(
+            L10n.of(context).oopsSomethingWentWrong,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         leading: const Center(child: BackButton()),
@@ -28,7 +42,7 @@ class ChatAccessSettingsPageView extends StatelessWidget {
       body: MaxWidthBody(
         child: StreamBuilder<Object>(
           stream: room.client.onRoomState.stream.where(
-            (update) => update.roomId == controller.room.id,
+            (update) => update.roomId == room.id,
           ),
           builder: (context, snapshot) {
             final canonicalAlias = room.canonicalAlias;
@@ -177,9 +191,11 @@ class ChatAccessSettingsPageView extends StatelessWidget {
                           : null,
                     ),
                   FutureBuilder(
-                    future: room.client.getLocalAliases(room.id),
+                    future: controller.getLocalAliases(room),
                     builder: (context, snapshot) {
-                      final localAddresses = snapshot.data;
+                      final localAddresses = snapshot.data == null
+                          ? null
+                          : List<String>.from(snapshot.data!);
                       if (localAddresses == null) {
                         return const SizedBox.shrink();
                       }
@@ -201,12 +217,14 @@ class ChatAccessSettingsPageView extends StatelessWidget {
                   ),
                   Divider(color: theme.dividerColor),
                   FutureBuilder(
-                    future: room.client.getRoomVisibilityOnDirectory(room.id),
+                    future: controller.getDirectoryVisibility(room),
                     builder: (context, snapshot) => SwitchListTile.adaptive(
                       value: snapshot.data == Visibility.public,
                       title: Text(
                         L10n.of(context).chatCanBeDiscoveredViaSearchOnServer(
-                          room.client.userID!.domain!,
+                          room.client.userID?.domain ??
+                              room.client.homeserver?.host ??
+                              '',
                         ),
                       ),
                       onChanged: controller.setChatVisibilityOnDirectory,
@@ -223,13 +241,7 @@ class ChatAccessSettingsPageView extends StatelessWidget {
                 ),
                 ListTile(
                   title: Text(L10n.of(context).roomVersion),
-                  subtitle: SelectableText(
-                    room
-                            .getState(EventTypes.RoomCreate)!
-                            .content
-                            .tryGet<String>('room_version') ??
-                        'Unknown',
-                  ),
+                  subtitle: SelectableText(controller.roomVersion),
                   trailing: room.canSendEvent(EventTypes.RoomTombstone)
                       ? IconButton(
                           icon: const Icon(Icons.upgrade_outlined),
