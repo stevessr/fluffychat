@@ -99,7 +99,10 @@ abstract class ClientManager {
     await store.setStringList(clientNamespace, clientNamesList);
   }
 
-  static NativeImplementations get nativeImplementations => kIsWeb
+  // A web implementation owns a real Worker. Recreating it for every client
+  // or thumbnail generation leaks worker threads and their pending-completer
+  // maps, which is especially expensive under WasmGC.
+  static final NativeImplementations _nativeImplementations = kIsWeb
       ? NativeImplementationsWebWorker(
           Uri.parse(resolveWebPath('native_executor.js')),
           timeout: const Duration(minutes: 1),
@@ -109,6 +112,9 @@ abstract class ClientManager {
           vodozemacInit: () =>
               vod.init(wasmPath: resolveWebPath('assets/assets/vodozemac/')),
         );
+
+  static NativeImplementations get nativeImplementations =>
+      _nativeImplementations;
 
   static Future<Client> createClient(
     String clientName,
