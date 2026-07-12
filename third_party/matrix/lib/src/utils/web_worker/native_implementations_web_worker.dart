@@ -119,39 +119,45 @@ class NativeImplementationsWebWorker extends NativeImplementations {
   // lint here:
   // ignore: avoid_void_async
   void _handleIncomingMessage(MessageEvent event) async {
-    final rawData = event.data.dartify();
-    if (rawData is! Map) {
-      Logs().e('Web worker returned an invalid response: $rawData');
-      return;
-    }
-    final data = Map<dynamic, dynamic>.from(rawData);
-    // don't forget handling errors of our second thread...
-    if (data['label'] == 'stacktrace') {
-      final rawOrigin = data['origin'];
-      final origin = rawOrigin is num ? rawOrigin.toDouble() : rawOrigin;
-      final error = data['error'];
-      final rawStackTrace = data['stacktrace']?.toString() ?? '';
-      StackTrace stackTrace;
-      try {
-        stackTrace = await onStackTrace.call(rawStackTrace);
-      } catch (e, s) {
-        Logs().w('Unable to convert web worker stack trace', e, s);
-        stackTrace = StackTrace.fromString(rawStackTrace);
+    try {
+      final rawData = event.data.dartify();
+      if (rawData is! Map) {
+        throw StateError('Web worker returned an invalid response: $rawData');
       }
-      // The operation may have timed out while an asynchronous source-map
-      // converter was running. Only complete it if it is still registered.
-      final completer = _completers.remove(origin);
-      completer?.completeError(
-        WebWorkerError(error: error, stackTrace: stackTrace),
-      );
-    } else {
-      final response = WebWorkerData.fromJson(data);
-      final completer = _completers.remove(response.label);
-      if (completer == null) {
-        Logs().w('Web worker returned an unknown label: ${response.label}');
-        return;
+      final data = Map<dynamic, dynamic>.from(rawData);
+      // don't forget handling errors of our second thread...
+      if (data['label'] == 'stacktrace') {
+        final rawOrigin = data['origin'];
+        final origin = rawOrigin is num ? rawOrigin.toDouble() : rawOrigin;
+        final error = data['error'];
+        final rawStackTrace = data['stacktrace']?.toString() ?? '';
+        StackTrace stackTrace;
+        try {
+          stackTrace = await onStackTrace.call(rawStackTrace);
+        } catch (e, s) {
+          Logs().w('Unable to convert web worker stack trace', e, s);
+          stackTrace = StackTrace.fromString(rawStackTrace);
+        }
+        // The operation may have timed out while an asynchronous source-map
+        // converter was running. Only complete it if it is still registered.
+        final completer = _completers.remove(origin);
+        completer?.completeError(
+          WebWorkerError(error: error, stackTrace: stackTrace),
+        );
+      } else {
+        final response = WebWorkerData.fromJson(data);
+        final completer = _completers.remove(response.label);
+        if (completer == null) {
+          Logs().w('Web worker returned an unknown label: ${response.label}');
+          return;
+        }
+        completer.complete(response.data);
       }
-      completer.complete(response.data);
+    } catch (e, s) {
+      // A worker that violates the response protocol cannot safely service
+      // later operations. Fail everything now rather than leaving callers
+      // blocked until their individual timeouts expire.
+      _markTerminalFailure(e, s);
     }
   }
 

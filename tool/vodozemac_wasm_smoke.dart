@@ -187,6 +187,47 @@ Future<void> main() async {
   }
   web.console.log('WEB_WORKER_FAILURE_FALLBACK_OK'.toJS);
 
+  final invalidResponseBlob = web.Blob(
+    <web.BlobPart>[
+      "self.onmessage = () => self.postMessage('invalid response');".toJS,
+    ].toJS,
+    web.BlobPropertyBag(type: 'text/javascript'),
+  );
+  final invalidResponseWorkerUrl = web.URL.createObjectURL(invalidResponseBlob);
+  final invalidResponseWorker = NativeImplementationsWebWorker(
+    Uri.parse(invalidResponseWorkerUrl),
+    timeout: const Duration(seconds: 10),
+  );
+  final protocolFailureTimer = Stopwatch()..start();
+  var protocolFailureWorked = false;
+  var repeatedProtocolFailureWorked = false;
+  try {
+    await invalidResponseWorker.operation<Object?, Uint8List>(
+      WebWorkerOperations.calcImageMetadata,
+      png,
+    );
+  } catch (_) {
+    protocolFailureWorked = true;
+  }
+  try {
+    await invalidResponseWorker.operation<Object?, Uint8List>(
+      WebWorkerOperations.calcImageMetadata,
+      png,
+    );
+  } catch (_) {
+    repeatedProtocolFailureWorked = true;
+  } finally {
+    protocolFailureTimer.stop();
+    invalidResponseWorker.dispose();
+    web.URL.revokeObjectURL(invalidResponseWorkerUrl);
+  }
+  if (!protocolFailureWorked ||
+      !repeatedProtocolFailureWorked ||
+      protocolFailureTimer.elapsed > const Duration(seconds: 5)) {
+    throw StateError('Invalid worker responses did not fail promptly');
+  }
+  web.console.log('WEB_WORKER_PROTOCOL_FAILURE_OK'.toJS);
+
   final stackTraceFallbackWorker = NativeImplementationsWebWorker(
     Uri.parse('native_executor.js'),
     timeout: const Duration(seconds: 10),
