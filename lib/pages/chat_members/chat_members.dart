@@ -27,13 +27,15 @@ class ChatMembersController extends State<ChatMembersPage> {
   Membership membershipFilter = Membership.join;
 
   final TextEditingController filterController = TextEditingController();
+  int _refreshGeneration = 0;
 
   void setMembershipFilter(Membership membership) {
     membershipFilter = membership;
     setFilter();
   }
 
-  Future<void> setFilter([_]) async {
+  void setFilter([_]) {
+    if (!mounted) return;
     final filter = filterController.text.toLowerCase().trim();
 
     final members = this.members
@@ -61,18 +63,26 @@ class ChatMembersController extends State<ChatMembersPage> {
   }
 
   Future<void> refreshMembers([_]) async {
+    if (!mounted) return;
+    final generation = ++_refreshGeneration;
     Logs().d('Load room members from', widget.roomId);
     try {
       setState(() {
         error = null;
       });
-      final participants = await Matrix.of(context).client
-          .getRoomById(widget.roomId)
-          ?.requestParticipants(
-            [...Membership.values]..remove(Membership.leave),
-          );
+      final room = Matrix.of(context).client.getRoomById(widget.roomId);
+      if (room == null) {
+        if (!mounted || generation != _refreshGeneration) return;
+        setState(() {
+          members = filteredMembers = const [];
+        });
+        return;
+      }
+      final participants = await room.requestParticipants(
+        [...Membership.values]..remove(Membership.leave),
+      );
 
-      if (!mounted) return;
+      if (!mounted || generation != _refreshGeneration) return;
 
       setState(() {
         members = participants;
@@ -84,6 +94,7 @@ class ChatMembersController extends State<ChatMembersPage> {
         e,
         s,
       );
+      if (!mounted || generation != _refreshGeneration) return;
       setState(() {
         error = e;
       });
@@ -110,6 +121,7 @@ class ChatMembersController extends State<ChatMembersPage> {
 
   @override
   void dispose() {
+    _refreshGeneration++;
     _updateSub?.cancel();
     filterController.dispose();
     super.dispose();
