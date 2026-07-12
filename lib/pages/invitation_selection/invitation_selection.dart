@@ -37,12 +37,14 @@ class InvitationSelectionController extends State<InvitationSelection> {
   bool loading = false;
   List<Profile> foundProfiles = [];
   Timer? coolDown;
+  int _searchGeneration = 0;
 
-  String? get roomId => widget.roomId;
+  String get roomId => widget.roomId;
 
   Future<List<User>> getContacts(BuildContext context) async {
     final client = Matrix.of(context).client;
-    final room = client.getRoomById(roomId!)!;
+    final room = client.getRoomById(roomId);
+    if (room == null) return [];
 
     final participants = (room.summary.mJoinedMemberCount ?? 0) > 100
         ? room.getParticipants()
@@ -69,7 +71,8 @@ class InvitationSelectionController extends State<InvitationSelection> {
   ) async {
     final l10n = L10n.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
-    final room = Matrix.of(context).client.getRoomById(roomId!)!;
+    final room = Matrix.of(context).client.getRoomById(roomId);
+    if (room == null) return;
 
     final success = await showFutureLoadingDialog(
       context: context,
@@ -93,26 +96,29 @@ class InvitationSelectionController extends State<InvitationSelection> {
 
   Future<void> searchUser(BuildContext context, String text) async {
     coolDown?.cancel();
+    final generation = ++_searchGeneration;
     if (text.isEmpty) {
-      setState(() => foundProfiles = []);
+      setState(() {
+        foundProfiles = [];
+        loading = false;
+      });
+      return;
     }
     currentSearchTerm = text;
-    if (currentSearchTerm.isEmpty) return;
-    if (loading) return;
     setState(() => loading = true);
     final matrix = Matrix.of(context);
     SearchUserDirectoryResponse response;
     try {
       response = await matrix.client.searchUserDirectory(text, limit: 10);
     } catch (e) {
-      if (!context.mounted) return;
+      if (!context.mounted || generation != _searchGeneration) return;
       setState(() => loading = false);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text((e).toLocalizedString(context))));
       return;
     }
-    if (!context.mounted) return;
+    if (!context.mounted || generation != _searchGeneration) return;
     setState(() {
       loading = false;
       foundProfiles = List<Profile>.from(response.results);
