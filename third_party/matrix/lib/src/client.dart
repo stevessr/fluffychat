@@ -549,6 +549,7 @@ class Client extends MatrixApi {
     final supportedVersions =
         overrideSupportedVersions ?? Client.supportedVersions;
     try {
+      _authenticatedMediaSupported = null;
       homeserver = homeserverUrl.stripTrailingSlash();
 
       // Look up well known
@@ -1339,12 +1340,37 @@ class Client extends MatrixApi {
     throwOnUpdateFailure: throwOnUpdateFailure,
   );
 
-  Future<bool> authenticatedMediaSupported() async {
-    return (await getVersions()).versions.any(
-          (v) => isVersionGreaterThanOrEqualTo(v, 'v1.11'),
-        ) ||
-        (await getVersions()).unstableFeatures?['org.matrix.msc3916.stable'] ==
-            true;
+  Future<bool>? _authenticatedMediaSupported;
+
+  /// Whether the homeserver supports the authenticated media endpoints.
+  ///
+  /// Keep this check as one shared future. Media-heavy timelines otherwise read
+  /// and decode the same `/versions` cache once per image, and WasmGC is much
+  /// less forgiving when a browser-restored JSON collection does not retain its
+  /// precise generic type at a runtime-checked async boundary.
+  Future<bool> authenticatedMediaSupported() =>
+      _authenticatedMediaSupported ??= _detectAuthenticatedMediaSupport();
+
+  Future<bool> _detectAuthenticatedMediaSupport() async {
+    try {
+      final response = await getVersions();
+
+      // Read the generated model through Object/dynamic here deliberately. A
+      // value restored from web storage can be a perfectly valid Dart List or
+      // Map while not carrying the exact List<String>/Map<String, bool>
+      // runtime type expected by WasmGC. Validate each value instead of letting
+      // Iterable.any's implicit callback cast terminate the Wasm isolate.
+      return supportsAuthenticatedMedia(response);
+    } catch (error, stackTrace) {
+      // A failed capability probe must not prevent every MXC image from
+      // loading. The legacy media route remains the compatible fallback.
+      Logs().w(
+        'Unable to detect authenticated media support; using legacy media API',
+        error,
+        stackTrace,
+      );
+      return false;
+    }
   }
 
   /// This endpoint allows clients to retrieve the configuration of the content

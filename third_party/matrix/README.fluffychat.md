@@ -1,4 +1,4 @@
-# FluffyChat WasmGC IndexedDB compatibility patch
+# FluffyChat WasmGC compatibility patches
 
 This directory contains Matrix Dart SDK 8.0.0 with a narrow patch to its web
 IndexedDB box implementation.
@@ -15,3 +15,10 @@ through a Dart `Future`.
 
 Remove the dependency override after an upstream Matrix SDK release provides
 equivalent WasmGC-safe IndexedDB handling.
+
+The vendored SDK also normalizes the `/versions` response used to select the
+authenticated MXC media API. The capability check is memoized per homeserver
+and validates collection elements individually, avoiding strict generic casts
+when JSON values have crossed browser storage/interop boundaries. If the probe
+itself fails, media loading falls back to the legacy endpoint instead of
+terminating the Wasm isolate.
