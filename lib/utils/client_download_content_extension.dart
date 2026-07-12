@@ -49,10 +49,27 @@ extension ClientDownloadContentExtension on Client {
         : {'authorization': 'Bearer $accessToken'};
     var response = await httpClient.get(httpUri, headers: headers);
 
+    // A server can advertise v1.11 but still return M_NOT_FOUND for remote
+    // media on the authenticated endpoint. Retry the equivalent legacy URL.
+    if (response.statusCode >= 400 &&
+        httpUri.path.startsWith('/_matrix/client/v1/media/')) {
+      final legacyUri = isThumbnail
+          ? await mxc.getThumbnailUri(
+              this,
+              width: width,
+              height: height,
+              animated: animated,
+              method: thumbnailMethod,
+              forceLegacy: true,
+            )
+          : await mxc.getDownloadUri(this, forceLegacy: true);
+      response = await httpClient.get(legacyUri, headers: headers);
+    }
+
     // Some homeservers fail remote thumbnail federation while download still
     // works. Fallback once to raw download to keep media rendering functional.
     if (response.statusCode != 200 && isThumbnail) {
-      final fallbackUri = await mxc.getDownloadUri(this);
+      final fallbackUri = await mxc.getDownloadUri(this, forceLegacy: true);
       response = await httpClient.get(fallbackUri, headers: headers);
     }
 

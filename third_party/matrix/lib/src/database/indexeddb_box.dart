@@ -446,17 +446,17 @@ class Box<V> {
 
   V? _fromValue(Object? value) {
     if (value == null) return null;
-    switch (V) {
-      case const (List<dynamic>):
-        return List.unmodifiable(value as List) as V;
-      case const (Map<dynamic, dynamic>):
-        return Map.unmodifiable(value as Map) as V;
-      case const (int):
-      case const (double):
-      case const (bool):
-      case const (String):
-      default:
-        return value as V;
+    // Do not switch on the generic type literal here. The database declares
+    // most JSON boxes as raw Box<Map>/Box<List>, while dart2wasm preserves the
+    // more precise runtime type produced by JS dartification. A type-literal
+    // switch therefore misses the collection branch and the final `as V`
+    // fails inside IndexedDB's success callback.
+    if (value is Map) {
+      return Map<dynamic, dynamic>.unmodifiable(value) as V;
     }
+    if (value is List) {
+      return List<dynamic>.unmodifiable(value) as V;
+    }
+    return value as V;
   }
 }

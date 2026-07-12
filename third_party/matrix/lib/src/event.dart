@@ -860,11 +860,36 @@ class Event extends MatrixEvent {
         if (downloadCallback != null) {
           uint8list = await downloadCallback(downloadUri);
         } else {
-          uint8list = await _downloadAttachmentBytes(
-            downloadUri,
-            scanner: scanner,
-            onDownloadProgress: onDownloadProgress,
-          );
+          try {
+            uint8list = await _downloadAttachmentBytes(
+              downloadUri,
+              scanner: scanner,
+              onDownloadProgress: onDownloadProgress,
+            );
+          } on MatrixException catch (error) {
+            final shouldTryLegacy =
+                scanner == null &&
+                downloadUri.path.startsWith(
+                  '/_matrix/client/v1/media/download/',
+                ) &&
+                (error.error == MatrixError.M_NOT_FOUND ||
+                    error.error == MatrixError.M_UNRECOGNIZED);
+            if (!shouldTryLegacy) rethrow;
+
+            // Some homeservers advertise Matrix v1.11 while their
+            // authenticated media endpoint cannot federate this MXC. Retry the
+            // same object through the legacy media endpoint before failing.
+            final legacyUri = await mxcUrl.getDownloadUri(
+              room.client,
+              skipScanner: skipScanner,
+              forceLegacy: true,
+            );
+            uint8list = await _downloadAttachmentBytes(
+              legacyUri,
+              scanner: scanner,
+              onDownloadProgress: onDownloadProgress,
+            );
+          }
         }
       }
       storeable = storeable && uint8list.lengthInBytes < database.maxFileSize;
