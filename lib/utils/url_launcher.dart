@@ -34,17 +34,24 @@ class UrlLauncher {
   Future<void> launchUrl() async {
     final l10n = L10n.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
-    if (url!.toLowerCase().startsWith(AppConfig.deepLinkPrefix) ||
-        url!.toLowerCase().startsWith(AppConfig.inviteLinkPrefix) ||
-        {'#', '@', '!', '+', '\$'}.contains(url![0]) ||
-        url!.toLowerCase().startsWith(AppConfig.schemePrefix)) {
+    final url = this.url?.trim();
+    if (url == null || url.isEmpty) {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text(l10n.cantOpenUri(this.url ?? ''))),
+      );
+      return;
+    }
+    if (url.toLowerCase().startsWith(AppConfig.deepLinkPrefix) ||
+        url.toLowerCase().startsWith(AppConfig.inviteLinkPrefix) ||
+        {'#', '@', '!', '+', '\$'}.contains(url[0]) ||
+        url.toLowerCase().startsWith(AppConfig.schemePrefix)) {
       return openMatrixToUrl();
     }
-    final uri = Uri.tryParse(url!);
+    final uri = Uri.tryParse(url);
     if (uri == null) {
       // we can't open this thing
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text(l10n.cantOpenUri(url!))),
+        SnackBar(content: Text(l10n.cantOpenUri(url))),
       );
       return;
     }
@@ -59,6 +66,7 @@ class UrlLauncher {
         okLabel: l10n.open,
         cancelLabel: l10n.cancel,
       );
+      if (!context.mounted) return;
       if (consent != OkCancelResult.ok) return;
     }
 
@@ -93,12 +101,12 @@ class UrlLauncher {
           return;
         }
       }
-      launchUrlString(url!);
+      launchUrlString(url);
       return;
     }
     if (uri.host.isEmpty) {
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text(l10n.cantOpenUri(url!))),
+        SnackBar(content: Text(l10n.cantOpenUri(url))),
       );
       return;
     }
@@ -124,8 +132,10 @@ class UrlLauncher {
   }
 
   Future<void> openMatrixToUrl() async {
+    final sourceUrl = this.url?.trim();
+    if (sourceUrl == null || sourceUrl.isEmpty) return;
     final matrix = Matrix.of(context);
-    final url = this.url!.replaceFirst(
+    final url = sourceUrl.replaceFirst(
       AppConfig.deepLinkPrefix,
       AppConfig.inviteLinkPrefix,
     );
@@ -150,7 +160,6 @@ class UrlLauncher {
       var room =
           matrix.client.getRoomByAlias(roomIdOrAlias) ??
           matrix.client.getRoomById(roomIdOrAlias);
-      var roomId = room?.id;
       // we make the servers a set and later on convert to a list, so that we can easily
       // deduplicate servers added via alias lookup and query parameter
       final servers = <String>{};
@@ -162,9 +171,11 @@ class UrlLauncher {
         );
         final result = response.result;
         if (result != null) {
-          roomId = result.roomId;
-          servers.addAll(result.servers!);
-          room = matrix.client.getRoomById(roomId!);
+          final resolvedRoomId = result.roomId;
+          servers.addAll(result.servers ?? const []);
+          if (resolvedRoomId != null) {
+            room = matrix.client.getRoomById(resolvedRoomId);
+          }
         }
       }
       servers.addAll(identityParts.via);
@@ -202,7 +213,6 @@ class UrlLauncher {
               title: 'Join room $roomIdOrAlias',
             ) ==
             OkCancelResult.ok) {
-          roomId = roomIdOrAlias;
           if (!context.mounted) return;
           final response = await showFutureLoadingDialog(
             context: context,
@@ -211,7 +221,8 @@ class UrlLauncher {
               via: servers.isNotEmpty ? servers.toList() : null,
             ),
           );
-          if (response.error != null) return;
+          final joinedRoomId = response.result;
+          if (response.error != null || joinedRoomId == null) return;
           if (!context.mounted) return;
           // wait for two seconds so that it probably came down /sync
           await showFutureLoadingDialog(
@@ -222,12 +233,12 @@ class UrlLauncher {
           if (event != null) {
             context.go(
               Uri(
-                pathSegments: ['rooms', response.result!],
+                pathSegments: ['rooms', joinedRoomId],
                 queryParameters: {'event': event},
               ).toString(),
             );
           } else {
-            context.go('/rooms/${response.result!}');
+            context.go('/rooms/$joinedRoomId');
           }
         }
       }
@@ -243,9 +254,11 @@ class UrlLauncher {
             }),
       );
       if (!context.mounted) return;
+      final profile = profileResult.result;
+      if (profile == null) return;
       await UserDialog.show(
         context: context,
-        profile: profileResult.result!,
+        profile: profile,
         noProfileWarning: noProfileWarning,
       );
     }
