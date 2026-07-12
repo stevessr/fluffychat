@@ -25,37 +25,41 @@ class _LockScreenState extends State<LockScreen> {
   bool _inputBlocked = false;
   bool _autoTriggered = false;
   final TextEditingController _textEditingController = TextEditingController();
+  Timer? _coolDownTimer;
+
+  void _startCoolDown() {
+    _coolDownTimer?.cancel();
+    final seconds = _coolDownSeconds;
+    setState(() {
+      _errorText = L10n.of(context).wrongPinEntered(seconds);
+      _inputBlocked = true;
+    });
+    _coolDownTimer = Timer(Duration(seconds: seconds), () {
+      if (!mounted) return;
+      setState(() {
+        _inputBlocked = false;
+        _coolDownSeconds *= 2;
+        _errorText = null;
+      });
+    });
+  }
 
   Future<void> tryUnlockWithBiometrics() async {
+    if (_inputBlocked) return;
     setState(() {
       _errorText = null;
+      _inputBlocked = true;
     });
 
     final success = await AppLock.of(context).unlockWithBiometrics();
-
-    if (success) {
-      setState(() {
-        _inputBlocked = false;
-        _errorText = null;
-      });
-      return;
-    }
+    if (!mounted || success) return;
 
     // Only increment cooldown for non-biometrics-only mode
     if (!AppLock.of(context).isBiometricsOnly) {
-      setState(() {
-        _errorText = L10n.of(context).wrongPinEntered(_coolDownSeconds);
-        _inputBlocked = true;
-      });
-      Future.delayed(Duration(seconds: _coolDownSeconds)).then((_) {
-        setState(() {
-          _inputBlocked = false;
-          _coolDownSeconds *= 2;
-          _errorText = null;
-        });
-      });
+      _startCoolDown();
     } else {
       setState(() {
+        _inputBlocked = false;
         _errorText = L10n.of(context).invalidInput;
       });
     }
@@ -63,6 +67,7 @@ class _LockScreenState extends State<LockScreen> {
   }
 
   Future<void> tryUnlock(String text) async {
+    if (_inputBlocked) return;
     text = text.trim();
     setState(() {
       _errorText = null;
@@ -78,25 +83,11 @@ class _LockScreenState extends State<LockScreen> {
     }
 
     if (AppLock.of(context).unlock(text)) {
-      setState(() {
-        _inputBlocked = false;
-        _errorText = null;
-      });
       _textEditingController.clear();
       return;
     }
 
-    setState(() {
-      _errorText = L10n.of(context).wrongPinEntered(_coolDownSeconds);
-      _inputBlocked = true;
-    });
-    Future.delayed(Duration(seconds: _coolDownSeconds)).then((_) {
-      setState(() {
-        _inputBlocked = false;
-        _coolDownSeconds *= 2;
-        _errorText = null;
-      });
-    });
+    _startCoolDown();
     _textEditingController.clear();
   }
 
@@ -105,12 +96,19 @@ class _LockScreenState extends State<LockScreen> {
     super.initState();
     if (AppLock.of(context).isBiometricsOnly) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!_autoTriggered) {
+        if (mounted && !_autoTriggered) {
           _autoTriggered = true;
           tryUnlockWithBiometrics();
         }
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _coolDownTimer?.cancel();
+    _textEditingController.dispose();
+    super.dispose();
   }
 
   @override
@@ -225,9 +223,7 @@ class _LockScreenState extends State<LockScreen> {
                                     if (availableBiometrics.contains(
                                       BiometricType.face,
                                     )) {
-                                      return Icon(
-                                        Icons.face_unlock_outlined,
-                                      );
+                                      return Icon(Icons.face_unlock_outlined);
                                     }
                                     return Icon(Icons.fingerprint_outlined);
                                   },
