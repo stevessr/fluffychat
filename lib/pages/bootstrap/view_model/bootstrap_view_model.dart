@@ -27,6 +27,8 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
   final TextEditingController repeatPassphraseController =
       TextEditingController();
   final ScrollController devicesScrollController = ScrollController();
+  bool _disposed = false;
+  bool _controllerListenersAttached = false;
 
   BootstrapViewModel({required this.client, required this.reset})
     : super(BootstrapViewModelState()..reset = reset) {
@@ -35,7 +37,15 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
 
   @override
   void dispose() {
+    _disposed = true;
     _cancelKeyVerification();
+    if (_controllerListenersAttached) {
+      newPassphraseController.removeListener(_checkCanCreatePassphrase);
+      repeatPassphraseController.removeListener(_checkCanCreatePassphrase);
+      enterPassphraseOrRecovController.removeListener(
+        _passphraseOrRecoveryKeyEntered,
+      );
+    }
     enterPassphraseOrRecovController.dispose();
     newPassphraseController.dispose();
     repeatPassphraseController.dispose();
@@ -43,7 +53,13 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
     super.dispose();
   }
 
+  @override
+  void notifyListeners() {
+    if (!_disposed) super.notifyListeners();
+  }
+
   void _checkCanCreatePassphrase([_]) {
+    if (_disposed) return;
     final passphrase = newPassphraseController.text;
     value.newPassphraseEqualsRepeatPassphrase =
         passphrase.isNotEmpty && passphrase == repeatPassphraseController.text;
@@ -59,9 +75,17 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
   }
 
   Future<void> retryKeyVerification() async {
+    if (_disposed) return;
+    final userId = client.userID;
+    final user = userId == null ? null : client.userDeviceKeys[userId];
+    if (user == null) return;
     value.noSecretsreceived = false;
-    value.keyVerification = await client.userDeviceKeys[client.userID!]!
-        .startVerification();
+    final keyVerification = await user.startVerification();
+    if (_disposed) {
+      keyVerification.cancel();
+      return;
+    }
+    value.keyVerification = keyVerification;
     value.keyVerification?.onUpdate = _onKeyVerificationUpdate;
     notifyListeners();
   }
@@ -69,18 +93,24 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
   Future<void> _init() async {
     final state = value.cryptoIdentityState = await client
         .getCryptoIdentityState();
+    if (_disposed) return;
     newPassphraseController.addListener(_checkCanCreatePassphrase);
     repeatPassphraseController.addListener(_checkCanCreatePassphrase);
     enterPassphraseOrRecovController.addListener(
       _passphraseOrRecoveryKeyEntered,
     );
+    _controllerListenersAttached = true;
     if (state.initialized) {
       if (state.connected) return notifyListeners();
 
       await client.updateUserDeviceKeys();
+      if (_disposed) return;
 
+      final userId = client.userID;
       final devices = value.connectedDevices =
-          client.userDeviceKeys[client.userID!]?.deviceKeys.values
+          (userId == null ? null : client.userDeviceKeys[userId])
+              ?.deviceKeys
+              .values
               .where(
                 (device) => device.hasValidSignatureChain(
                   verifiedByTheirMasterKey: true,
@@ -89,8 +119,13 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
               .toList() ??
           [];
       if (devices.isNotEmpty) {
-        value.keyVerification = await client.userDeviceKeys[client.userID!]!
-            .startVerification();
+        final user = userId == null ? null : client.userDeviceKeys[userId];
+        final keyVerification = await user?.startVerification();
+        if (_disposed) {
+          keyVerification?.cancel();
+          return;
+        }
+        value.keyVerification = keyVerification;
         value.keyVerification?.onUpdate = _onKeyVerificationUpdate;
       }
       if (supportsSecureStorage) {
@@ -98,6 +133,7 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
           final keyFromSecureStorage = await FlutterSecureStorage().read(
             key: _secureStorageKey,
           );
+          if (_disposed) return;
           if (keyFromSecureStorage != null) {
             enterPassphraseOrRecovController.text = keyFromSecureStorage;
           }
@@ -110,6 +146,7 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
   }
 
   void _passphraseOrRecoveryKeyEntered() {
+    if (_disposed) return;
     final passphraseOrRecoveryKeyEntered =
         enterPassphraseOrRecovController.text.isNotEmpty;
     if (value.passphraseOrRecoveryKeyEntered !=
@@ -120,18 +157,22 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
   }
 
   Future<void> _onKeyVerificationUpdate() async {
+    if (_disposed) return;
     if (value.keyVerification?.state == KeyVerificationState.done) {
       value.waitingForSecrets = true;
       value.noSecretsreceived = false;
       notifyListeners();
       value.cryptoIdentityState = await client.getCryptoIdentityState();
+      if (_disposed) return;
       var tries = 0;
       const max = 10;
-      while (value.cryptoIdentityState?.connected != true) {
+      while (!_disposed && value.cryptoIdentityState?.connected != true) {
         Logs().d('Waiting for secrets... [$tries/$max]');
-        if (tries >= max) return;
+        if (tries >= max) break;
         await Future.delayed(const Duration(seconds: 1));
+        if (_disposed) return;
         value.cryptoIdentityState = await client.getCryptoIdentityState();
+        if (_disposed) return;
         tries++;
       }
 
@@ -147,6 +188,7 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
     String? passphrase,
     BuildContext context,
   ) async {
+    if (_disposed) return;
     value.isLoading = true;
     notifyListeners();
     try {
@@ -159,7 +201,9 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
         setupSelfSigningKey: !reset,
         setupUserSigningKey: !reset,
       );
+      if (_disposed) return;
     } catch (e, s) {
+      if (_disposed) return;
       if (!context.mounted) return;
       ErrorReporter(
         context,
@@ -186,6 +230,7 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
       PlatformInfos.isMobile || PlatformInfos.isDesktop;
 
   Future<void> unlock(BuildContext context) async {
+    if (_disposed) return;
     final key = enterPassphraseOrRecovController.text.trim();
     if (key.isEmpty) return;
 
@@ -196,11 +241,14 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
     notifyListeners();
     try {
       await client.restoreCryptoIdentity(key);
+      if (_disposed) return;
       value.isLoading = false;
       value.cryptoIdentityState = await client.getCryptoIdentityState();
+      if (_disposed) return;
       notifyListeners();
       return;
     } catch (e, s) {
+      if (_disposed) return;
       if (e is! InvalidPassphraseException) {
         const errorMessage = 'Unexpected error on unlock passphrase';
         if (context.mounted) {
@@ -252,11 +300,13 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
   }
 
   void toggleObscureText() {
+    if (_disposed) return;
     value.obscureText = !value.obscureText;
     notifyListeners();
   }
 
   void startResetAccount() {
+    if (_disposed) return;
     value.reset = true;
     notifyListeners();
   }
@@ -269,9 +319,10 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
       type: FileType.custom,
     );
     final file = result?.xFile;
-    if (file == null) return;
+    if (file == null || _disposed) return;
     try {
       final key = await file.readAsString();
+      if (_disposed) return;
       enterPassphraseOrRecovController.text = key;
     } catch (e, s) {
       Logs().d('Unable to read recovery key file', e, s);
@@ -288,17 +339,20 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
     bool? downloaded,
     BuildContext context,
   ) async {
+    final recoveryKey = value.recoveryKey;
+    if (_disposed || recoveryKey == null) return;
     final path = await FilePicker.saveFile(
       fileName:
           'FluffyChat-Recovery-Key-${DateTime.now().toIso8601String()}.txt',
-      bytes: Uint8List.fromList(value.recoveryKey!.codeUnits),
+      bytes: Uint8List.fromList(recoveryKey.codeUnits),
     );
-    if (path == null) return;
+    if (path == null || _disposed) return;
     value.recoveryKeyDownloaded = downloaded == true;
     notifyListeners();
   }
 
   Future<void> toggleRecoveryKeyStoredInSecureStorage(bool? stored) async {
+    if (_disposed) return;
     if (stored == true) {
       await FlutterSecureStorage().write(
         key: _secureStorageKey,
@@ -307,6 +361,7 @@ class BootstrapViewModel extends ValueNotifier<BootstrapViewModelState> {
     } else {
       await FlutterSecureStorage().delete(key: _secureStorageKey);
     }
+    if (_disposed) return;
     value.recoveryKeyStoredInSecureStorage = stored == true;
     notifyListeners();
   }
