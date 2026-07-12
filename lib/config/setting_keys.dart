@@ -157,8 +157,14 @@ enum AppSettings<T> {
 }
 
 T _readSetting<T>(AppSettings<T> setting, T? Function(Object value) decode) {
+  final store = AppSettings._store;
+  // Widgets can be rendered while asynchronous application bootstrap is still
+  // opening SharedPreferences (and lightweight widget tests deliberately do
+  // this). Reads must remain safe and use the declared default until storage
+  // becomes available instead of force-unwrapping the store.
+  if (store == null) return setting.defaultValue;
   try {
-    final storedValue = AppSettings.store.get(setting.key);
+    final storedValue = store.get(setting.key);
     if (storedValue == null) return setting.defaultValue;
     final value = decode(storedValue);
     if (value != null) return value;
@@ -171,7 +177,7 @@ T _readSetting<T>(AppSettings<T> setting, T? Function(Object value) decode) {
       error,
       stackTrace,
     );
-    unawaited(AppSettings.store.remove(setting.key));
+    unawaited(store.remove(setting.key));
     return setting.defaultValue;
   }
 }
