@@ -277,13 +277,19 @@ class MatrixImageFileResizedResponse {
   factory MatrixImageFileResizedResponse.fromJson(Map<String, dynamic> json) =>
       MatrixImageFileResizedResponse(
         bytes: Uint8List.fromList(
-          (json['bytes'] as Iterable<dynamic>).whereType<int>().toList(),
+          (json['bytes'] as Iterable<dynamic>)
+              .map((value) => (value as num).toInt())
+              .toList(growable: false),
         ),
-        width: json['width'],
-        height: json['height'],
+        // Values crossing a JavaScript worker boundary can be represented as
+        // doubles even when the producer sent Dart ints. Normalize them before
+        // assigning to strongly typed fields so WasmGC does not fail a runtime
+        // type check.
+        width: (json['width'] as num).toInt(),
+        height: (json['height'] as num).toInt(),
         mimeType: json['mimeType'],
-        originalHeight: json['originalHeight'],
-        originalWidth: json['originalWidth'],
+        originalHeight: (json['originalHeight'] as num?)?.toInt(),
+        originalWidth: (json['originalWidth'] as num?)?.toInt(),
         blurhash: json['blurhash'],
       );
 
