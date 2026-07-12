@@ -152,6 +152,31 @@ Future<void> main() async {
   }
   web.console.log('CUSTOM_IMAGE_INVALID_FALLBACK_OK'.toJS);
 
+  // A missing worker script must reject pending work immediately instead of
+  // leaving it alive until the normal operation timeout.
+  final brokenWorker = NativeImplementationsWebWorker(
+    Uri.parse('missing-native-executor.js'),
+    timeout: const Duration(seconds: 10),
+  );
+  final workerFailureTimer = Stopwatch()..start();
+  var workerFailed = false;
+  try {
+    await brokenWorker.operation<Object?, Uint8List>(
+      WebWorkerOperations.calcImageMetadata,
+      png,
+    );
+  } catch (_) {
+    workerFailed = true;
+  } finally {
+    workerFailureTimer.stop();
+    brokenWorker.dispose();
+  }
+  if (!workerFailed ||
+      workerFailureTimer.elapsed > const Duration(seconds: 5)) {
+    throw StateError('Broken web worker did not fail pending work promptly');
+  }
+  web.console.log('WEB_WORKER_FAILURE_FALLBACK_OK'.toJS);
+
   final pickleKey = Uint8List(32);
   final pickle = account.toPickleEncrypted(pickleKey);
   final restored = vodozemac.Account.fromPickleEncrypted(
