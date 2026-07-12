@@ -5,6 +5,7 @@
 
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings_view.dart';
+import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/future_loading_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -28,13 +29,13 @@ class ChatEncryptionSettingsController extends State<ChatEncryptionSettings> {
 
   Room get room => Matrix.of(context).client.getRoomById(roomId!)!;
 
-  Future<void> unblock(DeviceKeys key) async {
-    if (key.blocked) {
-      await key.setBlocked(false);
-    }
-  }
-
   String? uncollapsedUserId;
+  final Set<String> _updatingDeviceIds = {};
+
+  bool isUpdatingDevice(DeviceKeys key) {
+    final deviceId = key.deviceId;
+    return deviceId != null && _updatingDeviceIds.contains(deviceId);
+  }
 
   void uncollapse(String? userId) {
     setState(() {
@@ -98,9 +99,17 @@ class ChatEncryptionSettingsController extends State<ChatEncryptionSettings> {
     );
     if (consent != OkCancelResult.ok) return;
     if (!mounted) return;
-    final req = await room.client.userDeviceKeys[room.directChatMatrixID]!
-        .startVerification();
+    final directChatUserId = room.directChatMatrixID;
+    final userDeviceKeys = directChatUserId == null
+        ? null
+        : room.client.userDeviceKeys[directChatUserId];
+    if (userDeviceKeys == null) {
+      Logs().w('Unable to verify direct chat without loaded user device keys');
+      return;
+    }
+    final req = await userDeviceKeys.startVerification();
     req.onUpdate = () {
+      if (!mounted) return;
       if (req.state == KeyVerificationState.done) {
         setState(() {});
       }
@@ -109,11 +118,25 @@ class ChatEncryptionSettingsController extends State<ChatEncryptionSettings> {
     await KeyVerificationDialog(request: req).show(context);
   }
 
-  void toggleBlocked(DeviceKeys key) {
-    setState(() {
-      if (!key.blocked && key.verified) key.setVerified(false);
-      key.setBlocked(!key.blocked);
-    });
+  Future<void> toggleBlocked(DeviceKeys key) async {
+    final deviceId = key.deviceId;
+    if (deviceId == null || !_updatingDeviceIds.add(deviceId)) return;
+    if (mounted) setState(() {});
+    try {
+      final shouldBlock = !key.blocked;
+      if (shouldBlock && key.verified) await key.setVerified(false);
+      await key.setBlocked(shouldBlock);
+    } catch (error, stackTrace) {
+      Logs().w('Unable to change device block state', error, stackTrace);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error.toLocalizedString(context))),
+        );
+      }
+    } finally {
+      _updatingDeviceIds.remove(deviceId);
+      if (mounted) setState(() {});
+    }
   }
 
   @override
