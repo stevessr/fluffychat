@@ -32,6 +32,7 @@ class LoginController extends State<Login> {
 
   @override
   void dispose() {
+    _wellKnownGeneration++;
     _coolDown?.cancel();
     usernameController.dispose();
     passwordController.dispose();
@@ -95,9 +96,9 @@ class LoginController extends State<Login> {
         password: passwordController.text,
         initialDeviceDisplayName: PlatformInfos.appDisplayName,
       );
-      if (mounted) {
-        context.go('/backup');
-      }
+      if (!mounted) return;
+      context.go('/backup');
+      return;
     } on MatrixException catch (exception) {
       if (!mounted) return;
       setState(() {
@@ -113,21 +114,29 @@ class LoginController extends State<Login> {
       });
       return;
     }
-
-    if (mounted) setState(() => loading = false);
   }
 
   Timer? _coolDown;
+  int _wellKnownGeneration = 0;
+  Future<void> _wellKnownQueue = Future.value();
 
   void checkWellKnownWithCoolDown(String userId) {
+    final generation = ++_wellKnownGeneration;
     _coolDown?.cancel();
-    _coolDown = Timer(
-      const Duration(seconds: 1),
-      () => _checkWellKnown(userId),
-    );
+    _coolDown = Timer(const Duration(seconds: 1), () {
+      _wellKnownQueue = _wellKnownQueue
+          .then((_) async {
+            if (!mounted || generation != _wellKnownGeneration) return;
+            await _checkWellKnown(userId, generation);
+          })
+          .catchError((e, s) {
+            Logs().w('Unable to process homeserver discovery', e, s);
+          });
+    });
   }
 
-  Future<void> _checkWellKnown(String userId) async {
+  Future<void> _checkWellKnown(String userId, int generation) async {
+    if (!mounted || generation != _wellKnownGeneration) return;
     if (mounted) setState(() => usernameError = null);
     if (!userId.isValidMatrixIdStrict()) return;
     final oldHomeserver = widget.client.homeserver;
@@ -143,8 +152,16 @@ class LoginController extends State<Login> {
       } catch (_) {
         // do nothing, newDomain is already set to a reasonable fallback
       }
+      if (!mounted || generation != _wellKnownGeneration) {
+        widget.client.homeserver = oldHomeserver;
+        return;
+      }
       if (newDomain != oldHomeserver) {
         await widget.client.checkHomeserver(newDomain);
+        if (!mounted || generation != _wellKnownGeneration) {
+          widget.client.homeserver = oldHomeserver;
+          return;
+        }
 
         if (widget.client.homeserver == null) {
           widget.client.homeserver = oldHomeserver;
@@ -164,7 +181,7 @@ class LoginController extends State<Login> {
             okLabel: l10n.ok,
             cancelLabel: l10n.cancel,
           );
-          if (!mounted) return;
+          if (!mounted || generation != _wellKnownGeneration) return;
           if (dialogResult == OkCancelResult.ok) {
             if (mounted) setState(() => usernameError = null);
           } else {
@@ -182,7 +199,7 @@ class LoginController extends State<Login> {
       }
     } catch (e) {
       widget.client.homeserver = oldHomeserver;
-      if (!mounted) return;
+      if (!mounted || generation != _wellKnownGeneration) return;
       usernameError = e.toLocalizedString(context);
       if (mounted) setState(() {});
     }
@@ -215,7 +232,8 @@ class LoginController extends State<Login> {
         sendAttempt++,
       ),
     );
-    if (response.error != null) return;
+    final sid = response.result?.sid;
+    if (response.error != null || sid == null) return;
     if (!mounted) return;
     final password = await showTextInputDialog(
       useRootNavigator: false,
@@ -245,10 +263,7 @@ class LoginController extends State<Login> {
       'logout_devices': false,
       'auth': AuthenticationThreePidCreds(
         type: AuthenticationTypes.emailIdentity,
-        threepidCreds: ThreepidCreds(
-          sid: response.result!.sid,
-          clientSecret: clientSecret,
-        ),
+        threepidCreds: ThreepidCreds(sid: sid, clientSecret: clientSecret),
       ).toJson(),
     };
     final success = await showFutureLoadingDialog(
@@ -266,7 +281,7 @@ class LoginController extends State<Login> {
       );
       usernameController.text = input;
       passwordController.text = password;
-      login();
+      await login();
     }
   }
 
