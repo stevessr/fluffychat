@@ -3,8 +3,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'dart:async';
-
 import 'package:archive/archive.dart';
 import 'package:collection/collection.dart';
 import 'package:fluffychat/l10n/l10n.dart';
@@ -129,6 +127,11 @@ class _ImportEmoteArchiveDialogState extends State<ImportEmoteArchiveDialog> {
     });
     final imports = _importMap;
     final successfulUploads = <String>{};
+    final pack = widget.controller.pack;
+    if (pack == null) {
+      setState(() => _loading = false);
+      return;
+    }
 
     // check for duplicates first
 
@@ -137,21 +140,16 @@ class _ImportEmoteArchiveDialogState extends State<ImportEmoteArchiveDialog> {
     for (final entry in imports.entries) {
       final imageCode = entry.value;
 
-      if (widget.controller.pack!.images.containsKey(imageCode)) {
-        final completer = Completer<OkCancelResult>();
-        WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-          final result = await showOkCancelAlertDialog(
-            useRootNavigator: false,
-            context: context,
-            title: L10n.of(context).emoteExists,
-            message: imageCode,
-            cancelLabel: L10n.of(context).replace,
-            okLabel: L10n.of(context).skip,
-          );
-          completer.complete(result);
-        });
-
-        final result = await completer.future;
+      if (pack.images.containsKey(imageCode)) {
+        final result = await showOkCancelAlertDialog(
+          useRootNavigator: false,
+          context: context,
+          title: L10n.of(context).emoteExists,
+          message: imageCode,
+          cancelLabel: L10n.of(context).replace,
+          okLabel: L10n.of(context).skip,
+        );
+        if (!mounted) return;
         if (result == OkCancelResult.ok) {
           skipKeys.add(entry.key);
         }
@@ -207,11 +205,9 @@ class _ImportEmoteArchiveDialogState extends State<ImportEmoteArchiveDialog> {
                 info['w'] = (ratio * 256.0).round();
               }
             }
-            widget.controller.pack!.images[imageCode] =
-                ImagePackImageContent.fromJson(<String, dynamic>{
-                  'url': uri.toString(),
-                  'info': info,
-                });
+            pack.images[imageCode] = ImagePackImageContent.fromJson(
+              <String, dynamic>{'url': uri.toString(), 'info': info},
+            );
             successfulUploads.add(file.name);
           } catch (e) {
             Logs().d('Could not upload emote $imageCode: $e');
@@ -230,6 +226,7 @@ class _ImportEmoteArchiveDialogState extends State<ImportEmoteArchiveDialog> {
 
     if (!mounted) return;
     await widget.controller.save(context);
+    if (!mounted) return;
     _importMap.removeWhere(
       (key, value) => successfulUploads.contains(key.name),
     );
@@ -240,9 +237,9 @@ class _ImportEmoteArchiveDialogState extends State<ImportEmoteArchiveDialog> {
     // in case we have unhandled / duplicated emotes left, don't pop
     if (mounted) setState(() {});
     if (_importMap.isEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => Navigator.of(context).pop(),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) Navigator.of(context).pop();
+      });
     }
   }
 }
@@ -264,19 +261,28 @@ class _EmojiImportPreview extends StatefulWidget {
 }
 
 class _EmojiImportPreviewState extends State<_EmojiImportPreview> {
-  final hasErrorNotifier = ValueNotifier(false);
-  final controller = TextEditingController();
+  late final TextEditingController _controller;
+  bool _hasError = false;
+  bool _errorScheduled = false;
 
   @override
   void initState() {
     super.initState();
-    controller.text = widget.entry.value;
+    _controller = TextEditingController(text: widget.entry.value);
+  }
+
+  @override
+  void didUpdateWidget(covariant _EmojiImportPreview oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.entry.value != widget.entry.value &&
+        _controller.text != widget.entry.value) {
+      _controller.text = widget.entry.value;
+    }
   }
 
   @override
   void dispose() {
-    hasErrorNotifier.dispose();
-    controller.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -293,67 +299,67 @@ class _EmojiImportPreviewState extends State<_EmojiImportPreview> {
           icon: const Icon(Icons.remove_circle),
           tooltip: L10n.of(context).remove,
         ),
-        ValueListenableBuilder(
-          valueListenable: hasErrorNotifier,
-          builder: (context, hasError, child) {
-            if (hasError) return _ImageFileError(name: widget.entry.key.name);
-
-            return Column(
-              mainAxisSize: .min,
-              mainAxisAlignment: .center,
-              crossAxisAlignment: .center,
-              children: [
-                Image.memory(
-                  widget.entry.key.content,
-                  height: 64,
-                  width: 64,
-                  errorBuilder: (context, e, s) {
+        if (_hasError)
+          _ImageFileError(name: widget.entry.key.name)
+        else
+          Column(
+            mainAxisSize: .min,
+            mainAxisAlignment: .center,
+            crossAxisAlignment: .center,
+            children: [
+              Image.memory(
+                widget.entry.key.content,
+                height: 64,
+                width: 64,
+                errorBuilder: (context, e, s) {
+                  if (!_errorScheduled) {
+                    _errorScheduled = true;
                     WidgetsBinding.instance.addPostFrameCallback(
                       (_) => _setRenderError(),
                     );
+                  }
 
-                    return _ImageFileError(name: widget.entry.key.name);
-                  },
-                ),
-                SizedBox(
-                  width: 128,
-                  child: TextField(
-                    controller: controller,
-                    inputFormatters: [
-                      // Support Unicode characters, but disallow spaces, colons, tildes
-                      FilteringTextInputFormatter.allow(RegExp(r'^[^\s:~]+$')),
-                    ],
-                    autocorrect: false,
-                    minLines: 1,
-                    maxLines: 1,
-                    decoration: InputDecoration(
-                      hintText: L10n.of(context).emoteShortcode,
-                      prefixText: ': ',
-                      suffixText: ':',
-                      border: const OutlineInputBorder(),
-                      prefixStyle: TextStyle(
-                        color: theme.colorScheme.secondary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      suffixStyle: TextStyle(
-                        color: theme.colorScheme.secondary,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  return _ImageFileError(name: widget.entry.key.name);
+                },
+              ),
+              SizedBox(
+                width: 128,
+                child: TextField(
+                  controller: _controller,
+                  inputFormatters: [
+                    // Support Unicode characters, but disallow spaces, colons, tildes
+                    FilteringTextInputFormatter.allow(RegExp(r'^[^\s:~]+$')),
+                  ],
+                  autocorrect: false,
+                  minLines: 1,
+                  maxLines: 1,
+                  decoration: InputDecoration(
+                    hintText: L10n.of(context).emoteShortcode,
+                    prefixText: ': ',
+                    suffixText: ':',
+                    border: const OutlineInputBorder(),
+                    prefixStyle: TextStyle(
+                      color: theme.colorScheme.secondary,
+                      fontWeight: FontWeight.bold,
                     ),
-                    onChanged: widget.onNameChanged,
-                    onSubmitted: widget.onNameChanged,
+                    suffixStyle: TextStyle(
+                      color: theme.colorScheme.secondary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
+                  onChanged: widget.onNameChanged,
+                  onSubmitted: widget.onNameChanged,
                 ),
-              ],
-            );
-          },
-        ),
+              ),
+            ],
+          ),
       ],
     );
   }
 
   void _setRenderError() {
-    hasErrorNotifier.value = true;
+    if (!mounted || _hasError) return;
+    setState(() => _hasError = true);
     widget.onRemove.call();
   }
 }

@@ -34,6 +34,7 @@ class EmotesSettings extends StatefulWidget {
 
 class EmotesSettingsController extends State<EmotesSettings> {
   late final Room? room;
+  final Map<String, TextEditingController> _imageCodeControllers = {};
 
   String? stateKey;
 
@@ -67,6 +68,22 @@ class EmotesSettingsController extends State<EmotesSettings> {
         eventPack?.tryGet<String>('attribution') ?? '';
     if (reset) resetAction();
   }
+
+  @override
+  void dispose() {
+    packDisplayNameController.dispose();
+    packAttributionController.dispose();
+    for (final controller in _imageCodeControllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  TextEditingController imageCodeController(String imageCode) =>
+      _imageCodeControllers.putIfAbsent(
+        imageCode,
+        () => TextEditingController(text: imageCode),
+      );
 
   bool showSave = false;
 
@@ -111,7 +128,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
               pack!.toJson(),
             ),
     );
-    if (!result.isError) {
+    if (!result.isError && mounted) {
       setState(() {
         showSave = false;
       });
@@ -148,7 +165,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
         content,
       ),
     );
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   final TextEditingController packDisplayNameController =
@@ -157,10 +174,18 @@ class EmotesSettingsController extends State<EmotesSettings> {
   final TextEditingController packAttributionController =
       TextEditingController();
 
-  void removeImageAction(String oldImageCode) => setState(() {
-    pack!.images.remove(oldImageCode);
-    showSave = true;
-  });
+  void removeImageAction(String oldImageCode) {
+    final removedController = _imageCodeControllers.remove(oldImageCode);
+    setState(() {
+      pack!.images.remove(oldImageCode);
+      showSave = true;
+    });
+    if (removedController != null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => removedController.dispose(),
+      );
+    }
+  }
 
   void toggleUsage(String imageCode, ImagePackUsage usage) {
     setState(() {
@@ -226,6 +251,8 @@ class EmotesSettingsController extends State<EmotesSettings> {
     setState(() {
       pack!.images[imageCode] = image;
       pack!.images.remove(oldImageCode);
+      _imageCodeControllers.remove(oldImageCode);
+      _imageCodeControllers[imageCode] = controller;
       showSave = true;
     });
   }
@@ -243,10 +270,19 @@ class EmotesSettingsController extends State<EmotesSettings> {
       room?.canChangeStateEvent('im.ponies.room_emotes') == false;
 
   void resetAction() {
+    final removedControllers = _imageCodeControllers.values.toList();
+    _imageCodeControllers.clear();
     setState(() {
       _pack = _getPack();
       showSave = false;
     });
+    if (removedControllers.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        for (final controller in removedControllers) {
+          controller.dispose();
+        }
+      });
+    }
   }
 
   Future<void> createImagePack() async {
@@ -293,6 +329,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
 
   Future<void> saveAction() async {
     await save(context);
+    if (!mounted) return;
     setState(() {
       showSave = false;
     });
@@ -328,6 +365,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
             contentType: file.mimeType,
           );
 
+          if (!mounted) return;
           setState(() {
             final info = <String, dynamic>{...file.info};
             // normalize width / height to 256, required for stickers
@@ -350,6 +388,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
       },
     );
 
+    if (!mounted) return;
     setState(() {
       showSave = true;
     });
@@ -369,13 +408,10 @@ class EmotesSettingsController extends State<EmotesSettings> {
 
   Future<void> importEmojiZip() async {
     // 先选择文件
-    final files = await selectFiles(
-      context,
-      type: FileType.any,
-    );
+    final files = await selectFiles(context, type: FileType.any);
 
     // 🚀 用户取消了，直接返回，不显示 loading
-    if (files.isEmpty) return;
+    if (!mounted || files.isEmpty) return;
 
     // 显示 loading 并解压
     final result = await showFutureLoadingDialog<Archive?>(
@@ -384,7 +420,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
       future: () async {
         // 读取文件字节
         final bytes = await files.first.readAsBytes();
-        
+
         // 🚀 在后台线程解压，避免阻塞 UI
         final archive = await compute(_decodeZip, bytes);
 
@@ -394,6 +430,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
 
     final archive = result.result;
     if (archive == null) return;
+    if (!mounted) return;
 
     await showDialog(
       context: context,
@@ -402,18 +439,15 @@ class EmotesSettingsController extends State<EmotesSettings> {
       builder: (context) =>
           ImportEmoteArchiveDialog(controller: this, archive: archive),
     );
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   Future<void> importEmojiTarGz() async {
     // 先选择文件
-    final files = await selectFiles(
-      context,
-      type: FileType.any,
-    );
+    final files = await selectFiles(context, type: FileType.any);
 
     // 🚀 用户取消了，直接返回，不显示 loading
-    if (files.isEmpty) return;
+    if (!mounted || files.isEmpty) return;
 
     // 检查文件格式
     if (!files.first.name.endsWith('.tar') &&
@@ -435,11 +469,12 @@ class EmotesSettingsController extends State<EmotesSettings> {
       title: L10n.of(context).loadingPleaseWait,
       future: () async {
         final bytes = await files.first.readAsBytes();
-        
+
         // 🚀 在后台线程解压，避免阻塞 UI
-        final isGzipped = files.first.name.endsWith('.gz') ||
+        final isGzipped =
+            files.first.name.endsWith('.gz') ||
             files.first.name.endsWith('.tgz');
-        
+
         final archive = await compute(
           isGzipped ? _decodeTarGz : _decodeTar,
           bytes,
@@ -451,16 +486,15 @@ class EmotesSettingsController extends State<EmotesSettings> {
 
     final archive = result.result;
     if (archive == null) return;
+    if (!mounted) return;
 
     await showDialog(
       context: context,
       useRootNavigator: false,
-      builder: (context) => ImportEmoteArchiveDialog(
-        controller: this,
-        archive: archive,
-      ),
+      builder: (context) =>
+          ImportEmoteArchiveDialog(controller: this, archive: archive),
     );
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   Future<void> importEmojiFromFiles() async {
@@ -472,7 +506,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
     );
 
     // 🚀 用户取消了，直接返回，不显示 loading
-    if (files.isEmpty) return;
+    if (!mounted || files.isEmpty) return;
 
     // 显示 loading 并处理文件
     final result = await showFutureLoadingDialog<Archive?>(
@@ -484,9 +518,9 @@ class EmotesSettingsController extends State<EmotesSettings> {
           final bytes = await file.readAsBytes();
           return ArchiveFile(file.name, bytes.length, bytes);
         }).toList();
-        
+
         final archiveFiles = await Future.wait(fileReadFutures);
-        
+
         // Create an in-memory archive from the selected files
         final archive = Archive();
         for (final file in archiveFiles) {
@@ -499,16 +533,15 @@ class EmotesSettingsController extends State<EmotesSettings> {
 
     final archive = result.result;
     if (archive == null) return;
+    if (!mounted) return;
 
     await showDialog(
       context: context,
       useRootNavigator: false,
-      builder: (context) => ImportEmoteArchiveDialog(
-        controller: this,
-        archive: archive,
-      ),
+      builder: (context) =>
+          ImportEmoteArchiveDialog(controller: this, archive: archive),
     );
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   Future<void> exportAsZip() async {

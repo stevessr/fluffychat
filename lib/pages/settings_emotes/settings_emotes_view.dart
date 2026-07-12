@@ -16,12 +16,7 @@ import 'package:matrix/matrix.dart';
 import '../../widgets/matrix.dart';
 import 'settings_emotes.dart';
 
-enum PopupMenuEmojiActions {
-  export,
-  importZip,
-  importTarGz,
-  importFiles,
-}
+enum PopupMenuEmojiActions { export, importZip, importTarGz, importFiles }
 
 class EmotesSettingsView extends StatelessWidget {
   final EmotesSettingsController controller;
@@ -257,9 +252,8 @@ class EmotesSettingsView extends StatelessWidget {
                     itemBuilder: (BuildContext context, int i) {
                       final imageCode = imageKeys[i];
                       final image = controller.pack!.images[imageCode]!;
-                      // TODO: Dispose this
-                      final textEditingController = TextEditingController();
-                      textEditingController.text = imageCode;
+                      final textEditingController = controller
+                          .imageCodeController(imageCode);
                       final useShortCuts =
                           (PlatformInfos.isWeb || PlatformInfos.isDesktop);
                       return ListTile(
