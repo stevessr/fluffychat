@@ -8,6 +8,7 @@ import 'dart:js_interop';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 import 'package:web/web.dart';
 
@@ -32,6 +33,27 @@ class NativeImplementationsWebWorker extends NativeImplementations {
   }) : worker = Worker(href.toString().toJS) {
     worker.onmessage = _handleIncomingMessage.toJS;
   }
+
+  // Implement these explicitly instead of relying on
+  // NativeImplementations.noSuchMethod. Minified WasmGC member symbols no
+  // longer equal the source method names used by that fallback switch.
+  @override
+  FutureOr<RoomKeys> generateUploadKeys(
+    GenerateUploadKeysArgs args, {
+    bool retryInDummy = true,
+  }) => NativeImplementations.dummy.generateUploadKeys(args);
+
+  @override
+  FutureOr<Uint8List> keyFromPassphrase(
+    KeyFromPassphraseArgs args, {
+    bool retryInDummy = true,
+  }) => NativeImplementations.dummy.keyFromPassphrase(args);
+
+  @override
+  FutureOr<Uint8List?> decryptFile(
+    EncryptedFile file, {
+    bool retryInDummy = true,
+  }) => NativeImplementations.dummy.decryptFile(file);
 
   Future<T> operation<T, U>(WebWorkerOperations name, U argument) async {
     final label = _random.nextDouble();
