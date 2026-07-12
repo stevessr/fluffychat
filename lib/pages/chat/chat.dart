@@ -401,7 +401,6 @@ class ChatController extends State<ChatPageWithRoom>
     scrollController.addListener(_updateScrollController);
     inputFocus.addListener(_inputFocusListener);
 
-    // 预加载扩展 Emoji 字体用于聊天消息
     DynamicFontLoader().preloadExtendedEmoji();
 
     _loadDraft();
@@ -460,7 +459,6 @@ class ChatController extends State<ChatPageWithRoom>
     try {
       await loadTimelineFuture;
       if (!mounted) return;
-      // We launched the chat with a given initial event ID:
       if (initialEventId != null) {
         scrollToEventId(initialEventId);
         return;
@@ -477,8 +475,6 @@ class ChatController extends State<ChatPageWithRoom>
                 )
                 .indexWhere((e) => e.eventId == readMarkerEventId);
 
-      // Read marker is existing but not found in first events. Try a single
-      // requestHistory call before opening timeline on event context:
       if (readMarkerEventId.isNotEmpty && readMarkerEventIndex == -1) {
         await loadedTimeline.requestHistory(historyCount: _loadHistoryCount);
         if (!mounted || timeline != loadedTimeline) return;
@@ -498,7 +494,6 @@ class ChatController extends State<ChatPageWithRoom>
         _showScrollUpMaterialBanner(readMarkerEventId);
       }
 
-      // Mark room as read on first visit if requirements are fulfilled
       setReadMarker();
 
       if (!mounted) return;
@@ -598,7 +593,6 @@ class ChatController extends State<ChatPageWithRoom>
       return;
     }
 
-    // Do not send read markers when app is not in foreground
     if (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) {
       return;
     }
@@ -607,7 +601,6 @@ class ChatController extends State<ChatPageWithRoom>
     if (timeline == null || timeline.events.isEmpty) return;
 
     Logs().d('Set read marker...', eventId);
-    // ignore: unawaited_futures
     _setReadMarkerFuture = timeline
         .setReadMarker(
           eventId: eventId,
@@ -630,7 +623,6 @@ class ChatController extends State<ChatPageWithRoom>
     inputFocus.removeListener(_inputFocusListener);
     inputFocus.dispose();
     _displayChatDetailsColumn.dispose();
-    web.window.removeEventListener('paste', _handleClipboardFilePasteWeb);
     _webClipboardFilePasteListener.dispose();
     if (currentlyTyping) room.setTyping(false);
     MxcImage.clearCache(widget.room.id);
@@ -640,16 +632,12 @@ class ChatController extends State<ChatPageWithRoom>
   TextEditingController sendController = TextEditingController();
 
   void setSendingClient(Client c) {
-    // first cancel typing with the old sending client
     if (currentlyTyping) {
-      // no need to have the setting typing to false be blocking
       typingCoolDown?.cancel();
       typingCoolDown = null;
       room.setTyping(false);
       currentlyTyping = false;
     }
-    // then cancel the old timeline
-    // fixes bug with read reciepts and quick switching
     loadTimelineFuture = _getTimeline(eventContextId: room.fullyRead).onError(
       ErrorReporter(
         context,
@@ -657,7 +645,6 @@ class ChatController extends State<ChatPageWithRoom>
       ).onErrorCallback,
     );
 
-    // then set the new sending client
     setState(() => sendingClient = c);
   }
 
@@ -677,8 +664,6 @@ class ChatController extends State<ChatPageWithRoom>
         roomManagementCommandNames.contains(commandName) &&
         sendingClient.commands.containsKey(commandName);
 
-    // Server ACL commands send unencrypted room state and do not need the
-    // device trust checks intended for encrypted timeline messages.
     if (!isRoomManagementCommand) {
       final proceed = await showTrustUserInRoomDialog(context, room);
       if (!mounted || !proceed) return;
@@ -702,6 +687,7 @@ class ChatController extends State<ChatPageWithRoom>
           okLabel: l10n.sendAsText,
           cancelLabel: l10n.cancel,
         );
+        if (!mounted) return;
         if (dialogResult == OkCancelResult.cancel) return;
         parseCommands = false;
       }
@@ -710,7 +696,6 @@ class ChatController extends State<ChatPageWithRoom>
     }
 
     if (forcePlaintext) {
-      // ignore: unawaited_futures
       _sendUnencryptedText(submittedText);
     } else if (isRoomManagementCommand) {
       try {
@@ -735,11 +720,8 @@ class ChatController extends State<ChatPageWithRoom>
         context,
       ).showSnackBar(SnackBar(content: Text(message)));
     } else if (replyEvent != null) {
-      // 发送回复消息，不添加回退文本（fallback text）
-      // 只使用 m.relates_to 中的 m.in_reply_to 引用
       final replyTo = replyEvent!;
       final mentionUserIds = <String>{replyTo.senderId};
-      // 解析消息体中的 @[displayName] 和 @user:server.tld 提及
       for (final mention in _extractMentions(submittedText)) {
         final resolvedId = mention.isValidMatrixIdStrict()
             ? mention
@@ -768,13 +750,11 @@ class ChatController extends State<ChatPageWithRoom>
           'm.in_reply_to': {'event_id': replyTo.eventId},
         };
       }
-      // ignore: unawaited_futures
       room.sendEvent(
         content,
         editEventId: editEvent?.eventId,
       );
     } else {
-      // ignore: unawaited_futures
       room.sendTextEvent(
         submittedText,
         inReplyTo: null,
@@ -809,7 +789,6 @@ class ChatController extends State<ChatPageWithRoom>
         'm.in_reply_to': {'event_id': inReplyTo.eventId},
       };
       final mentionUserIds = <String>{inReplyTo.senderId};
-      // 解析消息体中的 @[displayName] 和 @user:server.tld 提及
       for (final mention in _extractMentions(message)) {
         final resolvedId = mention.isValidMatrixIdStrict()
             ? mention
@@ -941,12 +920,13 @@ class ChatController extends State<ChatPageWithRoom>
       return;
     }
     final image = await Pasteboard.image;
+    if (!mounted) return;
     if (image != null) {
       await sendImageFromClipBoard(image);
       return;
     }
-    // No image in clipboard — fall back to pasting text
     final textData = await Clipboard.getData('text/plain');
+    if (!mounted) return;
     if (textData?.text != null) {
       final selection = sendController.selection;
       final text = sendController.text;
@@ -1070,20 +1050,31 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
-  String _getSelectedEventString() {
+  String? _getSelectedEventString() {
+    final timeline = this.timeline;
+    if (timeline == null || selectedEvents.isEmpty) return null;
     var copyString = '';
     if (selectedEvents.length == 1) {
-      return selectedEvents.first.getDisplayEvent(timeline!).body;
+      return selectedEvents.first
+          .getDisplayEvent(timeline)
+          .calcLocalizedBodyFallback(MatrixLocals(L10n.of(context)));
     }
     for (final event in selectedEvents) {
       if (copyString.isNotEmpty) copyString += '\n\n';
-      copyString += event.getDisplayEvent(timeline!).body;
+      copyString += event
+          .getDisplayEvent(timeline)
+          .calcLocalizedBodyFallback(
+            MatrixLocals(L10n.of(context)),
+            withSenderNamePrefix: true,
+          );
     }
     return copyString;
   }
 
   void copyEventsAction() {
-    Clipboard.setData(ClipboardData(text: _getSelectedEventString()));
+    final selectedEventString = _getSelectedEventString();
+    if (selectedEventString == null) return;
+    Clipboard.setData(ClipboardData(text: selectedEventString));
     setState(() {
       showEmojiPicker = false;
       selectedEvents.clear();
@@ -1257,12 +1248,14 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void sendAgainAction() {
+    final timeline = this.timeline;
+    if (timeline == null || selectedEvents.isEmpty) return;
     final event = selectedEvents.first;
     if (event.status.isError) {
       event.sendAgain();
     }
     final allEditEvents = event
-        .aggregatedEvents(timeline!, RelationshipTypes.edit)
+        .aggregatedEvents(timeline, RelationshipTypes.edit)
         .where((e) => e.status.isError);
     for (final e in allEditEvents) {
       e.sendAgain();
@@ -1279,7 +1272,6 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   Future<void> replyWithImageAction(Event event) async {
-    // 先退出选择模式，让 UI 恢复正常
     setState(() => selectedEvents.clear());
 
     final result = await FilePicker.pickFile(type: FileType.image);
@@ -1394,7 +1386,6 @@ class ChatController extends State<ChatPageWithRoom>
     sendController.value = TextEditingValue(
       text: newText,
       selection: TextSelection.collapsed(
-        // don't forget an UTF-8 combined emoji might have a length > 1
         offset: selection.baseOffset + emoji.emoji.length,
       ),
     );
@@ -1448,14 +1439,10 @@ class ChatController extends State<ChatPageWithRoom>
   void editSelectedEventAction() {
     final timeline = this.timeline;
     if (timeline == null) return;
-    // NOTE: 必须基于原始事件（而非 displayEvent）作为编辑目标。
-    // displayEvent 是 getDisplayEvent 解析出的"最新编辑事件"，其 eventId 是某次编辑
-    // 而非原始消息。Matrix 的编辑关系 m.relates_to.event_id 必须指向原始事件，
-    // 否则 SDK 的 getDisplayEvent 无法把后续编辑聚合到原始事件下，导致第二次及以后
-    // 的编辑发送后，显示的仍是第一次编辑的结果。
+
     final event = selectedEvents.first;
     final displayEvent = event.getDisplayEvent(timeline);
-    // For image/file/sticker events, open SendFileDialog with editEventId
+
     if ({
       MessageTypes.Image,
       MessageTypes.Sticker,
@@ -1463,7 +1450,6 @@ class ChatController extends State<ChatPageWithRoom>
       MessageTypes.Video,
       MessageTypes.Audio,
     }.contains(displayEvent.messageType)) {
-      // ignore: unawaited_futures
       editFileEventAction(event);
       return;
     }
@@ -1519,7 +1505,6 @@ class ChatController extends State<ChatPageWithRoom>
 
     if (lastOwnMessage == null) return;
 
-    // If it's an image/file event, use editFileEventAction instead
     if ({
       MessageTypes.Image,
       MessageTypes.Sticker,
@@ -1531,7 +1516,6 @@ class ChatController extends State<ChatPageWithRoom>
       return;
     }
 
-    // Text, emote, notice, etc. — edit as text in input bar
     _startEditingEvent(lastOwnMessage);
   }
 
@@ -1581,7 +1565,6 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   int? findChildIndexCallback(Key key, Map<String, int> thisEventsKeyMap) {
-    // this method is called very often. As such, it has to be optimized for speed.
     if (key is! ValueKey) {
       return null;
     }
@@ -1589,12 +1572,10 @@ class ChatController extends State<ChatPageWithRoom>
     if (eventId is! String) {
       return null;
     }
-    // first fetch the last index the event was at
     final index = thisEventsKeyMap[eventId];
     if (index == null) {
       return null;
     }
-    // we need to +1 as 0 is the typing thing at the bottom
     return index + 1;
   }
 
@@ -1746,7 +1727,6 @@ class ChatController extends State<ChatPageWithRoom>
       (event ?? selectedEvents.single).showInfoDialog(context);
 
   Future<void> onPhoneButtonTap() async {
-    // VoIP required Android SDK 21
     if (PlatformInfos.isAndroid) {
       final androidInfo = await DeviceInfoPlugin().androidInfo;
       if (!mounted) return;
@@ -1803,8 +1783,11 @@ class ChatController extends State<ChatPageWithRoom>
   });
 
   Future<void> _cancelEditWithConfirmation() async {
-    final originalText = editEvent!
-        .getDisplayEvent(timeline!)
+    final editEvent = this.editEvent;
+    final timeline = this.timeline;
+    if (editEvent == null || timeline == null) return;
+    final originalText = editEvent
+        .getDisplayEvent(timeline)
         .calcLocalizedBodyFallback(
           MatrixLocals(L10n.of(context)),
           withSenderNamePrefix: false,
@@ -1819,6 +1802,7 @@ class ChatController extends State<ChatPageWithRoom>
         okLabel: L10n.of(context).ok,
         cancelLabel: L10n.of(context).cancel,
       );
+      if (!mounted || this.editEvent != editEvent) return;
       if (result == OkCancelResult.cancel) return;
     }
 
@@ -1828,10 +1812,10 @@ class ChatController extends State<ChatPageWithRoom>
   late final ValueNotifier<bool> _displayChatDetailsColumn;
 
   Future<void> toggleDisplayChatDetailsColumn() async {
-    await AppSettings.displayChatDetailsColumn.setItem(
-      !_displayChatDetailsColumn.value,
-    );
-    _displayChatDetailsColumn.value = !_displayChatDetailsColumn.value;
+    final nextValue = !_displayChatDetailsColumn.value;
+    await AppSettings.displayChatDetailsColumn.setItem(nextValue);
+    if (!mounted) return;
+    _displayChatDetailsColumn.value = nextValue;
   }
 
   @override
@@ -1878,7 +1862,6 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
-  /// 从消息文本中提取 @[displayName] 和 @user:server.tld 形式的提及
   List<String> _extractMentions(String message) {
     if (message.isEmpty) return [];
     final mentions = message
@@ -1890,7 +1873,6 @@ class ChatController extends State<ChatPageWithRoom>
         )
         .toList()
       ..removeAt(0);
-    // 过滤掉 @room 并移除空字符串
     mentions.removeWhere(
       (m) => m == '@room' || m == '@',
     );
