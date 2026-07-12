@@ -113,20 +113,27 @@ class EmotesSettingsController extends State<EmotesSettings> {
       return;
     }
     final client = Matrix.of(context).client;
+    final userId = client.userID;
+    final room = this.room;
+    late final Future<dynamic> Function() savePack;
+    if (room != null) {
+      savePack = () => client.setRoomStateWithKey(
+        room.id,
+        'im.ponies.room_emotes',
+        stateKey ?? '',
+        pack!.toJson(),
+      );
+    } else {
+      if (userId == null) return;
+      savePack = () => client.setAccountData(
+        userId,
+        'im.ponies.user_emotes',
+        pack!.toJson(),
+      );
+    }
     final result = await showFutureLoadingDialog(
       context: context,
-      future: () => room != null
-          ? client.setRoomStateWithKey(
-              room!.id,
-              'im.ponies.room_emotes',
-              stateKey ?? '',
-              pack!.toJson(),
-            )
-          : client.setAccountData(
-              client.userID!,
-              'im.ponies.user_emotes',
-              pack!.toJson(),
-            ),
+      future: savePack,
     );
     if (!result.isError && mounted) {
       setState(() {
@@ -140,6 +147,8 @@ class EmotesSettingsController extends State<EmotesSettings> {
       return;
     }
     final client = Matrix.of(context).client;
+    final userId = client.userID;
+    if (userId == null) return;
     final content =
         client.accountData['im.ponies.emote_rooms']?.content ??
         <String, dynamic>{};
@@ -159,11 +168,8 @@ class EmotesSettingsController extends State<EmotesSettings> {
     // and save
     await showFutureLoadingDialog(
       context: context,
-      future: () => client.setAccountData(
-        client.userID!,
-        'im.ponies.emote_rooms',
-        content,
-      ),
+      future: () =>
+          client.setAccountData(userId, 'im.ponies.emote_rooms', content),
     );
     if (mounted) setState(() {});
   }
@@ -188,10 +194,10 @@ class EmotesSettingsController extends State<EmotesSettings> {
   }
 
   void toggleUsage(String imageCode, ImagePackUsage usage) {
+    final image = pack?.images[imageCode];
+    if (image == null) return;
     setState(() {
-      final usages = pack!.images[imageCode]!.usage ??= List.from(
-        ImagePackUsage.values,
-      );
+      final usages = image.usage ??= List.from(ImagePackUsage.values);
       if (!usages.remove(usage)) usages.add(usage);
       showSave = true;
     });
@@ -259,7 +265,8 @@ class EmotesSettingsController extends State<EmotesSettings> {
 
   bool isGloballyActive(Client? client) =>
       room != null &&
-      client!.accountData['im.ponies.emote_rooms']?.content
+      client != null &&
+      client.accountData['im.ponies.emote_rooms']?.content
               .tryGetMap<String, Object?>('rooms')
               ?.tryGetMap<String, Object?>(room!.id)
               ?.tryGetMap<String, Object?>(stateKey ?? '') !=
@@ -301,7 +308,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
 
     final keyName = name.toLowerCase().replaceAll(' ', '_');
 
-    if (packKeys?.contains(name) ?? false) {
+    if (packKeys?.contains(keyName) ?? false) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(L10n.of(context).stickerPackNameAlreadyExists)),
       );
