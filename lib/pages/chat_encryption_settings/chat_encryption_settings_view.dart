@@ -22,7 +22,21 @@ class ChatEncryptionSettingsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final room = controller.room;
+    final room = controller.roomOrNull;
+    if (room == null) {
+      return Scaffold(
+        appBar: AppBar(
+          leading: const BackButton(),
+          title: Text(L10n.of(context).encryption),
+        ),
+        body: Center(
+          child: Text(
+            L10n.of(context).oopsSomethingWentWrong,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
     return StreamBuilder<Object>(
       stream: room.client.onSync.stream.where(
         (s) => s.rooms?.join?[room.id] != null || s.deviceLists != null,
@@ -31,7 +45,7 @@ class ChatEncryptionSettingsView extends StatelessWidget {
         appBar: AppBar(
           leading: IconButton(
             icon: const Icon(Icons.close_outlined),
-            onPressed: () => context.go('/rooms/${controller.roomId!}'),
+            onPressed: () => context.go('/rooms/${room.id}'),
           ),
           title: Text(L10n.of(context).encryption),
           actions: [
