@@ -247,9 +247,11 @@ class Box<V> {
     /// NOTE: This is a workaround to get the keys as [IDBObjectStore.getAll()]
     /// only returns the values as a list.
     /// And using the [IDBObjectStore.openCursor()] method is not working as expected.
-    final keys = await getAllKeys(txn);
-
-    final getAllValuesCompleter = Completer();
+    // Queue both requests before awaiting either one. IndexedDB automatically
+    // commits a transaction once its callback returns with no pending request;
+    // creating getAll() only after awaiting getAllKeys() can therefore hit an
+    // inactive transaction, especially under dart2wasm.
+    final getAllValuesCompleter = Completer<void>();
     final getAllValuesRequest = store.getAll();
     getAllValuesRequest.onerror = (Event event) {
       Logs().e(
@@ -263,13 +265,24 @@ class Box<V> {
       );
     }.toJS;
     getAllValuesRequest.onsuccess = (Event event) {
-      final values = _dartifyIndexedDbValue(getAllValuesRequest.result) as List;
-      for (var i = 0; i < values.length; i++) {
-        map[keys[i]] = _fromValue(values[i]) as V;
-      }
       getAllValuesCompleter.complete();
     }.toJS;
+
+    final keys = await getAllKeys(txn);
     await getAllValuesCompleter.future;
+    // Keep conversion and validation outside the JavaScript callback. A Dart
+    // type/range error thrown directly from an IDB callback otherwise becomes
+    // an unhandled WebAssembly.Exception in the browser.
+    final values = _dartifyIndexedDbValue(getAllValuesRequest.result) as List;
+    if (keys.length != values.length) {
+      throw StateError(
+        'IndexedDB returned ${keys.length} keys but ${values.length} values '
+        'for box $name',
+      );
+    }
+    for (var i = 0; i < values.length; i++) {
+      map[keys[i]] = _fromValue(values[i]) as V;
+    }
     return map;
   }
 

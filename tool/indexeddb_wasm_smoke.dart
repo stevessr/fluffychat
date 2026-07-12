@@ -55,7 +55,11 @@ Future<void> main() async {
   });
   events.clearQuickAccessCache();
   fragments.clearQuickAccessCache();
-  if ((await events.get('room,event'))?['event_id'] != r'$local' ||
+  final allEvents = await events.getAllValues();
+  final allFragments = await fragments.getAllValues();
+  if (allEvents['room,event']?['event_id'] != r'$local' ||
+      allFragments['room,SENDING']?.single != r'$local' ||
+      (await events.get('room,event'))?['event_id'] != r'$local' ||
       (await fragments.get('room,SENDING'))?.single != r'$local') {
     throw StateError('Transactional encrypted media state did not persist');
   }
