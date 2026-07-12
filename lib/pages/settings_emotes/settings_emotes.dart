@@ -560,6 +560,11 @@ class EmotesSettingsController extends State<EmotesSettings> {
             url,
             headers: {'authorization': 'Bearer ${client.accessToken}'},
           );
+          if (response.statusCode != 200) {
+            throw Exception(
+              'Unable to download emote $name (${response.statusCode})',
+            );
+          }
 
           archive.addFile(
             ArchiveFile(name, response.bodyBytes.length, response.bodyBytes),
@@ -575,7 +580,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
     final file = result.result;
     if (file == null) return;
     if (!mounted) return;
-    file.save(context);
+    await file.save(context);
   }
 }
 
