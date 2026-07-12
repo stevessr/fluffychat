@@ -18,6 +18,7 @@ import 'package:fluffychat/utils/unicode_17_emoji_set.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/member_actions_popup_menu_button.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:matrix/matrix.dart';
@@ -222,10 +223,6 @@ class Message extends StatelessWidget {
     final threadChildren = event.aggregatedEvents(
       timeline,
       RelationshipTypes.thread,
-    );
-    final isEdited = event.hasAggregatedEvents(
-      timeline,
-      RelationshipTypes.edit,
     );
 
     final showReactionPicker =
@@ -1041,10 +1038,19 @@ class BubblePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final scrollable = _scrollable ??= Scrollable.of(context);
-    final scrollableBox = scrollable.context.findRenderObject() as RenderBox;
+    if (!context.mounted) return;
+    final scrollable = _scrollable ??= Scrollable.maybeOf(context);
+    final scrollableBox = scrollable?.context.findRenderObject();
+    final bubbleBox = context.findRenderObject();
+    if (scrollableBox is! RenderBox ||
+        bubbleBox is! RenderBox ||
+        !scrollableBox.attached ||
+        !bubbleBox.attached ||
+        !scrollableBox.hasSize ||
+        !bubbleBox.hasSize) {
+      return;
+    }
     final scrollableRect = Offset.zero & scrollableBox.size;
-    final bubbleBox = context.findRenderObject() as RenderBox;
 
     final origin = bubbleBox.localToGlobal(
       Offset.zero,
@@ -1064,10 +1070,7 @@ class BubblePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(BubblePainter oldDelegate) {
-    final scrollable = Scrollable.of(context);
-    final oldScrollable = _scrollable;
-    _scrollable = scrollable;
-    return scrollable.position != oldScrollable?.position;
+    return !listEquals(oldDelegate.colors, colors);
   }
 }
 
@@ -1088,6 +1091,7 @@ class __AnimateInState extends State<_AnimateIn> {
     if (!widget.animateIn) return widget.child;
     if (!_animationFinished) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _animationFinished) return;
         setState(() {
           _animationFinished = true;
         });
