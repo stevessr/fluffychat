@@ -12,6 +12,8 @@ import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 // ignore: implementation_imports
 import 'package:matrix/src/utils/crypto/encrypted_file.dart';
 // ignore: implementation_imports
+import 'package:matrix/src/utils/matrix_file.dart';
+// ignore: implementation_imports
 import 'package:matrix/src/utils/web_worker/native_implementations_web_worker.dart';
 import 'package:vodozemac/vodozemac.dart' as vodozemac;
 import 'package:web/web.dart' as web;
@@ -79,6 +81,22 @@ Future<void> main() async {
   final metadata = await nativeImplementations.calcImageMetadata(png);
   if (metadata == null || metadata.width != 1 || metadata.height != 1) {
     throw StateError('Web worker image metadata round trip failed');
+  }
+  final resized = await nativeImplementations.shrinkImage(
+    MatrixImageFileResizeArguments(
+      bytes: png,
+      maxDimension: 1,
+      fileName: 'pixel.png',
+      calcBlurhash: true,
+    ),
+  );
+  if (resized == null ||
+      resized.bytes.isEmpty ||
+      resized.width != 1 ||
+      resized.height != 1 ||
+      resized.originalWidth != 1 ||
+      resized.originalHeight != 1) {
+    throw StateError('Web worker image resize round trip failed');
   }
 
   final pickleKey = Uint8List(32);

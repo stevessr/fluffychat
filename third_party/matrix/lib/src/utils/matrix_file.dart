@@ -319,10 +319,17 @@ class MatrixImageFileResizeArguments {
 
   factory MatrixImageFileResizeArguments.fromJson(Map<String, dynamic> json) =>
       MatrixImageFileResizeArguments(
-        bytes: json['bytes'],
-        maxDimension: json['maxDimension'],
-        fileName: json['fileName'],
-        calcBlurhash: json['calcBlurhash'],
+        // Structured cloning through a JavaScript worker produces a regular
+        // numeric list and represents integral numbers as doubles under
+        // dart2wasm. Rebuild the strongly typed arguments explicitly.
+        bytes: Uint8List.fromList(
+          (json['bytes'] as Iterable<dynamic>)
+              .map((value) => (value as num).toInt())
+              .toList(growable: false),
+        ),
+        maxDimension: (json['maxDimension'] as num).toInt(),
+        fileName: json['fileName'] as String,
+        calcBlurhash: json['calcBlurhash'] as bool,
       );
 
   Map<String, Object> toJson() => {
