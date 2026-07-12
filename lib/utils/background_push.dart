@@ -163,7 +163,7 @@ class BackgroundPush {
       //<GOOGLE_SERVICES>await firebase.requestPermission();
     }
     if (PlatformInfos.isAndroid && !isIntegrationTest) {
-      _flutterLocalNotificationsPlugin
+      await _flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin
           >()
@@ -266,10 +266,16 @@ class BackgroundPush {
 
   Future<void> setupPush() async {
     final context = matrix?.context;
-    if (PlatformInfos.isAndroid &&
-        (await UnifiedPush.getDistributors()).isNotEmpty &&
-        context != null &&
-        context.mounted) {
+    var hasUnifiedPushDistributor = false;
+    if (PlatformInfos.isAndroid) {
+      try {
+        hasUnifiedPushDistributor =
+            (await UnifiedPush.getDistributors()).isNotEmpty;
+      } catch (e, s) {
+        Logs().w('[Push] Unable to query UnifiedPush distributors', e, s);
+      }
+    }
+    if (hasUnifiedPushDistributor && context != null && context.mounted) {
       await UnifiedPushUi(
         context: context,
         instances: ['default'],
@@ -278,42 +284,36 @@ class BackgroundPush {
         onNoDistribDialogDismissed: () {}, // TODO: Implement me
       ).registerAppWithDialog();
     } else {
+      if (!PlatformInfos.isMobile || matrix == null) return;
+      if (upAction) return;
       for (final client in clients) {
         Logs().d('SetupPush for Client ${client.clientName}');
-        if (client.onLoginStateChanged.value != LoginState.loggedIn ||
-            !PlatformInfos.isMobile ||
-            matrix == null) {
-          return;
-        }
-        // Do not setup unifiedpush if this has been initialized by
-        // an unifiedpush action
-        if (upAction) {
-          return;
-        }
+        if (client.onLoginStateChanged.value != LoginState.loggedIn) continue;
         await setupFirebase(client);
       }
     }
 
     // ignore: unawaited_futures
-    _flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails().then((
-      details,
-    ) {
+    try {
+      final details = await _flutterLocalNotificationsPlugin
+          .getNotificationAppLaunchDetails();
       if (details == null ||
           !details.didNotificationLaunchApp ||
           _wentToRoomOnStartup) {
         return;
       }
-      _wentToRoomOnStartup = true;
       final response = details.notificationResponse;
-      if (response != null) {
-        notificationTap(
-          response,
-          clients: clients,
-          router: FluffyChatApp.router,
-          l10n: l10n,
-        );
-      }
-    });
+      if (response == null) return;
+      _wentToRoomOnStartup = true;
+      await notificationTap(
+        response,
+        clients: clients,
+        router: FluffyChatApp.router,
+        l10n: l10n,
+      );
+    } catch (e, s) {
+      Logs().w('[Push] Unable to process launch notification', e, s);
+    }
   }
 
   Future<void> _noFcmWarning() async {
@@ -324,15 +324,20 @@ class BackgroundPush {
       return;
     }
     await loadLocale();
+    final l10n = this.l10n;
+    final onFcmError = this.onFcmError;
+    if (l10n == null || onFcmError == null) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final context = matrix?.context;
+      if (context == null || !context.mounted) return;
       if (PlatformInfos.isAndroid) {
-        onFcmError?.call(
-          l10n!.noGoogleServicesWarning,
+        onFcmError(
+          l10n.noGoogleServicesWarning,
           link: Uri.parse(AppConfig.enablePushTutorial),
         );
         return;
       }
-      onFcmError?.call(l10n!.oopsPushError);
+      onFcmError(l10n.oopsPushError);
     });
   }
 
