@@ -44,25 +44,25 @@ class SettingsController extends State<Settings> {
     final matrix = Matrix.of(context);
     final profile = await profileFuture;
     if (!mounted) return;
+    final userId = matrix.client.userID;
+    if (userId == null) return;
     final input = await showTextInputDialog(
       useRootNavigator: false,
       context: context,
       title: l10n.editDisplayname,
       okLabel: l10n.ok,
       cancelLabel: l10n.cancel,
-      initialText: profile?.displayName ?? matrix.client.userID!.localpart,
+      initialText: profile?.displayName ?? userId.localpart,
     );
     if (input == null) return;
     if (!mounted) return;
     final success = await showFutureLoadingDialog(
       context: context,
-      future: () => matrix.client.setProfileField(
-        matrix.client.userID!,
-        'displayname',
-        {'displayname': input},
-      ),
+      future: () => matrix.client.setProfileField(userId, 'displayname', {
+        'displayname': input,
+      }),
     );
-    if (success.error == null) {
+    if (success.error == null && mounted) {
       updateProfile();
     }
   }
@@ -130,7 +130,7 @@ class SettingsController extends State<Settings> {
         context: context,
         future: () => matrix.client.setAvatar(null),
       );
-      if (success.error == null) {
+      if (success.error == null && mounted) {
         updateProfile();
       }
       return;
@@ -160,7 +160,7 @@ class SettingsController extends State<Settings> {
       context: context,
       future: () => matrix.client.setAvatar(file),
     );
-    if (success.error == null) {
+    if (success.error == null && mounted) {
       updateProfile();
     }
   }
@@ -173,15 +173,23 @@ class SettingsController extends State<Settings> {
   }
 
   Future<void> checkBootstrap() async {
+    if (!mounted) return;
     final client = Matrix.of(context).client;
     if (!client.encryptionEnabled) return;
     if (!client.isLogged()) return;
     await client.accountDataLoading;
+    if (!mounted) return;
     await client.userDeviceKeysLoading;
+    if (!mounted) return;
     if (client.prevBatch == null) {
-      await client.onSync.stream.first;
+      try {
+        await client.onSync.stream.first.timeout(const Duration(seconds: 40));
+      } on TimeoutException {
+        return;
+      }
     }
 
+    if (!mounted) return;
     final state = await client.getCryptoIdentityState();
     if (!mounted) return;
     setState(() {
@@ -207,13 +215,17 @@ class SettingsController extends State<Settings> {
       return;
     }
     await context.push('/backup');
+    if (!mounted) return;
     checkBootstrap();
   }
 
   @override
   Widget build(BuildContext context) {
     final client = Matrix.of(context).client;
-    profileFuture ??= client.getProfileFromUserId(client.userID!);
+    final userId = client.userID;
+    profileFuture ??= userId == null
+        ? Future.value(Profile(userId: ''))
+        : client.getProfileFromUserId(userId);
     return SettingsView(this);
   }
 }

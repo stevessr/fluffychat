@@ -22,11 +22,12 @@ class SettingsStyle extends StatefulWidget {
 }
 
 class SettingsStyleController extends State<SettingsStyle> {
-  void setChatColor(Color? color) {
-    AppSettings.colorSchemeSeedInt.setItem(
+  Future<void> setChatColor(Color? color) async {
+    await AppSettings.colorSchemeSeedInt.setItem(
       color?.toARGB32() ?? AppSettings.colorSchemeSeedInt.defaultValue,
     );
-    ThemeController.of(context).setPrimaryColor(color);
+    if (!mounted) return;
+    await ThemeController.of(context).setPrimaryColor(color);
   }
 
   Future<void> setWallpaper() async {
@@ -66,6 +67,7 @@ class SettingsStyleController extends State<SettingsStyle> {
       ),
     );
     if (result.isValue) return;
+    if (!mounted) return;
 
     setState(() {
       _wallpaperOpacity = client.applicationAccountConfig.wallpaperOpacity;
@@ -93,6 +95,7 @@ class SettingsStyleController extends State<SettingsStyle> {
       ),
     );
     if (result.isValue) return;
+    if (!mounted) return;
 
     setState(() {
       _wallpaperBlur = client.applicationAccountConfig.wallpaperBlur;
@@ -115,24 +118,16 @@ class SettingsStyleController extends State<SettingsStyle> {
   ThemeMode get currentTheme => ThemeController.of(context).themeMode;
   Color? get currentColor => ThemeController.of(context).primaryColor;
 
-  void switchTheme(ThemeMode? newTheme) {
+  Future<void> switchTheme(ThemeMode? newTheme) async {
     if (newTheme == null) return;
-    switch (newTheme) {
-      case ThemeMode.light:
-        ThemeController.of(context).setThemeMode(ThemeMode.light);
-        break;
-      case ThemeMode.dark:
-        ThemeController.of(context).setThemeMode(ThemeMode.dark);
-        break;
-      case ThemeMode.system:
-        ThemeController.of(context).setThemeMode(ThemeMode.system);
-        break;
-    }
+    await ThemeController.of(context).setThemeMode(newTheme);
+    if (!mounted) return;
     setState(() {});
   }
 
   Future<void> changeFontSizeFactor(double d) async {
     await AppSettings.fontSizeFactor.setItem(d);
+    if (!mounted) return;
     setState(() {});
   }
 
