@@ -39,12 +39,13 @@ class ChatDetailsController extends State<ChatDetails> {
   void toggleDisplaySettings() =>
       setState(() => displaySettings = !displaySettings);
 
-  String? get roomId => widget.roomId;
+  String get roomId => widget.roomId;
 
   Future<void> setDisplaynameAction() async {
     final l10n = L10n.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
-    final room = Matrix.of(context).client.getRoomById(roomId!)!;
+    final room = Matrix.of(context).client.getRoomById(roomId);
+    if (room == null) return;
     final input = await showTextInputDialog(
       context: context,
       title: l10n.changeTheNameOfTheGroup,
@@ -69,7 +70,8 @@ class ChatDetailsController extends State<ChatDetails> {
   Future<void> setTopicAction() async {
     final l10n = L10n.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
-    final room = Matrix.of(context).client.getRoomById(roomId!)!;
+    final room = Matrix.of(context).client.getRoomById(roomId);
+    if (room == null) return;
     final input = await showTextInputDialog(
       context: context,
       title: l10n.setChatDescription,
@@ -96,7 +98,8 @@ class ChatDetailsController extends State<ChatDetails> {
 
   Future<void> setAvatarAction() async {
     final l10n = L10n.of(context);
-    final room = Matrix.of(context).client.getRoomById(roomId!);
+    final room = Matrix.of(context).client.getRoomById(roomId);
+    if (room == null) return;
     final actions = [
       if (PlatformInfos.isMobile)
         AdaptiveModalAction(
@@ -110,7 +113,7 @@ class ChatDetailsController extends State<ChatDetails> {
         label: l10n.openGallery,
         icon: const Icon(Icons.photo_outlined),
       ),
-      if (room?.avatar != null)
+      if (room.avatar != null)
         AdaptiveModalAction(
           value: AvatarAction.remove,
           label: l10n.delete,
@@ -131,7 +134,7 @@ class ChatDetailsController extends State<ChatDetails> {
     if (action == AvatarAction.remove) {
       await showFutureLoadingDialog(
         context: context,
-        future: () => room!.setAvatar(null),
+        future: () => room.setAvatar(null),
       );
       return;
     }
@@ -162,7 +165,7 @@ class ChatDetailsController extends State<ChatDetails> {
     if (!mounted) return;
     await showFutureLoadingDialog(
       context: context,
-      future: () => room!.setAvatar(file),
+      future: () => room.setAvatar(file),
     );
   }
 
