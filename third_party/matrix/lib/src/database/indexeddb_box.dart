@@ -30,6 +30,22 @@ Object? _normalizeIndexedDbValue(Object? value) {
   return value;
 }
 
+Object? _prepareIndexedDbValue(Object? value) {
+  if (value == null || value is String || value is num || value is bool) {
+    return value;
+  }
+  if (value is Map) {
+    return <String, Object?>{
+      for (final entry in value.entries)
+        entry.key.toString(): _prepareIndexedDbValue(entry.value),
+    };
+  }
+  if (value is Iterable) {
+    return <Object?>[for (final item in value) _prepareIndexedDbValue(item)];
+  }
+  return value;
+}
+
 StateError _indexedDbError(String operation, DOMException? error) =>
     StateError('$operation${error == null ? '' : ': $error'}');
 
@@ -114,13 +130,14 @@ class BoxCollection with ZoneTransactionMixin {
       boxNames?.jsify() ?? _db.objectStoreNames,
       readOnly ? 'readonly' : 'readwrite',
     );
+    final operationFutures = <Future<void>>[];
     for (final fun in cache) {
       // The IDB methods return a Future in Dart but must not be awaited in
       // order to have an actual transaction. They must only be performed and
       // then the transaction object must call `txn.completed;` which then
       // returns the actual future.
       // https://developer.mozilla.org/en-US/docs/Web/API/IDBTransaction
-      unawaited(fun(txn));
+      operationFutures.add(fun(txn));
     }
 
     txn.onerror = (Event event) {
@@ -133,7 +150,7 @@ class BoxCollection with ZoneTransactionMixin {
     txn.oncomplete = (Event event) {
       transactionCompleter.complete();
     }.toJS;
-    return transactionCompleter.future;
+    await Future.wait<void>([transactionCompleter.future, ...operationFutures]);
   });
 
   Future<void> clear() async {
@@ -334,7 +351,7 @@ class Box<V> {
 
     txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
     final store = txn.objectStore(name);
-    final putRequest = store.put(val.jsify(), key.toJS);
+    final putRequest = store.put(_prepareIndexedDbValue(val).jsify(), key.toJS);
     final putCompleter = Completer();
     putRequest.onerror = (Event event) {
       Logs().e('[IndexedDBBox] [put] Error - ${putRequest.error}');
