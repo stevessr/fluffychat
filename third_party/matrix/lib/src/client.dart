@@ -2433,6 +2433,7 @@ class Client extends MatrixApi {
     await _retryDelay;
     _retryDelay = Future.delayed(Duration(seconds: syncErrorTimeoutSec));
     if (!isLogged() || _disposed || _aborted) return;
+    var receivedSyncResponse = false;
     try {
       if (_initLock) {
         Logs().d('Running sync while init isn\'t done yet, dropping request');
@@ -2486,6 +2487,7 @@ class Client extends MatrixApi {
                 ),
               ),
             );
+      receivedSyncResponse = true;
 
       onSyncStatus.add(SyncStatusUpdate(SyncStatus.processing));
       if (syncResp == null) throw syncError ?? 'Unknown sync error';
@@ -2557,6 +2559,26 @@ class Client extends MatrixApi {
         SyncStatusUpdate(
           SyncStatus.error,
           error: SdkError(exception: e, stackTrace: s),
+        ),
+      );
+    } on TimeoutException catch (e, s) {
+      // Some transports and async SDK hooks can surface their own timeout
+      // before our syncRequest timeout wrapper gets a chance to normalize it.
+      // Treat those as a recoverable sync failure instead of reporting that
+      // event processing crashed. The background sync loop will retry after
+      // this invocation completes.
+      final exception = receivedSyncResponse ? e : SyncConnectionException(e);
+      Logs().w(
+        receivedSyncResponse
+            ? 'Syncloop timed out during asynchronous event processing. Retrying...'
+            : 'Syncloop timed out while waiting for the server. Retrying...',
+        e,
+        s,
+      );
+      onSyncStatus.add(
+        SyncStatusUpdate(
+          SyncStatus.error,
+          error: SdkError(exception: exception, stackTrace: s),
         ),
       );
     } catch (e, s) {
