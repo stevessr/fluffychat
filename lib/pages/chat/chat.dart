@@ -1133,41 +1133,48 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   Future<void> redactEventsAction() async {
-    final reasonInput = selectedEvents.any((event) => event.status.isSent)
-        ? await showTextInputDialog(
-            context: context,
-            title: L10n.of(context).redactMessage,
-            message: L10n.of(context).redactMessageDescription,
-            isDestructive: true,
-            hintText: L10n.of(context).optionalRedactReason,
-            maxLength: 255,
-            maxLines: 3,
-            minLines: 1,
-            okLabel: L10n.of(context).remove,
-            cancelLabel: L10n.of(context).cancel,
-          )
-        : null;
-    if (reasonInput == null) return;
-    final reason = reasonInput.isEmpty ? null : reasonInput;
+    if (selectedEvents.isEmpty) return;
+    String? reason;
+    if (selectedEvents.any((event) => event.status.isSent)) {
+      final reasonInput = await showTextInputDialog(
+        context: context,
+        title: L10n.of(context).redactMessage,
+        message: L10n.of(context).redactMessageDescription,
+        isDestructive: true,
+        hintText: L10n.of(context).optionalRedactReason,
+        maxLength: 255,
+        maxLines: 3,
+        minLines: 1,
+        okLabel: L10n.of(context).remove,
+        cancelLabel: L10n.of(context).cancel,
+      );
+      if (reasonInput == null) return;
+      reason = reasonInput.isEmpty ? null : reasonInput;
+    }
     if (!mounted) return;
-    await showFutureLoadingDialog(
+    final events = List<Event>.from(selectedEvents);
+    final clients = currentRoomBundle.whereType<Client>().toList();
+    final result = await showFutureLoadingDialog(
       context: context,
       futureWithProgress: (onProgress) async {
-        final count = selectedEvents.length;
-        for (final (i, event) in selectedEvents.indexed) {
-          onProgress(i / count);
+        final count = events.length;
+        for (final (i, event) in events.indexed) {
           if (event.status.isSent) {
             if (event.canRedact) {
               await event.redactEvent(reason: reason);
             } else {
-              final client = currentRoomBundle.firstWhere(
-                (cl) => selectedEvents.first.senderId == cl!.userID,
-                orElse: () => null,
+              final client = clients.firstWhereOrNull(
+                (client) => event.senderId == client.userID,
               );
               if (client == null) {
-                return;
+                throw StateError(
+                  'No active account can redact ${event.eventId}',
+                );
               }
-              final room = client.getRoomById(roomId)!;
+              final room = client.getRoomById(roomId);
+              if (room == null) {
+                throw StateError('Room $roomId is unavailable for redaction');
+              }
               await Event.fromJson(
                 event.toJson(),
                 room,
@@ -1176,9 +1183,11 @@ class ChatController extends State<ChatPageWithRoom>
           } else {
             await event.cancelSend();
           }
+          onProgress((i + 1) / count);
         }
       },
     );
+    if (result.error != null || !mounted) return;
     setState(() {
       showEmojiPicker = false;
       selectedEvents.clear();
@@ -1186,18 +1195,21 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   List<Client?> get currentRoomBundle {
-    final clients = Matrix.of(context).currentBundle!;
-    clients.removeWhere((c) => c!.getRoomById(roomId) == null);
-    return clients;
+    final clients = Matrix.of(context).currentBundle;
+    if (clients == null) return const [];
+    return clients
+        .where((client) => client?.getRoomById(roomId) != null)
+        .toList();
   }
 
   bool get canRedactSelectedEvents {
     if (isArchived) return false;
-    final clients = Matrix.of(context).currentBundle;
     for (final event in selectedEvents) {
       if (!event.status.isSent) return false;
       if (event.canRedact == false &&
-          !(clients!.any((cl) => event.senderId == cl!.userID))) {
+          !currentRoomBundle.any(
+            (client) => event.senderId == client?.userID,
+          )) {
         return false;
       }
     }
@@ -1222,7 +1234,7 @@ class ChatController extends State<ChatPageWithRoom>
       return false;
     }
     return currentRoomBundle.any(
-      (cl) => selectedEvents.first.senderId == cl!.userID,
+      (client) => selectedEvents.first.senderId == client?.userID,
     );
   }
 
