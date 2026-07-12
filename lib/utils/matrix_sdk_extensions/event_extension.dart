@@ -86,6 +86,7 @@ extension LocalizedBody on Event {
     if (file == null) return;
 
     await Pasteboard.writeImage(_clipboardPngBytes(file));
+    if (!context.mounted) return;
     scaffoldMessenger.showSnackBar(
       SnackBar(showCloseIcon: true, content: Text(l10n.copiedToClipboard)),
     );
