@@ -93,8 +93,14 @@ class _EventVideoPlayerState extends State<EventVideoPlayer> {
     final fileDescription = widget.event.fileDescription;
     const maxDimension = 300.0;
     final infoMap = widget.event.content.tryGetMap<String, Object?>('info');
-    final videoWidth = infoMap?.tryGet<int>('w') ?? maxDimension;
-    final videoHeight = infoMap?.tryGet<int>('h') ?? maxDimension;
+    final rawVideoWidth = infoMap?.tryGet<int>('w');
+    final rawVideoHeight = infoMap?.tryGet<int>('h');
+    final videoWidth = rawVideoWidth != null && rawVideoWidth > 0
+        ? rawVideoWidth.toDouble()
+        : maxDimension;
+    final videoHeight = rawVideoHeight != null && rawVideoHeight > 0
+        ? rawVideoHeight.toDouble()
+        : maxDimension;
 
     final modifier = max(videoWidth, videoHeight) / maxDimension;
     final width = videoWidth / modifier;

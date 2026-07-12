@@ -33,25 +33,29 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
   VideoPlayerController? _videoPlayerController;
 
   double? _downloadProgress;
+  int _loadGeneration = 0;
 
   // The video_player package only doesn't support Windows and Linux.
   final _supportsVideoPlayer =
       !PlatformInfos.isWindows && !PlatformInfos.isLinux;
 
-  Future<void> _downloadAction() async {
+  Future<void> _downloadAction(int generation) async {
+    if (!mounted || generation != _loadGeneration) return;
+    final event = widget.event;
     if (!_supportsVideoPlayer) {
-      widget.event.saveFile(context);
+      await event.saveFile(context);
       return;
     }
 
     try {
-      final fileSize = widget.event.content
+      final fileSize = event.content
           .tryGetMap<String, Object?>('info')
           ?.tryGet<int>('size');
-      final videoFile = await widget.event.downloadAndDecryptAttachment(
-        onDownloadProgress: fileSize == null
+      final videoFile = await event.downloadAndDecryptAttachment(
+        onDownloadProgress: fileSize == null || fileSize <= 0
             ? null
             : (progress) {
+                if (!mounted || generation != _loadGeneration) return;
                 final progressPercentage = progress / fileSize;
                 setState(() {
                   _downloadProgress = progressPercentage < 1
@@ -60,6 +64,7 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
                 });
               },
       );
+      if (!mounted || generation != _loadGeneration) return;
 
       // Dispose the controllers if we already have them.
       _disposeControllers();
@@ -72,19 +77,33 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
         );
       } else {
         final tempDir = await getTemporaryDirectory();
-        final fileNameStr =
-            widget.event.attachmentMxcUrl?.pathSegments.last ??
-            widget.event.body;
-        final fileName = Uri.encodeComponent(fileNameStr);
+        if (!mounted || generation != _loadGeneration) return;
+        final attachmentUrl = event.attachmentOrThumbnailMxcUrl();
+        final attachmentPathSegments = attachmentUrl?.pathSegments;
+        final sourceName =
+            attachmentPathSegments == null || attachmentPathSegments.isEmpty
+            ? videoFile.name
+            : attachmentPathSegments.last;
+        final fileName = Uri.encodeComponent(sourceName);
         final file = File('${tempDir.path}/${fileName}_${videoFile.name}');
         if (await file.exists() == false) {
           await file.writeAsBytes(videoFile.bytes);
         }
+        if (!mounted || generation != _loadGeneration) return;
         videoPlayerController = VideoPlayerController.file(file);
       }
       _videoPlayerController = videoPlayerController;
 
       await videoPlayerController.initialize();
+      if (!mounted ||
+          generation != _loadGeneration ||
+          _videoPlayerController != videoPlayerController) {
+        if (_videoPlayerController == videoPlayerController) {
+          _videoPlayerController = null;
+          await videoPlayerController.dispose();
+        }
+        return;
+      }
 
       // Create a ChewieController on top.
       setState(() {
@@ -98,12 +117,16 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
         );
       });
     } on IOException catch (e) {
-      if (!mounted) return;
+      if (!mounted || generation != _loadGeneration) return;
+      _disposeControllers();
+      setState(() => _downloadProgress = null);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(e.toLocalizedString(context))));
     } catch (e, s) {
-      if (!mounted) return;
+      if (!mounted || generation != _loadGeneration) return;
+      _disposeControllers();
+      setState(() => _downloadProgress = null);
       ErrorReporter(context, 'Unable to play video').onErrorCallback(e, s);
     }
   }
@@ -117,15 +140,31 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
 
   @override
   void dispose() {
+    _loadGeneration++;
     _disposeControllers();
     super.dispose();
   }
 
   @override
+  void didUpdateWidget(covariant EventVideoPlayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.event.eventId == widget.event.eventId) return;
+    final generation = ++_loadGeneration;
+    _disposeControllers();
+    _downloadProgress = null;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || generation != _loadGeneration) return;
+      _downloadAction(generation);
+    });
+  }
+
+  @override
   void initState() {
     super.initState();
+    final generation = _loadGeneration;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _downloadAction();
+      if (!mounted || generation != _loadGeneration) return;
+      _downloadAction(generation);
     });
   }
 
@@ -140,8 +179,14 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
         ) ??
         fallbackBlurHash;
     final infoMap = widget.event.content.tryGetMap<String, Object?>('info');
-    final videoWidth = infoMap?.tryGet<int>('w') ?? 400;
-    final videoHeight = infoMap?.tryGet<int>('h') ?? 300;
+    final rawVideoWidth = infoMap?.tryGet<int>('w');
+    final rawVideoHeight = infoMap?.tryGet<int>('h');
+    final videoWidth = rawVideoWidth != null && rawVideoWidth > 0
+        ? rawVideoWidth
+        : 400;
+    final videoHeight = rawVideoHeight != null && rawVideoHeight > 0
+        ? rawVideoHeight
+        : 300;
     final height = MediaQuery.sizeOf(context).height - 52;
     final width = videoWidth * (height / videoHeight);
 
