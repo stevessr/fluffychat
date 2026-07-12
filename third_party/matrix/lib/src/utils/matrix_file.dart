@@ -212,7 +212,12 @@ class MatrixImageFile extends MatrixFile {
   static MatrixImageFileResizedResponse? calcMetadataImplementation(
     Uint8List bytes,
   ) {
-    final image = decodeImage(bytes);
+    final Image? image;
+    try {
+      image = decodeImage(bytes);
+    } catch (_) {
+      return null;
+    }
     if (image == null) return null;
 
     return MatrixImageFileResizedResponse(
@@ -229,10 +234,16 @@ class MatrixImageFile extends MatrixFile {
   static MatrixImageFileResizedResponse? resizeImplementation(
     MatrixImageFileResizeArguments arguments,
   ) {
-    final image = decodeImage(arguments.bytes);
+    final Image? image;
+    try {
+      image = decodeImage(arguments.bytes);
+    } catch (_) {
+      return null;
+    }
+    if (image == null) return null;
 
     final resized = copyResize(
-      image!,
+      image,
       height: image.height > image.width ? arguments.maxDimension : null,
       width: image.width >= image.height ? arguments.maxDimension : null,
     );

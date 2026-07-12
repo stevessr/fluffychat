@@ -130,6 +130,23 @@ Future<void> main() async {
   if (invalidPreview != null) {
     throw StateError('Invalid image preview did not fall back to null');
   }
+  final invalidWorkerResize = await nativeImplementations.shrinkImage(
+    MatrixImageFileResizeArguments(
+      bytes: Uint8List.fromList([0, 1, 2, 3]),
+      maxDimension: 1,
+      fileName: 'invalid.png',
+      calcBlurhash: true,
+    ),
+  );
+  if (invalidWorkerResize != null) {
+    throw StateError('Invalid worker image resize did not return null');
+  }
+  final invalidWorkerMetadata = await nativeImplementations.calcImageMetadata(
+    Uint8List.fromList([0, 1, 2, 3]),
+  );
+  if (invalidWorkerMetadata != null) {
+    throw StateError('Invalid worker image metadata did not return null');
+  }
   web.console.log('CUSTOM_IMAGE_INVALID_FALLBACK_OK'.toJS);
 
   final pickleKey = Uint8List(32);
