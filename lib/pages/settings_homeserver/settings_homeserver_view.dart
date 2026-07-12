@@ -55,7 +55,7 @@ class SettingsHomeserverView extends StatelessWidget {
                 ),
               ),
               FutureBuilder(
-                future: client.getWellknownSupport(),
+                future: controller.fetchSupportInfo(client),
                 builder: (context, snapshot) {
                   final error = snapshot.error;
                   final data = snapshot.data;
@@ -181,7 +181,7 @@ class SettingsHomeserverView extends StatelessWidget {
               ),
               Divider(color: theme.dividerColor),
               FutureBuilder(
-                future: client.getWellknown(),
+                future: controller.fetchWellKnown(client),
                 builder: (context, snapshot) {
                   final error = snapshot.error;
                   if (error != null) {
