@@ -453,15 +453,18 @@ class ChatController extends State<ChatPageWithRoom>
     loadTimelineFuture = _getTimeline();
     try {
       await loadTimelineFuture;
+      if (!mounted) return;
       // We launched the chat with a given initial event ID:
       if (initialEventId != null) {
         scrollToEventId(initialEventId);
         return;
       }
 
+      final loadedTimeline = timeline;
+      if (loadedTimeline == null || !mounted) return;
       var readMarkerEventIndex = readMarkerEventId.isEmpty
           ? -1
-          : timeline!.events
+          : loadedTimeline.events
                 .filterByVisibleInGui(
                   exceptionEventId: readMarkerEventId,
                   threadId: activeThreadId,
@@ -471,8 +474,9 @@ class ChatController extends State<ChatPageWithRoom>
       // Read marker is existing but not found in first events. Try a single
       // requestHistory call before opening timeline on event context:
       if (readMarkerEventId.isNotEmpty && readMarkerEventIndex == -1) {
-        await timeline?.requestHistory(historyCount: _loadHistoryCount);
-        readMarkerEventIndex = timeline!.events
+        await loadedTimeline.requestHistory(historyCount: _loadHistoryCount);
+        if (!mounted || timeline != loadedTimeline) return;
+        readMarkerEventIndex = loadedTimeline.events
             .filterByVisibleInGui(
               exceptionEventId: readMarkerEventId,
               threadId: activeThreadId,

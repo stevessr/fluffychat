@@ -2477,7 +2477,15 @@ class Client extends MatrixApi {
 
       final syncResp = responseTimeout == null
           ? await syncRequest
-          : await syncRequest.timeout(responseTimeout);
+          : await syncRequest.timeout(
+              responseTimeout,
+              onTimeout: () => throw SyncConnectionException(
+                TimeoutException(
+                  'Sync response exceeded its network timeout',
+                  responseTimeout,
+                ),
+              ),
+            );
 
       onSyncStatus.add(SyncStatusUpdate(SyncStatus.processing));
       if (syncResp == null) throw syncError ?? 'Unknown sync error';
