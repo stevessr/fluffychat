@@ -1188,7 +1188,7 @@ class ChatController extends State<ChatPageWithRoom>
     }
     if (!mounted) return;
     final events = List<Event>.from(selectedEvents);
-    final clients = currentRoomBundle.whereType<Client>().toList();
+    final clients = currentRoomBundle;
     final result = await showFutureLoadingDialog(
       context: context,
       futureWithProgress: (onProgress) async {
@@ -1229,11 +1229,12 @@ class ChatController extends State<ChatPageWithRoom>
     });
   }
 
-  List<Client?> get currentRoomBundle {
+  List<Client> get currentRoomBundle {
     final clients = Matrix.of(context).currentBundle;
     if (clients == null) return const [];
     return clients
-        .where((client) => client?.getRoomById(roomId) != null)
+        .whereType<Client>()
+        .where((client) => client.getRoomById(roomId) != null)
         .toList();
   }
 
@@ -1242,9 +1243,7 @@ class ChatController extends State<ChatPageWithRoom>
     for (final event in selectedEvents) {
       if (!event.status.isSent) return false;
       if (event.canRedact == false &&
-          !currentRoomBundle.any(
-            (client) => event.senderId == client?.userID,
-          )) {
+          !currentRoomBundle.any((client) => event.senderId == client.userID)) {
         return false;
       }
     }
@@ -1269,7 +1268,7 @@ class ChatController extends State<ChatPageWithRoom>
       return false;
     }
     return currentRoomBundle.any(
-      (client) => selectedEvents.first.senderId == client?.userID,
+      (client) => selectedEvents.first.senderId == client.userID,
     );
   }
 
@@ -1461,9 +1460,8 @@ class ChatController extends State<ChatPageWithRoom>
     final timeline = this.timeline;
     if (timeline == null) return;
 
-    final client = currentRoomBundle.firstWhere(
-      (c) => c?.userID == event.senderId,
-      orElse: () => null,
+    final client = currentRoomBundle.firstWhereOrNull(
+      (client) => client.userID == event.senderId,
     );
     if (client == null) return;
 
@@ -1504,9 +1502,8 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   Future<void> editFileEventAction(Event event) async {
-    final client = currentRoomBundle.firstWhere(
-      (c) => c?.userID == event.senderId,
-      orElse: () => null,
+    final client = currentRoomBundle.firstWhereOrNull(
+      (client) => client.userID == event.senderId,
     );
     if (client == null) return;
     setSendingClient(client);
@@ -1547,7 +1544,7 @@ class ChatController extends State<ChatPageWithRoom>
           e.type == EventTypes.Message &&
           e.status.isSent &&
           !e.redacted &&
-          currentRoomBundle.any((c) => c?.userID == e.senderId),
+          currentRoomBundle.any((client) => client.userID == e.senderId),
     );
 
     if (lastOwnMessage == null) return;
@@ -1730,7 +1727,6 @@ class ChatController extends State<ChatPageWithRoom>
     if (text.endsWith(' ') && Matrix.of(context).hasComplexBundles) {
       final clients = currentRoomBundle;
       for (final client in clients) {
-        if (client == null) continue;
         final prefix = client.sendPrefix;
         if ((prefix.isNotEmpty) &&
             text.toLowerCase() == '${prefix.toLowerCase()} ') {
