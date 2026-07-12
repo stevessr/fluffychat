@@ -30,8 +30,11 @@ class PollWidget extends StatelessWidget {
       showFutureLoadingDialog(context: context, future: event.endPoll);
 
   void _toggleVote(BuildContext context, String answerId, int maxSelection) {
-    final userId = event.room.client.userID!;
-    final answerIds = event.getPollResponses(timeline)[userId] ?? {};
+    final userId = event.room.client.userID;
+    if (userId == null || answerId.isEmpty || maxSelection <= 0) return;
+    final answerIds = Set<String>.from(
+      event.getPollResponses(timeline)[userId] ?? const <String>{},
+    );
     if (!answerIds.remove(answerId)) {
       answerIds.add(answerId);
       if (answerIds.length > maxSelection) {
@@ -39,6 +42,7 @@ class PollWidget extends StatelessWidget {
         answerIds.add(answerId);
       }
     }
+    if (answerIds.isEmpty) return;
 
     showFutureLoadingDialog(
       context: context,
@@ -56,7 +60,11 @@ class PollWidget extends StatelessWidget {
     }
     final responses = event.getPollResponses(timeline);
     final pollHasBeenEnded = event.getPollHasBeenEnded(timeline);
+    final userId = event.room.client.userID;
+    final maxSelections = eventContent.pollStartContent.maxSelections;
     final canVote =
+        userId != null &&
+        maxSelections > 0 &&
         event.room.canSendEvent(PollEventContent.responseType) &&
         !pollHasBeenEnded;
     final maxPolls = responses.length;
@@ -99,9 +107,7 @@ class PollWidget extends StatelessWidget {
               color: Colors.transparent,
               clipBehavior: Clip.hardEdge,
               child: CheckboxListTile.adaptive(
-                value:
-                    responses[event.room.client.userID!]?.contains(answer.id) ??
-                    false,
+                value: responses[userId]?.contains(answer.id) ?? false,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                 checkboxScaleFactor: 1.5,
                 checkboxShape: RoundedRectangleBorder(
@@ -109,11 +115,7 @@ class PollWidget extends StatelessWidget {
                 ),
                 onChanged: !canVote
                     ? null
-                    : (_) => _toggleVote(
-                        context,
-                        answer.id,
-                        eventContent.pollStartContent.maxSelections,
-                      ),
+                    : (_) => _toggleVote(context, answer.id, maxSelections),
                 title: Text(
                   answer.mText,
                   maxLines: 1,

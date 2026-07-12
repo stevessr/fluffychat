@@ -32,6 +32,10 @@ class _StartPollBottomSheetState extends State<StartPollBottomSheet> {
 
   String? _txid;
 
+  bool get _hasValidPollInput =>
+      _bodyController.text.trim().isNotEmpty &&
+      !_answers.any((controller) => controller.text.trim().isEmpty);
+
   @override
   void dispose() {
     _bodyController.dispose();
@@ -42,9 +46,14 @@ class _StartPollBottomSheetState extends State<StartPollBottomSheet> {
   }
 
   Future<void> _createPoll() async {
-    final proceed = await showTrustUserInRoomDialog(context, widget.room);
-    if (!proceed || !mounted) return;
+    if (isLoading || !_hasValidPollInput) return;
+    setState(() {
+      isLoading = true;
+    });
+    var pollCreated = false;
     try {
+      final proceed = await showTrustUserInRoomDialog(context, widget.room);
+      if (!proceed || !mounted) return;
       var id = 0;
       _txid ??= widget.room.client.generateUniqueTransactionId();
       await widget.room.startPoll(
@@ -62,6 +71,7 @@ class _StartPollBottomSheetState extends State<StartPollBottomSheet> {
         txid: _txid,
       );
       if (!mounted) return;
+      pollCreated = true;
       Navigator.of(context).pop();
     } catch (e, s) {
       Logs().w('Unable to create poll', e, s);
@@ -69,18 +79,39 @@ class _StartPollBottomSheetState extends State<StartPollBottomSheet> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(e.toLocalizedString(context))));
+    } finally {
+      if (mounted && !pollCreated) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
   void _updateCanCreate([_]) {
-    final newCanCreate =
-        _bodyController.text.trim().isNotEmpty &&
-        !_answers.any((controller) => controller.text.trim().isEmpty);
+    final newCanCreate = _hasValidPollInput;
     if (_canCreate != newCanCreate) {
       setState(() {
         _canCreate = newCanCreate;
       });
     }
+  }
+
+  void _addAnswer() {
+    setState(() {
+      _answers.add(TextEditingController());
+      _canCreate = _hasValidPollInput;
+    });
+  }
+
+  void _removeAnswer(TextEditingController answerController) {
+    setState(() {
+      _answers.remove(answerController);
+      _canCreate = _hasValidPollInput;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      answerController.dispose();
+    });
   }
 
   @override
@@ -129,9 +160,7 @@ class _StartPollBottomSheetState extends State<StartPollBottomSheet> {
                       ? null
                       : IconButton(
                           icon: const Icon(Icons.cancel_outlined),
-                          onPressed: () => setState(() {
-                            _answers.remove(answerController..dispose());
-                          }),
+                          onPressed: () => _removeAnswer(answerController),
                         ),
                 ),
               ),
@@ -141,11 +170,7 @@ class _StartPollBottomSheetState extends State<StartPollBottomSheet> {
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
               icon: const Icon(Icons.add_outlined),
-              onPressed: _answers.length < maxAnswers
-                  ? () => setState(() {
-                      _answers.add(TextEditingController());
-                    })
-                  : null,
+              onPressed: _answers.length < maxAnswers ? _addAnswer : null,
               label: Text(L10n.of(context).addAnswerOption),
             ),
           ),
