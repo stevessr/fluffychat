@@ -32,6 +32,14 @@ class NewPrivateChatController extends State<NewPrivateChat> {
   final TextEditingController controller = TextEditingController();
   final FocusNode textFieldFocus = FocusNode();
 
+  @override
+  void dispose() {
+    _searchCoolDown?.cancel();
+    controller.dispose();
+    textFieldFocus.dispose();
+    super.dispose();
+  }
+
   Future<List<Profile>>? searchResponse;
 
   Timer? _searchCoolDown;
@@ -62,6 +70,7 @@ class NewPrivateChatController extends State<NewPrivateChat> {
 
     _searchCoolDown?.cancel();
     _searchCoolDown = Timer(_coolDown, () {
+      if (!mounted) return;
       setState(() {
         searchResponse = _searchUser(searchTerm);
       });

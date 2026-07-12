@@ -22,6 +22,14 @@ class SettingsPasswordController extends State<SettingsPassword> {
   final TextEditingController newPassword1Controller = TextEditingController();
   final TextEditingController newPassword2Controller = TextEditingController();
 
+  @override
+  void dispose() {
+    oldPasswordController.dispose();
+    newPassword1Controller.dispose();
+    newPassword2Controller.dispose();
+    super.dispose();
+  }
+
   String? oldPasswordError;
   String? newPassword1Error;
   String? newPassword2Error;

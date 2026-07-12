@@ -29,6 +29,15 @@ class Login extends StatefulWidget {
 class LoginController extends State<Login> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _coolDown?.cancel();
+    usernameController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
   String? usernameError;
   String? passwordError;
   bool loading = false;
