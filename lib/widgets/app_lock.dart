@@ -59,6 +59,7 @@ class AppLock extends State<AppLockWidget> with WidgetsBindingObserver {
     if (widget.isLoggedIn) return;
 
     await changePincode(null);
+    if (!mounted) return;
     setState(() {
       _isLocked = false;
     });
@@ -85,6 +86,7 @@ class AppLock extends State<AppLockWidget> with WidgetsBindingObserver {
       key: 'chat.fluffy.use_biometrics',
       value: useBiometrics.toString(),
     );
+    if (!mounted) return;
     _useBiometrics = useBiometrics;
     return;
   }
@@ -94,6 +96,7 @@ class AppLock extends State<AppLockWidget> with WidgetsBindingObserver {
       key: 'chat.fluffy.app_lock',
       value: pincode,
     );
+    if (!mounted) return;
     _pincode = pincode;
     return;
   }
@@ -106,6 +109,7 @@ class AppLock extends State<AppLockWidget> with WidgetsBindingObserver {
       persistAcrossBackgrounding: true,
       biometricOnly: true,
     );
+    if (!mounted) return false;
     if (unlocked) {
       setState(() {
         _isLocked = false;
@@ -140,6 +144,12 @@ class AppLock extends State<AppLockWidget> with WidgetsBindingObserver {
 
   static AppLock of(BuildContext context) =>
       Provider.of<AppLock>(context, listen: false);
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => Provider<AppLock>(
