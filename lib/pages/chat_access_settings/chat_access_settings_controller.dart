@@ -42,8 +42,8 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
 
   String get roomVersion =>
       room
-          .getState(EventTypes.RoomCreate)!
-          .content
+          .getState(EventTypes.RoomCreate)
+          ?.content
           .tryGet<String>('room_version') ??
       'Unknown';
 
@@ -167,8 +167,8 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
   Future<void> updateRoomAction() async {
     final l10n = L10n.of(context);
     final roomVersion = room
-        .getState(EventTypes.RoomCreate)!
-        .content
+        .getState(EventTypes.RoomCreate)
+        ?.content
         .tryGet<String>('room_version');
     final capabilitiesResult = await showFutureLoadingDialog(
       context: context,
@@ -176,12 +176,14 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
     );
     final capabilities = capabilitiesResult.result;
     if (capabilities == null) return;
+    final roomVersions = capabilities.mRoomVersions;
+    if (roomVersions == null) return;
     if (!mounted) return;
     final newVersion = await showModalActionPopup<String>(
       context: context,
       title: l10n.replaceRoomWithNewerVersion,
       cancelLabel: l10n.cancel,
-      actions: capabilities.mRoomVersions!.available.entries
+      actions: roomVersions.available.entries
           .where((r) => r.key != roomVersion)
           .map(
             (version) => AdaptiveModalAction(
@@ -206,14 +208,21 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
       return;
     }
     if (!mounted) return;
+    String? upgradedRoomId;
     final result = await showFutureLoadingDialog(
       context: context,
       futureWithProgress: (onProgress) async {
         final newRoomId = await room.client.upgradeRoom(room.id, newVersion);
+        upgradedRoomId = newRoomId;
         var newRoom = room.client.getRoomById(newRoomId);
-        while (newRoom == null) {
-          await room.client.onSync.stream.first;
+        if (newRoom == null) {
+          await room.client.onSync.stream
+              .firstWhere((_) => room.client.getRoomById(newRoomId) != null)
+              .timeout(const Duration(seconds: 60));
           newRoom = room.client.getRoomById(newRoomId);
+        }
+        if (newRoom == null) {
+          throw StateError('Upgraded room did not appear after sync');
         }
 
         if ({
@@ -230,7 +239,7 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
             try {
               Logs().v('Inviting...', user.id);
               await newRoom.invite(user.id);
-              onProgress(i / users.length);
+              onProgress((i + 1) / users.length);
             } on MatrixException catch (e) {
               final retryAfterMs = e.retryAfterMs;
               if (e.error != MatrixError.M_LIMIT_EXCEEDED ||
@@ -240,7 +249,7 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
               Logs().d('Limit exceeded. Retry after $retryAfterMs');
               await Future.delayed(Duration(milliseconds: retryAfterMs));
               await newRoom.invite(user.id);
-              onProgress(i / users.length);
+              onProgress((i + 1) / users.length);
             }
           }
         }
@@ -248,14 +257,16 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
     );
     if (result.error != null) return;
     if (!mounted) return;
-    context.go('/rooms/${room.id}');
+    final destinationRoomId = upgradedRoomId;
+    if (destinationRoomId != null) context.go('/rooms/$destinationRoomId');
   }
 
   Future<void> addAlias() async {
     final l10n = L10n.of(context);
     final domain = room.client.userID?.domain;
     if (domain == null) {
-      throw Exception('userID or domain is null! This should never happen.');
+      Logs().w('Unable to add room alias without a logged-in user domain');
+      return;
     }
 
     final input = await showTextInputDialog(
@@ -317,10 +328,11 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
   }
 
   Future<void> deleteAlias(String alias) async {
-    await showFutureLoadingDialog(
+    final result = await showFutureLoadingDialog(
       context: context,
       future: () => room.client.deleteRoomAlias(alias),
     );
+    if (result.error != null || !mounted) return;
     setState(() {});
   }
 
@@ -335,7 +347,6 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
         room.id,
         visibility: visibility == true ? Visibility.public : Visibility.private,
       );
-      setState(() {});
     } catch (e, s) {
       Logs().w('Unable to change visibility', e, s);
       if (mounted) {
