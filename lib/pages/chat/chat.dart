@@ -1520,6 +1520,9 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   Future<void> goToNewRoomAction() async {
+    final tombstone = room.getState(EventTypes.RoomTombstone);
+    if (tombstone == null) return;
+    final replacementRoom = tombstone.parsedTombstoneContent.replacementRoom;
     final result = await showFutureLoadingDialog(
       context: context,
       future: () async {
@@ -1535,20 +1538,16 @@ class ChatController extends State<ChatPageWithRoom>
             .toSet()
             .take(10)
             .toList();
-        return room.client.joinRoom(
-          room
-              .getState(EventTypes.RoomTombstone)!
-              .parsedTombstoneContent
-              .replacementRoom,
-          via: via,
-        );
+        return room.client.joinRoom(replacementRoom, via: via);
       },
     );
-    if (result.error != null) return;
     if (!mounted) return;
-    context.go('/rooms/${result.result!}');
+    final newRoomId = result.result;
+    if (result.error != null || newRoomId == null) return;
 
     await showFutureLoadingDialog(context: context, future: room.leave);
+    if (!mounted) return;
+    context.go('/rooms/$newRoomId');
   }
 
   void onSelectMessage(Event event) {
@@ -1657,10 +1656,8 @@ class ChatController extends State<ChatPageWithRoom>
   double? inputBarHeight;
 
   void updateInputBarHeight() {
-    RenderBox? renderBox;
-    if (inputBarKey.currentContext?.findRenderObject() != null) {
-      renderBox = inputBarKey.currentContext!.findRenderObject() as RenderBox;
-    }
+    final renderObject = inputBarKey.currentContext?.findRenderObject();
+    final renderBox = renderObject is RenderBox ? renderObject : null;
 
     final height = renderBox?.size.height ?? 72.0;
     if (height != inputBarHeight) {
@@ -1685,7 +1682,8 @@ class ChatController extends State<ChatPageWithRoom>
     if (text.endsWith(' ') && Matrix.of(context).hasComplexBundles) {
       final clients = currentRoomBundle;
       for (final client in clients) {
-        final prefix = client!.sendPrefix;
+        if (client == null) continue;
+        final prefix = client.sendPrefix;
         if ((prefix.isNotEmpty) &&
             text.toLowerCase() == '${prefix.toLowerCase()} ') {
           setSendingClient(client);
@@ -1763,8 +1761,9 @@ class ChatController extends State<ChatPageWithRoom>
     if (!mounted) return;
 
     final voipPlugin = Matrix.of(context).voipPlugin;
+    if (voipPlugin == null) return;
     try {
-      await voipPlugin!.voip.inviteToCall(room, callType);
+      await voipPlugin.voip.inviteToCall(room, callType);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
