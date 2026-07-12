@@ -8,6 +8,10 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
+// ignore: implementation_imports
+import 'package:matrix/src/utils/crypto/encrypted_file.dart';
+// ignore: implementation_imports
+import 'package:matrix/src/utils/web_worker/native_implementations_web_worker.dart';
 import 'package:vodozemac/vodozemac.dart' as vodozemac;
 import 'package:web/web.dart' as web;
 
@@ -49,6 +53,23 @@ Future<void> main() async {
       digest.length != 32 ||
       !plaintext.asMap().entries.every((e) => e.value == attachment[e.key])) {
     throw StateError('Encrypted attachment crypto round trip failed');
+  }
+
+  // This call used to fall through NativeImplementations.noSuchMethod. Wasm
+  // minification changes the invocation symbol, so exercise the explicit web
+  // worker fallback used when reading encrypted MXC attachments.
+  final encryptedAttachment = await encryptFile(attachment);
+  final nativeImplementations = NativeImplementationsWebWorker(
+    Uri.parse('native_executor.js'),
+  );
+  final workerDecrypted = await nativeImplementations.decryptFile(
+    encryptedAttachment,
+  );
+  if (workerDecrypted == null ||
+      !workerDecrypted.asMap().entries.every(
+        (entry) => entry.value == attachment[entry.key],
+      )) {
+    throw StateError('Web worker decrypt fallback round trip failed');
   }
 
   final pickleKey = Uint8List(32);

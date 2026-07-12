@@ -110,48 +110,16 @@ class BoxCollection with ZoneTransactionMixin {
     return Box<V>(name, this);
   }
 
-  List<Future<void> Function(IDBTransaction txn)>? _txnCache;
-
   Future<void> transaction(
     Future<void> Function() action, {
     List<String>? boxNames,
     bool readOnly = false,
-  }) => zoneTransaction(() async {
-    final txnCache = _txnCache = [];
-    await action();
-    final cache = List<Future<void> Function(IDBTransaction txn)>.from(
-      txnCache,
-    );
-    _txnCache = null;
-    if (cache.isEmpty) return;
-
-    final transactionCompleter = Completer<void>();
-    final txn = _db.transaction(
-      boxNames?.jsify() ?? _db.objectStoreNames,
-      readOnly ? 'readonly' : 'readwrite',
-    );
-    final operationFutures = <Future<void>>[];
-    for (final fun in cache) {
-      // The IDB methods return a Future in Dart but must not be awaited in
-      // order to have an actual transaction. They must only be performed and
-      // then the transaction object must call `txn.completed;` which then
-      // returns the actual future.
-      // https://developer.mozilla.org/en-US/docs/Web/API/IDBTransaction
-      operationFutures.add(fun(txn));
-    }
-
-    txn.onerror = (Event event) {
-      Logs().e('[IndexedDBBox] [transaction] Error - ${txn.error}');
-      transactionCompleter.completeError(
-        _indexedDbError('Transaction not completed due to an error', txn.error),
-      );
-    }.toJS;
-
-    txn.oncomplete = (Event event) {
-      transactionCompleter.complete();
-    }.toJS;
-    await Future.wait<void>([transactionCompleter.future, ...operationFutures]);
-  });
+  }) {
+    // Cached generic operation closures escape IndexedDB callbacks as
+    // unhandled WebAssembly.Exception values under dart2wasm. Execute each
+    // operation normally under the existing zone lock instead.
+    return zoneTransaction(action);
+  }
 
   Future<void> clear() async {
     final transactionCompleter = Completer();
@@ -191,8 +159,6 @@ class BoxCollection with ZoneTransactionMixin {
   }
 
   Future<void> close() async {
-    assert(_txnCache == null, 'Database closed while in transaction!');
-    // Note, zoneTransaction and txnCache are different kinds of transactions.
     return zoneTransaction(() async => _db.close());
   }
 
@@ -246,7 +212,10 @@ class Box<V> {
     }.toJS;
     await getAllKeysCompleter.future;
     final keys =
-        (_dartifyIndexedDbValue(request.result) as List?)?.cast<String>() ?? [];
+        (_dartifyIndexedDbValue(request.result) as List?)
+            ?.map((key) => key.toString())
+            .toList() ??
+        [];
     _quickAccessCachedKeys = keys.toSet();
     return keys;
   }
@@ -342,13 +311,6 @@ class Box<V> {
   }
 
   Future<void> put(String key, V val, [IDBTransaction? txn]) async {
-    if (boxCollection._txnCache != null) {
-      boxCollection._txnCache!.add((txn) => put(key, val, txn));
-      _quickAccessCache[key] = val;
-      _quickAccessCachedKeys?.add(key);
-      return;
-    }
-
     txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
     final store = txn.objectStore(name);
     final putRequest = store.put(_prepareIndexedDbValue(val).jsify(), key.toJS);
@@ -369,13 +331,6 @@ class Box<V> {
   }
 
   Future<void> delete(String key, [IDBTransaction? txn]) async {
-    if (boxCollection._txnCache != null) {
-      boxCollection._txnCache!.add((txn) => delete(key, txn));
-      _quickAccessCache[key] = null;
-      _quickAccessCachedKeys?.remove(key);
-      return;
-    }
-
     txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
     final store = txn.objectStore(name);
     final deleteRequest = store.delete(key.toJS);
@@ -399,15 +354,6 @@ class Box<V> {
   }
 
   Future<void> deleteAll(List<String> keys, [IDBTransaction? txn]) async {
-    if (boxCollection._txnCache != null) {
-      boxCollection._txnCache!.add((txn) => deleteAll(keys, txn));
-      for (final key in keys) {
-        _quickAccessCache[key] = null;
-      }
-      _quickAccessCachedKeys?.removeAll(keys);
-      return;
-    }
-
     txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
     final store = txn.objectStore(name);
     for (final key in keys) {
@@ -440,24 +386,20 @@ class Box<V> {
   }
 
   Future<void> clear([IDBTransaction? txn]) async {
-    if (boxCollection._txnCache != null) {
-      boxCollection._txnCache!.add(clear);
-    } else {
-      txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
-      final store = txn.objectStore(name);
-      final clearRequest = store.clear();
-      final clearCompleter = Completer();
-      clearRequest.onerror = (Event event) {
-        Logs().e('[IndexedDBBox] [clear] Error - ${clearRequest.error}');
-        clearCompleter.completeError(
-          _indexedDbError('[IndexedDBBox] [clear] Error', clearRequest.error),
-        );
-      }.toJS;
-      clearRequest.onsuccess = (Event event) {
-        clearCompleter.complete();
-      }.toJS;
-      await clearCompleter.future;
-    }
+    txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
+    final store = txn.objectStore(name);
+    final clearRequest = store.clear();
+    final clearCompleter = Completer();
+    clearRequest.onerror = (Event event) {
+      Logs().e('[IndexedDBBox] [clear] Error - ${clearRequest.error}');
+      clearCompleter.completeError(
+        _indexedDbError('[IndexedDBBox] [clear] Error', clearRequest.error),
+      );
+    }.toJS;
+    clearRequest.onsuccess = (Event event) {
+      clearCompleter.complete();
+    }.toJS;
+    await clearCompleter.future;
     clearQuickAccessCache();
   }
 

@@ -18,10 +18,16 @@ type-literal switch. This is required for SDK boxes declared as raw `Box<Map>`,
 including the SSSS cache read by Cross Signing after login.
 
 Before writes, maps and iterables are recursively copied into plain
-JS-convertible Dart collections. Batched IndexedDB transaction operations are
-also retained and awaited instead of being launched as unhandled futures. This
-is needed by the event/room/timeline updates performed while sending encrypted
-media.
+JS-convertible Dart collections. For WasmGC the SDK executes database
+operations sequentially under its zone lock instead of replaying cached generic
+closures from an IndexedDB JS callback. This is needed by the event, room and
+timeline updates performed while sending encrypted media. Historical
+non-string IndexedDB keys are normalized with `toString`.
+
+The web-worker native implementation explicitly delegates unsupported crypto
+operations to the dummy implementation. It no longer relies on `noSuchMethod`,
+whose invocation symbols are renamed by Wasm minification and previously broke
+encrypted attachment decryption.
 
 Remove the dependency override after an upstream Matrix SDK release provides
 equivalent WasmGC-safe IndexedDB handling.
