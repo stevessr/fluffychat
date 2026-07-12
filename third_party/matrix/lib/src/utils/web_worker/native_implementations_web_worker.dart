@@ -8,7 +8,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:matrix/encryption.dart';
-import 'package:matrix/matrix.dart';
+import 'package:matrix/matrix.dart' hide Event;
 import 'package:web/web.dart';
 
 // ignore: unused-code
@@ -31,6 +31,8 @@ class NativeImplementationsWebWorker extends NativeImplementations {
     this.onStackTrace = defaultStackTraceHandler,
   }) : worker = Worker(href.toString().toJS) {
     worker.onmessage = _handleIncomingMessage.toJS;
+    worker.onmessageerror = _handleWorkerMessageError.toJS;
+    worker.onerror = _handleWorkerError.toJS;
   }
 
   // Implement these explicitly instead of relying on
@@ -59,9 +61,11 @@ class NativeImplementationsWebWorker extends NativeImplementations {
     final completer = Completer<T>();
     _completers[label] = completer;
     final message = WebWorkerData(label, name, argument);
-    worker.postMessage(message.toJson().jsify());
 
     try {
+      // postMessage itself can throw when structured cloning fails. Keep it
+      // inside the cleanup scope so such failures do not leak completers.
+      worker.postMessage(message.toJson().jsify());
       return await completer.future.timeout(timeout);
     } finally {
       // A timed-out worker response may never arrive. Do not retain its
@@ -69,6 +73,36 @@ class NativeImplementationsWebWorker extends NativeImplementations {
       // unknown-label path in _handleIncomingMessage.
       _completers.remove(label);
     }
+  }
+
+  void _handleWorkerError(Event event) {
+    _failPendingOperations(
+      StateError('Web worker failed to load or execute: $event'),
+      StackTrace.current,
+    );
+  }
+
+  void _handleWorkerMessageError(Event event) {
+    _failPendingOperations(
+      StateError('Web worker could not deserialize a message: $event'),
+      StackTrace.current,
+    );
+  }
+
+  void _failPendingOperations(Object error, StackTrace stackTrace) {
+    final completers = _completers.values.toList(growable: false);
+    _completers.clear();
+    for (final completer in completers) {
+      if (!completer.isCompleted) completer.completeError(error, stackTrace);
+    }
+  }
+
+  void dispose() {
+    worker.terminate();
+    _failPendingOperations(
+      StateError('Web worker has been disposed'),
+      StackTrace.current,
+    );
   }
 
   // toJS is not working with Future<void> so we need to ignore avoid_void_async
