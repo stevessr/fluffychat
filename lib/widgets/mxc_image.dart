@@ -14,6 +14,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dar
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 
 class MxcImage extends StatefulWidget {
@@ -62,6 +63,7 @@ class MxcImage extends StatefulWidget {
 }
 
 class _MxcImageState extends State<MxcImage> {
+  static const int _maxCachedImagesPerScope = 256;
   static final Map<String?, Map<String, Uint8List>> _imageDataCaches = {};
   Map<String, Uint8List> get _imageDataCache =>
       _imageDataCaches[widget.cacheName ?? ''] ??= {};
@@ -72,16 +74,30 @@ class _MxcImageState extends State<MxcImage> {
   int _loadGeneration = 0;
   int? _loadingGeneration;
 
-  Uint8List? get _imageData => widget.cacheKey == null
-      ? _imageDataNoCache
-      : _imageDataCache[widget.cacheKey];
+  Uint8List? get _imageData {
+    final cacheKey = widget.cacheKey;
+    if (cacheKey == null) return _imageDataNoCache;
+    final cache = _imageDataCache;
+    final data = cache.remove(cacheKey);
+    if (data != null) cache[cacheKey] = data;
+    return data;
+  }
 
   set _imageData(Uint8List? data) {
     if (data == null) return;
     final cacheKey = widget.cacheKey;
-    cacheKey == null
-        ? _imageDataNoCache = data
-        : _imageDataCache[cacheKey] = data;
+    if (cacheKey == null) {
+      _imageDataNoCache = data;
+      return;
+    }
+    final cache = _imageDataCache;
+    // Refresh insertion order so frequently reused entries stay in the
+    // bounded in-memory cache instead of letting Wasm memory grow forever.
+    cache.remove(cacheKey);
+    cache[cacheKey] = data;
+    while (cache.length > _maxCachedImagesPerScope) {
+      cache.remove(cache.keys.first);
+    }
   }
 
   Future<void> _load(int generation) async {
@@ -158,6 +174,10 @@ class _MxcImageState extends State<MxcImage> {
           // Network interruptions are retryable. Keep one retry loop instead
           // of spawning an unawaited recursive Future for every failure.
           await Future.delayed(widget.retryDuration);
+        } on http.ClientException catch (_) {
+          // Network interruptions are retryable. Keep one retry loop instead
+          // of spawning an unawaited recursive Future for every failure.
+          await Future.delayed(widget.retryDuration);
         } catch (e, s) {
           if (!mounted || generation != _loadGeneration) return;
           // Some homeservers return 404/forbidden or malformed remote media.
@@ -200,8 +220,18 @@ class _MxcImageState extends State<MxcImage> {
     _imageDataNoCache = null;
     _loadFailed = false;
     _renderFailed = false;
+    final cachedPayloadChanged =
+        oldWidget.uri != widget.uri ||
+        oldWidget.event != widget.event ||
+        oldWidget.client != widget.client ||
+        oldWidget.width != widget.width ||
+        oldWidget.height != widget.height ||
+        oldWidget.isThumbnail != widget.isThumbnail ||
+        oldWidget.animated != widget.animated ||
+        oldWidget.thumbnailMethod != widget.thumbnailMethod;
     if (widget.cacheKey != null &&
-        (oldWidget.uri != widget.uri || oldWidget.event != widget.event)) {
+        oldWidget.cacheKey == widget.cacheKey &&
+        cachedPayloadChanged) {
       _imageDataCache.remove(widget.cacheKey);
     }
     WidgetsBinding.instance.addPostFrameCallback((_) => _tryLoad());
