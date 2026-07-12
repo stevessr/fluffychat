@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:typed_data';
 
@@ -70,6 +71,14 @@ Future<void> main() async {
         (entry) => entry.value == attachment[entry.key],
       )) {
     throw StateError('Web worker decrypt fallback round trip failed');
+  }
+
+  final png = base64Decode(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+  );
+  final metadata = await nativeImplementations.calcImageMetadata(png);
+  if (metadata == null || metadata.width != 1 || metadata.height != 1) {
+    throw StateError('Web worker image metadata round trip failed');
   }
 
   final pickleKey = Uint8List(32);

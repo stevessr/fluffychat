@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'dart:async';
-import 'dart:collection';
 import 'dart:js_interop';
 import 'dart:math';
 import 'dart:typed_data';
@@ -62,28 +61,48 @@ class NativeImplementationsWebWorker extends NativeImplementations {
     final message = WebWorkerData(label, name, argument);
     worker.postMessage(message.toJson().jsify());
 
-    return completer.future.timeout(timeout);
+    try {
+      return await completer.future.timeout(timeout);
+    } finally {
+      // A timed-out worker response may never arrive. Do not retain its
+      // completer indefinitely, and let a late response follow the safe
+      // unknown-label path in _handleIncomingMessage.
+      _completers.remove(label);
+    }
   }
 
   // toJS is not working with Future<void> so we need to ignore avoid_void_async
   // lint here:
   // ignore: avoid_void_async
   void _handleIncomingMessage(MessageEvent event) async {
-    final data = event.data.dartify() as LinkedHashMap;
+    final rawData = event.data.dartify();
+    if (rawData is! Map) {
+      Logs().e('Web worker returned an invalid response: $rawData');
+      return;
+    }
+    final data = Map<dynamic, dynamic>.from(rawData);
     // don't forget handling errors of our second thread...
     if (data['label'] == 'stacktrace') {
-      final origin = data['origin'];
-      final completer = _completers[origin];
+      final rawOrigin = data['origin'];
+      final origin = rawOrigin is num ? rawOrigin.toDouble() : rawOrigin;
+      final completer = _completers.remove(origin);
 
       final error = data['error'];
 
-      final stackTrace = await onStackTrace.call(data['stacktrace'] as String);
+      final stackTrace = await onStackTrace.call(
+        data['stacktrace']?.toString() ?? '',
+      );
       completer?.completeError(
         WebWorkerError(error: error, stackTrace: stackTrace),
       );
     } else {
       final response = WebWorkerData.fromJson(data);
-      _completers[response.label]!.complete(response.data);
+      final completer = _completers.remove(response.label);
+      if (completer == null) {
+        Logs().w('Web worker returned an unknown label: ${response.label}');
+        return;
+      }
+      completer.complete(response.data);
     }
   }
 
@@ -152,14 +171,19 @@ class WebWorkerData {
 
   const WebWorkerData(this.label, this.name, this.data);
 
-  factory WebWorkerData.fromJson(LinkedHashMap<dynamic, dynamic> data) =>
-      WebWorkerData(
-        data['label'],
-        data.containsKey('name')
-            ? WebWorkerOperations.values[data['name']]
-            : null,
-        data['data'],
-      );
+  factory WebWorkerData.fromJson(Map<dynamic, dynamic> data) {
+    final rawName = data['name'];
+    final nameIndex = rawName is num ? rawName.toInt() : null;
+    return WebWorkerData(
+      data['label'],
+      nameIndex != null &&
+              nameIndex >= 0 &&
+              nameIndex < WebWorkerOperations.values.length
+          ? WebWorkerOperations.values[nameIndex]
+          : null,
+      data['data'],
+    );
+  }
 
   Map<String, Object?> toJson() => {
     'label': label,

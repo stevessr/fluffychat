@@ -5,7 +5,6 @@
 // ignore_for_file: avoid_print
 
 import 'dart:async';
-import 'dart:collection';
 import 'dart:js_interop';
 import 'dart:typed_data';
 
@@ -42,9 +41,15 @@ DedicatedWorkerGlobalScope get _workerScope =>
 Future<void> startWebWorker() async {
   Logs().i('[native implementations worker]: Starting...');
   _workerScope.onmessage = (MessageEvent event) {
-    final data = event.data.dartify() as LinkedHashMap;
+    final rawData = event.data.dartify();
+    if (rawData is! Map) {
+      Logs().e('[native implementations worker] Invalid message: $rawData');
+      return;
+    }
+    final data = Map<dynamic, dynamic>.from(rawData);
     try {
       final operation = WebWorkerData.fromJson(data);
+      final label = (operation.label as num).toDouble();
       switch (operation.name) {
         case WebWorkerOperations.shrinkImage:
           final result = MatrixImageFile.resizeImplementation(
@@ -52,21 +57,24 @@ Future<void> startWebWorker() async {
               Map.from(operation.data as Map),
             ),
           );
-          _sendResponse(operation.label as double, result?.toJson());
+          _sendResponse(label, result?.toJson());
           break;
         case WebWorkerOperations.calcImageMetadata:
           final result = MatrixImageFile.calcMetadataImplementation(
             Uint8List.fromList(
-              (operation.data as List).whereType<int>().toList(),
+              (operation.data as List)
+                  .map((value) => (value as num).toInt())
+                  .toList(growable: false),
             ),
           );
-          _sendResponse(operation.label as double, result?.toJson());
+          _sendResponse(label, result?.toJson());
           break;
         default:
           throw TypeError();
       }
     } catch (e, s) {
-      _replyError(e, s, data['label'] as double);
+      final rawLabel = data['label'];
+      _replyError(e, s, rawLabel is num ? rawLabel.toDouble() : -1);
     }
   }.toJS;
 }
