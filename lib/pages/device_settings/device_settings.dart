@@ -27,13 +27,29 @@ class DevicesSettings extends StatefulWidget {
 
 class DevicesSettingsController extends State<DevicesSettings> {
   List<Device>? devices;
-  Future<bool> loadUserDevices(BuildContext context) async {
-    if (devices != null) return true;
-    devices = await Matrix.of(context).client.getDevices();
-    return true;
+  Future<bool>? _devicesFuture;
+
+  Future<bool> loadUserDevices(BuildContext context) {
+    return _devicesFuture ??= _loadUserDevices(Matrix.of(context).client);
   }
 
-  void reload() => setState(() => devices = null);
+  Future<bool> _loadUserDevices(Client client) async {
+    try {
+      devices = await client.getDevices();
+      return true;
+    } catch (_) {
+      _devicesFuture = null;
+      rethrow;
+    }
+  }
+
+  void reload() {
+    if (!mounted) return;
+    setState(() {
+      devices = null;
+      _devicesFuture = null;
+    });
+  }
 
   bool? chatBackupEnabled;
 
@@ -45,11 +61,15 @@ class DevicesSettingsController extends State<DevicesSettings> {
 
   Future<void> _checkChatBackup() async {
     final client = Matrix.of(context).client;
-    final state = await client.getCryptoIdentityState();
-    if (!mounted) return;
-    setState(() {
-      chatBackupEnabled = state.initialized && !state.connected;
-    });
+    try {
+      final state = await client.getCryptoIdentityState();
+      if (!mounted) return;
+      setState(() {
+        chatBackupEnabled = state.initialized && !state.connected;
+      });
+    } catch (error, stackTrace) {
+      Logs().w('Unable to load chat backup state', error, stackTrace);
+    }
   }
 
   Future<void> removeDevicesAction(List<Device> devices) async {
@@ -83,14 +103,15 @@ class DevicesSettingsController extends State<DevicesSettings> {
       deviceIds.add(userDevice.deviceId);
     }
 
-    await showFutureLoadingDialog(
+    final result = await showFutureLoadingDialog(
       context: context,
       delay: false,
       future: () => matrix.client.uiaRequestBackground(
         (auth) => matrix.client.deleteDevices(deviceIds, auth: auth),
       ),
     );
-    reload();
+    if (!mounted) return;
+    if (result.error == null) reload();
   }
 
   Future<void> renameDeviceAction(Device device) async {
@@ -127,12 +148,14 @@ class DevicesSettingsController extends State<DevicesSettings> {
     );
     if (consent != OkCancelResult.ok) return;
     if (!mounted) return;
-    final req = await matrix
-        .client
-        .userDeviceKeys[matrix.client.userID!]!
-        .deviceKeys[device.deviceId]!
-        .startVerification();
+    final key = _deviceKey(matrix.client, device);
+    if (key == null) {
+      Logs().w('Unable to verify missing device key ${device.deviceId}');
+      return;
+    }
+    final req = await key.startVerification();
     req.onUpdate = () {
+      if (!mounted) return;
       if ({
         KeyVerificationState.error,
         KeyVerificationState.done,
@@ -145,24 +168,34 @@ class DevicesSettingsController extends State<DevicesSettings> {
   }
 
   Future<void> blockDeviceAction(Device device) async {
-    final key = Matrix.of(context)
-        .client
-        .userDeviceKeys[Matrix.of(context).client.userID!]!
-        .deviceKeys[device.deviceId]!;
+    final key = _deviceKey(Matrix.of(context).client, device);
+    if (key == null) {
+      Logs().w('Unable to block missing device key ${device.deviceId}');
+      return;
+    }
     if (key.directVerified) {
       await key.setVerified(false);
     }
     await key.setBlocked(true);
+    if (!mounted) return;
     setState(() {});
   }
 
   Future<void> unblockDeviceAction(Device device) async {
-    final key = Matrix.of(context)
-        .client
-        .userDeviceKeys[Matrix.of(context).client.userID!]!
-        .deviceKeys[device.deviceId]!;
+    final key = _deviceKey(Matrix.of(context).client, device);
+    if (key == null) {
+      Logs().w('Unable to unblock missing device key ${device.deviceId}');
+      return;
+    }
     await key.setBlocked(false);
+    if (!mounted) return;
     setState(() {});
+  }
+
+  DeviceKeys? _deviceKey(Client client, Device device) {
+    final userId = client.userID;
+    if (userId == null) return null;
+    return client.userDeviceKeys[userId]?.deviceKeys[device.deviceId];
   }
 
   bool _isOwnDevice(Device userDevice) =>
