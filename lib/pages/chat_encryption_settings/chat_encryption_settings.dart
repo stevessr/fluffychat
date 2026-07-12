@@ -27,7 +27,12 @@ class ChatEncryptionSettings extends StatefulWidget {
 class ChatEncryptionSettingsController extends State<ChatEncryptionSettings> {
   String? get roomId => GoRouterState.of(context).pathParameters['roomid'];
 
-  Room get room => Matrix.of(context).client.getRoomById(roomId!)!;
+  Room? get roomOrNull {
+    final roomId = this.roomId;
+    return roomId == null
+        ? null
+        : Matrix.of(context).client.getRoomById(roomId);
+  }
 
   String? uncollapsedUserId;
   final Set<String> _updatingDeviceIds = {};
@@ -48,6 +53,8 @@ class ChatEncryptionSettingsController extends State<ChatEncryptionSettings> {
   }
 
   Future<void> enableEncryption(_) async {
+    final room = roomOrNull;
+    if (room == null) return;
     final l10n = L10n.of(context);
     if (room.encrypted) {
       showOkAlertDialog(
@@ -89,6 +96,8 @@ class ChatEncryptionSettingsController extends State<ChatEncryptionSettings> {
   }
 
   Future<void> startVerification() async {
+    final room = roomOrNull;
+    if (room == null) return;
     final l10n = L10n.of(context);
     final consent = await showOkCancelAlertDialog(
       context: context,
