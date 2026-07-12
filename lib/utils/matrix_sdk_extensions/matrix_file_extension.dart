@@ -21,6 +21,7 @@ extension MatrixFileExtension on MatrixFile {
       bytes: bytes,
     );
     if (downloadPath == null) return;
+    if (!context.mounted) return;
 
     scaffoldMessenger.showSnackBar(
       SnackBar(
@@ -40,7 +41,8 @@ extension MatrixFileExtension on MatrixFile {
   Future<void> share(BuildContext context) async {
     // Workaround for iPad from
     // https://github.com/fluttercommunity/plus_plugins/tree/main/packages/share_plus/share_plus#ipad
-    final box = context.findRenderObject() as RenderBox?;
+    final renderObject = context.findRenderObject();
+    final box = renderObject is RenderBox ? renderObject : null;
 
     await SharePlus.instance.share(
       ShareParams(

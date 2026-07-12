@@ -20,16 +20,20 @@ abstract class FluffyShare {
     final l10n = L10n.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     if (PlatformInfos.isMobile && !copyOnly) {
-      final box = context.findRenderObject() as RenderBox;
+      final renderObject = context.findRenderObject();
+      final box = renderObject is RenderBox ? renderObject : null;
       await SharePlus.instance.share(
         ShareParams(
           text: text,
-          sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
+          sharePositionOrigin: box == null
+              ? null
+              : box.localToGlobal(Offset.zero) & box.size,
         ),
       );
       return;
     }
     await Clipboard.setData(ClipboardData(text: text));
+    if (!context.mounted) return;
     if (!PlatformInfos.isMobile) {
       scaffoldMessenger.showSnackBar(
         SnackBar(showCloseIcon: true, content: Text(l10n.copiedToClipboard)),
