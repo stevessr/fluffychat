@@ -69,7 +69,8 @@ class _MxcImageState extends State<MxcImage> {
   Uint8List? _imageDataNoCache;
   bool _loadFailed = false;
   bool _renderFailed = false;
-  bool _loading = false;
+  int _loadGeneration = 0;
+  int? _loadingGeneration;
 
   Uint8List? get _imageData => widget.cacheKey == null
       ? _imageDataNoCache
@@ -83,12 +84,13 @@ class _MxcImageState extends State<MxcImage> {
         : _imageDataCache[cacheKey] = data;
   }
 
-  Future<void> _load() async {
+  Future<void> _load(int generation) async {
     if (!mounted) return;
     final client =
         widget.client ?? widget.event?.room.client ?? Matrix.of(context).client;
     final uri = widget.uri;
     final event = widget.event;
+    final isThumbnail = widget.isThumbnail;
 
     if (uri != null) {
       final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
@@ -102,10 +104,10 @@ class _MxcImageState extends State<MxcImage> {
         width: realWidth,
         height: realHeight,
         thumbnailMethod: widget.thumbnailMethod,
-        isThumbnail: widget.isThumbnail,
+        isThumbnail: isThumbnail,
         animated: widget.animated,
       );
-      if (!mounted) return;
+      if (!mounted || generation != _loadGeneration) return;
       setState(() {
         _imageData = remoteData;
         _loadFailed = false;
@@ -115,9 +117,8 @@ class _MxcImageState extends State<MxcImage> {
     }
 
     if (event != null &&
-        event.attachmentOrThumbnailMxcUrl(getThumbnail: widget.isThumbnail) !=
-            null) {
-      final useThumbnail = widget.isThumbnail && event.hasThumbnail;
+        event.attachmentOrThumbnailMxcUrl(getThumbnail: isThumbnail) != null) {
+      final useThumbnail = isThumbnail && event.hasThumbnail;
       if (!useThumbnail &&
           !{
             MessageTypes.Image,
@@ -128,8 +129,8 @@ class _MxcImageState extends State<MxcImage> {
       final data = await event.downloadAndDecryptAttachment(
         getThumbnail: useThumbnail,
       );
-      if (data.detectFileType is MatrixImageFile) {
-        if (!mounted) return;
+      if (data.detectFileType is MatrixImageFile || isThumbnail) {
+        if (!mounted || generation != _loadGeneration) return;
         setState(() {
           _imageData = data.bytes;
           _loadFailed = false;
@@ -141,13 +142,14 @@ class _MxcImageState extends State<MxcImage> {
   }
 
   Future<void> _tryLoad() async {
-    if (_imageData != null || _loading) return;
-    _loading = true;
+    final generation = _loadGeneration;
+    if (_imageData != null || _loadingGeneration == generation) return;
+    _loadingGeneration = generation;
     try {
-      while (mounted && _imageData == null) {
+      while (mounted && generation == _loadGeneration && _imageData == null) {
         try {
-          await _load();
-          if (!mounted) return;
+          await _load(generation);
+          if (!mounted || generation != _loadGeneration) return;
           if (_imageData == null || _imageData!.isEmpty) {
             setState(() => _loadFailed = true);
           }
@@ -157,6 +159,7 @@ class _MxcImageState extends State<MxcImage> {
           // of spawning an unawaited recursive Future for every failure.
           await Future.delayed(widget.retryDuration);
         } catch (e, s) {
+          if (!mounted || generation != _loadGeneration) return;
           // Some homeservers return 404/forbidden or malformed remote media.
           // Keep the UI alive and render a stable broken-image fallback.
           Logs().w('Unable to load mxc image', e, s);
@@ -165,13 +168,42 @@ class _MxcImageState extends State<MxcImage> {
         }
       }
     } finally {
-      _loading = false;
+      if (_loadingGeneration == generation) {
+        _loadingGeneration = null;
+      }
     }
   }
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _tryLoad());
+  }
+
+  @override
+  void didUpdateWidget(covariant MxcImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final sourceChanged =
+        oldWidget.uri != widget.uri ||
+        oldWidget.event != widget.event ||
+        oldWidget.client != widget.client ||
+        oldWidget.cacheKey != widget.cacheKey ||
+        oldWidget.cacheName != widget.cacheName ||
+        oldWidget.width != widget.width ||
+        oldWidget.height != widget.height ||
+        oldWidget.isThumbnail != widget.isThumbnail ||
+        oldWidget.animated != widget.animated ||
+        oldWidget.thumbnailMethod != widget.thumbnailMethod;
+    if (!sourceChanged) return;
+
+    _loadGeneration++;
+    _imageDataNoCache = null;
+    _loadFailed = false;
+    _renderFailed = false;
+    if (widget.cacheKey != null &&
+        (oldWidget.uri != widget.uri || oldWidget.event != widget.event)) {
+      _imageDataCache.remove(widget.cacheKey);
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) => _tryLoad());
   }
 
