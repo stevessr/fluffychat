@@ -13,6 +13,7 @@ import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat_list/unread_bubble.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
+import 'package:fluffychat/utils/popup_menu_position.dart';
 import 'package:fluffychat/utils/stream_extension.dart';
 import 'package:fluffychat/utils/string_color.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
@@ -232,21 +233,8 @@ class _SpaceViewState extends State<SpaceView> {
     final space = client.getRoomById(widget.spaceId);
     final room = client.getRoomById(roomId);
     if (space == null) return;
-    final overlay =
-        Overlay.of(posContext).context.findRenderObject() as RenderBox;
-
-    final button = posContext.findRenderObject() as RenderBox;
-
-    final position = RelativeRect.fromRect(
-      Rect.fromPoints(
-        button.localToGlobal(const Offset(0, -65), ancestor: overlay),
-        button.localToGlobal(
-          button.size.bottomRight(Offset.zero) + const Offset(-50, 0),
-          ancestor: overlay,
-        ),
-      ),
-      Offset.zero & overlay.size,
-    );
+    final position = popupMenuPosition(posContext);
+    if (position == null) return;
 
     final action = await showMenu<SpaceChildAction>(
       context: posContext,
