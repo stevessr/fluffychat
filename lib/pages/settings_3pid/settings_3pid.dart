@@ -46,7 +46,8 @@ class Settings3PidController extends State<Settings3Pid> {
         Settings3Pid.sendAttempt++,
       ),
     );
-    if (response.error != null) return;
+    final sid = response.result?.sid;
+    if (response.error != null || sid == null) return;
     if (!mounted) return;
     final ok = await showOkAlertDialog(
       useRootNavigator: false,
@@ -61,14 +62,11 @@ class Settings3PidController extends State<Settings3Pid> {
       context: context,
       delay: false,
       future: () => matrix.client.uiaRequestBackground(
-        (auth) => matrix.client.add3PID(
-          clientSecret,
-          response.result!.sid,
-          auth: auth,
-        ),
+        (auth) => matrix.client.add3PID(clientSecret, sid, auth: auth),
       ),
     );
     if (success.error != null) return;
+    if (!mounted) return;
     setState(() => request = null);
   }
 
@@ -96,6 +94,7 @@ class Settings3PidController extends State<Settings3Pid> {
       ),
     );
     if (success.error != null) return;
+    if (!mounted) return;
     setState(() => request = null);
   }
 
