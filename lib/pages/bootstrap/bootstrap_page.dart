@@ -15,22 +15,41 @@ import 'package:fluffychat/widgets/view_model_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class BootstrapPage extends StatelessWidget {
+class BootstrapPage extends StatefulWidget {
   final bool reset;
   const BootstrapPage({required this.reset, super.key});
+
+  @override
+  State<BootstrapPage> createState() => _BootstrapPageState();
+}
+
+class _BootstrapPageState extends State<BootstrapPage> {
+  bool _successNavigationScheduled = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return ViewModelBuilder(
-      create: () =>
-          BootstrapViewModel(client: Matrix.of(context).client, reset: reset),
+      create: () => BootstrapViewModel(
+        client: Matrix.of(context).client,
+        reset: widget.reset,
+      ),
       builder: (context, viewModel, _) {
         final cryptoIdentityState = viewModel.value.cryptoIdentityState;
-        if (cryptoIdentityState?.connected == true && !reset) {
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) => viewModel.goToRoomsPageAfterSuccess(context),
-          );
+        if (cryptoIdentityState?.connected == true && !widget.reset) {
+          if (!_successNavigationScheduled) {
+            _successNavigationScheduled = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted || !context.mounted) return;
+              if (viewModel.value.cryptoIdentityState?.connected != true) {
+                _successNavigationScheduled = false;
+                return;
+              }
+              viewModel.goToRoomsPageAfterSuccess(context);
+            });
+          }
+        } else {
+          _successNavigationScheduled = false;
         }
 
         final title = cryptoIdentityState == null
@@ -50,7 +69,7 @@ class BootstrapPage extends StatelessWidget {
                 ? null
                 : CloseButton(
                     onPressed: () async {
-                      if (!reset) {
+                      if (!widget.reset) {
                         final consent = await showOkCancelAlertDialog(
                           context: context,
                           title: L10n.of(context).skipChatBackup,

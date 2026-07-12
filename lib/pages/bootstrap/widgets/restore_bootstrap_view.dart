@@ -15,19 +15,34 @@ import 'package:flutter/material.dart';
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
 
-class RestoreBootstrapView extends StatelessWidget {
+class RestoreBootstrapView extends StatefulWidget {
   final BootstrapViewModel viewModel;
 
   const RestoreBootstrapView(this.viewModel, {super.key});
 
   @override
+  State<RestoreBootstrapView> createState() => _RestoreBootstrapViewState();
+}
+
+class _RestoreBootstrapViewState extends State<RestoreBootstrapView> {
+  KeyVerification? _shownKeyVerification;
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final viewModel = widget.viewModel;
     final keyVerification = viewModel.value.keyVerification;
     if (keyVerification != null) {
       Logs().v('Key verification state:', keyVerification.state);
-      if (keyVerification.state == KeyVerificationState.askSas) {
+      if (keyVerification.state == KeyVerificationState.askSas &&
+          _shownKeyVerification != keyVerification) {
+        _shownKeyVerification = keyVerification;
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted ||
+              widget.viewModel.value.keyVerification != keyVerification ||
+              keyVerification.state != KeyVerificationState.askSas) {
+            return;
+          }
           KeyVerificationDialog(request: keyVerification).show(context);
         });
       }
