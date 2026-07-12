@@ -28,6 +28,15 @@ class SettingsSecurity extends StatefulWidget {
 }
 
 class SettingsSecurityController extends State<SettingsSecurity> {
+  Future<Capabilities>? _capabilitiesFuture;
+  Future<bool>? _canCheckBiometricsFuture;
+
+  Future<Capabilities> getCapabilities(Client client) => _capabilitiesFuture ??=
+      client.getCapabilities().timeout(const Duration(seconds: 10));
+
+  Future<bool> canCheckBiometrics() =>
+      _canCheckBiometricsFuture ??= LocalAuthentication().canCheckBiometrics;
+
   Future<bool> _authenticateWithBiometrics(String reason) async {
     try {
       return await LocalAuthentication().authenticate(
@@ -145,6 +154,7 @@ class SettingsSecurityController extends State<SettingsSecurity> {
     if (newLock != null) {
       if (!mounted) return;
       await AppLock.of(context).changePincode(newLock);
+      if (!mounted) return;
       setState(() {});
     }
   }

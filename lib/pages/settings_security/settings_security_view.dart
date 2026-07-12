@@ -15,7 +15,6 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/settings_switch_list_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:matrix/matrix.dart';
 
 import 'settings_security.dart';
@@ -42,9 +41,7 @@ class SettingsSecurityView extends StatelessWidget {
         iconColor: theme.colorScheme.onSurface,
         child: MaxWidthBody(
           child: FutureBuilder(
-            future: Matrix.of(
-              context,
-            ).client.getCapabilities().timeout(const Duration(seconds: 10)),
+            future: controller.getCapabilities(client),
             builder: (context, snapshot) {
               final capabilities = snapshot.data;
               final error = snapshot.error;
@@ -103,7 +100,8 @@ class SettingsSecurityView extends StatelessWidget {
                       subtitle: Text(L10n.of(context).appLockDescription),
                     ),
                     SwitchListTile.adaptive(
-                      value: AppLock.of(context).isActive &&
+                      value:
+                          AppLock.of(context).isActive &&
                           !AppLock.of(context).isBiometricsOnly,
                       title: Text(L10n.of(context).useAppLock),
                       onChanged: (active) => active
@@ -111,13 +109,15 @@ class SettingsSecurityView extends StatelessWidget {
                           : controller.disableAppLockAction(),
                     ),
                     FutureBuilder(
-                      future: LocalAuthentication().canCheckBiometrics,
+                      future: controller.canCheckBiometrics(),
                       builder: (context, snapshot) {
                         if (snapshot.data != true) return SizedBox.shrink();
                         return SwitchListTile.adaptive(
                           value: AppLock.of(context).isBiometricsOnly,
                           title: Text(L10n.of(context).useBiometricsOnly),
-                          subtitle: Text(L10n.of(context).biometricsOnlyDescription),
+                          subtitle: Text(
+                            L10n.of(context).biometricsOnlyDescription,
+                          ),
                           onChanged: (_) =>
                               controller.toggleBiometricsOnlyAction(),
                         );
@@ -126,7 +126,7 @@ class SettingsSecurityView extends StatelessWidget {
                     if (AppLock.of(context).isActive &&
                         !AppLock.of(context).isBiometricsOnly) ...[
                       FutureBuilder(
-                        future: LocalAuthentication().canCheckBiometrics,
+                        future: controller.canCheckBiometrics(),
                         builder: (context, snapshot) {
                           if (snapshot.data != true) return SizedBox.shrink();
                           return SwitchListTile.adaptive(
