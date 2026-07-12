@@ -63,6 +63,10 @@ class SendFileDialogState extends State<SendFileDialog> {
   static const int minSizeToCompress = 20 * 1000;
 
   final TextEditingController _labelTextController = TextEditingController();
+  final Map<int, Future<Uint8List>> _previewBytes = {};
+  final Set<int> _failedImagePreviews = {};
+  final Set<int> _loggedPreviewErrors = {};
+  late final Future<String> _combinedFileSize;
 
   /// Mutable working copy of [SendFileDialog.files]. Editing an image replaces
   /// its entry with a new [XFile] whose bytes, mimetype and filename extension
@@ -74,6 +78,10 @@ class SendFileDialogState extends State<SendFileDialog> {
   void initState() {
     super.initState();
     encrypt = widget.room.encrypted;
+    // Creating these Futures in build() restarts file reads whenever dialog
+    // state or its entrance animation rebuilds. Besides wasting memory, a
+    // malformed image can then produce the same preview error repeatedly.
+    _combinedFileSize = _calcCombinedFileSize();
   }
 
   Future<void> _editImage(int index) async {
@@ -94,8 +102,21 @@ class SendFileDialogState extends State<SendFileDialog> {
         name: '$baseName.png',
         length: result.length,
       );
+      _previewBytes[index] = Future.value(result);
+      _failedImagePreviews.remove(index);
     });
   }
+
+  Future<Uint8List> _previewBytesFor(int index) =>
+      _previewBytes.putIfAbsent(index, () => _files[index].readAsBytes());
+
+  Widget _brokenImagePreview() => const Center(
+    child: SizedBox(
+      width: 256,
+      height: 256,
+      child: Icon(Icons.broken_image_outlined, size: 64),
+    ),
+  );
 
   Map<String, Object?>? _buildExtraContent({
     String? label,
@@ -390,7 +411,7 @@ class SendFileDialogState extends State<SendFileDialog> {
     final showEncryptionToggle = widget.room.encrypted;
 
     return FutureBuilder<String>(
-      future: _calcCombinedFileSize(),
+      future: _combinedFileSize,
       builder: (context, snapshot) {
         final sizeString =
             snapshot.data ?? L10n.of(context).calculatingFileSize;
@@ -401,7 +422,7 @@ class SendFileDialogState extends State<SendFileDialog> {
             width: 256,
             child: SingleChildScrollView(
               child: Column(
-                mainAxisSize: .min,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   const SizedBox(height: 12),
                   if (uniqueFileType == 'image')
@@ -424,9 +445,19 @@ class SendFileDialogState extends State<SendFileDialog> {
                                     ),
                                     color: Colors.black,
                                     clipBehavior: Clip.hardEdge,
-                                    child: FutureBuilder(
-                                      future: _files[i].readAsBytes(),
+                                    child: FutureBuilder<Uint8List>(
+                                      future: _previewBytesFor(i),
                                       builder: (context, snapshot) {
+                                        if (snapshot.error != null) {
+                                          if (_loggedPreviewErrors.add(i)) {
+                                            Logs().w(
+                                              'Unable to preview image',
+                                              snapshot.error,
+                                              snapshot.stackTrace,
+                                            );
+                                          }
+                                          return _brokenImagePreview();
+                                        }
                                         final bytes = snapshot.data;
                                         if (bytes == null) {
                                           return const Center(
@@ -434,22 +465,8 @@ class SendFileDialogState extends State<SendFileDialog> {
                                                 CircularProgressIndicator.adaptive(),
                                           );
                                         }
-                                        if (snapshot.error != null) {
-                                          Logs().w(
-                                            'Unable to preview image',
-                                            snapshot.error,
-                                            snapshot.stackTrace,
-                                          );
-                                          return const Center(
-                                            child: SizedBox(
-                                              width: 256,
-                                              height: 256,
-                                              child: Icon(
-                                                Icons.broken_image_outlined,
-                                                size: 64,
-                                              ),
-                                            ),
-                                          );
+                                        if (_failedImagePreviews.contains(i)) {
+                                          return _brokenImagePreview();
                                         }
                                         return Image.memory(
                                           bytes,
@@ -459,21 +476,15 @@ class SendFileDialogState extends State<SendFileDialog> {
                                               : null,
                                           fit: BoxFit.contain,
                                           errorBuilder: (context, e, s) {
-                                            Logs().w(
-                                              'Unable to preview image',
-                                              e,
-                                              s,
-                                            );
-                                            return const Center(
-                                              child: SizedBox(
-                                                width: 256,
-                                                height: 256,
-                                                child: Icon(
-                                                  Icons.broken_image_outlined,
-                                                  size: 64,
-                                                ),
-                                              ),
-                                            );
+                                            _failedImagePreviews.add(i);
+                                            if (_loggedPreviewErrors.add(i)) {
+                                              Logs().w(
+                                                'Unable to preview image',
+                                                e,
+                                                s,
+                                              );
+                                            }
+                                            return _brokenImagePreview();
                                           },
                                         );
                                       },
@@ -521,8 +532,8 @@ class SendFileDialogState extends State<SendFileDialog> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Column(
-                              mainAxisSize: .min,
-                              crossAxisAlignment: .start,
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   fileName,
@@ -556,7 +567,7 @@ class SendFileDialogState extends State<SendFileDialog> {
                   // Workaround for SwitchListTile.adaptive crashes in CupertinoDialog
                   if ({'image', 'video'}.contains(uniqueFileType))
                     Row(
-                      crossAxisAlignment: .center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         if ({
                           TargetPlatform.iOS,
@@ -578,11 +589,11 @@ class SendFileDialogState extends State<SendFileDialog> {
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
-                            mainAxisSize: .min,
-                            crossAxisAlignment: .start,
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisSize: .min,
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
                                     L10n.of(context).compress,
@@ -608,7 +619,7 @@ class SendFileDialogState extends State<SendFileDialog> {
                     ),
                   if (uniqueFileType == 'image')
                     Row(
-                      crossAxisAlignment: .center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         if ({
                           TargetPlatform.iOS,
@@ -626,8 +637,8 @@ class SendFileDialogState extends State<SendFileDialog> {
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
-                            mainAxisSize: .min,
-                            crossAxisAlignment: .start,
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 L10n.of(context).spoilerText,
@@ -640,7 +651,7 @@ class SendFileDialogState extends State<SendFileDialog> {
                     ),
                   if (showEncryptionToggle)
                     Row(
-                      crossAxisAlignment: .center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         if ({
                           TargetPlatform.iOS,
@@ -658,8 +669,8 @@ class SendFileDialogState extends State<SendFileDialog> {
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
-                            mainAxisSize: .min,
-                            crossAxisAlignment: .start,
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 L10n.of(context).encryption,
