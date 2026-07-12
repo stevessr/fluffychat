@@ -96,38 +96,60 @@ Future<Uint8List> _convertToCircularImage(
   Uint8List imageBytes,
   int size,
 ) async {
-  final codec = await instantiateImageCodec(imageBytes);
-  final frame = await codec.getNextFrame();
-  final originalImage = frame.image;
+  Codec? codec;
+  FrameInfo? frame;
+  Picture? picture;
+  Image? circularImage;
+  try {
+    codec = await instantiateImageCodec(imageBytes);
+    frame = await codec.getNextFrame();
+    final originalImage = frame.image;
+    final targetSize = size < 1 ? 1 : size;
 
-  final recorder = PictureRecorder();
-  final canvas = Canvas(recorder);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder);
 
-  final paint = Paint();
-  final rect = Rect.fromLTWH(0, 0, size.toDouble(), size.toDouble());
-
-  final clipPath = Path()
-    ..addOval(
-      Rect.fromCircle(center: Offset(size / 2, size / 2), radius: size / 2),
+    final paint = Paint();
+    final rect = Rect.fromLTWH(
+      0,
+      0,
+      targetSize.toDouble(),
+      targetSize.toDouble(),
     );
 
-  canvas.clipPath(clipPath);
+    final clipPath = Path()
+      ..addOval(
+        Rect.fromCircle(
+          center: Offset(targetSize / 2, targetSize / 2),
+          radius: targetSize / 2,
+        ),
+      );
 
-  canvas.drawImageRect(
-    originalImage,
-    Rect.fromLTWH(
-      0,
-      0,
-      originalImage.width.toDouble(),
-      originalImage.height.toDouble(),
-    ),
-    rect,
-    paint,
-  );
+    canvas.clipPath(clipPath);
 
-  final picture = recorder.endRecording();
-  final circularImage = await picture.toImage(size, size);
+    canvas.drawImageRect(
+      originalImage,
+      Rect.fromLTWH(
+        0,
+        0,
+        originalImage.width.toDouble(),
+        originalImage.height.toDouble(),
+      ),
+      rect,
+      paint,
+    );
 
-  final byteData = await circularImage.toByteData(format: ImageByteFormat.png);
-  return byteData!.buffer.asUint8List();
+    picture = recorder.endRecording();
+    circularImage = await picture.toImage(targetSize, targetSize);
+
+    final byteData = await circularImage.toByteData(
+      format: ImageByteFormat.png,
+    );
+    return byteData?.buffer.asUint8List() ?? imageBytes;
+  } finally {
+    circularImage?.dispose();
+    picture?.dispose();
+    frame?.image.dispose();
+    codec?.dispose();
+  }
 }

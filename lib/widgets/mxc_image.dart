@@ -67,6 +67,9 @@ class _MxcImageState extends State<MxcImage> {
       _imageDataCaches[widget.cacheName ?? ''] ??= {};
 
   Uint8List? _imageDataNoCache;
+  bool _loadFailed = false;
+  bool _renderFailed = false;
+  bool _loading = false;
 
   Uint8List? get _imageData => widget.cacheKey == null
       ? _imageDataNoCache
@@ -105,7 +108,10 @@ class _MxcImageState extends State<MxcImage> {
       if (!mounted) return;
       setState(() {
         _imageData = remoteData;
+        _loadFailed = false;
+        _renderFailed = false;
       });
+      return;
     }
 
     if (event != null &&
@@ -126,6 +132,8 @@ class _MxcImageState extends State<MxcImage> {
         if (!mounted) return;
         setState(() {
           _imageData = data.bytes;
+          _loadFailed = false;
+          _renderFailed = false;
         });
         return;
       }
@@ -133,19 +141,31 @@ class _MxcImageState extends State<MxcImage> {
   }
 
   Future<void> _tryLoad() async {
-    if (_imageData != null) {
-      return;
-    }
+    if (_imageData != null || _loading) return;
+    _loading = true;
     try {
-      await _load();
-    } on IOException catch (_) {
-      if (!mounted) return;
-      await Future.delayed(widget.retryDuration);
-      _tryLoad();
-    } catch (e, s) {
-      // Some homeservers return 404/forbidden for remote thumbnails.
-      // Keep the UI alive and let the widget render its fallback.
-      Logs().w('Unable to load mxc image', e, s);
+      while (mounted && _imageData == null) {
+        try {
+          await _load();
+          if (!mounted) return;
+          if (_imageData == null || _imageData!.isEmpty) {
+            setState(() => _loadFailed = true);
+          }
+          return;
+        } on IOException catch (_) {
+          // Network interruptions are retryable. Keep one retry loop instead
+          // of spawning an unawaited recursive Future for every failure.
+          await Future.delayed(widget.retryDuration);
+        } catch (e, s) {
+          // Some homeservers return 404/forbidden or malformed remote media.
+          // Keep the UI alive and render a stable broken-image fallback.
+          Logs().w('Unable to load mxc image', e, s);
+          if (mounted) setState(() => _loadFailed = true);
+          return;
+        }
+      }
+    } finally {
+      _loading = false;
     }
   }
 
@@ -172,14 +192,31 @@ class _MxcImageState extends State<MxcImage> {
         header.contains('http://www.w3.org/2000/svg');
   }
 
+  Widget _brokenImage(BuildContext context) => SizedBox(
+    width: widget.width,
+    height: widget.height,
+    child: Material(
+      color: Theme.of(context).colorScheme.surfaceContainer,
+      child: Icon(
+        Icons.broken_image_outlined,
+        size: min(widget.height ?? 64, 64),
+        color: Theme.of(context).colorScheme.onSurface,
+      ),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     final data = _imageData;
     final hasData = data != null && data.isNotEmpty;
+    final showFailure = _loadFailed || _renderFailed;
+    final showContent = hasData || showFailure;
 
     return AnimatedCrossFade(
       duration: FluffyThemes.animationDuration,
-      firstChild: hasData
+      firstChild: showFailure
+          ? _brokenImage(context)
+          : hasData
           ? ClipRRect(
               borderRadius: widget.borderRadius,
               child: _looksLikeSvg(data)
@@ -199,21 +236,11 @@ class _MxcImageState extends State<MxcImage> {
                           ? FilterQuality.low
                           : FilterQuality.medium,
                       errorBuilder: (context, e, s) {
-                        Logs().d('Unable to render mxc image', e, s);
-                        return SizedBox(
-                          width: widget.width,
-                          height: widget.height,
-                          child: Material(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.surfaceContainer,
-                            child: Icon(
-                              Icons.broken_image_outlined,
-                              size: min(widget.height ?? 64, 64),
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
-                        );
+                        if (!_renderFailed) {
+                          _renderFailed = true;
+                          Logs().d('Unable to render mxc image', e, s);
+                        }
+                        return _brokenImage(context);
                       },
                     ),
             )
@@ -227,7 +254,7 @@ class _MxcImageState extends State<MxcImage> {
         height: widget.height,
         placeholder: widget.placeholder,
       ),
-      crossFadeState: hasData
+      crossFadeState: showContent
           ? CrossFadeState.showFirst
           : CrossFadeState.showSecond,
     );
