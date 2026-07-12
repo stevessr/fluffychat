@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:typed_data';
 
+import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/custom_image_resizer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
@@ -63,9 +64,11 @@ Future<void> main() async {
   // minification changes the invocation symbol, so exercise the explicit web
   // worker fallback used when reading encrypted MXC attachments.
   final encryptedAttachment = await encryptFile(attachment);
-  final nativeImplementations = NativeImplementationsWebWorker(
-    Uri.parse('native_executor.js'),
-  );
+  final nativeImplementations = ClientManager.nativeImplementations;
+  if (nativeImplementations is! NativeImplementationsWebWorker ||
+      !identical(nativeImplementations, ClientManager.nativeImplementations)) {
+    throw StateError('Web native implementations are not a stable worker');
+  }
   final workerDecrypted = await nativeImplementations.decryptFile(
     encryptedAttachment,
   );
