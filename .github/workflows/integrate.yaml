@@ -101,7 +101,7 @@ jobs:
       - run: flutter pub get
       - name: Prepare web
         run: ./scripts/prepare-web.sh
-      - run: flutter build web
+      - run: flutter build web --wasm --no-web-resources-cdn
       - name: Upload Web Build
         uses: actions/upload-artifact@v7
         with:
