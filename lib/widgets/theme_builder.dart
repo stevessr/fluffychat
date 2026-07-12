@@ -50,6 +50,7 @@ class ThemeController extends State<ThemeBuilder> {
 
     final rawThemeMode = preferences.getString(widget.themeModeSettingsKey);
     final rawColor = preferences.getInt(widget.primaryColorSettingsKey);
+    if (!mounted) return;
 
     setState(() {
       _themeMode = ThemeMode.values.singleWhereOrNull(
@@ -63,6 +64,7 @@ class ThemeController extends State<ThemeBuilder> {
     final preferences = _sharedPreferences ??=
         await SharedPreferences.getInstance();
     await preferences.setString(widget.themeModeSettingsKey, newThemeMode.name);
+    if (!mounted) return;
     setState(() {
       _themeMode = newThemeMode;
     });
@@ -79,6 +81,7 @@ class ThemeController extends State<ThemeBuilder> {
         newPrimaryColor.hexValue,
       );
     }
+    if (!mounted) return;
     setState(() {
       _primaryColor = newPrimaryColor;
     });
