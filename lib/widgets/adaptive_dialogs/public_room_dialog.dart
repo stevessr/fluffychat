@@ -32,6 +32,7 @@ class PublicRoomDialog extends StatelessWidget {
   Future<void> _joinRoom(BuildContext context) async {
     final l10n = L10n.of(context);
     final client = Matrix.of(context).client;
+    final router = GoRouter.of(context);
     final chunk = this.chunk;
     final knock = chunk?.joinRule == 'knock';
     final result = await showFutureLoadingDialog<String>(
@@ -42,9 +43,13 @@ class PublicRoomDialog extends StatelessWidget {
             client.getRoomById(chunk.roomId)?.membership != Membership.leave) {
           return chunk.roomId;
         }
+        final target = roomAlias ?? chunk?.roomId;
+        if (target == null) {
+          throw StateError('Public room dialog has no room alias or room ID');
+        }
         final roomId = chunk != null && knock
             ? await client.knockRoom(chunk.roomId, via: via)
-            : await client.joinRoom(roomAlias ?? chunk!.roomId, via: via);
+            : await client.joinRoom(target, via: via);
 
         if (!knock && client.getRoomById(roomId) == null) {
           await client.waitForRoomInSync(roomId);
@@ -56,23 +61,26 @@ class PublicRoomDialog extends StatelessWidget {
     if (roomId == null) return;
     if (!context.mounted) return;
     if (knock && client.getRoomById(roomId) == null) {
-      Navigator.of(context).pop<bool>(true);
       await showOkAlertDialog(
         context: context,
         title: l10n.youHaveKnocked,
         message: l10n.pleaseWaitUntilInvited,
       );
+      if (context.mounted) Navigator.of(context).pop<bool>(true);
       return;
     }
     if (result.error != null) return;
     if (!context.mounted) return;
+    final joinedRoom = client.getRoomById(roomId);
+    final isSpace = chunk?.roomType == 'm.space' || joinedRoom?.isSpace == true;
     Navigator.of(context).pop<bool>(true);
-    // don't open the room if the joined room is a space
-    if (chunk?.roomType != 'm.space' &&
-        !client.getRoomById(result.result!)!.isSpace) {
-      context.go('/rooms/$roomId');
+    // Do not dereference the room after sync waiting: a slow or filtered sync
+    // may still not have materialized it locally. The public-room metadata is
+    // enough to route known spaces, otherwise default to the room route.
+    if (!isSpace) {
+      router.go('/rooms/$roomId');
     } else {
-      context.go('/rooms?spaceId=$roomId');
+      router.go('/rooms?spaceId=$roomId');
     }
     return;
   }
@@ -83,8 +91,10 @@ class PublicRoomDialog extends StatelessWidget {
     final l10n = L10n.of(context);
     final chunk = this.chunk;
     if (chunk != null) return chunk;
+    final roomAlias = this.roomAlias;
+    if (roomAlias == null) throw (l10n.noRoomsFound);
     final query = await Matrix.of(context).client.queryPublicRooms(
-      server: roomAlias!.domain,
+      server: roomAlias.domain,
       filter: PublicRoomQueryFilter(genericSearchTerm: roomAlias),
     );
     if (!query.chunk.any(_testRoom)) {
@@ -247,7 +257,8 @@ class PublicRoomDialog extends StatelessWidget {
                         label: L10n.of(context).report,
                         icon: Icons.gavel_outlined,
                         onTap: () async {
-                          Navigator.of(context).pop();
+                          final target = chunk?.roomId ?? roomAlias;
+                          if (target == null) return;
                           final reason = await showTextInputDialog(
                             context: context,
                             title: L10n.of(context).whyDoYouWantToReportThis,
@@ -257,33 +268,42 @@ class PublicRoomDialog extends StatelessWidget {
                           );
                           if (reason == null || reason.isEmpty) return;
                           if (!context.mounted) return;
-                          await showFutureLoadingDialog(
+                          final reportResult = await showFutureLoadingDialog(
                             context: context,
-                            future: () => Matrix.of(context).client.reportRoom(
-                              chunk?.roomId ?? roomAlias!,
-                              reason,
-                            ),
+                            future: () => Matrix.of(
+                              context,
+                            ).client.reportRoom(target, reason),
                           );
+                          if (context.mounted && reportResult.error == null) {
+                            Navigator.of(context).pop();
+                          }
                         },
                       ),
                       AdaptiveIconTextButton(
                         label: L10n.of(context).copy,
                         icon: Icons.copy_outlined,
-                        onTap: () =>
-                            Clipboard.setData(ClipboardData(text: roomLink!)),
+                        onTap: roomLink == null
+                            ? null
+                            : () => Clipboard.setData(
+                                ClipboardData(text: roomLink),
+                              ),
                       ),
                       AdaptiveIconTextButton(
                         label: L10n.of(context).share,
                         icon: Icons.adaptive.share,
-                        onTap: () => FluffyShare.share(
-                          'https://matrix.to/#/$roomLink',
-                          context,
-                        ),
+                        onTap: roomLink == null
+                            ? null
+                            : () => FluffyShare.share(
+                                'https://matrix.to/#/$roomLink',
+                                context,
+                              ),
                       ),
                     ],
                   ),
                   AdaptiveDialogInkWell(
-                    onTap: () => _joinRoom(context),
+                    onTap: roomAlias == null && chunk == null
+                        ? null
+                        : () => _joinRoom(context),
                     child: Text(
                       chunk?.joinRule == 'knock' &&
                               Matrix.of(

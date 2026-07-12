@@ -84,7 +84,10 @@ class ChatListController extends State<ChatList>
   String? get activeSpaceId => _activeSpaceId;
 
   Future<void> setActiveSpace(String spaceId) async {
-    await Matrix.of(context).client.getRoomById(spaceId)!.postLoad();
+    final space = Matrix.of(context).client.getRoomById(spaceId);
+    if (space == null) return;
+    await space.postLoad();
+    if (!mounted) return;
 
     setState(() {
       _activeSpaceId = spaceId;
@@ -313,7 +316,9 @@ class ChatListController extends State<ChatList>
   }
 
   Future<void> editSpace(BuildContext context, String spaceId) async {
-    await Matrix.of(context).client.getRoomById(spaceId)!.postLoad();
+    final space = Matrix.of(context).client.getRoomById(spaceId);
+    if (space == null) return;
+    await space.postLoad();
     if (!context.mounted) return;
     context.push('/rooms/$spaceId/details');
   }
