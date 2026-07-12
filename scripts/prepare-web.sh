@@ -10,7 +10,9 @@ version=$(yq ".dependencies.flutter_vodozemac" < pubspec.yaml)
 version=$(printf "%s" "$version" | tr -d '"^')
 git clone https://github.com/famedly/dart-vodozemac.git -b ${version} .vodozemac
 cd .vodozemac
-cargo install flutter_rust_bridge_codegen
+# Keep the Rust-generated web bindings on the same ABI/codegen version as the
+# patched Dart runtime in third_party/flutter_rust_bridge.
+cargo install flutter_rust_bridge_codegen --version 2.11.1 --locked
 flutter_rust_bridge_codegen build-web --dart-root dart --rust-root $(readlink -f rust) --release
 cd ..
 rm -f ./assets/vodozemac/vodozemac_bindings_dart*
