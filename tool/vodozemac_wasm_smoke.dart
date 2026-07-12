@@ -187,6 +187,27 @@ Future<void> main() async {
   }
   web.console.log('WEB_WORKER_FAILURE_FALLBACK_OK'.toJS);
 
+  final stackTraceFallbackWorker = NativeImplementationsWebWorker(
+    Uri.parse('native_executor.js'),
+    timeout: const Duration(seconds: 10),
+    onStackTrace: (_) => throw StateError('source map unavailable'),
+  );
+  var stackTraceFallbackWorked = false;
+  try {
+    await stackTraceFallbackWorker.operation<Object?, String>(
+      WebWorkerOperations.shrinkImage,
+      'invalid resize arguments',
+    );
+  } on WebWorkerError catch (error) {
+    stackTraceFallbackWorked = error.stackTrace.toString().isNotEmpty;
+  } finally {
+    stackTraceFallbackWorker.dispose();
+  }
+  if (!stackTraceFallbackWorked) {
+    throw StateError('Web worker stack trace fallback did not complete');
+  }
+  web.console.log('WEB_WORKER_STACKTRACE_FALLBACK_OK'.toJS);
+
   final pickleKey = Uint8List(32);
   final pickle = account.toPickleEncrypted(pickleKey);
   final restored = vodozemac.Account.fromPickleEncrypted(
