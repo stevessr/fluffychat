@@ -61,6 +61,7 @@ class _SpaceViewState extends State<SpaceView> {
   String? _nextBatch;
   bool _noMoreRooms = false;
   bool _isLoading = false;
+  final Set<String> _joiningRoomIds = {};
 
   StreamSubscription? _childStateSub;
 
@@ -166,22 +167,33 @@ class _SpaceViewState extends State<SpaceView> {
   }
 
   Future<void> _joinChildRoom(SpaceRoomsChunk$2 item) async {
+    if (!_joiningRoomIds.add(item.roomId)) return;
+    setState(() {});
     final client = Matrix.of(context).client;
     final space = client.getRoomById(widget.spaceId);
     final via = space?.spaceChildren
         .firstWhereOrNull((child) => child.roomId == item.roomId)
         ?.via;
-    final roomResult = await showFutureLoadingDialog(
-      context: context,
-      future: () async {
-        final waitForRoom = client.waitForRoomInSync(item.roomId, join: true);
-        await client.joinRoom(item.roomId, via: via);
-        await waitForRoom;
-        return client.getRoomById(item.roomId)!;
-      },
-    );
-    final room = roomResult.result;
-    if (room != null) widget.onChatTab(room);
+    try {
+      final roomResult = await showFutureLoadingDialog(
+        context: context,
+        future: () async {
+          final waitForRoom = client.waitForRoomInSync(item.roomId, join: true);
+          await client.joinRoom(item.roomId, via: via);
+          await waitForRoom.timeout(const Duration(seconds: 60));
+          final joinedRoom = client.getRoomById(item.roomId);
+          if (joinedRoom == null) {
+            throw StateError('Joined room is missing after sync');
+          }
+          return joinedRoom;
+        },
+      );
+      final room = roomResult.result;
+      if (room != null && mounted) widget.onChatTab(room);
+    } finally {
+      _joiningRoomIds.remove(item.roomId);
+      if (mounted) setState(() {});
+    }
   }
 
   Future<void> _onSpaceAction(SpaceActions action) async {
@@ -666,8 +678,24 @@ class _SpaceViewState extends State<SpaceView> {
                                       UnreadBubble(room: joinedRoom)
                                     else
                                       TextButton(
-                                        onPressed: () => _joinChildRoom(item),
-                                        child: Text(L10n.of(context).join),
+                                        onPressed:
+                                            _joiningRoomIds.contains(
+                                              item.roomId,
+                                            )
+                                            ? null
+                                            : () => _joinChildRoom(item),
+                                        child:
+                                            _joiningRoomIds.contains(
+                                              item.roomId,
+                                            )
+                                            ? const SizedBox.square(
+                                                dimension: 16,
+                                                child:
+                                                    CircularProgressIndicator.adaptive(
+                                                      strokeWidth: 2,
+                                                    ),
+                                              )
+                                            : Text(L10n.of(context).join),
                                       ),
                                   ],
                                 ),
