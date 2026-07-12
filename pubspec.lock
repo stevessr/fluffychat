@@ -2204,10 +2204,9 @@ packages:
   vodozemac:
     dependency: "direct main"
     description:
-      name: vodozemac
-      sha256: bbe7dd31d7f623e2aeedb92e4b71a8b519e6109ce1e2911b5a220f6752b65cda
-      url: "https://pub.dev"
-    source: hosted
+      path: "third_party/vodozemac"
+      relative: true
+    source: path
     version: "0.5.0"
   wakelock_plus:
     dependency: "direct main"

@@ -17,6 +17,12 @@ Collection restoration is selected from the value shape rather than a generic
 type-literal switch. This is required for SDK boxes declared as raw `Box<Map>`,
 including the SSSS cache read by Cross Signing after login.
 
+Before writes, maps and iterables are recursively copied into plain
+JS-convertible Dart collections. Batched IndexedDB transaction operations are
+also retained and awaited instead of being launched as unhandled futures. This
+is needed by the event/room/timeline updates performed while sending encrypted
+media.
+
 Remove the dependency override after an upstream Matrix SDK release provides
 equivalent WasmGC-safe IndexedDB handling.
 

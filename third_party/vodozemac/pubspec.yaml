@@ -1,0 +1,28 @@
+name: vodozemac
+description: Provides bindings to the vodozemac library that has Olm and Megolm implementation from Dart.
+version: 0.5.0
+homepage: https://famedly.com
+repository: https://github.com/famedly/dart-vodozemac
+issue_tracker: https://github.com/famedly/dart-vodozemac/issues
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  collection: ^1.19.0
+  flutter_rust_bridge: 2.11.1
+  test_core: ^0.6.8
+  web: ^1.1.1
+
+dev_dependencies:
+  lints: ^5.1.1
+  test: ^1.21.0
+  checks: ^0.3.0
+  import_sorter: ^4.6.0
+  ffigen: ^18.1.0
+  olm: ^3.1.0
+
+import_sorter:
+  comments: false
+  ignored_files: # ignore generated files
+    - \/lib\/src\/generated\/*

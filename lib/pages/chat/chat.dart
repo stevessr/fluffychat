@@ -493,7 +493,6 @@ class ChatController extends State<ChatPageWithRoom>
 
       if (!mounted) return;
     } catch (e, s) {
-      ErrorReporter(context, 'Unable to load timeline').onErrorCallback(e, s);
       Logs().w(
         'Timeline bootstrap failed. Keep chat alive without crashing.',
         e,

@@ -26,6 +26,31 @@ Future<void> main() async {
   final fallbackKeys = account.fallbackKey;
   final signature = account.sign('FluffyChat WasmGC smoke test').toBase64();
 
+  // Encrypted attachment sending uses these synchronous DCO byte-array paths.
+  final attachment = Uint8List.fromList(
+    List<int>.generate(257, (i) => i % 256),
+  );
+  final attachmentKey = Uint8List.fromList(List<int>.generate(32, (i) => i));
+  final attachmentIv = Uint8List.fromList(
+    List<int>.generate(16, (i) => 31 - i),
+  );
+  final ciphertext = vodozemac.CryptoUtils.aesCtr(
+    input: attachment,
+    key: attachmentKey,
+    iv: attachmentIv,
+  );
+  final digest = vodozemac.CryptoUtils.sha256(input: ciphertext);
+  final plaintext = vodozemac.CryptoUtils.aesCtr(
+    input: ciphertext,
+    key: attachmentKey,
+    iv: attachmentIv,
+  );
+  if (ciphertext.length != attachment.length ||
+      digest.length != 32 ||
+      !plaintext.asMap().entries.every((e) => e.value == attachment[e.key])) {
+    throw StateError('Encrypted attachment crypto round trip failed');
+  }
+
   final pickleKey = Uint8List(32);
   final pickle = account.toPickleEncrypted(pickleKey);
   final restored = vodozemac.Account.fromPickleEncrypted(
@@ -40,7 +65,8 @@ Future<void> main() async {
   final result =
       'VODOZEMAC_WASM_SMOKE_OK identity=$identityKey '
       'max=$maxOneTimeKeys otk=${oneTimeKeys.length} '
-      'fallback=${fallbackKeys.length} signature=$signature';
+      'fallback=${fallbackKeys.length} signature=$signature '
+      'attachment=${ciphertext.length} sha256=${digest.length}';
   web.console.log(result.toJS);
 
   runApp(Directionality(textDirection: TextDirection.ltr, child: Text(result)));

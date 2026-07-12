@@ -20,7 +20,7 @@ Future<void> main() async {
 
   final collection = await BoxCollection.open(
     'fluffychat_wasm_indexeddb_smoke',
-    {'ssss_cache'},
+    {'ssss_cache', 'events', 'timeline_fragments', 'files'},
   );
   // MatrixSdkDatabase declares the SSSS cache as a raw Box<Map>. This exact
   // generic shape previously missed IndexedDBBox._fromValue's collection case.
@@ -39,6 +39,25 @@ Future<void> main() async {
   if (copied['keyId'] != 'smoke-key' ||
       (copied['metadata'] as Map)['attempt'] != 1) {
     throw StateError('IndexedDB value did not survive its round trip');
+  }
+
+  final events = collection.openBox<Map>('events');
+  final fragments = collection.openBox<List>('timeline_fragments');
+  final files = collection.openBox<String>('files');
+  await collection.transaction(() async {
+    await events.put('room,event', {
+      'event_id': r'$local',
+      'content': {'url': 'cache://file/transaction'},
+    });
+    await fragments.put('room,SENDING', <String>[r'$local']);
+    await files.put('cache://file/transaction', 'encrypted-media');
+    await events.delete('room,old-event');
+  });
+  events.clearQuickAccessCache();
+  fragments.clearQuickAccessCache();
+  if ((await events.get('room,event'))?['event_id'] != r'$local' ||
+      (await fragments.get('room,SENDING'))?.single != r'$local') {
+    throw StateError('Transactional encrypted media state did not persist');
   }
 
   // Exercise the exact post-login Cross Signing/SSSS call path as well.

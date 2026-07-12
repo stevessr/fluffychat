@@ -169,6 +169,11 @@ dependency_overrides:
   # patch until an upstream release explicitly supports this WasmGC boundary.
   flutter_rust_bridge:
     path: third_party/flutter_rust_bridge
+  # vodozemac 0.5.0 generates a strict `raw as Uint8List` DCO decoder. WasmGC
+  # returns AES/SHA byte results as List<int>, which crashes encrypted media
+  # sending. Remove after regenerated upstream bindings normalize byte arrays.
+  vodozemac:
+    path: third_party/vodozemac
   # To fix 16kb compatiblity in PlayStore. It is fixed in main branch but
   # not yet published:
   # https://github.com/google/webcrypto.dart/issues/207
