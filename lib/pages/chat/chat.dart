@@ -1615,6 +1615,7 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   Future<void> unpinEvent(String eventId) async {
+    if (eventId.isEmpty) return;
     final response = await showOkCancelAlertDialog(
       context: context,
       title: L10n.of(context).unpin,
@@ -1624,7 +1625,7 @@ class ChatController extends State<ChatPageWithRoom>
     );
     if (!mounted) return;
     if (response == OkCancelResult.ok) {
-      final events = room.pinnedEventIds
+      final events = List<String>.from(room.pinnedEventIds)
         ..removeWhere((oldEvent) => oldEvent == eventId);
       showFutureLoadingDialog(
         context: context,

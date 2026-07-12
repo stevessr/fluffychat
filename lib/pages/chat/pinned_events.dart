@@ -29,12 +29,12 @@ class PinnedEvents extends StatelessWidget {
         ),
       ),
     );
-    final events = eventsResult.result;
-    if (events == null) return;
+    final events = eventsResult.result?.whereType<Event>().toList();
+    if (events == null || events.isEmpty) return;
     if (!context.mounted) return;
 
     final eventId = events.length == 1
-        ? events.single?.eventId
+        ? events.single.eventId
         : await showModalActionPopup<String>(
             context: context,
             title: l10n.pin,
@@ -42,24 +42,23 @@ class PinnedEvents extends StatelessWidget {
             actions: events
                 .map(
                   (event) => AdaptiveModalAction(
-                    value: event?.eventId ?? '',
+                    value: event.eventId,
                     icon: const Icon(Icons.push_pin_outlined),
-                    label:
-                        event
-                            ?.calcLocalizedBodyFallback(
-                              MatrixLocals(l10n),
-                              withSenderNamePrefix: true,
-                              hideReply: true,
-                            )
-                            .trim()
-                            .replaceAll('\n', ' ') ??
-                        'UNKNOWN',
+                    label: event
+                        .calcLocalizedBodyFallback(
+                          MatrixLocals(l10n),
+                          withSenderNamePrefix: true,
+                          hideReply: true,
+                        )
+                        .trim()
+                        .replaceAll('\n', ' '),
                   ),
                 )
                 .toList(),
           );
 
-    if (eventId != null) controller.scrollToEventId(eventId);
+    if (!context.mounted || eventId == null || eventId.isEmpty) return;
+    await controller.scrollToEventId(eventId);
   }
 
   @override
@@ -92,8 +91,10 @@ class PinnedEvents extends StatelessWidget {
             color: theme.colorScheme.onSurfaceVariant,
             icon: const Icon(Icons.push_pin),
             tooltip: L10n.of(context).unpin,
-            onPressed: controller.room.canSendEvent(EventTypes.RoomPinnedEvents)
-                ? () => controller.unpinEvent(event!.eventId)
+            onPressed:
+                event != null &&
+                    controller.room.canSendEvent(EventTypes.RoomPinnedEvents)
+                ? () => controller.unpinEvent(event.eventId)
                 : null,
           ),
           onTap: () => _displayPinnedEventsDialog(context),
