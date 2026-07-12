@@ -30,7 +30,7 @@ class NewPrivateChatView extends StatelessWidget {
     final theme = Theme.of(context);
 
     final searchResponse = controller.searchResponse;
-    final userId = Matrix.of(context).client.userID!;
+    final userId = Matrix.of(context).client.userID;
     return Scaffold(
       appBar: AppBar(
         scrolledUnderElevation: 0,
@@ -171,42 +171,44 @@ class NewPrivateChatView extends StatelessWidget {
                               title: Text(L10n.of(context).scanQrCode),
                               onTap: controller.openScannerAction,
                             ),
-                          Center(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 64.0,
-                                vertical: 24.0,
-                              ),
-                              child: Material(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    AppConfig.borderRadius,
-                                  ),
-                                  side: BorderSide(
-                                    width: 3,
-                                    color: theme.colorScheme.primary,
-                                  ),
+                          if (userId != null)
+                            Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 64.0,
+                                  vertical: 24.0,
                                 ),
-                                color: Colors.transparent,
-                                clipBehavior: Clip.hardEdge,
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(
-                                    AppConfig.borderRadius,
+                                child: Material(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      AppConfig.borderRadius,
+                                    ),
+                                    side: BorderSide(
+                                      width: 3,
+                                      color: theme.colorScheme.primary,
+                                    ),
                                   ),
-                                  onTap: () =>
-                                      showQrCodeViewer(context, userId),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: ConstrainedBox(
-                                      constraints: const BoxConstraints(
-                                        maxWidth: 200,
-                                      ),
-                                      child: PrettyQrView.data(
-                                        data: 'https://matrix.to/#/$userId',
-                                        decoration: PrettyQrDecoration(
-                                          shape: PrettyQrSmoothSymbol(
-                                            roundFactor: 1,
-                                            color: theme.colorScheme.primary,
+                                  color: Colors.transparent,
+                                  clipBehavior: Clip.hardEdge,
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(
+                                      AppConfig.borderRadius,
+                                    ),
+                                    onTap: () =>
+                                        showQrCodeViewer(context, userId),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          maxWidth: 200,
+                                        ),
+                                        child: PrettyQrView.data(
+                                          data: 'https://matrix.to/#/$userId',
+                                          decoration: PrettyQrDecoration(
+                                            shape: PrettyQrSmoothSymbol(
+                                              roundFactor: 1,
+                                              color: theme.colorScheme.primary,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -215,7 +217,6 @@ class NewPrivateChatView extends StatelessWidget {
                                 ),
                               ),
                             ),
-                          ),
                         ],
                       )
                     : FutureBuilder(
