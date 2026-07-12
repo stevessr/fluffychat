@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:fluffychat/config/app_config.dart';
@@ -30,6 +31,33 @@ class SettingsNotifications extends StatefulWidget {
 class SettingsNotificationsController extends State<SettingsNotifications> {
   bool isLoading = false;
 
+  Future<void> _waitForPushRulesUpdate(Client client) => client.onSync.stream
+      .where(
+        (syncUpdate) =>
+            syncUpdate.accountData?.any(
+              (accountData) => accountData.type == 'm.push_rules',
+            ) ??
+            false,
+      )
+      .first
+      .timeout(const Duration(seconds: 30));
+
+  Future<void> _updatePushRules(
+    Client client,
+    Future<void> Function() update,
+  ) async {
+    final updateFromSync = _waitForPushRulesUpdate(client);
+    try {
+      await update();
+      await updateFromSync;
+    } catch (_) {
+      // If the API request fails first, absorb the already-created sync
+      // waiter so its later timeout cannot become an unhandled Future error.
+      unawaited(updateFromSync.catchError((_) {}));
+      rethrow;
+    }
+  }
+
   Future<void> onPusherTap(Pusher pusher) async {
     final delete = await showModalActionPopup<bool>(
       context: context,
@@ -55,6 +83,7 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
     );
 
     if (success.error != null) return;
+    if (!mounted) return;
 
     setState(() {
       pusherFuture = null;
@@ -68,19 +97,12 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
       isLoading = true;
     });
     try {
-      final updateFromSync = Matrix.of(context).client.onSync.stream
-          .where(
-            (syncUpdate) =>
-                syncUpdate.accountData?.any(
-                  (accountData) => accountData.type == 'm.push_rules',
-                ) ??
-                false,
-          )
-          .first;
-      await Matrix.of(
-        context,
-      ).client.setPushRuleEnabled(kind, pushRule.ruleId, !pushRule.enabled);
-      await updateFromSync;
+      final client = Matrix.of(context).client;
+      await _updatePushRules(
+        client,
+        () =>
+            client.setPushRuleEnabled(kind, pushRule.ruleId, !pushRule.enabled),
+      );
     } catch (e, s) {
       Logs().w('Unable to toggle push rule', e, s);
       if (!mounted) return;
@@ -154,17 +176,11 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
           isLoading = true;
         });
         try {
-          final updateFromSync = Matrix.of(context).client.onSync.stream
-              .where(
-                (syncUpdate) =>
-                    syncUpdate.accountData?.any(
-                      (accountData) => accountData.type == 'm.push_rules',
-                    ) ??
-                    false,
-              )
-              .first;
-          await Matrix.of(context).client.deletePushRule(kind, rule.ruleId);
-          await updateFromSync;
+          final client = Matrix.of(context).client;
+          await _updatePushRules(
+            client,
+            () => client.deletePushRule(kind, rule.ruleId),
+          );
         } catch (e, s) {
           Logs().w('Unable to delete push rule', e, s);
           if (!mounted) return;
