@@ -111,10 +111,17 @@ class ChatEventList extends StatelessWidget {
                       (event) =>
                           !event.isCollapsedState && event.isVisibleInGui,
                     );
-                    if (visibleIndex > timeline.events.length - 50) {
-                      WidgetsBinding.instance.addPostFrameCallback(
-                        controller.requestHistory,
-                      );
+                    if (visibleIndex > timeline.events.length - 50 &&
+                        !timeline.isRequestingHistory) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (!controller.mounted ||
+                            controller.timeline != timeline ||
+                            timeline.isRequestingHistory ||
+                            !timeline.canRequestHistory) {
+                          return;
+                        }
+                        controller.requestHistory();
+                      });
                     }
                     return Center(
                       child: TextButton.icon(
