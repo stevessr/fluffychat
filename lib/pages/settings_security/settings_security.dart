@@ -17,6 +17,9 @@ import 'package:matrix/matrix.dart';
 
 import 'settings_security_view.dart';
 
+bool isValidAppLockPin(String text) =>
+    text.length == 6 && int.tryParse(text) != null;
+
 class SettingsSecurity extends StatefulWidget {
   const SettingsSecurity({super.key});
 
@@ -25,6 +28,18 @@ class SettingsSecurity extends StatefulWidget {
 }
 
 class SettingsSecurityController extends State<SettingsSecurity> {
+  Future<bool> _authenticateWithBiometrics(String reason) async {
+    try {
+      return await LocalAuthentication().authenticate(
+        localizedReason: reason,
+        biometricOnly: true,
+      );
+    } catch (e, s) {
+      Logs().w('Unable to authenticate with biometrics', e, s);
+      return false;
+    }
+  }
+
   Future<void> toggleBiometrics() async {
     AppLock.of(context).showLockScreen();
 
@@ -44,15 +59,12 @@ class SettingsSecurityController extends State<SettingsSecurity> {
     if (!mounted) return;
 
     if (!oldState) {
-      final localAuth = LocalAuthentication();
-      final unlocked = await localAuth.authenticate(
-        localizedReason: actionStr,
-        biometricOnly: true,
-      );
+      final unlocked = await _authenticateWithBiometrics(actionStr);
       if (!unlocked) return;
       if (!mounted) return;
     }
     await AppLock.of(context).changeUseBiometrics(!oldState);
+    if (!mounted) return;
     setState(() {});
   }
 
@@ -75,10 +87,8 @@ class SettingsSecurityController extends State<SettingsSecurity> {
       await appLock.changeUseBiometrics(false);
     } else {
       // Enable biometrics-only mode - authenticate first, then clear PIN
-      final localAuth = LocalAuthentication();
-      final unlocked = await localAuth.authenticate(
-        localizedReason: L10n.of(context).enableBiometrics,
-        biometricOnly: true,
+      final unlocked = await _authenticateWithBiometrics(
+        L10n.of(context).enableBiometrics,
       );
       if (!unlocked) return;
       if (!mounted) return;
@@ -121,7 +131,7 @@ class SettingsSecurityController extends State<SettingsSecurity> {
       message: l10n.pleaseEnter6Digits,
       cancelLabel: l10n.cancel,
       validator: (text) {
-        if (text.length == 6 && int.tryParse(text)! >= 0) {
+        if (isValidAppLockPin(text)) {
           return null;
         }
         return l10n.pleaseEnter6Digits;
@@ -155,7 +165,8 @@ class SettingsSecurityController extends State<SettingsSecurity> {
       return;
     }
     if (!mounted) return;
-    final supposedMxid = matrix.client.userID!;
+    final supposedMxid = matrix.client.userID;
+    if (supposedMxid == null) return;
     final mxid = await showTextInputDialog(
       useRootNavigator: false,
       context: context,
@@ -201,8 +212,10 @@ class SettingsSecurityController extends State<SettingsSecurity> {
 
   Future<void> changeShareKeysWith(ShareKeysWith? shareKeysWith) async {
     if (shareKeysWith == null) return;
-    AppSettings.shareKeysWith.setItem(shareKeysWith.name);
-    Matrix.of(context).client.shareKeysWith = shareKeysWith;
+    final client = Matrix.of(context).client;
+    await AppSettings.shareKeysWith.setItem(shareKeysWith.name);
+    if (!mounted) return;
+    client.shareKeysWith = shareKeysWith;
     setState(() {});
   }
 
