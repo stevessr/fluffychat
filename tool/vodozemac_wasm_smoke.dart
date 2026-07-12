@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:typed_data';
 
+import 'package:fluffychat/utils/custom_image_resizer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 // ignore: implementation_imports
@@ -98,6 +99,38 @@ Future<void> main() async {
       resized.originalHeight != 1) {
     throw StateError('Web worker image resize round trip failed');
   }
+  // Exercise the production send-file preview path too: Flutter decodes the
+  // selected image to RGBA and the native_imaging WebAssembly module generates
+  // the JPEG thumbnail and blurhash.
+  final customResized = await customImageResizer(
+    MatrixImageFileResizeArguments(
+      bytes: png,
+      maxDimension: 1,
+      fileName: 'pixel.png',
+      calcBlurhash: true,
+    ),
+  );
+  if (customResized == null ||
+      customResized.bytes.isEmpty ||
+      customResized.width != 1 ||
+      customResized.height != 1 ||
+      customResized.originalWidth != 1 ||
+      customResized.originalHeight != 1 ||
+      customResized.mimeType != 'image/jpeg') {
+    throw StateError('Custom image resizer Wasm round trip failed');
+  }
+  final invalidPreview = await customImageResizer(
+    MatrixImageFileResizeArguments(
+      bytes: Uint8List.fromList([0, 1, 2, 3]),
+      maxDimension: 1,
+      fileName: 'invalid.png',
+      calcBlurhash: true,
+    ),
+  );
+  if (invalidPreview != null) {
+    throw StateError('Invalid image preview did not fall back to null');
+  }
+  web.console.log('CUSTOM_IMAGE_INVALID_FALLBACK_OK'.toJS);
 
   final pickleKey = Uint8List(32);
   final pickle = account.toPickleEncrypted(pickleKey);
