@@ -7015,9 +7015,14 @@ class GetVersionsResponse {
 
   GetVersionsResponse.fromJson(Map<String, Object?> json)
     : unstableFeatures = ((v) => v != null
-          ? (v as Map<String, Object?>).map((k, v) => MapEntry(k, v as bool))
+          ? (v as Map).map(
+              (k, v) =>
+                  MapEntry(k.toString(), v == true || v == 1 || v == 'true'),
+            )
           : null)(json['unstable_features']),
-      versions = (json['versions'] as List).map((v) => v as String).toList();
+      versions = (json['versions'] as List)
+          .map((v) => v is String ? v : v.toString())
+          .toList();
   Map<String, Object?> toJson() {
     final unstableFeatures = this.unstableFeatures;
     return {
