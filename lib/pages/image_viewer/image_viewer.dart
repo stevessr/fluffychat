@@ -63,6 +63,13 @@ class ImageViewerController extends State<ImageViewer> {
 
   late int currentIndex;
 
+  @override
+  void dispose() {
+    focusNode.dispose();
+    pageController.dispose();
+    super.dispose();
+  }
+
   void onKeyEvent(KeyEvent event) {
     switch (event.logicalKey) {
       case LogicalKeyboardKey.arrowUp:

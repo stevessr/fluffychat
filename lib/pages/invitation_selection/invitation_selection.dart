@@ -25,6 +25,14 @@ class InvitationSelection extends StatefulWidget {
 
 class InvitationSelectionController extends State<InvitationSelection> {
   TextEditingController controller = TextEditingController();
+
+  @override
+  void dispose() {
+    coolDown?.cancel();
+    controller.dispose();
+    super.dispose();
+  }
+
   late String currentSearchTerm;
   bool loading = false;
   List<Profile> foundProfiles = [];
@@ -98,22 +106,21 @@ class InvitationSelectionController extends State<InvitationSelection> {
       response = await matrix.client.searchUserDirectory(text, limit: 10);
     } catch (e) {
       if (!context.mounted) return;
+      setState(() => loading = false);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text((e).toLocalizedString(context))));
       return;
-    } finally {
-      setState(() => loading = false);
     }
+    if (!context.mounted) return;
     setState(() {
+      loading = false;
       foundProfiles = List<Profile>.from(response.results);
       if (text.isValidMatrixIdStrict() &&
           foundProfiles.indexWhere((profile) => text == profile.userId) == -1) {
-        setState(
-          () => foundProfiles = [
-            Profile.fromJson({'user_id': text}),
-          ],
-        );
+        foundProfiles = [
+          Profile.fromJson({'user_id': text}),
+        ];
       }
     });
   }

@@ -32,6 +32,15 @@ class _StartPollBottomSheetState extends State<StartPollBottomSheet> {
 
   String? _txid;
 
+  @override
+  void dispose() {
+    _bodyController.dispose();
+    for (final answer in _answers) {
+      answer.dispose();
+    }
+    super.dispose();
+  }
+
   Future<void> _createPoll() async {
     final proceed = await showTrustUserInRoomDialog(context, widget.room);
     if (!proceed || !mounted) return;

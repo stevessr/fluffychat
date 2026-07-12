@@ -31,6 +31,12 @@ class NewGroup extends StatefulWidget {
 class NewGroupController extends State<NewGroup> {
   TextEditingController nameController = TextEditingController();
 
+  @override
+  void dispose() {
+    nameController.dispose();
+    super.dispose();
+  }
+
   bool publicGroup = false;
   bool groupCanBeFound = false;
 
