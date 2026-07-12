@@ -112,10 +112,14 @@ class NativeImplementationsWebWorker extends NativeImplementations {
     bool retryInDummy = false,
   }) async {
     try {
-      final result = await operation<Map<dynamic, dynamic>, Uint8List>(
+      final result = await operation<Object?, Uint8List>(
         WebWorkerOperations.calcImageMetadata,
         bytes,
       );
+      if (result == null) return null;
+      if (result is! Map) {
+        throw StateError('Web worker returned invalid image metadata: $result');
+      }
       return MatrixImageFileResizedResponse.fromJson(Map.from(result));
     } catch (e, s) {
       if (!retryInDummy) {
@@ -137,11 +141,14 @@ class NativeImplementationsWebWorker extends NativeImplementations {
     bool retryInDummy = false,
   }) async {
     try {
-      final result =
-          await operation<Map<dynamic, dynamic>, Map<String, dynamic>>(
-            WebWorkerOperations.shrinkImage,
-            args.toJson(),
-          );
+      final result = await operation<Object?, Map<String, dynamic>>(
+        WebWorkerOperations.shrinkImage,
+        args.toJson(),
+      );
+      if (result == null) return null;
+      if (result is! Map) {
+        throw StateError('Web worker returned invalid resized image: $result');
+      }
       return MatrixImageFileResizedResponse.fromJson(Map.from(result));
     } catch (e, s) {
       if (!retryInDummy) {
