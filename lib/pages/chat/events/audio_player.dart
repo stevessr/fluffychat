@@ -59,13 +59,17 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
 
   @override
   void dispose() {
-    super.dispose();
     final audioPlayer = matrix.voiceMessageEventId.value != widget.event.eventId
         ? null
         : matrix.audioPlayer;
     if (audioPlayer != null) {
       if (audioPlayer.playing && !audioPlayer.isAtEndPosition) {
+        final roomId = widget.event.room.id;
+        final eventId = widget.event.eventId;
+        final senderName = widget.event.senderFromMemoryOrFallback
+            .calcDisplayname();
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!matrix.context.mounted) return;
           ScaffoldMessenger.of(matrix.context).showMaterialBanner(
             MaterialBanner(
               padding: EdgeInsets.zero,
@@ -89,11 +93,10 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
               content: StreamBuilder(
                 stream: audioPlayer.positionStream.asBroadcastStream(),
                 builder: (context, _) => GestureDetector(
-                  onTap: () => FluffyChatApp.router.go(
-                    '/rooms/${widget.event.room.id}?event=${widget.event.eventId}',
-                  ),
+                  onTap: () =>
+                      FluffyChatApp.router.go('/rooms/$roomId?event=$eventId'),
                   child: Text(
-                    '🎙️ ${audioPlayer.position.minuteSecondString} / ${audioPlayer.duration?.minuteSecondString} - ${widget.event.senderFromMemoryOrFallback.calcDisplayname()}',
+                    '🎙️ ${audioPlayer.position.minuteSecondString} / ${audioPlayer.duration?.minuteSecondString} - $senderName',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -108,6 +111,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                         null;
 
                     WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (!matrix.context.mounted) return;
                       ScaffoldMessenger.of(
                         matrix.context,
                       ).clearMaterialBanners();
@@ -119,16 +123,19 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
             ),
           );
         });
+        super.dispose();
         return;
       }
       audioPlayer.pause();
       audioPlayer.dispose();
       matrix.voiceMessageEventId.value = matrix.audioPlayer = null;
     }
+    super.dispose();
   }
 
   Future<void> _onButtonTap() async {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!matrix.context.mounted) return;
       ScaffoldMessenger.of(matrix.context).clearMaterialBanners();
     });
     final currentPlayer =
@@ -159,6 +166,10 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
       matrixFile = await widget.event.downloadAndDecryptAttachment(
         onDownloadProgress: fileSize != null && fileSize > 0
             ? (progress) {
+                if (!mounted ||
+                    matrix.voiceMessageEventId.value != widget.event.eventId) {
+                  return;
+                }
                 final progressPercentage = progress / fileSize;
                 setState(() {
                   _downloadProgress = progressPercentage < 1
@@ -189,36 +200,74 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
         }
       }
 
+      if (!mounted ||
+          matrix.voiceMessageEventId.value != widget.event.eventId) {
+        if (matrix.voiceMessageEventId.value == widget.event.eventId) {
+          matrix.voiceMessageEventId.value = null;
+        }
+        return;
+      }
       setState(() {
         status = AudioPlayerStatus.downloaded;
       });
     } catch (e, s) {
       Logs().v('Could not download audio file', e, s);
-      if (!mounted) rethrow;
+      if (matrix.voiceMessageEventId.value == widget.event.eventId) {
+        matrix.voiceMessageEventId.value = null;
+      }
+      if (!mounted) return;
+      setState(() {
+        status = AudioPlayerStatus.notDownloaded;
+        _downloadProgress = null;
+      });
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(e.toLocalizedString(context))));
-      rethrow;
+      return;
     }
-    if (!context.mounted) return;
+    if (!mounted) return;
     if (matrix.voiceMessageEventId.value != widget.event.eventId) return;
 
     final audioPlayer = matrix.audioPlayer = AudioPlayer();
+    try {
+      if (file != null) {
+        await audioPlayer.setFilePath(file.path);
+      } else {
+        await audioPlayer.setAudioSource(
+          AudioSource.uri(
+            Uri.dataFromBytes(matrixFile.bytes, mimeType: matrixFile.mimeType),
+          ),
+        );
+      }
+      if (!mounted ||
+          matrix.voiceMessageEventId.value != widget.event.eventId ||
+          matrix.audioPlayer != audioPlayer) {
+        if (matrix.audioPlayer == audioPlayer) {
+          matrix.audioPlayer = null;
+          if (matrix.voiceMessageEventId.value == widget.event.eventId) {
+            matrix.voiceMessageEventId.value = null;
+          }
+        }
+        await audioPlayer.dispose();
+        return;
+      }
 
-    if (file != null) {
-      audioPlayer.setFilePath(file.path);
-    } else {
-      await audioPlayer.setAudioSource(
-        AudioSource.uri(
-          Uri.dataFromBytes(matrixFile.bytes, mimeType: matrixFile.mimeType),
-        ),
+      audioPlayer.play().onError(
+        ErrorReporter(context, 'Unable to play audio message').onErrorCallback,
       );
+    } catch (e, s) {
+      if (matrix.audioPlayer == audioPlayer) {
+        matrix.audioPlayer = null;
+        matrix.voiceMessageEventId.value = null;
+      }
+      await audioPlayer.dispose();
+      if (!mounted) return;
+      ErrorReporter(
+        context,
+        'Unable to initialize audio message',
+      ).onErrorCallback(e, s);
+      setState(() => status = AudioPlayerStatus.notDownloaded);
     }
-    if (!mounted) return;
-
-    audioPlayer.play().onError(
-      ErrorReporter(context, 'Unable to play audio message').onErrorCallback,
-    );
   }
 
   Future<void> _toggleSpeed() async {
@@ -242,16 +291,18 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
         await audioPlayer.setSpeed(1.0);
         break;
     }
+    if (!mounted || matrix.audioPlayer != audioPlayer) return;
     setState(() {});
   }
 
   List<int>? _getWaveform() {
-    final eventWaveForm = widget.event.content
+    final rawEventWaveForm = widget.event.content
         .tryGetMap<String, Object?>('org.matrix.msc1767.audio')
         ?.tryGetList<int>('waveform');
-    if (eventWaveForm == null || eventWaveForm.isEmpty) {
+    if (rawEventWaveForm == null || rawEventWaveForm.isEmpty) {
       return null;
     }
+    final eventWaveForm = List<int>.from(rawEventWaveForm);
     while (eventWaveForm.length < AudioPlayerWidget.wavesCount) {
       for (var i = 0; i < eventWaveForm.length; i = i + 2) {
         eventWaveForm.insert(i, eventWaveForm[i]);
@@ -275,6 +326,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
     if (matrix.voiceMessageEventId.value == widget.event.eventId &&
         matrix.audioPlayer != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!matrix.context.mounted) return;
         ScaffoldMessenger.of(matrix.context).clearMaterialBanners();
       });
     }
