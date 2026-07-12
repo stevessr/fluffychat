@@ -386,7 +386,7 @@ class ChatListController extends State<ChatList>
     _activeSpaceId = widget.activeSpace;
 
     scrollController.addListener(_onScroll);
-    _waitForFirstSync();
+    unawaited(_waitForFirstSync());
     Matrix.of(context).voipPlugin?.context = context;
 
     // 预加载扩展字体以加速后续页面
@@ -711,10 +711,9 @@ class ChatListController extends State<ChatList>
         );
         return;
       case ChatContextAction.block:
-        final inviteEvent = room.getState(
-          EventTypes.RoomMember,
-          room.client.userID!,
-        );
+        final userId = room.client.userID;
+        if (userId == null) return;
+        final inviteEvent = room.getState(EventTypes.RoomMember, userId);
         context.go(
           '/rooms/settings/security/ignorelist',
           extra: inviteEvent?.senderId,
@@ -828,7 +827,9 @@ class ChatListController extends State<ChatList>
   Future<void> setStatus() async {
     final l10n = L10n.of(context);
     final client = Matrix.of(context).client;
-    final currentPresence = await client.fetchCurrentPresence(client.userID!);
+    final userId = client.userID;
+    if (userId == null) return;
+    final currentPresence = await client.fetchCurrentPresence(userId);
     if (!mounted) return;
     final input = await showTextInputDialog(
       useRootNavigator: false,
@@ -847,41 +848,41 @@ class ChatListController extends State<ChatList>
     if (!mounted) return;
     await showFutureLoadingDialog(
       context: context,
-      future: () => client.setPresence(
-        client.userID!,
-        PresenceType.online,
-        statusMsg: input,
-      ),
+      future: () =>
+          client.setPresence(userId, PresenceType.online, statusMsg: input),
     );
   }
 
-  bool waitForFirstSync = false;
-
   Future<void> _waitForFirstSync() async {
-    final router = GoRouter.of(context);
     final client = Matrix.of(context).client;
-    await client.roomsLoading;
-    await client.accountDataLoading;
-    await client.userDeviceKeysLoading;
-    if (client.prevBatch == null) {
-      await client.onSyncStatus.stream.firstWhere(
-        (status) => status.status == SyncStatus.finished,
+    try {
+      await (() async {
+        await client.roomsLoading;
+        await client.accountDataLoading;
+        await client.userDeviceKeysLoading;
+      })().timeout(const Duration(seconds: 45));
+      if (client.prevBatch == null) {
+        await client.onSyncStatus.stream
+            .firstWhere((status) => status.status == SyncStatus.finished)
+            .timeout(const Duration(seconds: 45));
+      }
+    } catch (error, stackTrace) {
+      Logs().w(
+        'Unable to finish first-sync device check. Keep chat list available.',
+        error,
+        stackTrace,
       );
-
-      if (!mounted) return;
-      setState(() {
-        waitForFirstSync = true;
-      });
+      return;
     }
     if (!mounted) return;
-    setState(() {
-      waitForFirstSync = true;
-    });
+    final userId = client.userID;
+    if (userId == null) return;
 
-    if (client.userDeviceKeys[client.userID!]?.deviceKeys.values.any(
+    if (client.userDeviceKeys[userId]?.deviceKeys.values.any(
           (device) => !device.verified && !device.blocked,
         ) ??
         false) {
+      final router = GoRouter.of(context);
       late final ScaffoldFeatureController controller;
       final theme = Theme.of(context);
       controller = ScaffoldMessenger.of(context).showSnackBar(
