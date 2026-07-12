@@ -129,13 +129,18 @@ class NativeImplementationsWebWorker extends NativeImplementations {
     if (data['label'] == 'stacktrace') {
       final rawOrigin = data['origin'];
       final origin = rawOrigin is num ? rawOrigin.toDouble() : rawOrigin;
-      final completer = _completers.remove(origin);
-
       final error = data['error'];
-
-      final stackTrace = await onStackTrace.call(
-        data['stacktrace']?.toString() ?? '',
-      );
+      final rawStackTrace = data['stacktrace']?.toString() ?? '';
+      StackTrace stackTrace;
+      try {
+        stackTrace = await onStackTrace.call(rawStackTrace);
+      } catch (e, s) {
+        Logs().w('Unable to convert web worker stack trace', e, s);
+        stackTrace = StackTrace.fromString(rawStackTrace);
+      }
+      // The operation may have timed out while an asynchronous source-map
+      // converter was running. Only complete it if it is still registered.
+      final completer = _completers.remove(origin);
       completer?.completeError(
         WebWorkerError(error: error, stackTrace: stackTrace),
       );
