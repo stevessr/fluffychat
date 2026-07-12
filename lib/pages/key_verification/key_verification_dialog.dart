@@ -33,30 +33,53 @@ class KeyVerificationDialog extends StatefulWidget {
 
 class KeyVerificationPageState extends State<KeyVerificationDialog> {
   void Function()? originalOnUpdate;
-  late final List<dynamic> sasEmoji;
+  List<dynamic>? sasEmoji;
+  final TextEditingController _ssssController = TextEditingController();
 
   @override
   void initState() {
+    super.initState();
     originalOnUpdate = widget.request.onUpdate;
     widget.request.onUpdate = () {
       originalOnUpdate?.call();
+      if (!mounted) return;
       setState(() {});
     };
-    widget.request.client.getProfileFromUserId(widget.request.userId).then((p) {
-      profile = p;
-      setState(() {});
-    });
-    rootBundle.loadString('assets/sas-emoji.json').then((e) {
-      sasEmoji = json.decode(e);
-      setState(() {});
-    });
-    super.initState();
+    widget.request.client
+        .getProfileFromUserId(widget.request.userId)
+        .then(
+          (p) {
+            if (!mounted) return;
+            profile = p;
+            setState(() {});
+          },
+          onError: (error, stackTrace) {
+            Logs().w('Unable to load verification profile', error, stackTrace);
+          },
+        );
+    rootBundle
+        .loadString('assets/sas-emoji.json')
+        .then(
+          (data) {
+            if (!mounted) return;
+            sasEmoji = json.decode(data);
+            setState(() {});
+          },
+          onError: (error, stackTrace) {
+            Logs().w(
+              'Unable to load SAS emoji translations',
+              error,
+              stackTrace,
+            );
+          },
+        );
   }
 
   @override
   void dispose() {
     widget.request.onUpdate =
         originalOnUpdate; // don't want to get updates anymore
+    _ssssController.dispose();
     if (![
       KeyVerificationState.error,
       KeyVerificationState.done,
@@ -87,7 +110,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
         return valid;
       },
     );
-    if (valid.error != null) {
+    if (valid.result != true) {
       if (!mounted) return;
       await showOkAlertDialog(
         useRootNavigator: false,
@@ -109,22 +132,54 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
     );
     if (directChatId != null) {
       user = widget.request.client
-          .getRoomById(directChatId)!
-          .unsafeGetUserFromMemoryOrFallback(widget.request.userId);
+          .getRoomById(directChatId)
+          ?.unsafeGetUserFromMemoryOrFallback(widget.request.userId);
     }
     final displayName =
-        user?.calcDisplayname() ?? widget.request.userId.localpart!;
+        user?.calcDisplayname() ??
+        profile?.displayName ??
+        widget.request.userId.localpart ??
+        widget.request.userId;
     var title = Text(L10n.of(context).verifyTitle);
     Widget body;
     final buttons = <Widget>[];
 
     switch (widget.request.state) {
       case KeyVerificationState.showQRSuccess:
+        body = const Padding(
+          padding: EdgeInsets.all(16),
+          child: Icon(Icons.verified_outlined, color: Colors.green, size: 96),
+        );
+        buttons.add(
+          AdaptiveDialogAction(
+            onPressed: () => widget.request.cancel(),
+            child: Text(L10n.of(context).cancel),
+          ),
+        );
+        break;
       case KeyVerificationState.confirmQRScan:
-        throw 'Not implemented';
+        body = const Padding(
+          padding: EdgeInsets.all(16),
+          child: Icon(Icons.verified_outlined, color: Colors.green, size: 96),
+        );
+        buttons.add(
+          AdaptiveDialogAction(
+            onPressed: () => widget.request.cancel(),
+            child: Text(
+              L10n.of(context).theyDontMatch,
+              style: TextStyle(color: theme.colorScheme.error),
+            ),
+          ),
+        );
+        buttons.add(
+          AdaptiveDialogAction(
+            onPressed: () => widget.request.acceptQRScanConfirmation(),
+            child: Text(L10n.of(context).theyMatch),
+          ),
+        );
+        break;
       case KeyVerificationState.askSSSS:
         // prompt the user for their ssss passphrase / key
-        textEditingController = TextEditingController();
         String input;
         body = Container(
           margin: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -137,7 +192,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
               ),
               Container(height: 10),
               TextField(
-                controller: textEditingController,
+                controller: _ssssController,
                 autofocus: false,
                 autocorrect: false,
                 onSubmitted: (s) {
@@ -160,7 +215,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
         buttons.add(
           AdaptiveDialogAction(
             child: Text(L10n.of(context).submit),
-            onPressed: () => checkInput(textEditingController!.text),
+            onPressed: () => checkInput(_ssssController.text),
           ),
         );
         buttons.add(
@@ -177,7 +232,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
           children: [
             const SizedBox(height: 16),
             Avatar(
-              mxContent: user?.avatarUrl,
+              mxContent: user?.avatarUrl ?? profile?.avatarUrl,
               name: displayName,
               size: Avatar.defaultSize * 2,
             ),
@@ -213,7 +268,10 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
               Stack(
                 alignment: Alignment.center,
                 children: [
-                  Avatar(mxContent: user?.avatarUrl, name: displayName),
+                  Avatar(
+                    mxContent: user?.avatarUrl ?? profile?.avatarUrl,
+                    name: displayName,
+                  ),
                   const SizedBox(
                     width: Avatar.defaultSize + 2,
                     height: Avatar.defaultSize + 2,
