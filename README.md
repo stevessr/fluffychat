@@ -87,7 +87,7 @@ cd fluffychat
 * Build with:
 ```bash
 ./scripts/prepare-web.sh # To install Vodozemac
-flutter build web --release
+flutter build web --release --wasm --no-web-resources-cdn
 ```
 
 * Optionally configure by serving a `config.json` at the same path as fluffychat.

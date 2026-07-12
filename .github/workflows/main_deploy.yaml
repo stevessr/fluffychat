@@ -25,7 +25,7 @@ jobs:
       - run: rm ./assets/vodozemac/.gitignore
       - run: flutter pub get
       - name: Build Release Web
-        run: flutter build web --dart-define=FLUTTER_WEB_CANVASKIT_URL=canvaskit/ --release --source-maps --base-href "/nightly/"
+        run: flutter build web --wasm --no-web-resources-cdn --dart-define=FLUTTER_WEB_CANVASKIT_URL=canvaskit/ --release --source-maps --base-href "/nightly/"
       - name: Subset web fonts
         run: ./scripts/subset-web-fonts.sh
       - run: mv build/web/ public
