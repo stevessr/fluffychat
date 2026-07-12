@@ -67,7 +67,9 @@ class NewGroupController extends State<NewGroup> {
       type: FileType.image,
       allowMultiple: false,
     );
-    final bytes = await photo.singleOrNull?.readAsBytes();
+    final selectedPhoto = photo.singleOrNull;
+    if (selectedPhoto == null) return;
+    final bytes = await selectedPhoto.readAsBytes();
     if (!mounted) return;
 
     setState(() {
@@ -96,6 +98,7 @@ class NewGroupController extends State<NewGroup> {
           ),
       ],
     );
+    if (!mounted) return;
     await _addToSpace(roomId);
     if (!mounted) return;
 
@@ -123,6 +126,7 @@ class NewGroupController extends State<NewGroup> {
           ),
       ],
     );
+    if (!mounted) return;
     await _addToSpace(spaceId);
     if (!mounted) return;
     context.pop<String>(spaceId);
@@ -178,12 +182,12 @@ class NewGroupController extends State<NewGroup> {
 
   @override
   void initState() {
+    super.initState();
     final spaceId = widget.spaceId;
     if (spaceId != null) {
       final space = Matrix.of(context).client.getRoomById(spaceId);
       publicGroup = space?.joinRules == JoinRules.public;
     }
-    super.initState();
   }
 
   @override
