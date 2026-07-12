@@ -25,8 +25,6 @@ import 'custom_image_resizer_backend_native.dart'
 Future<MatrixImageFileResizedResponse?> customImageResizer(
   MatrixImageFileResizeArguments arguments,
 ) async {
-  await native.init();
-
   var imageBytes = arguments.bytes;
   String? blurhash;
 
@@ -36,11 +34,19 @@ Future<MatrixImageFileResizedResponse?> customImageResizer(
   var height = 0;
   String? mimeType;
 
+  Codec? dartCodec;
+  FrameInfo? dartFrame;
+  native.Image? nativeImg;
   try {
+    // Loading the native_imaging module can fail independently of decoding
+    // (for example because Imaging.wasm was not cached yet). Treat that like
+    // any other preview failure and let the caller keep the original file.
+    await native.init();
+
     // for the other platforms
-    final dartCodec = await instantiateImageCodec(arguments.bytes);
+    dartCodec = await instantiateImageCodec(arguments.bytes);
     final frameCount = dartCodec.frameCount;
-    final dartFrame = await dartCodec.getNextFrame();
+    dartFrame = await dartCodec.getNextFrame();
     final rgbaData = await dartFrame.image.toByteData();
     if (rgbaData == null) {
       return null;
@@ -54,10 +60,7 @@ Future<MatrixImageFileResizedResponse?> customImageResizer(
     width = originalWidth = dartFrame.image.width;
     height = originalHeight = dartFrame.image.height;
 
-    var nativeImg = native.Image.fromRGBA(width, height, rgba);
-
-    dartFrame.image.dispose();
-    dartCodec.dispose();
+    nativeImg = native.Image.fromRGBA(width, height, rgba);
 
     if (arguments.calcBlurhash) {
       // scale down image for blurhashing to speed it up
@@ -68,36 +71,41 @@ Future<MatrixImageFileResizedResponse?> customImageResizer(
         // nearest is unsupported...
         native.Transform.bilinear,
       );
-
-      blurhash = blurhashImg.toBlurhash(3, 3);
-
-      blurhashImg.free();
+      try {
+        blurhash = blurhashImg.toBlurhash(3, 3);
+      } finally {
+        blurhashImg.free();
+      }
     }
 
-    if (frameCount > 1) {
-      // Don't scale down animated images, since those would lose frames.
-      nativeImg.free();
-    } else {
+    if (frameCount <= 1) {
       final max = arguments.maxDimension;
       if (width > max || height > max) {
         (width, height) = _scaleToBox(width, height, boxSize: max);
 
-        final scaledImg = nativeImg.resample(
+        final originalImg = nativeImg;
+        final scaledImg = originalImg.resample(
           width,
           height,
           native.Transform.lanczos,
         );
-        nativeImg.free();
         nativeImg = scaledImg;
+        originalImg.free();
       }
 
       imageBytes = await nativeImg.toJpeg(75);
       mimeType = 'image/jpeg';
-      nativeImg.free();
     }
   } catch (e, s) {
     Logs().e('Could not generate preview', e, s);
-    mimeType = null;
+    // Returning an all-zero response makes callers treat failed decoding as a
+    // valid thumbnail. Return null so MatrixImageFile.shrink preserves the
+    // original attachment instead of propagating invalid image metadata.
+    return null;
+  } finally {
+    nativeImg?.free();
+    dartFrame?.image.dispose();
+    dartCodec?.dispose();
   }
 
   return MatrixImageFileResizedResponse(
