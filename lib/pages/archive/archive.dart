@@ -20,54 +20,89 @@ class Archive extends StatefulWidget {
 
 class ArchiveController extends State<Archive> {
   List<Room> archive = [];
+  Future<List<Room>>? _archiveFuture;
+  bool isForgetting = false;
 
-  Future<List<Room>> getArchive(BuildContext context) async {
-    if (archive.isNotEmpty) return archive;
-    return archive = await Matrix.of(context).client.loadArchive();
+  Future<List<Room>> getArchive(BuildContext context) {
+    return _archiveFuture ??= _loadArchive(Matrix.of(context).client);
   }
 
-  Future<void> forgetRoomAction(int i) async {
-    await showFutureLoadingDialog(
-      context: context,
-      future: () async {
-        Logs().v('Forget room ${archive.last.getLocalizedDisplayname()}');
-        await archive[i].forget();
-        archive.removeAt(i);
-      },
-    );
-    setState(() {});
+  Future<List<Room>> _loadArchive(Client client) async {
+    try {
+      return archive = await client.loadArchive();
+    } catch (_) {
+      _archiveFuture = null;
+      rethrow;
+    }
+  }
+
+  Future<void> forgetRoomAction(Room room) async {
+    if (isForgetting || !archive.any((entry) => entry.id == room.id)) return;
+    setState(() => isForgetting = true);
+    try {
+      final result = await showFutureLoadingDialog(
+        context: context,
+        future: () async {
+          Logs().v('Forget room ${room.getLocalizedDisplayname()}');
+          await room.forget();
+        },
+      );
+      if (!mounted) return;
+      if (result.error == null) {
+        setState(() {
+          archive.removeWhere((entry) => entry.id == room.id);
+        });
+      }
+    } finally {
+      if (mounted) setState(() => isForgetting = false);
+    }
   }
 
   Future<void> forgetAllAction() async {
-    final archive = this.archive;
+    if (isForgetting || archive.isEmpty) return;
+    setState(() => isForgetting = true);
     final client = Matrix.of(context).client;
-    if (archive.isEmpty) return;
-    if (await showOkCancelAlertDialog(
-          useRootNavigator: false,
-          context: context,
-          title: L10n.of(context).areYouSure,
-          okLabel: L10n.of(context).yes,
-          cancelLabel: L10n.of(context).cancel,
-          message: L10n.of(context).clearArchive,
-        ) !=
-        OkCancelResult.ok) {
-      return;
+    try {
+      if (await showOkCancelAlertDialog(
+            useRootNavigator: false,
+            context: context,
+            title: L10n.of(context).areYouSure,
+            okLabel: L10n.of(context).yes,
+            cancelLabel: L10n.of(context).cancel,
+            message: L10n.of(context).clearArchive,
+          ) !=
+          OkCancelResult.ok) {
+        return;
+      }
+      if (!mounted) return;
+      final rooms = List<Room>.from(archive);
+      final forgottenRoomIds = <String>{};
+      final result = await showFutureLoadingDialog(
+        context: context,
+        futureWithProgress: (onProgress) async {
+          for (var index = 0; index < rooms.length; index++) {
+            final room = rooms[index];
+            Logs().v('Forget room ${room.getLocalizedDisplayname()}');
+            await room.forget();
+            forgottenRoomIds.add(room.id);
+            onProgress((index + 1) / rooms.length);
+          }
+        },
+      );
+      if (!mounted) return;
+      setState(() {
+        archive.removeWhere((room) => forgottenRoomIds.contains(room.id));
+      });
+      if (result.error == null) {
+        client.clearArchivesFromCache();
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isForgetting = false;
+        });
+      }
     }
-    if (!mounted) return;
-    await showFutureLoadingDialog(
-      context: context,
-      futureWithProgress: (onProgress) async {
-        final count = archive.length;
-        while (archive.isNotEmpty) {
-          onProgress(1 - (archive.length / count));
-          Logs().v('Forget room ${archive.last.getLocalizedDisplayname()}');
-          await archive.last.forget();
-          archive.removeLast();
-        }
-      },
-    );
-    client.clearArchivesFromCache();
-    setState(() {});
   }
 
   @override

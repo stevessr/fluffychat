@@ -29,7 +29,9 @@ class ArchiveView extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextButton.icon(
-                  onPressed: controller.forgetAllAction,
+                  onPressed: controller.isForgetting
+                      ? null
+                      : controller.forgetAllAction,
                   label: Text(L10n.of(context).clearArchive),
                   icon: const Icon(Icons.cleaning_services_outlined),
                 ),
@@ -60,13 +62,16 @@ class ArchiveView extends StatelessWidget {
                 }
                 return ListView.builder(
                   itemCount: controller.archive.length,
-                  itemBuilder: (BuildContext context, int i) => ChatListItem(
-                    controller.archive[i],
-                    onForget: () => controller.forgetRoomAction(i),
-                    onTap: () => context.go(
-                      '/rooms/archive/${controller.archive[i].id}',
-                    ),
-                  ),
+                  itemBuilder: (BuildContext context, int i) {
+                    final room = controller.archive[i];
+                    return ChatListItem(
+                      room,
+                      onForget: controller.isForgetting
+                          ? null
+                          : () => controller.forgetRoomAction(room),
+                      onTap: () => context.go('/rooms/archive/${room.id}'),
+                    );
+                  },
                 );
               }
             },
