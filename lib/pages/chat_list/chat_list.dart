@@ -15,6 +15,7 @@ import 'package:fluffychat/utils/error_reporter.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/popup_menu_position.dart';
 import 'package:fluffychat/utils/show_scaffold_dialog.dart';
 import 'package:fluffychat/utils/show_update_snackbar.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_modal_action_popup.dart';
@@ -467,21 +468,8 @@ class ChatListController extends State<ChatList>
     BuildContext posContext, [
     Room? space,
   ]) async {
-    final overlay =
-        Overlay.of(posContext).context.findRenderObject() as RenderBox;
-
-    final button = posContext.findRenderObject() as RenderBox;
-
-    final position = RelativeRect.fromRect(
-      Rect.fromPoints(
-        button.localToGlobal(const Offset(0, -65), ancestor: overlay),
-        button.localToGlobal(
-          button.size.bottomRight(Offset.zero) + const Offset(-50, 0),
-          ancestor: overlay,
-        ),
-      ),
-      Offset.zero & overlay.size,
-    );
+    final position = popupMenuPosition(posContext);
+    if (position == null) return;
 
     final spacesWithPowerLevels = room.client.rooms
         .where(

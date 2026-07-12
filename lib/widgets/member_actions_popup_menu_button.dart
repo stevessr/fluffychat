@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/utils/popup_menu_position.dart';
 import 'package:fluffychat/widgets/permission_slider_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -25,20 +26,8 @@ Future<void> showMemberActionsPopupMenu({
   final displayname = user.calcDisplayname();
   final isMe = user.room.client.userID == user.id;
 
-  final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
-
-  final button = context.findRenderObject() as RenderBox;
-
-  final position = RelativeRect.fromRect(
-    Rect.fromPoints(
-      button.localToGlobal(const Offset(0, -65), ancestor: overlay),
-      button.localToGlobal(
-        button.size.bottomRight(Offset.zero) + const Offset(-50, 0),
-        ancestor: overlay,
-      ),
-    ),
-    Offset.zero & overlay.size,
-  );
+  final position = popupMenuPosition(context);
+  if (position == null) return;
 
   const defaultPowerLevels = {0, 50, 100, 9007199254740991};
 
