@@ -53,9 +53,19 @@ class _CuteContentState extends State<CuteContent> {
   }
 
   Future<void> addOverlay() async {
+    if (_isOverlayShown) return;
     _isOverlayShown = true;
     await Future.delayed(const Duration(milliseconds: 50));
-    if (!mounted) return;
+    if (!mounted) {
+      _isOverlayShown = false;
+      return;
+    }
+
+    final overlayState = Overlay.maybeOf(context);
+    if (overlayState == null) {
+      _isOverlayShown = false;
+      return;
+    }
 
     OverlayEntry? overlay;
     overlay = OverlayEntry(
@@ -67,7 +77,7 @@ class _CuteContentState extends State<CuteContent> {
         },
       ),
     );
-    Overlay.of(context).insert(overlay);
+    overlayState.insert(overlay);
   }
 
   String? generateLabel(User? user) {
@@ -120,13 +130,20 @@ class _CuteEventOverlayState extends State<CuteEventOverlay>
 
   @override
   void initState() {
+    super.initState();
     controller = AnimationController(
       duration: const Duration(milliseconds: 2500),
       vsync: this,
     );
     controller?.forward();
     controller?.addStatusListener(_hideOverlay);
-    super.initState();
+  }
+
+  @override
+  void dispose() {
+    controller?.removeStatusListener(_hideOverlay);
+    controller?.dispose();
+    super.dispose();
   }
 
   @override
