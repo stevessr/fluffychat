@@ -1302,14 +1302,17 @@ class ChatController extends State<ChatPageWithRoom>
   Future<void> scrollToEventId(
     String eventId, {
     bool highlightEvent = true,
+    bool reloadIfMissing = true,
   }) async {
-    final foundEvent = timeline!.events.firstWhereOrNull(
+    final timeline = this.timeline;
+    if (timeline == null) return;
+    final foundEvent = timeline.events.firstWhereOrNull(
       (event) => event.eventId == eventId,
     );
 
     final eventIndex = foundEvent == null
         ? -1
-        : timeline!.events
+        : timeline.events
               .filterByVisibleInGui(
                 exceptionEventId: eventId,
                 threadId: activeThreadId,
@@ -1317,8 +1320,9 @@ class ChatController extends State<ChatPageWithRoom>
               .indexOf(foundEvent);
 
     if (eventIndex == -1) {
+      if (!reloadIfMissing) return;
       setState(() {
-        timeline = null;
+        this.timeline = null;
         _scrolledUp = false;
         loadTimelineFuture = _getTimeline(eventContextId: eventId).onError(
           ErrorReporter(
@@ -1328,8 +1332,14 @@ class ChatController extends State<ChatPageWithRoom>
         );
       });
       await loadTimelineFuture;
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        scrollToEventId(eventId);
+      if (!mounted || this.timeline == null) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || this.timeline == null) return;
+        scrollToEventId(
+          eventId,
+          highlightEvent: highlightEvent,
+          reloadIfMissing: false,
+        );
       });
       return;
     }
@@ -1338,18 +1348,22 @@ class ChatController extends State<ChatPageWithRoom>
         scrollToEventIdMarker = eventId;
       });
     }
+    if (!scrollController.hasClients) return;
     await scrollController.scrollToIndex(
       eventIndex + 1,
       duration: FluffyThemes.animationDuration,
       preferPosition: AutoScrollPosition.middle,
     );
+    if (!mounted) return;
     _updateScrollController();
   }
 
   Future<void> scrollDown() async {
-    if (!timeline!.allowNewEvent) {
+    final timeline = this.timeline;
+    if (timeline == null) return;
+    if (!timeline.allowNewEvent) {
       setState(() {
-        timeline = null;
+        this.timeline = null;
         _scrolledUp = false;
         loadTimelineFuture = _getTimeline().onError(
           ErrorReporter(
@@ -1359,7 +1373,9 @@ class ChatController extends State<ChatPageWithRoom>
         );
       });
       await loadTimelineFuture;
+      if (!mounted || this.timeline == null) return;
     }
+    if (!scrollController.hasClients) return;
     scrollController.jumpTo(0);
   }
 
