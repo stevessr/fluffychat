@@ -19,6 +19,7 @@ class NativeImplementationsWebWorker extends NativeImplementations {
 
   final Map<double, Completer<dynamic>> _completers = {};
   final _random = Random();
+  (Object, StackTrace)? _terminalFailure;
 
   /// the default handler for stackTraces in web workers
   static StackTrace defaultStackTraceHandler(String obfuscatedStackTrace) {
@@ -57,6 +58,10 @@ class NativeImplementationsWebWorker extends NativeImplementations {
   }) => NativeImplementations.dummy.decryptFile(file);
 
   Future<T> operation<T, U>(WebWorkerOperations name, U argument) async {
+    final terminalFailure = _terminalFailure;
+    if (terminalFailure != null) {
+      Error.throwWithStackTrace(terminalFailure.$1, terminalFailure.$2);
+    }
     final label = _random.nextDouble();
     final completer = Completer<T>();
     _completers[label] = completer;
@@ -76,7 +81,7 @@ class NativeImplementationsWebWorker extends NativeImplementations {
   }
 
   void _handleWorkerError(Event event) {
-    _failPendingOperations(
+    _markTerminalFailure(
       StateError('Web worker failed to load or execute: $event'),
       StackTrace.current,
     );
@@ -97,12 +102,17 @@ class NativeImplementationsWebWorker extends NativeImplementations {
     }
   }
 
+  void _markTerminalFailure(Object error, StackTrace stackTrace) {
+    _terminalFailure ??= (error, stackTrace);
+    _failPendingOperations(error, stackTrace);
+  }
+
   void dispose() {
-    worker.terminate();
-    _failPendingOperations(
+    _markTerminalFailure(
       StateError('Web worker has been disposed'),
       StackTrace.current,
     );
+    worker.terminate();
   }
 
   // toJS is not working with Future<void> so we need to ignore avoid_void_async

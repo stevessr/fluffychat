@@ -160,6 +160,7 @@ Future<void> main() async {
   );
   final workerFailureTimer = Stopwatch()..start();
   var workerFailed = false;
+  var repeatedWorkerOperationFailed = false;
   try {
     await brokenWorker.operation<Object?, Uint8List>(
       WebWorkerOperations.calcImageMetadata,
@@ -167,11 +168,20 @@ Future<void> main() async {
     );
   } catch (_) {
     workerFailed = true;
+  }
+  try {
+    await brokenWorker.operation<Object?, Uint8List>(
+      WebWorkerOperations.calcImageMetadata,
+      png,
+    );
+  } catch (_) {
+    repeatedWorkerOperationFailed = true;
   } finally {
     workerFailureTimer.stop();
     brokenWorker.dispose();
   }
   if (!workerFailed ||
+      !repeatedWorkerOperationFailed ||
       workerFailureTimer.elapsed > const Duration(seconds: 5)) {
     throw StateError('Broken web worker did not fail pending work promptly');
   }
