@@ -158,6 +158,11 @@ flutter_launcher_icons:
 # 2. Always link an (upstream?) issue
 # 3. Explain how and when this can be removed (overrides must be temporarily)
 dependency_overrides:
+  # Matrix 8.0.0 reads IndexedDB values through JS interop. dart2wasm keeps
+  # those values as Wasm-safe JS representations, so normalize them before
+  # the SDK's strongly typed database boxes consume them.
+  matrix:
+    path: third_party/matrix
   # flutter_rust_bridge 2.11.1 exposes synchronous DCO results as Dart Lists.
   # dart2wasm receives those values as JS arrays, causing a runtime type check
   # when vodozemac creates the first Olm account. Keep this local compatibility

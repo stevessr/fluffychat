@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:async';
 import 'dart:convert';
 
-import 'package:async/async.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/web_paths.dart';
 import 'package:flutter/foundation.dart';
@@ -102,16 +102,20 @@ enum AppSettings<T> {
     final store = AppSettings._store = await SharedPreferences.getInstance();
 
     // Migrate wrong datatype for fontSizeFactor
-    final fontSizeFactorString = Result(
-      () => store.getString(AppSettings.fontSizeFactor.key),
-    ).asValue?.value;
-    if (fontSizeFactorString != null) {
+    final storedFontSizeFactor = store.get(AppSettings.fontSizeFactor.key);
+    if (storedFontSizeFactor is String) {
       Logs().i('Migrate wrong datatype for fontSizeFactor!');
       await store.remove(AppSettings.fontSizeFactor.key);
-      final fontSizeFactor = double.tryParse(fontSizeFactorString);
+      final fontSizeFactor = double.tryParse(storedFontSizeFactor);
       if (fontSizeFactor != null) {
         await store.setDouble(AppSettings.fontSizeFactor.key, fontSizeFactor);
       }
+    } else if (storedFontSizeFactor is int) {
+      // JSON decoding on dart2wasm restores integral doubles as integers.
+      await store.setDouble(
+        AppSettings.fontSizeFactor.key,
+        storedFontSizeFactor.toDouble(),
+      );
     }
 
     if (store.getBool(AppSettings.sendOnEnter.key) == null) {
@@ -152,70 +156,56 @@ enum AppSettings<T> {
   }
 }
 
-extension AppSettingsBoolExtension on AppSettings<bool> {
-  bool get value {
-    final value = Result(() => AppSettings.store.getBool(key));
-    final error = value.asError;
-    if (error != null) {
-      Logs().e(
-        'Unable to fetch $key from storage. Removing entry...',
-        error.error,
-        error.stackTrace,
-      );
-    }
-    return value.asValue?.value ?? defaultValue;
+T _readSetting<T>(AppSettings<T> setting, T? Function(Object value) decode) {
+  try {
+    final storedValue = AppSettings.store.get(setting.key);
+    if (storedValue == null) return setting.defaultValue;
+    final value = decode(storedValue);
+    if (value != null) return value;
+    throw StateError(
+      'Unexpected ${storedValue.runtimeType} value for ${setting.key}',
+    );
+  } catch (error, stackTrace) {
+    Logs().e(
+      'Unable to fetch ${setting.key} from storage. Removing entry...',
+      error,
+      stackTrace,
+    );
+    unawaited(AppSettings.store.remove(setting.key));
+    return setting.defaultValue;
   }
+}
+
+extension AppSettingsBoolExtension on AppSettings<bool> {
+  bool get value => _readSetting(this, (value) => value is bool ? value : null);
 
   Future<void> setItem(bool value) => AppSettings.store.setBool(key, value);
 }
 
 extension AppSettingsStringExtension on AppSettings<String> {
-  String get value {
-    final value = Result(() => AppSettings.store.getString(key));
-    final error = value.asError;
-    if (error != null) {
-      Logs().e(
-        'Unable to fetch $key from storage. Removing entry...',
-        error.error,
-        error.stackTrace,
-      );
-    }
-    return value.asValue?.value ?? defaultValue;
-  }
+  String get value =>
+      _readSetting(this, (value) => value is String ? value : null);
 
   Future<void> setItem(String value) => AppSettings.store.setString(key, value);
 }
 
 extension AppSettingsIntExtension on AppSettings<int> {
-  int get value {
-    final value = Result(() => AppSettings.store.getInt(key));
-    final error = value.asError;
-    if (error != null) {
-      Logs().e(
-        'Unable to fetch $key from storage. Removing entry...',
-        error.error,
-        error.stackTrace,
-      );
+  int get value => _readSetting(this, (value) {
+    if (value is int) return value;
+    if (value is double &&
+        value.isFinite &&
+        value == value.truncateToDouble()) {
+      return value.toInt();
     }
-    return value.asValue?.value ?? defaultValue;
-  }
+    return null;
+  });
 
   Future<void> setItem(int value) => AppSettings.store.setInt(key, value);
 }
 
 extension AppSettingsDoubleExtension on AppSettings<double> {
-  double get value {
-    final value = Result(() => AppSettings.store.getDouble(key));
-    final error = value.asError;
-    if (error != null) {
-      Logs().e(
-        'Unable to fetch $key from storage. Removing entry...',
-        error.error,
-        error.stackTrace,
-      );
-    }
-    return value.asValue?.value ?? defaultValue;
-  }
+  double get value =>
+      _readSetting(this, (value) => value is num ? value.toDouble() : null);
 
   Future<void> setItem(double value) => AppSettings.store.setDouble(key, value);
 }
