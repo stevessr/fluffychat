@@ -2562,27 +2562,18 @@ class Client extends MatrixApi {
         ),
       );
     } on TimeoutException catch (e, s) {
-      // Some transports and async SDK hooks can surface their own timeout
-      // before our syncRequest timeout wrapper gets a chance to normalize it.
-      // Treat those as a recoverable sync failure instead of reporting that
-      // event processing crashed. The background sync loop will retry after
-      // this invocation completes.
-      final exception = receivedSyncResponse ? e : SyncConnectionException(e);
-      Logs().w(
-        receivedSyncResponse
-            ? 'Syncloop timed out during asynchronous event processing. Retrying...'
-            : 'Syncloop timed out while waiting for the server. Retrying...',
-        e,
-        s,
-      );
-      onSyncStatus.add(
-        SyncStatusUpdate(
-          SyncStatus.error,
-          error: SdkError(exception: exception, stackTrace: s),
-        ),
-      );
+      _reportSyncTimeout(e, s, receivedSyncResponse: receivedSyncResponse);
     } catch (e, s) {
       if (!isLogged() || _disposed || _aborted) return;
+      // WasmGC can occasionally surface a Dart TimeoutException through the
+      // JavaScript exception bridge as a generic Object. In that case the
+      // typed catch above is skipped even though the error still has the
+      // canonical TimeoutException representation. Keep sync alive and retry
+      // just as we do for a normally typed timeout.
+      if (_looksLikeTimeoutException(e)) {
+        _reportSyncTimeout(e, s, receivedSyncResponse: receivedSyncResponse);
+        return;
+      }
       Logs().e('Error during processing events', e, s);
       onSyncStatus.add(
         SyncStatusUpdate(
@@ -2594,6 +2585,42 @@ class Client extends MatrixApi {
         ),
       );
     }
+  }
+
+  void _reportSyncTimeout(
+    Object error,
+    StackTrace stackTrace, {
+    required bool receivedSyncResponse,
+  }) {
+    // Some transports and async SDK hooks can surface their own timeout
+    // before our syncRequest timeout wrapper gets a chance to normalize it.
+    // Treat those as a recoverable sync failure instead of reporting that
+    // event processing crashed. The background sync loop will retry after
+    // this invocation completes.
+    final exception = receivedSyncResponse
+        ? error
+        : SyncConnectionException(error);
+    Logs().w(
+      receivedSyncResponse
+          ? 'Syncloop timed out during asynchronous event processing. Retrying...'
+          : 'Syncloop timed out while waiting for the server. Retrying...',
+      error,
+      stackTrace,
+    );
+    onSyncStatus.add(
+      SyncStatusUpdate(
+        SyncStatus.error,
+        error: SdkError(exception: exception, stackTrace: stackTrace),
+      ),
+    );
+  }
+
+  static bool _looksLikeTimeoutException(Object error) {
+    if (error is TimeoutException) return true;
+    final description = error.toString();
+    return description == 'TimeoutException' ||
+        description.startsWith('TimeoutException:') ||
+        description.startsWith('TimeoutException after ');
   }
 
   /// Use this method only for testing utilities!
