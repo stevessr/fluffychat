@@ -69,10 +69,17 @@ class _ShareScaffoldDialogState extends State<ShareScaffoldDialog> {
       if (consent != OkCancelResult.ok) return;
     }
     if (!mounted) return;
-    while (context.canPop()) {
-      context.pop();
+    final router = GoRouter.of(context);
+    while (router.canPop()) {
+      router.pop();
     }
-    context.go('/rooms/$roomId', extra: widget.items);
+    router.go('/rooms/$roomId', extra: widget.items);
+  }
+
+  @override
+  void dispose() {
+    _filterController.dispose();
+    super.dispose();
   }
 
   @override

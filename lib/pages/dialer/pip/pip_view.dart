@@ -122,6 +122,7 @@ class PIPViewState extends State<PIPView> with TickerProviderStateMixin {
       _isDragging = false;
     });
     _dragAnimationController.forward().whenCompleteOrCancel(() {
+      if (!mounted) return;
       _dragAnimationController.value = 0;
       _dragOffset = Offset.zero;
     });
@@ -129,10 +130,19 @@ class PIPViewState extends State<PIPView> with TickerProviderStateMixin {
 
   void _onPanStart(_) {
     if (_isAnimating()) return;
+    final cornerOffset = _offsets[_corner];
+    if (cornerOffset == null) return;
     setState(() {
-      _dragOffset = _offsets[_corner]!;
+      _dragOffset = cornerOffset;
       _isDragging = true;
     });
+  }
+
+  @override
+  void dispose() {
+    _toggleFloatingAnimationController.dispose();
+    _dragAnimationController.dispose();
+    super.dispose();
   }
 
   @override
