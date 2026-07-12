@@ -203,7 +203,15 @@ class ChatEncryptionSettingsView extends StatelessWidget {
                                           L10n.of(context).noCurve25519KeyFound,
                                     ),
                                     trailing: IconButton(
-                                      icon: Icon(Icons.block_outlined),
+                                      icon: controller.isUpdatingDevice(device)
+                                          ? const SizedBox.square(
+                                              dimension: 18,
+                                              child:
+                                                  CircularProgressIndicator.adaptive(
+                                                    strokeWidth: 2,
+                                                  ),
+                                            )
+                                          : Icon(Icons.block_outlined),
                                       style: IconButton.styleFrom(
                                         foregroundColor: device.blocked
                                             ? theme.colorScheme.error
@@ -213,8 +221,12 @@ class ChatEncryptionSettingsView extends StatelessWidget {
                                           ? L10n.of(context).unblockDevice
                                           : L10n.of(context).blockDevice,
 
-                                      onPressed: () =>
-                                          controller.toggleBlocked(device),
+                                      onPressed:
+                                          controller.isUpdatingDevice(device)
+                                          ? null
+                                          : () => controller.toggleBlocked(
+                                              device,
+                                            ),
                                     ),
                                   );
                                 }),
