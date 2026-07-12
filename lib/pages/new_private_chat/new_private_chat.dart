@@ -53,6 +53,7 @@ class NewPrivateChatController extends State<NewPrivateChat> {
     final deeplink = widget.deeplink;
     if (deeplink != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
         UrlLauncher(context, deeplink).openMatrixToUrl();
       });
     }
@@ -119,9 +120,9 @@ class NewPrivateChatController extends State<NewPrivateChat> {
   Future<void> copyUserId() async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final l10n = L10n.of(context);
-    await Clipboard.setData(
-      ClipboardData(text: Matrix.of(context).client.userID!),
-    );
+    final userId = Matrix.of(context).client.userID;
+    if (userId == null) return;
+    await Clipboard.setData(ClipboardData(text: userId));
     if (!mounted) return;
     scaffoldMessenger.showSnackBar(
       SnackBar(content: Text(l10n.copiedToClipboard)),

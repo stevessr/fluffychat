@@ -46,16 +46,20 @@ class InvitationSelectionController extends State<InvitationSelection> {
     final room = client.getRoomById(roomId);
     if (room == null) return [];
 
-    final participants = (room.summary.mJoinedMemberCount ?? 0) > 100
-        ? room.getParticipants()
-        : await room.requestParticipants();
+    final participants = List<User>.from(
+      (room.summary.mJoinedMemberCount ?? 0) > 100
+          ? room.getParticipants()
+          : await room.requestParticipants(),
+    );
     participants.removeWhere(
       (u) => ![Membership.join, Membership.invite].contains(u.membership),
     );
-    final contacts = client.rooms
-        .where((r) => r.isDirectChat)
-        .map((r) => r.unsafeGetUserFromMemoryOrFallback(r.directChatMatrixID!))
-        .toList();
+    final contacts = client.rooms.where((r) => r.isDirectChat).expand((room) {
+      final userId = room.directChatMatrixID;
+      return userId == null
+          ? const <User>[]
+          : [room.unsafeGetUserFromMemoryOrFallback(userId)];
+    }).toList();
     contacts.sort(
       (a, b) => a.calcDisplayname().toLowerCase().compareTo(
         b.calcDisplayname().toLowerCase(),
