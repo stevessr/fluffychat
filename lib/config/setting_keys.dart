@@ -177,8 +177,18 @@ T _readSetting<T>(AppSettings<T> setting, T? Function(Object value) decode) {
       error,
       stackTrace,
     );
-    unawaited(store.remove(setting.key));
+    unawaited(_removeInvalidSetting(store, setting.key));
     return setting.defaultValue;
+  }
+}
+
+Future<void> _removeInvalidSetting(SharedPreferences store, String key) async {
+  try {
+    await store.remove(key);
+  } catch (error, stackTrace) {
+    // Reads must remain synchronous and return their default, but a failed
+    // asynchronous cleanup must not become an uncaught browser-storage error.
+    Logs().w('Unable to remove invalid setting $key', error, stackTrace);
   }
 }
 
