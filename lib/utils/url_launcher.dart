@@ -32,6 +32,18 @@ class UrlLauncher {
   const UrlLauncher(this.context, this.url, [this.name]);
 
   Future<void> launchUrl() async {
+    try {
+      await _launchUrl();
+    } catch (error, stackTrace) {
+      Logs().w('Unable to open URL', error, stackTrace);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(L10n.of(context).cantOpenUri(url ?? ''))),
+      );
+    }
+  }
+
+  Future<void> _launchUrl() async {
     final l10n = L10n.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final url = this.url?.trim();
@@ -90,18 +102,18 @@ class UrlLauncher {
             // to an apple maps thingy
             // https://developer.apple.com/library/archive/featuredarticles/iPhoneURLScheme_Reference/MapLinks/MapLinks.html
             final ll = '${latlong.first},${latlong.last}';
-            launchUrlString('https://maps.apple.com/?q=$ll&sll=$ll');
+            await _launchExternalUrl('https://maps.apple.com/?q=$ll&sll=$ll');
           } else {
             // transmute geo URIs on desktop to openstreetmap links, as those usually can't handle
             // geo URIs
-            launchUrlString(
+            await _launchExternalUrl(
               'https://www.openstreetmap.org/?mlat=${latlong.first}&mlon=${latlong.last}#map=16/${latlong.first}/${latlong.last}',
             );
           }
           return;
         }
       }
-      launchUrlString(url);
+      await _launchExternalUrl(url);
       return;
     }
     if (uri.host.isEmpty) {
@@ -125,9 +137,20 @@ class UrlLauncher {
         .join('.');
     // Force LaunchMode.externalApplication, otherwise url_launcher will default
     // to opening links in a webview on mobile platforms.
-    launchUrlString(
+    await _launchExternalUrl(
       uri.replace(host: newHost).toString(),
       mode: LaunchMode.externalApplication,
+    );
+  }
+
+  Future<void> _launchExternalUrl(
+    String target, {
+    LaunchMode mode = LaunchMode.platformDefault,
+  }) async {
+    final launched = await launchUrlString(target, mode: mode);
+    if (launched || !context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(L10n.of(context).cantOpenUri(target))),
     );
   }
 
