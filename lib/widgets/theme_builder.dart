@@ -7,6 +7,7 @@ import 'package:collection/collection.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:fluffychat/utils/color_value.dart';
 import 'package:flutter/material.dart';
+import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -45,19 +46,26 @@ class ThemeController extends State<ThemeBuilder> {
       Provider.of<ThemeController>(context, listen: false);
 
   Future<void> _loadData(_) async {
-    final preferences = _sharedPreferences ??=
-        await SharedPreferences.getInstance();
+    try {
+      final preferences = _sharedPreferences ??=
+          await SharedPreferences.getInstance();
 
-    final rawThemeMode = preferences.getString(widget.themeModeSettingsKey);
-    final rawColor = preferences.getInt(widget.primaryColorSettingsKey);
-    if (!mounted) return;
+      final rawThemeMode = preferences.getString(widget.themeModeSettingsKey);
+      final rawColor = preferences.getInt(widget.primaryColorSettingsKey);
+      if (!mounted) return;
 
-    setState(() {
-      _themeMode = ThemeMode.values.singleWhereOrNull(
-        (value) => value.name == rawThemeMode,
-      );
-      _primaryColor = rawColor == null ? null : Color(rawColor);
-    });
+      setState(() {
+        _themeMode = ThemeMode.values.singleWhereOrNull(
+          (value) => value.name == rawThemeMode,
+        );
+        _primaryColor = rawColor == null ? null : Color(rawColor);
+      });
+    } catch (error, stackTrace) {
+      // Loading theme preferences is scheduled from a post-frame callback.
+      // Keep the default theme instead of surfacing an unhandled startup
+      // exception when browser storage is unavailable.
+      Logs().w('Unable to load theme preferences', error, stackTrace);
+    }
   }
 
   Future<void> setThemeMode(ThemeMode newThemeMode) async {

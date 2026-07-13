@@ -3,10 +3,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:async';
+
 import 'package:fluffychat/widgets/lock_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 
 class AppLockWidget extends StatefulWidget {
@@ -32,6 +35,7 @@ class AppLock extends State<AppLockWidget> with WidgetsBindingObserver {
   bool _useBiometrics = false;
   bool _triedAutoBiometrics = false;
   bool _paused = false;
+  Future<bool>? _biometricUnlockFuture;
   bool get isActive =>
       !_paused &&
       (_useBiometrics ||
@@ -51,14 +55,21 @@ class AppLock extends State<AppLockWidget> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback(_checkLoggedIn);
     if (isActive && useBiometrics) {
-      unlockWithBiometrics();
+      unawaited(unlockWithBiometrics());
     }
   }
 
   Future<void> _checkLoggedIn(_) async {
     if (widget.isLoggedIn) return;
 
-    await changePincode(null);
+    try {
+      await changePincode(null);
+    } catch (error, stackTrace) {
+      // The user is already logged out. A secure-storage failure must not
+      // leave an obsolete app lock covering the logged-out UI forever.
+      Logs().w('Unable to clear app lock after logout', error, stackTrace);
+      _pincode = null;
+    }
     if (!mounted) return;
     setState(() {
       _isLocked = false;
@@ -74,7 +85,7 @@ class AppLock extends State<AppLockWidget> with WidgetsBindingObserver {
         state == AppLifecycleState.resumed &&
         !_triedAutoBiometrics) {
       if (useBiometrics) {
-        unlockWithBiometrics();
+        unawaited(unlockWithBiometrics());
       }
     }
   }
@@ -101,14 +112,36 @@ class AppLock extends State<AppLockWidget> with WidgetsBindingObserver {
     return;
   }
 
-  Future<bool> unlockWithBiometrics() async {
-    _triedAutoBiometrics = true;
-    final localAuth = LocalAuthentication();
-    final unlocked = await localAuth.authenticate(
-      localizedReason: 'Please authenticate to unlock the app.',
-      persistAcrossBackgrounding: true,
-      biometricOnly: true,
+  Future<bool> unlockWithBiometrics() {
+    final pendingUnlock = _biometricUnlockFuture;
+    if (pendingUnlock != null) return pendingUnlock;
+
+    final operation = _performBiometricUnlock();
+    _biometricUnlockFuture = operation;
+    unawaited(
+      operation.whenComplete(() {
+        if (identical(_biometricUnlockFuture, operation)) {
+          _biometricUnlockFuture = null;
+        }
+      }),
     );
+    return operation;
+  }
+
+  Future<bool> _performBiometricUnlock() async {
+    _triedAutoBiometrics = true;
+    bool unlocked;
+    try {
+      final localAuth = LocalAuthentication();
+      unlocked = await localAuth.authenticate(
+        localizedReason: 'Please authenticate to unlock the app.',
+        persistAcrossBackgrounding: true,
+        biometricOnly: true,
+      );
+    } catch (error, stackTrace) {
+      Logs().w('Unable to authenticate with biometrics', error, stackTrace);
+      return false;
+    }
     if (!mounted) return false;
     if (unlocked) {
       setState(() {
