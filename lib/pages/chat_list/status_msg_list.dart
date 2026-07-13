@@ -97,7 +97,7 @@ class StatusMessageList extends StatelessWidget {
   }
 }
 
-class PresenceAvatar extends StatelessWidget {
+class PresenceAvatar extends StatefulWidget {
   final CachedPresence presence;
   final double height;
   final void Function(Profile) onTap;
@@ -110,11 +110,46 @@ class PresenceAvatar extends StatelessWidget {
   });
 
   @override
+  State<PresenceAvatar> createState() => _PresenceAvatarState();
+}
+
+class _PresenceAvatarState extends State<PresenceAvatar> {
+  Future<Profile>? _profileFuture;
+  Client? _profileClient;
+  String? _profileUserId;
+
+  CachedPresence get presence => widget.presence;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _ensureProfileFuture();
+  }
+
+  @override
+  void didUpdateWidget(covariant PresenceAvatar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _ensureProfileFuture();
+  }
+
+  void _ensureProfileFuture() {
+    final client = Matrix.of(context).client;
+    if (_profileFuture != null &&
+        identical(_profileClient, client) &&
+        _profileUserId == presence.userid) {
+      return;
+    }
+    _profileClient = client;
+    _profileUserId = presence.userid;
+    _profileFuture = client.getProfileFromUserId(presence.userid);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final avatarSize = height - 16 - 16 - 6;
+    final avatarSize = widget.height - 16 - 16 - 6;
     final client = Matrix.of(context).client;
     return FutureBuilder<Profile>(
-      future: client.getProfileFromUserId(presence.userid),
+      future: _profileFuture,
       builder: (context, snapshot) {
         final theme = Theme.of(context);
 
@@ -142,7 +177,9 @@ class PresenceAvatar extends StatelessWidget {
                       curve: FluffyThemes.animationCurve,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(avatarSize),
-                        onTap: profile == null ? null : () => onTap(profile),
+                        onTap: profile == null
+                            ? null
+                            : () => widget.onTap(profile),
                         child: Material(
                           borderRadius: BorderRadius.circular(avatarSize),
                           child: Stack(
@@ -182,7 +219,7 @@ class PresenceAvatar extends StatelessWidget {
                                     height: 24,
                                     child: FloatingActionButton.small(
                                       heroTag: null,
-                                      onPressed: () => onTap(
+                                      onPressed: () => widget.onTap(
                                         profile ??
                                             Profile(userId: presence.userid),
                                       ),
