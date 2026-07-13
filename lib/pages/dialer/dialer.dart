@@ -157,15 +157,35 @@ class MyCallingPage extends State<Calling> {
   double? _localVideoWidth;
   EdgeInsetsGeometry? _localVideoMargin;
   CallState? _state;
+  StreamSubscription? _callStateSubscription;
+  StreamSubscription? _callEventSubscription;
+  bool _cleanupStarted = false;
+
+  void _runCallOperation(
+    String failureMessage,
+    Future<dynamic> Function() operation,
+  ) {
+    unawaited(() async {
+      try {
+        await operation();
+      } catch (error, stackTrace) {
+        Logs().w(failureMessage, error, stackTrace);
+      }
+    }());
+  }
 
   Future<void> _playCallSound() async {
-    const path = 'assets/sounds/call.ogg';
-    if (kIsWeb || PlatformInfos.isMobile || PlatformInfos.isMacOS) {
-      final player = AudioPlayer();
-      await player.setAsset(path);
-      player.play();
-    } else {
-      Logs().w('Playing sound not implemented for this platform!');
+    try {
+      const path = 'assets/sounds/call.ogg';
+      if (kIsWeb || PlatformInfos.isMobile || PlatformInfos.isMacOS) {
+        final player = AudioPlayer();
+        await player.setAsset(path);
+        await player.play();
+      } else {
+        Logs().w('Playing sound not implemented for this platform!');
+      }
+    } catch (error, stackTrace) {
+      Logs().w('Unable to play call sound', error, stackTrace);
     }
   }
 
@@ -173,13 +193,16 @@ class MyCallingPage extends State<Calling> {
   void initState() {
     super.initState();
     initialize();
-    _playCallSound();
+    unawaited(_playCallSound());
   }
 
   void initialize() {
     final call = this.call;
-    call.onCallStateChanged.stream.listen(_handleCallState);
-    call.onCallEventChanged.stream.listen((event) {
+    _callStateSubscription = call.onCallStateChanged.stream.listen(
+      _handleCallState,
+    );
+    _callEventSubscription = call.onCallEventChanged.stream.listen((event) {
+      if (!mounted) return;
       if (event == CallStateChange.kFeedsChanged) {
         setState(call.tryRemoveStopedStreams);
       } else if (event == CallStateChange.kLocalHoldUnhold ||
@@ -193,26 +216,47 @@ class MyCallingPage extends State<Calling> {
     _state = call.state;
 
     if (call.type == CallType.kVideo) {
-      try {
-        // Enable wakelock (keep screen on)
-        unawaited(WakelockPlus.enable());
-      } catch (_) {}
+      _runCallOperation('Unable to enable call wakelock', WakelockPlus.enable);
     }
   }
 
   void cleanUp() {
+    if (_cleanupStarted) return;
+    _cleanupStarted = true;
     Timer(const Duration(seconds: 2), () => widget.onClear?.call());
     if (call.type == CallType.kVideo) {
-      try {
-        unawaited(WakelockPlus.disable());
-      } catch (_) {}
+      _runCallOperation(
+        'Unable to disable call wakelock',
+        WakelockPlus.disable,
+      );
     }
   }
 
   @override
   void dispose() {
+    if (!_cleanupStarted && call.type == CallType.kVideo) {
+      _cleanupStarted = true;
+      _runCallOperation(
+        'Unable to disable call wakelock during disposal',
+        WakelockPlus.disable,
+      );
+    }
+    final callStateSubscription = _callStateSubscription;
+    final callEventSubscription = _callEventSubscription;
+    if (callStateSubscription != null) {
+      _runCallOperation(
+        'Unable to cancel call-state subscription',
+        callStateSubscription.cancel,
+      );
+    }
+    if (callEventSubscription != null) {
+      _runCallOperation(
+        'Unable to cancel call-event subscription',
+        callEventSubscription.cancel,
+      );
+    }
+    _runCallOperation('Unable to clean up call', call.cleanUp);
     super.dispose();
-    call.cleanUp.call();
   }
 
   void _resizeLocalVideo(Orientation orientation) {
@@ -234,7 +278,10 @@ class MyCallingPage extends State<Calling> {
   void _handleCallState(CallState state) {
     Logs().v('CallingPage::handleCallState: $state');
     if ({CallState.kConnected, CallState.kEnded}.contains(state)) {
-      HapticFeedback.heavyImpact();
+      _runCallOperation(
+        'Unable to provide call-state haptic feedback',
+        HapticFeedback.heavyImpact,
+      );
     }
 
     if (mounted) {
@@ -246,76 +293,91 @@ class MyCallingPage extends State<Calling> {
   }
 
   void _answerCall() {
-    setState(() {
-      call.answer();
-    });
+    _runCallOperation('Unable to answer call', call.answer);
   }
 
   void _hangUp() {
-    setState(() {
-      if (call.isRinging) {
-        call.reject();
-      } else {
-        call.hangup(reason: CallErrorCode.userHangup);
-      }
-    });
+    _runCallOperation(
+      'Unable to end call',
+      () => call.isRinging
+          ? call.reject()
+          : call.hangup(reason: CallErrorCode.userHangup),
+    );
   }
 
   void _muteMic() {
-    setState(() {
-      call.setMicrophoneMuted(!call.isMicrophoneMuted);
-    });
+    _runCallOperation(
+      'Unable to update microphone state',
+      () => call.setMicrophoneMuted(!call.isMicrophoneMuted),
+    );
   }
 
-  void _screenSharing() {
-    if (PlatformInfos.isAndroid) {
-      if (!call.screensharingEnabled) {
-        FlutterForegroundTask.init(
-          androidNotificationOptions: AndroidNotificationOptions(
-            channelId: 'notification_channel_id',
-            channelName: 'Foreground Notification',
-            channelDescription: L10n.of(
-              widget.context,
-            ).foregroundServiceRunning,
-          ),
-          iosNotificationOptions: const IOSNotificationOptions(),
-          foregroundTaskOptions: ForegroundTaskOptions(
-            eventAction: ForegroundTaskEventAction.nothing(),
-          ),
-        );
-        FlutterForegroundTask.startService(
-          notificationTitle: L10n.of(widget.context).screenSharingTitle,
-          notificationText: L10n.of(widget.context).screenSharingDetail,
-        );
-      } else {
-        FlutterForegroundTask.stopService();
-      }
-    }
-
-    setState(() {
-      call.setScreensharingEnabled(!call.screensharingEnabled);
-    });
-  }
+  void _screenSharing() =>
+      _runCallOperation('Unable to update screen sharing', () async {
+        final enableScreenSharing = !call.screensharingEnabled;
+        if (enableScreenSharing) {
+          var foregroundServiceStarted = false;
+          if (PlatformInfos.isAndroid) {
+            FlutterForegroundTask.init(
+              androidNotificationOptions: AndroidNotificationOptions(
+                channelId: 'notification_channel_id',
+                channelName: 'Foreground Notification',
+                channelDescription: L10n.of(
+                  widget.context,
+                ).foregroundServiceRunning,
+              ),
+              iosNotificationOptions: const IOSNotificationOptions(),
+              foregroundTaskOptions: ForegroundTaskOptions(
+                eventAction: ForegroundTaskEventAction.nothing(),
+              ),
+            );
+            await FlutterForegroundTask.startService(
+              notificationTitle: L10n.of(widget.context).screenSharingTitle,
+              notificationText: L10n.of(widget.context).screenSharingDetail,
+            );
+            foregroundServiceStarted = true;
+          }
+          try {
+            await call.setScreensharingEnabled(true);
+          } catch (_) {
+            if (foregroundServiceStarted) {
+              await FlutterForegroundTask.stopService();
+            }
+            rethrow;
+          }
+        } else {
+          await call.setScreensharingEnabled(false);
+          if (PlatformInfos.isAndroid) {
+            await FlutterForegroundTask.stopService();
+          }
+        }
+        if (mounted) setState(() {});
+      });
 
   void _remoteOnHold() {
-    setState(() {
-      call.setRemoteOnHold(!call.remoteOnHold);
-    });
+    _runCallOperation(
+      'Unable to update call hold state',
+      () => call.setRemoteOnHold(!call.remoteOnHold),
+    );
   }
 
   void _muteCamera() {
-    setState(() {
-      call.setLocalVideoMuted(!call.isLocalVideoMuted);
-    });
+    _runCallOperation(
+      'Unable to update camera state',
+      () => call.setLocalVideoMuted(!call.isLocalVideoMuted),
+    );
   }
 
   Future<void> _switchCamera() async {
-    if (call.localUserMediaStream != null) {
-      await Helper.switchCamera(
-        call.localUserMediaStream!.stream!.getVideoTracks().first,
-      );
+    try {
+      final videoTracks = call.localUserMediaStream?.stream?.getVideoTracks();
+      final videoTrack = videoTracks?.firstOrNull;
+      if (videoTrack == null) return;
+      await Helper.switchCamera(videoTrack);
+      if (mounted) setState(() {});
+    } catch (error, stackTrace) {
+      Logs().w('Unable to switch camera', error, stackTrace);
     }
-    setState(() {});
   }
 
   /*
