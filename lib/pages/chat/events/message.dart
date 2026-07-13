@@ -516,65 +516,12 @@ class Message extends StatelessWidget {
                                                   includingFallback: false,
                                                 ) !=
                                                 null)
-                                              FutureBuilder<Event?>(
-                                                future: event.getReplyEvent(
-                                                  timeline,
-                                                ),
-                                                builder: (BuildContext context, snapshot) {
-                                                  final replyEvent =
-                                                      snapshot.hasData
-                                                      ? snapshot.data!
-                                                      : Event(
-                                                          eventId:
-                                                              event
-                                                                  .inReplyToEventId() ??
-                                                              '\$fake_event_id',
-                                                          content: {
-                                                            'msgtype': 'm.text',
-                                                            'body': '...',
-                                                          },
-                                                          senderId:
-                                                              event.senderId,
-                                                          type:
-                                                              'm.room.message',
-                                                          room: event.room,
-                                                          status:
-                                                              EventStatus.sent,
-                                                          originServerTs:
-                                                              DateTime.now(),
-                                                        );
-                                                  return Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                          left: 16,
-                                                          right: 16,
-                                                          top: 8,
-                                                        ),
-                                                    child: Material(
-                                                      color: Colors.transparent,
-                                                      borderRadius: ReplyContent
-                                                          .borderRadius,
-                                                      child: InkWell(
-                                                        borderRadius:
-                                                            ReplyContent
-                                                                .borderRadius,
-                                                        onTap: () =>
-                                                            scrollToEventId(
-                                                              replyEvent
-                                                                  .eventId,
-                                                            ),
-                                                        child: AbsorbPointer(
-                                                          child: ReplyContent(
-                                                            replyEvent,
-                                                            ownMessage:
-                                                                ownMessage,
-                                                            timeline: timeline,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
+                                              _ReplyEventPreview(
+                                                event: event,
+                                                timeline: timeline,
+                                                ownMessage: ownMessage,
+                                                scrollToEventId:
+                                                    scrollToEventId,
                                               ),
                                             MessageContent(
                                               displayEvent,
@@ -1052,6 +999,87 @@ class BubblePainter extends CustomPainter {
   @override
   bool shouldRepaint(BubblePainter oldDelegate) {
     return !listEquals(oldDelegate.colors, colors);
+  }
+}
+
+class _ReplyEventPreview extends StatefulWidget {
+  final Event event;
+  final Timeline timeline;
+  final bool ownMessage;
+  final void Function(String eventId) scrollToEventId;
+
+  const _ReplyEventPreview({
+    required this.event,
+    required this.timeline,
+    required this.ownMessage,
+    required this.scrollToEventId,
+  });
+
+  @override
+  State<_ReplyEventPreview> createState() => _ReplyEventPreviewState();
+}
+
+class _ReplyEventPreviewState extends State<_ReplyEventPreview> {
+  late Future<Event?> _replyEventFuture;
+  late int _timelineEventCount;
+
+  @override
+  void initState() {
+    super.initState();
+    _resetFuture();
+  }
+
+  @override
+  void didUpdateWidget(covariant _ReplyEventPreview oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.event, widget.event) ||
+        !identical(oldWidget.timeline, widget.timeline) ||
+        _timelineEventCount != widget.timeline.events.length) {
+      _resetFuture();
+    }
+  }
+
+  void _resetFuture() {
+    _timelineEventCount = widget.timeline.events.length;
+    _replyEventFuture = widget.event.getReplyEvent(widget.timeline);
+  }
+
+  Event get _fallbackEvent => Event(
+    eventId: widget.event.inReplyToEventId() ?? '\$fake_event_id',
+    content: const {'msgtype': 'm.text', 'body': '...'},
+    senderId: widget.event.senderId,
+    type: EventTypes.Message,
+    room: widget.event.room,
+    status: EventStatus.sent,
+    originServerTs: DateTime.now(),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Event?>(
+      future: _replyEventFuture,
+      builder: (context, snapshot) {
+        final replyEvent = snapshot.data ?? _fallbackEvent;
+        return Padding(
+          padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: ReplyContent.borderRadius,
+            child: InkWell(
+              borderRadius: ReplyContent.borderRadius,
+              onTap: () => widget.scrollToEventId(replyEvent.eventId),
+              child: AbsorbPointer(
+                child: ReplyContent(
+                  replyEvent,
+                  ownMessage: widget.ownMessage,
+                  timeline: widget.timeline,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
 
