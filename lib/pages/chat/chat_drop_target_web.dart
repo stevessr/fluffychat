@@ -5,6 +5,7 @@ import 'dart:ui_web' as ui_web;
 import 'package:cross_file/cross_file.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:matrix/matrix.dart';
 import 'package:mime/mime.dart';
 import 'package:web/web.dart' as web;
 
@@ -136,7 +137,10 @@ class _WebChatDropTargetState extends State<_WebChatDropTarget> {
     event.stopImmediatePropagation();
     _dragging = false;
     widget.onDragExited();
-    unawaited(_handleDrop(event));
+    _runFileOperation(
+      'Unable to process dropped files',
+      () => _handleDrop(event),
+    );
   }
 
   void handleClipboardEvent(web.ClipboardEvent event) {
@@ -149,7 +153,10 @@ class _WebChatDropTargetState extends State<_WebChatDropTarget> {
     if (files.isNotEmpty) {
       event.preventDefault();
       event.stopImmediatePropagation();
-      unawaited(widget.onFilesDropped(files));
+      _runFileOperation(
+        'Unable to process pasted files',
+        () => widget.onFilesDropped(files),
+      );
       return;
     }
 
@@ -160,7 +167,23 @@ class _WebChatDropTargetState extends State<_WebChatDropTarget> {
 
     final snapshot = widget.inputController?.value;
     if (snapshot == null) return;
-    unawaited(_maybeUploadClipboardImage(snapshot));
+    _runFileOperation(
+      'Unable to process clipboard image',
+      () => _maybeUploadClipboardImage(snapshot),
+    );
+  }
+
+  void _runFileOperation(
+    String failureMessage,
+    Future<void> Function() operation,
+  ) {
+    unawaited(() async {
+      try {
+        await operation();
+      } catch (error, stackTrace) {
+        Logs().w(failureMessage, error, stackTrace);
+      }
+    }());
   }
 
   bool _containsFiles(web.DragEvent event) {

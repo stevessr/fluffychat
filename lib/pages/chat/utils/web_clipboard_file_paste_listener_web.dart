@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:js_interop';
 
 import 'package:cross_file/cross_file.dart';
+import 'package:matrix/matrix.dart';
 import 'package:web/web.dart' as web;
 
 class WebClipboardFilePasteListener {
@@ -32,7 +33,7 @@ class WebClipboardFilePasteListener {
 
       event.preventDefault();
       event.stopPropagation();
-      unawaited(_readAndNotify(files));
+      unawaited(_readAndNotifySafely(files));
     }).toJS;
     web.window.addEventListener('paste', _listener);
   }
@@ -42,6 +43,16 @@ class WebClipboardFilePasteListener {
     if (listener == null) return;
     web.window.removeEventListener('paste', listener);
     _listener = null;
+  }
+
+  Future<void> _readAndNotifySafely(List<web.File> files) async {
+    try {
+      await _readAndNotify(files);
+    } catch (error, stackTrace) {
+      // DOM clipboard objects and the owning chat can disappear while the
+      // asynchronous byte conversion or file dialog is running.
+      Logs().w('Unable to process pasted clipboard files', error, stackTrace);
+    }
   }
 
   Future<void> _readAndNotify(List<web.File> files) async {
