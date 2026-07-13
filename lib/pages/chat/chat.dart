@@ -1178,9 +1178,12 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   Future<void> reportEventAction() async {
-    final event = selectedEvents.single;
+    final event = selectedEvents.singleOrNull;
+    if (event == null) return;
     final l10n = L10n.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final client = Matrix.of(context).client;
+    final eventRoomId = event.roomId ?? event.room.id;
     if (!mounted) return;
     final reason = await showTextInputDialog(
       context: context,
@@ -1193,9 +1196,8 @@ class ChatController extends State<ChatPageWithRoom>
     if (!mounted) return;
     final result = await showFutureLoadingDialog(
       context: context,
-      future: () => Matrix.of(
-        context,
-      ).client.reportEvent(event.roomId!, event.eventId, reason: reason),
+      future: () =>
+          client.reportEvent(eventRoomId, event.eventId, reason: reason),
     );
     if (result.error != null) return;
     if (!mounted) return;
@@ -1209,23 +1211,23 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   Future<void> deleteErrorEventsAction() async {
-    try {
-      if (selectedEvents.any((event) => event.status != EventStatus.error)) {
-        throw Exception(
-          'Tried to delete failed to send events but one event is not failed to sent',
-        );
-      }
-      for (final event in selectedEvents) {
-        await event.cancelSend();
-      }
-      setState(selectedEvents.clear);
-    } catch (e, s) {
-      if (!mounted) return;
-      ErrorReporter(
-        context,
-        'Error while delete error events action',
-      ).onErrorCallback(e, s);
+    final events = List<Event>.from(selectedEvents);
+    if (events.isEmpty ||
+        events.any((event) => event.status != EventStatus.error)) {
+      Logs().w('Ignored invalid failed-event deletion request');
+      return;
     }
+    final result = await showFutureLoadingDialog(
+      context: context,
+      futureWithProgress: (setProgress) async {
+        for (final (index, event) in events.indexed) {
+          await event.cancelSend();
+          setProgress((index + 1) / events.length);
+        }
+      },
+    );
+    if (result.error != null || !mounted) return;
+    setState(() => selectedEvents.removeWhere(events.contains));
   }
 
   Future<void> redactEventsAction() async {
@@ -1354,20 +1356,28 @@ class ChatController extends State<ChatPageWithRoom>
     setState(() => selectedEvents.clear());
   }
 
-  void sendAgainAction() {
+  Future<void> sendAgainAction() async {
     final timeline = this.timeline;
     if (timeline == null || selectedEvents.isEmpty) return;
     final event = selectedEvents.first;
-    if (event.status.isError) {
-      event.sendAgain();
-    }
-    final allEditEvents = event
-        .aggregatedEvents(timeline, RelationshipTypes.edit)
-        .where((e) => e.status.isError);
-    for (final e in allEditEvents) {
-      e.sendAgain();
-    }
-    setState(() => selectedEvents.clear());
+    final retryEvents = <Event>[
+      if (event.status.isError) event,
+      ...event
+          .aggregatedEvents(timeline, RelationshipTypes.edit)
+          .where((edit) => edit.status.isError),
+    ];
+    if (retryEvents.isEmpty) return;
+    final result = await showFutureLoadingDialog(
+      context: context,
+      futureWithProgress: (setProgress) async {
+        for (final (index, retryEvent) in retryEvents.indexed) {
+          await retryEvent.sendAgain();
+          setProgress((index + 1) / retryEvents.length);
+        }
+      },
+    );
+    if (result.error != null || !mounted) return;
+    setState(() => selectedEvents.remove(event));
   }
 
   void replyAction({Event? replyTo}) {
