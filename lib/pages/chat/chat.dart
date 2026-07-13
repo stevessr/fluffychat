@@ -589,7 +589,7 @@ class ChatController extends State<ChatPageWithRoom>
     final loadedTimeline = timeline;
     if (!mounted || loadedTimeline == null) return;
     loadedTimeline.requestKeys(onlineKeyBackupOnly: false);
-    if (room.markedUnread) room.markUnread(false);
+    if (room.markedUnread) await room.markUnread(false);
 
     return;
   }
@@ -1736,6 +1736,7 @@ class ChatController extends State<ChatPageWithRoom>
 
   Future<void> unpinEvent(String eventId) async {
     if (eventId.isEmpty) return;
+    final targetRoom = room;
     final response = await showOkCancelAlertDialog(
       context: context,
       title: L10n.of(context).unpin,
@@ -1745,18 +1746,20 @@ class ChatController extends State<ChatPageWithRoom>
     );
     if (!mounted) return;
     if (response == OkCancelResult.ok) {
-      final events = List<String>.from(room.pinnedEventIds)
+      final events = List<String>.from(targetRoom.pinnedEventIds)
         ..removeWhere((oldEvent) => oldEvent == eventId);
-      showFutureLoadingDialog(
+      await showFutureLoadingDialog(
         context: context,
-        future: () => room.setPinnedEvents(events),
+        future: () => targetRoom.setPinnedEvents(events),
       );
     }
   }
 
-  void pinEvent() {
-    final pinnedEventIds = room.pinnedEventIds;
+  Future<void> pinEvent() async {
+    final targetRoom = room;
+    final pinnedEventIds = List<String>.from(targetRoom.pinnedEventIds);
     final selectedEventIds = selectedEvents.map((e) => e.eventId).toSet();
+    if (selectedEventIds.isEmpty) return;
     final unpin =
         selectedEventIds.length == 1 &&
         pinnedEventIds.contains(selectedEventIds.single);
@@ -1765,10 +1768,12 @@ class ChatController extends State<ChatPageWithRoom>
     } else {
       pinnedEventIds.addAll(selectedEventIds);
     }
-    showFutureLoadingDialog(
+    final result = await showFutureLoadingDialog(
       context: context,
-      future: () => room.setPinnedEvents(pinnedEventIds),
+      future: () => targetRoom.setPinnedEvents(pinnedEventIds),
     );
+    if (result.error != null || !mounted) return;
+    setState(() => selectedEvents.clear());
   }
 
   Timer? _storeInputTimeoutTimer;
