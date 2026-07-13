@@ -54,6 +54,7 @@ class SendFileDialog extends StatefulWidget {
 class SendFileDialogState extends State<SendFileDialog> {
   bool compress = true;
   bool spoiler = false;
+  bool isSending = false;
   late bool encrypt;
 
   static const String _mscSpoilerKey = 'org.matrix.msc2810.spoiler';
@@ -129,32 +130,54 @@ class SendFileDialogState extends State<SendFileDialog> {
     return extraContent.isEmpty ? null : extraContent;
   }
 
-  Future<void> _send(String? uniqueFileType) async {
+  Future<void> _send() async {
+    if (isSending) return;
+    setState(() => isSending = true);
     final l10n = L10n.of(context);
 
     final proceed = await showTrustUserInRoomDialog(context, widget.room);
-    if (!context.mounted || !proceed) return;
+    if (!mounted) return;
+    if (!proceed) {
+      setState(() => isSending = false);
+      return;
+    }
+
+    final outerContext = widget.outerContext;
+    if (!outerContext.mounted) {
+      setState(() => isSending = false);
+      return;
+    }
+    final room = widget.room;
+    final files = List<XFile>.from(_files);
+    final shouldCompress = compress;
+    final shouldEncrypt = encrypt;
+    final shouldMarkSpoiler = spoiler;
+    final label = _labelTextController.text.trim();
+    final labelOrNull = label.isEmpty ? null : label;
+    final inReplyTo = widget.inReplyTo;
+    final editEventId = widget.editEventId;
+    final threadRootEventId = widget.threadRootEventId;
+    final threadLastEventId = widget.threadLastEventId;
+    final scaffoldMessenger = ScaffoldMessenger.of(outerContext);
 
     Future<void> sendAction(void Function(double progress) setProgress) async {
-      final outerContext = widget.outerContext;
-      if (!widget.room.otherPartyCanReceiveMessages) {
+      if (!room.otherPartyCanReceiveMessages) {
         throw OtherPartyCanNotReceiveMessages();
       }
       Navigator.of(context, rootNavigator: false).pop();
-      final clientConfig = await Result.capture(widget.room.client.getConfig());
-      if (!mounted || !outerContext.mounted) return;
+      final clientConfig = await Result.capture(room.client.getConfig());
+      if (!outerContext.mounted) return;
       final maxUploadSize =
           clientConfig.asValue?.value.mUploadSize ?? 100 * 1000 * 1000;
 
-      final scaffoldMessenger = ScaffoldMessenger.of(outerContext);
-      final fileCount = _files.length;
+      final fileCount = files.length;
       var sentFiles = 0;
 
       double progressFor(double filePhase) =>
           fileCount == 0 ? 1 : (sentFiles + filePhase) / fileCount;
 
-      for (var i = 0; i < _files.length; i++) {
-        final xfile = _files[i];
+      for (var i = 0; i < files.length; i++) {
+        final xfile = files[i];
         final MatrixFile file;
         MatrixImageFile? thumbnail;
         final mimeType = xfile.mimeType ?? lookupMimeType(xfile.path);
@@ -178,7 +201,8 @@ class SendFileDialogState extends State<SendFileDialog> {
             mimeType.startsWith('video')) {
           setProgress(progressFor(0.2));
           file = await xfile.getVideoInfo(
-            compress: length != null && length > minSizeToCompress && compress,
+            compress:
+                length != null && length > minSizeToCompress && shouldCompress,
           );
         } else {
           if (length != null && length > maxUploadSize) {
@@ -208,33 +232,37 @@ class SendFileDialogState extends State<SendFileDialog> {
           setProgress(progressFor(0.4));
         }
 
-        final label = _labelTextController.text.trim();
-        final labelOrNull = label.isEmpty ? null : label;
-        final isSpoiler = spoiler && file.msgType == MessageTypes.Image;
+        final isSpoiler =
+            shouldMarkSpoiler && file.msgType == MessageTypes.Image;
         final extraContent = _buildExtraContent(
           label: labelOrNull,
           isSpoiler: isSpoiler,
         );
 
         Future<void> sendFileEvent() async {
-          if (encrypt || !widget.room.encrypted) {
-            await widget.room.sendFileEvent(
+          if (shouldEncrypt || !room.encrypted) {
+            await room.sendFileEvent(
               file,
               thumbnail: thumbnail,
-              shrinkImageMaxDimension: compress ? 1600 : null,
+              shrinkImageMaxDimension: shouldCompress ? 1600 : null,
               extraContent: extraContent,
-              inReplyTo: widget.inReplyTo,
-              editEventId: widget.editEventId,
-              threadRootEventId: widget.threadRootEventId,
-              threadLastEventId: widget.threadLastEventId,
+              inReplyTo: inReplyTo,
+              editEventId: editEventId,
+              threadRootEventId: threadRootEventId,
+              threadLastEventId: threadLastEventId,
             );
           } else {
             await _sendUnencryptedFileEvent(
+              room,
               file,
               thumbnail: thumbnail,
               label: labelOrNull,
-              shrinkImageMaxDimension: compress ? 1600 : null,
+              shrinkImageMaxDimension: shouldCompress ? 1600 : null,
               spoiler: isSpoiler,
+              inReplyTo: inReplyTo,
+              editEventId: editEventId,
+              threadRootEventId: threadRootEventId,
+              threadLastEventId: threadLastEventId,
             );
           }
         }
@@ -261,27 +289,29 @@ class SendFileDialogState extends State<SendFileDialog> {
       }
     }
 
-    if (_files.length == 1 && !(uniqueFileType == 'video' && compress)) {
-      await sendAction((_) {});
-    } else {
-      showFutureLoadingDialog(
-        context: widget.outerContext,
-        title: l10n.sendingAttachment,
-        futureWithProgress: sendAction,
-      );
+    final result = await showFutureLoadingDialog(
+      context: outerContext,
+      title: l10n.sendingAttachment,
+      futureWithProgress: sendAction,
+    );
+    if (mounted && result.error != null) {
+      setState(() => isSending = false);
     }
-
-    return;
   }
 
   Future<void> _sendUnencryptedFileEvent(
+    Room room,
     MatrixFile file, {
     MatrixImageFile? thumbnail,
     String? label,
     int? shrinkImageMaxDimension,
     required bool spoiler,
+    Event? inReplyTo,
+    String? editEventId,
+    String? threadRootEventId,
+    String? threadLastEventId,
   }) async {
-    final client = widget.room.client;
+    final client = room.client;
     if (file is MatrixImageFile && shrinkImageMaxDimension != null) {
       file = await MatrixImageFile.shrink(
         bytes: file.bytes,
@@ -327,9 +357,6 @@ class SendFileDialogState extends State<SendFileDialog> {
       if (spoiler) ...{_mscSpoilerKey: true, _spoilerKey: true},
     };
 
-    final inReplyTo = widget.inReplyTo;
-    final editEventId = widget.editEventId;
-
     if (editEventId != null) {
       content['m.new_content'] = Map<String, Object?>.from(content);
       content['m.relates_to'] = {
@@ -339,13 +366,13 @@ class SendFileDialogState extends State<SendFileDialog> {
       if (content['body'] is String) {
         content['body'] = '* ${content['body']}';
       }
-    } else if (widget.threadRootEventId != null) {
+    } else if (threadRootEventId != null) {
       content['m.relates_to'] = {
-        'event_id': widget.threadRootEventId!,
+        'event_id': threadRootEventId,
         'rel_type': RelationshipTypes.thread,
         'is_falling_back': true,
-        if (widget.threadLastEventId != null)
-          'm.in_reply_to': {'event_id': widget.threadLastEventId!},
+        if (threadLastEventId != null)
+          'm.in_reply_to': {'event_id': threadLastEventId},
       };
     }
 
@@ -360,7 +387,7 @@ class SendFileDialogState extends State<SendFileDialog> {
     }
 
     final txid = client.generateUniqueTransactionId();
-    await client.sendMessage(widget.room.id, EventTypes.Message, txid, content);
+    await client.sendMessage(room.id, EventTypes.Message, txid, content);
   }
 
   Future<String> _calcCombinedFileSize() async {
@@ -697,8 +724,13 @@ class SendFileDialogState extends State<SendFileDialog> {
               child: Text(L10n.of(context).cancel),
             ),
             AdaptiveDialogAction(
-              onPressed: () => _send(uniqueFileType),
-              child: Text(L10n.of(context).send),
+              onPressed: isSending ? null : _send,
+              child: isSending
+                  ? const SizedBox.square(
+                      dimension: 18,
+                      child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+                    )
+                  : Text(L10n.of(context).send),
             ),
           ],
         );
