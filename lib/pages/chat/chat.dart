@@ -239,7 +239,11 @@ class ChatController extends State<ChatPageWithRoom>
 
   Future<void> requestHistory([_]) async {
     Logs().v('Requesting history...');
-    await timeline?.requestHistory(historyCount: _loadHistoryCount);
+    try {
+      await timeline?.requestHistory(historyCount: _loadHistoryCount);
+    } catch (error, stackTrace) {
+      Logs().w('Unable to request room history', error, stackTrace);
+    }
   }
 
   Future<void> requestFuture() async {
@@ -247,29 +251,46 @@ class ChatController extends State<ChatPageWithRoom>
     if (timeline == null) return;
     Logs().v('Requesting future...');
 
-    final mostRecentEvent = timeline.events.filterByVisibleInGui().firstOrNull;
+    try {
+      final mostRecentEvent = timeline.events
+          .filterByVisibleInGui()
+          .firstOrNull;
 
-    await timeline.requestFuture(historyCount: _loadHistoryCount);
-    if (!mounted || this.timeline != timeline) return;
+      await timeline.requestFuture(historyCount: _loadHistoryCount);
+      if (!mounted || this.timeline != timeline) return;
 
-    if (mostRecentEvent != null) {
-      setReadMarker(eventId: mostRecentEvent.eventId);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted ||
-            this.timeline != timeline ||
-            !scrollController.hasClients) {
-          return;
-        }
-        final index = timeline.events.filterByVisibleInGui().indexOf(
-          mostRecentEvent,
-        );
-        if (index >= 0) {
-          scrollController.scrollToIndex(
-            index,
-            preferPosition: AutoScrollPosition.begin,
+      if (mostRecentEvent != null) {
+        setReadMarker(eventId: mostRecentEvent.eventId);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted ||
+              this.timeline != timeline ||
+              !scrollController.hasClients) {
+            return;
+          }
+          final index = timeline.events.filterByVisibleInGui().indexOf(
+            mostRecentEvent,
           );
-        }
-      });
+          if (index >= 0) {
+            unawaited(
+              scrollController
+                  .scrollToIndex(
+                    index,
+                    preferPosition: AutoScrollPosition.begin,
+                  )
+                  .then<void>(
+                    (_) {},
+                    onError: (error, stackTrace) => Logs().w(
+                      'Unable to restore timeline scroll position',
+                      error,
+                      stackTrace,
+                    ),
+                  ),
+            );
+          }
+        });
+      }
+    } catch (error, stackTrace) {
+      Logs().w('Unable to request newer room events', error, stackTrace);
     }
   }
 

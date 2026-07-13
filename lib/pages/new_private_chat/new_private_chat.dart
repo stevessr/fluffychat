@@ -54,7 +54,7 @@ class NewPrivateChatController extends State<NewPrivateChat> {
     if (deeplink != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        UrlLauncher(context, deeplink).openMatrixToUrl();
+        UrlLauncher(context, deeplink).launchUrl();
       });
     }
   }
