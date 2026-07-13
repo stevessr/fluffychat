@@ -2565,6 +2565,16 @@ class Client extends MatrixApi {
       _reportSyncTimeout(e, s, receivedSyncResponse: receivedSyncResponse);
     } catch (e, s) {
       if (!isLogged() || _disposed || _aborted) return;
+      // Anything thrown before a sync response has been received belongs to
+      // the transport/request path, not event processing. In particular,
+      // WasmGC may bridge Future.timeout failures as opaque JS objects whose
+      // runtime type and string representation no longer identify them as a
+      // TimeoutException. Normalize those failures here so the sync loop can
+      // retry without incorrectly reporting an event-processing crash.
+      if (!receivedSyncResponse) {
+        _reportSyncTransportFailure(e, s);
+        return;
+      }
       // WasmGC can occasionally surface a Dart TimeoutException through the
       // JavaScript exception bridge as a generic Object. In that case the
       // typed catch above is skipped even though the error still has the
@@ -2585,6 +2595,23 @@ class Client extends MatrixApi {
         ),
       );
     }
+  }
+
+  void _reportSyncTransportFailure(Object error, StackTrace stackTrace) {
+    final exception = error is SyncConnectionException
+        ? error
+        : SyncConnectionException(error);
+    Logs().w(
+      'Syncloop failed while waiting for the server. Retrying...',
+      error,
+      stackTrace,
+    );
+    onSyncStatus.add(
+      SyncStatusUpdate(
+        SyncStatus.error,
+        error: SdkError(exception: exception, stackTrace: stackTrace),
+      ),
+    );
   }
 
   void _reportSyncTimeout(
