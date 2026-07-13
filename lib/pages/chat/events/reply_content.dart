@@ -10,7 +10,7 @@ import 'package:matrix/matrix.dart';
 
 import '../../../config/app_config.dart';
 
-class ReplyContent extends StatelessWidget {
+class ReplyContent extends StatefulWidget {
   final Event replyEvent;
   final bool ownMessage;
   final Timeline? timeline;
@@ -26,6 +26,31 @@ class ReplyContent extends StatelessWidget {
     topRight: Radius.circular(AppConfig.borderRadius / 2),
     bottomRight: Radius.circular(AppConfig.borderRadius / 2),
   );
+
+  @override
+  State<ReplyContent> createState() => _ReplyContentState();
+}
+
+class _ReplyContentState extends State<ReplyContent> {
+  late Future<User?> _senderFuture;
+
+  Event get replyEvent => widget.replyEvent;
+  bool get ownMessage => widget.ownMessage;
+  Timeline? get timeline => widget.timeline;
+
+  @override
+  void initState() {
+    super.initState();
+    _senderFuture = replyEvent.fetchSenderUser();
+  }
+
+  @override
+  void didUpdateWidget(covariant ReplyContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.replyEvent, replyEvent)) {
+      _senderFuture = replyEvent.fetchSenderUser();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +69,7 @@ class ReplyContent extends StatelessWidget {
 
     return Material(
       color: Colors.transparent,
-      borderRadius: borderRadius,
+      borderRadius: ReplyContent.borderRadius,
       child: Row(
         mainAxisSize: .min,
         children: <Widget>[
@@ -64,7 +89,7 @@ class ReplyContent extends StatelessWidget {
               children: <Widget>[
                 FutureBuilder<User?>(
                   initialData: displayEvent.senderFromMemoryOrFallback,
-                  future: displayEvent.fetchSenderUser(),
+                  future: _senderFuture,
                   builder: (context, snapshot) {
                     return Text(
                       '${snapshot.data?.calcDisplayname() ?? displayEvent.senderFromMemoryOrFallback.calcDisplayname()}:',
