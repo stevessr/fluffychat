@@ -21,19 +21,29 @@ class CuteContent extends StatefulWidget {
 
 class _CuteContentState extends State<CuteContent> {
   static bool _isOverlayShown = false;
+  late Future<User?> _senderFuture;
 
   @override
   void initState() {
+    super.initState();
+    _senderFuture = widget.event.fetchSenderUser();
     if (AppSettings.autoplayImages.value && !_isOverlayShown) {
       addOverlay();
     }
-    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant CuteContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.event, widget.event)) {
+      _senderFuture = widget.event.fetchSenderUser();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<User?>(
-      future: widget.event.fetchSenderUser(),
+      future: _senderFuture,
       builder: (context, snapshot) {
         final label = generateLabel(snapshot.data);
 
