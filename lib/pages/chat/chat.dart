@@ -47,6 +47,7 @@ import 'package:matrix/matrix.dart';
 import 'package:mime/mime.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../utils/account_bundles.dart';
 import '../../utils/localized_exception_extension.dart';
@@ -658,7 +659,9 @@ class ChatController extends State<ChatPageWithRoom>
     inputFocus.dispose();
     _displayChatDetailsColumn.dispose();
     _webClipboardFilePasteListener.dispose();
-    if (currentlyTyping) room.setTyping(false);
+    if (currentlyTyping) {
+      unawaited(_setTypingSafely(room, false));
+    }
     MxcImage.clearCache(widget.room.id);
     super.dispose();
   }
@@ -668,9 +671,11 @@ class ChatController extends State<ChatPageWithRoom>
 
   void setSendingClient(Client c) {
     if (currentlyTyping) {
+      final previousRoom = room;
+      // no need to have the setting typing to false be blocking
       typingCoolDown?.cancel();
       typingCoolDown = null;
-      room.setTyping(false);
+      unawaited(_setTypingSafely(previousRoom, false));
       currentlyTyping = false;
     }
     loadTimelineFuture = _getTimeline(eventContextId: room.fullyRead).onError(
@@ -1769,6 +1774,34 @@ class ChatController extends State<ChatPageWithRoom>
   Timer? _storeInputTimeoutTimer;
   static const Duration _storeInputTimeout = Duration(milliseconds: 500);
 
+  Future<void> _persistDraft(
+    SharedPreferences prefs,
+    String draftKey,
+    String text,
+  ) async {
+    try {
+      if (text.isEmpty) {
+        await prefs.remove(draftKey);
+      } else {
+        await prefs.setString(draftKey, text);
+      }
+    } catch (error, stackTrace) {
+      Logs().w('Unable to persist chat draft', error, stackTrace);
+    }
+  }
+
+  Future<void> _setTypingSafely(
+    Room targetRoom,
+    bool typing, {
+    int? timeout,
+  }) async {
+    try {
+      await targetRoom.setTyping(typing, timeout: timeout);
+    } catch (error, stackTrace) {
+      Logs().w('Unable to update typing state', error, stackTrace);
+    }
+  }
+
   double? inputBarHeight;
 
   void updateInputBarHeight() {
@@ -1784,6 +1817,26 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void onInputBarChanged(String text) {
+    final prefs = Matrix.of(context).store;
+    final draftKey = 'draft_$roomId';
+    if (text.endsWith(' ') && Matrix.of(context).hasComplexBundles) {
+      final clients = currentRoomBundle;
+      for (final client in clients) {
+        final prefix = client.sendPrefix;
+        if ((prefix.isNotEmpty) &&
+            text.toLowerCase() == '${prefix.toLowerCase()} ') {
+          _storeInputTimeoutTimer?.cancel();
+          unawaited(_persistDraft(prefs, draftKey, ''));
+          setSendingClient(client);
+          sendController.clear();
+          if (!_inputTextIsEmpty) {
+            setState(() => _inputTextIsEmpty = true);
+          }
+          return;
+        }
+      }
+    }
+
     if (_inputTextIsEmpty != text.isEmpty) {
       setState(() {
         _inputTextIsEmpty = text.isEmpty;
@@ -1791,31 +1844,17 @@ class ChatController extends State<ChatPageWithRoom>
     }
 
     _storeInputTimeoutTimer?.cancel();
-    _storeInputTimeoutTimer = Timer(_storeInputTimeout, () async {
-      final prefs = Matrix.of(context).store;
-      await prefs.setString('draft_$roomId', text);
+    _storeInputTimeoutTimer = Timer(_storeInputTimeout, () {
+      unawaited(_persistDraft(prefs, draftKey, text));
     });
-    if (text.endsWith(' ') && Matrix.of(context).hasComplexBundles) {
-      final clients = currentRoomBundle;
-      for (final client in clients) {
-        final prefix = client.sendPrefix;
-        if ((prefix.isNotEmpty) &&
-            text.toLowerCase() == '${prefix.toLowerCase()} ') {
-          setSendingClient(client);
-          setState(() {
-            sendController.clear();
-          });
-          return;
-        }
-      }
-    }
     if (AppSettings.sendTypingNotifications.value) {
+      final typingRoom = room;
       typingCoolDown?.cancel();
       typingCoolDown = Timer(const Duration(seconds: 2), () {
         if (!mounted) return;
         typingCoolDown = null;
         currentlyTyping = false;
-        room.setTyping(false);
+        unawaited(_setTypingSafely(typingRoom, false));
       });
       typingTimeout ??= Timer(const Duration(seconds: 30), () {
         typingTimeout = null;
@@ -1823,9 +1862,12 @@ class ChatController extends State<ChatPageWithRoom>
       });
       if (!currentlyTyping) {
         currentlyTyping = true;
-        room.setTyping(
-          true,
-          timeout: const Duration(seconds: 30).inMilliseconds,
+        unawaited(
+          _setTypingSafely(
+            typingRoom,
+            true,
+            timeout: const Duration(seconds: 30).inMilliseconds,
+          ),
         );
       }
     }
