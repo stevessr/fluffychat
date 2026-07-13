@@ -374,6 +374,12 @@ class ChatController extends State<ChatPageWithRoom>
           ),
         );
       }
+    } catch (error, stackTrace) {
+      Logs().w('Unable to process shared chat content', error, stackTrace);
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toLocalizedString(context))));
     } finally {
       _processingShareItems = false;
     }
