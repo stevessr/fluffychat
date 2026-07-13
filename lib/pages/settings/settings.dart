@@ -173,6 +173,18 @@ class SettingsController extends State<Settings> {
   }
 
   Future<void> checkBootstrap() async {
+    try {
+      await _checkBootstrap();
+    } catch (error, stackTrace) {
+      // This check is optional UI state and is started from a post-frame
+      // callback. Never let a failed sync/database/crypto lookup escape as an
+      // unhandled asynchronous exception, especially on Wasm where a timeout
+      // can lose its Dart TimeoutException runtime type.
+      Logs().w('Unable to check encryption bootstrap state', error, stackTrace);
+    }
+  }
+
+  Future<void> _checkBootstrap() async {
     if (!mounted) return;
     final client = Matrix.of(context).client;
     if (!client.encryptionEnabled) return;
