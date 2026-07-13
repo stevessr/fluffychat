@@ -330,16 +330,30 @@ class ChatListController extends State<ChatList>
 
   String? get activeChat => widget.activeChat;
 
-  void _processIncomingSharedMedia(List<SharedMediaFile> files) {
-    files.removeWhere(
-      (file) => file.path.startsWith(AppConfig.deepLinkPrefix) == true,
-    );
-    if (files.isEmpty) return;
+  void _runBackgroundOperation(
+    String failureMessage,
+    Future<dynamic> Function() operation,
+  ) {
+    unawaited(() async {
+      try {
+        await operation();
+      } catch (error, stackTrace) {
+        Logs().w(failureMessage, error, stackTrace);
+      }
+    }());
+  }
 
-    showScaffoldDialog(
+  Future<void> _processIncomingSharedMedia(List<SharedMediaFile> files) async {
+    final sharedFiles = List<SharedMediaFile>.from(files)
+      ..removeWhere(
+        (file) => file.path.startsWith(AppConfig.deepLinkPrefix) == true,
+      );
+    if (sharedFiles.isEmpty || !mounted) return;
+
+    await showScaffoldDialog(
       context: context,
       builder: (context) => ShareScaffoldDialog(
-        items: files.map((file) {
+        items: sharedFiles.map((file) {
           if ({SharedMediaType.text, SharedMediaType.url}.contains(file.type)) {
             return TextShareItem(file.path);
           }
@@ -360,21 +374,33 @@ class ChatListController extends State<ChatList>
     // For sharing images coming from outside the app while the app is in the memory
     _intentFileStreamSubscription = ReceiveSharingIntent.instance
         .getMediaStream()
-        .listen(_processIncomingSharedMedia, onError: print);
+        .listen(
+          (files) => _runBackgroundOperation(
+            'Unable to process incoming shared media',
+            () => _processIncomingSharedMedia(files),
+          ),
+          onError: (Object error, StackTrace stackTrace) =>
+              Logs().w('Unable to receive shared media', error, stackTrace),
+        );
 
     // For sharing images coming from outside the app while the app is closed
-    ReceiveSharingIntent.instance.getInitialMedia().then(
-      _processIncomingSharedMedia,
-    );
+    _runBackgroundOperation('Unable to process initial shared media', () async {
+      final files = await ReceiveSharingIntent.instance.getInitialMedia();
+      await _processIncomingSharedMedia(files);
+    });
 
     if (PlatformInfos.isAndroid) {
       final shortcuts = FlutterShortcuts();
-      shortcuts.initialize().then(
-        (_) => shortcuts.listenAction((action) {
+      _runBackgroundOperation('Unable to initialize app shortcuts', () async {
+        await shortcuts.initialize();
+        await shortcuts.listenAction((action) {
           if (!mounted) return;
-          UrlLauncher(context, action).launchUrl();
-        }),
-      );
+          _runBackgroundOperation(
+            'Unable to open app shortcut',
+            () => UrlLauncher(context, action).launchUrl(),
+          );
+        });
+      });
     }
   }
 
@@ -390,16 +416,25 @@ class ChatListController extends State<ChatList>
     Matrix.of(context).voipPlugin?.context = context;
 
     // 预加载扩展字体以加速后续页面
-    DynamicFontLoader().preloadExtendedCJK();
+    _runBackgroundOperation(
+      'Unable to preload extended CJK fonts',
+      DynamicFontLoader().preloadExtendedCJK,
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        searchServer = Matrix.of(
-          context,
-        ).store.getString(_serverStoreNamespace);
-        Matrix.of(context).backgroundPush?.setupPush();
-        UpdateNotifier.showUpdateDialog(context);
+      if (!mounted) return;
+      searchServer = Matrix.of(context).store.getString(_serverStoreNamespace);
+      final backgroundPush = Matrix.of(context).backgroundPush;
+      if (backgroundPush != null) {
+        _runBackgroundOperation(
+          'Unable to set up background push',
+          backgroundPush.setupPush,
+        );
       }
+      _runBackgroundOperation(
+        'Unable to show update dialog',
+        () => UpdateNotifier.showUpdateDialog(context),
+      );
 
       // Workaround for system UI overlay style not applied on app start
       SystemChrome.setSystemUIOverlayStyle(
@@ -440,15 +475,26 @@ class ChatListController extends State<ChatList>
 
   @override
   void dispose() {
-    _intentDataStreamSubscription?.cancel();
-    _intentFileStreamSubscription?.cancel();
-    _onRoomTagUpdate?.cancel();
+    final subscriptions = [
+      _intentDataStreamSubscription,
+      _intentFileStreamSubscription,
+      _onRoomTagUpdate,
+    ].whereType<StreamSubscription>();
+    for (final subscription in subscriptions) {
+      _runBackgroundOperation(
+        'Unable to cancel chat-list subscription',
+        subscription.cancel,
+      );
+    }
     scrollController.removeListener(_onScroll);
     searchController.dispose();
     searchFocusNode.dispose();
     scrollController.dispose();
     scrolledToTop.dispose();
-    _clientStream.close();
+    _runBackgroundOperation(
+      'Unable to close chat-list client stream',
+      _clientStream.close,
+    );
     super.dispose();
   }
 
@@ -456,7 +502,10 @@ class ChatListController extends State<ChatList>
     final store = Matrix.of(context).store;
     final report = store.getStringList(AppConfig.pushHelperCrashReportKey);
     if (report == null) return;
-    store.remove(AppConfig.pushHelperCrashReportKey);
+    _runBackgroundOperation(
+      'Unable to clear push-helper crash report',
+      () => store.remove(AppConfig.pushHelperCrashReportKey),
+    );
     ErrorReporter(
       context,
       'Push Helper has been crashed',
