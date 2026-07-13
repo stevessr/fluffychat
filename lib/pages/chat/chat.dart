@@ -295,46 +295,69 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   Future<void> _shareItems([_]) async {
+    if (_processingShareItems) return;
     final shareItems = widget.shareItems;
     if (shareItems == null || shareItems.isEmpty) return;
-    if (!room.otherPartyCanReceiveMessages) {
-      final theme = Theme.of(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: theme.colorScheme.errorContainer,
-          closeIconColor: theme.colorScheme.onErrorContainer,
-          content: Text(
-            L10n.of(context).otherPartyNotLoggedIn,
-            style: TextStyle(color: theme.colorScheme.onErrorContainer),
+    _processingShareItems = true;
+    try {
+      if (!room.otherPartyCanReceiveMessages) {
+        final theme = Theme.of(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: theme.colorScheme.errorContainer,
+            closeIconColor: theme.colorScheme.onErrorContainer,
+            content: Text(
+              L10n.of(context).otherPartyNotLoggedIn,
+              style: TextStyle(color: theme.colorScheme.onErrorContainer),
+            ),
+            showCloseIcon: true,
           ),
-          showCloseIcon: true,
-        ),
-      );
-      return;
+        );
+        return;
+      }
+      final proceed = await showTrustUserInRoomDialog(context, room);
+      if (!mounted || !proceed) return;
+      final nonFileItems = shareItems
+          .where((item) => item is! FileShareItem)
+          .toList();
+      if (nonFileItems.isNotEmpty) {
+        final result = await showFutureLoadingDialog(
+          context: context,
+          futureWithProgress: (setProgress) async {
+            for (final (index, item) in nonFileItems.indexed) {
+              if (item is TextShareItem) {
+                await room.sendTextEvent(item.value);
+              } else if (item is ContentShareItem) {
+                await room.sendEvent(item.value.copy());
+              }
+              setProgress((index + 1) / nonFileItems.length);
+            }
+          },
+        );
+        if (result.error != null || !mounted) return;
+      }
+      final files = shareItems
+          .whereType<FileShareItem>()
+          .map((item) => item.value)
+          .toList();
+      if (files.isNotEmpty) {
+        await showAdaptiveDialog(
+          context: context,
+          builder: (c) => SendFileDialog(
+            files: files,
+            room: room,
+            outerContext: context,
+            threadRootEventId: activeThreadId,
+            threadLastEventId: threadLastEventId,
+          ),
+        );
+      }
+    } finally {
+      _processingShareItems = false;
     }
-    final proceed = await showTrustUserInRoomDialog(context, room);
-    if (!mounted || !proceed) return;
-    for (final item in shareItems) {
-      if (item is FileShareItem) continue;
-      if (item is TextShareItem) room.sendTextEvent(item.value);
-      if (item is ContentShareItem) room.sendEvent(item.value.copy());
-    }
-    final files = shareItems
-        .whereType<FileShareItem>()
-        .map((item) => item.value)
-        .toList();
-    if (files.isEmpty) return;
-    showAdaptiveDialog(
-      context: context,
-      builder: (c) => SendFileDialog(
-        files: files,
-        room: room,
-        outerContext: context,
-        threadRootEventId: activeThreadId,
-        threadLastEventId: threadLastEventId,
-      ),
-    );
   }
+
+  bool _processingShareItems = false;
 
   KeyEventResult _customEnterKeyHandling(FocusNode node, KeyEvent evt) {
     if (evt is KeyDownEvent &&
@@ -601,14 +624,25 @@ class ChatController extends State<ChatPageWithRoom>
     if (timeline == null || timeline.events.isEmpty) return;
 
     Logs().d('Set read marker...', eventId);
-    _setReadMarkerFuture = timeline
-        .setReadMarker(
-          eventId: eventId,
-          public: AppSettings.sendPublicReadReceipts.value,
-        )
-        .then((_) {
-          _setReadMarkerFuture = null;
-        });
+    final operation = timeline.setReadMarker(
+      eventId: eventId,
+      public: AppSettings.sendPublicReadReceipts.value,
+    );
+    _setReadMarkerFuture = operation;
+    unawaited(
+      operation
+          .then<void>(
+            (_) {},
+            onError: (error, stackTrace) {
+              Logs().w('Unable to set read marker', error, stackTrace);
+            },
+          )
+          .whenComplete(() {
+            if (identical(_setReadMarkerFuture, operation)) {
+              _setReadMarkerFuture = null;
+            }
+          }),
+    );
   }
 
   @override
