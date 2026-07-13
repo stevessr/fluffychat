@@ -57,6 +57,40 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
   List<int>? _waveform;
   String? _durationString;
 
+  void _runPlayerOperation(
+    String failureMessage,
+    Future<void> Function() operation,
+  ) {
+    unawaited(() async {
+      try {
+        await operation();
+      } catch (error, stackTrace) {
+        Logs().w(failureMessage, error, stackTrace);
+      }
+    }());
+  }
+
+  Future<void> _disposePlayerSafely(
+    AudioPlayer audioPlayer, {
+    bool stop = false,
+    bool pause = false,
+  }) async {
+    try {
+      if (stop) {
+        await audioPlayer.stop();
+      } else if (pause) {
+        await audioPlayer.pause();
+      }
+    } catch (error, stackTrace) {
+      Logs().w('Unable to stop audio message player', error, stackTrace);
+    }
+    try {
+      await audioPlayer.dispose();
+    } catch (error, stackTrace) {
+      Logs().w('Unable to dispose audio message player', error, stackTrace);
+    }
+  }
+
   @override
   void dispose() {
     final audioPlayer = matrix.voiceMessageEventId.value != widget.event.eventId
@@ -77,13 +111,18 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                 stream: audioPlayer.playerStateStream.asBroadcastStream(),
                 builder: (context, _) => IconButton(
                   onPressed: () {
-                    if (audioPlayer.isAtEndPosition) {
-                      audioPlayer.seek(Duration.zero);
-                    } else if (audioPlayer.playing) {
-                      audioPlayer.pause();
-                    } else {
-                      audioPlayer.play();
-                    }
+                    _runPlayerOperation(
+                      'Unable to update background audio playback',
+                      () async {
+                        if (audioPlayer.isAtEndPosition) {
+                          await audioPlayer.seek(Duration.zero);
+                        } else if (audioPlayer.playing) {
+                          await audioPlayer.pause();
+                        } else {
+                          await audioPlayer.play();
+                        }
+                      },
+                    );
                   },
                   icon: audioPlayer.playing && !audioPlayer.isAtEndPosition
                       ? const Icon(Icons.pause_outlined)
@@ -105,10 +144,9 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
               actions: [
                 IconButton(
                   onPressed: () {
-                    audioPlayer.pause();
-                    audioPlayer.dispose();
                     matrix.voiceMessageEventId.value = matrix.audioPlayer =
                         null;
+                    unawaited(_disposePlayerSafely(audioPlayer, pause: true));
 
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (!matrix.context.mounted) return;
@@ -126,9 +164,8 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
         super.dispose();
         return;
       }
-      audioPlayer.pause();
-      audioPlayer.dispose();
       matrix.voiceMessageEventId.value = matrix.audioPlayer = null;
+      unawaited(_disposePlayerSafely(audioPlayer, pause: true));
     }
     super.dispose();
   }
@@ -143,18 +180,24 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
         ? null
         : matrix.audioPlayer;
     if (currentPlayer != null && !currentPlayer.isAtEndPosition) {
-      if (currentPlayer.playing) {
-        currentPlayer.pause();
-      } else {
-        currentPlayer.play();
+      try {
+        if (currentPlayer.playing) {
+          await currentPlayer.pause();
+        } else {
+          await currentPlayer.play();
+        }
+      } catch (error, stackTrace) {
+        Logs().w('Unable to update audio playback', error, stackTrace);
       }
       return;
     }
 
     matrix.voiceMessageEventId.value = widget.event.eventId;
-    matrix.audioPlayer
-      ?..stop()
-      ..dispose();
+    final previousPlayer = matrix.audioPlayer;
+    matrix.audioPlayer = null;
+    if (previousPlayer != null) {
+      await _disposePlayerSafely(previousPlayer, stop: true);
+    }
     File? file;
     MatrixFile? matrixFile;
 
@@ -252,15 +295,13 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
         return;
       }
 
-      audioPlayer.play().onError(
-        ErrorReporter(context, 'Unable to play audio message').onErrorCallback,
-      );
+      _runPlayerOperation('Unable to play audio message', audioPlayer.play);
     } catch (e, s) {
       if (matrix.audioPlayer == audioPlayer) {
         matrix.audioPlayer = null;
         matrix.voiceMessageEventId.value = null;
       }
-      await audioPlayer.dispose();
+      await _disposePlayerSafely(audioPlayer);
       if (!mounted) return;
       ErrorReporter(
         context,
@@ -273,23 +314,28 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
   Future<void> _toggleSpeed() async {
     final audioPlayer = matrix.audioPlayer;
     if (audioPlayer == null) return;
-    switch (audioPlayer.speed) {
-      case 1.0:
-        await audioPlayer.setSpeed(1.25);
-        break;
-      case 1.25:
-        await audioPlayer.setSpeed(1.5);
-        break;
-      case 1.5:
-        await audioPlayer.setSpeed(2.0);
-        break;
-      case 2.0:
-        await audioPlayer.setSpeed(0.5);
-        break;
-      case 0.5:
-      default:
-        await audioPlayer.setSpeed(1.0);
-        break;
+    try {
+      switch (audioPlayer.speed) {
+        case 1.0:
+          await audioPlayer.setSpeed(1.25);
+          break;
+        case 1.25:
+          await audioPlayer.setSpeed(1.5);
+          break;
+        case 1.5:
+          await audioPlayer.setSpeed(2.0);
+          break;
+        case 2.0:
+          await audioPlayer.setSpeed(0.5);
+          break;
+        case 0.5:
+        default:
+          await audioPlayer.setSpeed(1.0);
+          break;
+      }
+    } catch (error, stackTrace) {
+      Logs().w('Unable to update audio playback speed', error, stackTrace);
+      return;
     }
     if (!mounted || matrix.audioPlayer != audioPlayer) return;
     setState(() {});
