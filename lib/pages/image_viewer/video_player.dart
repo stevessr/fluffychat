@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:chewie/chewie.dart';
@@ -42,12 +43,12 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
   Future<void> _downloadAction(int generation) async {
     if (!mounted || generation != _loadGeneration) return;
     final event = widget.event;
-    if (!_supportsVideoPlayer) {
-      await event.saveFile(context);
-      return;
-    }
 
     try {
+      if (!_supportsVideoPlayer) {
+        await event.saveFile(context);
+        return;
+      }
       final fileSize = event.content
           .tryGetMap<String, Object?>('info')
           ?.tryGet<int>('size');
@@ -67,7 +68,7 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
       if (!mounted || generation != _loadGeneration) return;
 
       // Dispose the controllers if we already have them.
-      _disposeControllers();
+      await _disposeControllers();
       late VideoPlayerController videoPlayerController;
 
       // Create the VideoPlayerController from the contents of videoFile.
@@ -100,8 +101,8 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
           _videoPlayerController != videoPlayerController) {
         if (_videoPlayerController == videoPlayerController) {
           _videoPlayerController = null;
-          await videoPlayerController.dispose();
         }
+        await _disposeVideoPlayerSafely(videoPlayerController);
         return;
       }
 
@@ -118,30 +119,48 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
       });
     } on IOException catch (e) {
       if (!mounted || generation != _loadGeneration) return;
-      _disposeControllers();
+      await _disposeControllers();
       setState(() => _downloadProgress = null);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(e.toLocalizedString(context))));
     } catch (e, s) {
       if (!mounted || generation != _loadGeneration) return;
-      _disposeControllers();
+      await _disposeControllers();
       setState(() => _downloadProgress = null);
       ErrorReporter(context, 'Unable to play video').onErrorCallback(e, s);
     }
   }
 
-  void _disposeControllers() {
-    _chewieController?.dispose();
-    _videoPlayerController?.dispose();
+  Future<void> _disposeControllers() async {
+    final chewieController = _chewieController;
+    final videoPlayerController = _videoPlayerController;
     _chewieController = null;
     _videoPlayerController = null;
+    try {
+      chewieController?.dispose();
+    } catch (error, stackTrace) {
+      Logs().w('Unable to dispose video controls', error, stackTrace);
+    }
+    if (videoPlayerController != null) {
+      await _disposeVideoPlayerSafely(videoPlayerController);
+    }
+  }
+
+  Future<void> _disposeVideoPlayerSafely(
+    VideoPlayerController controller,
+  ) async {
+    try {
+      await controller.dispose();
+    } catch (error, stackTrace) {
+      Logs().w('Unable to dispose video player', error, stackTrace);
+    }
   }
 
   @override
   void dispose() {
     _loadGeneration++;
-    _disposeControllers();
+    unawaited(_disposeControllers());
     super.dispose();
   }
 
@@ -150,11 +169,14 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.event.eventId == widget.event.eventId) return;
     final generation = ++_loadGeneration;
-    _disposeControllers();
     _downloadProgress = null;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || generation != _loadGeneration) return;
-      _downloadAction(generation);
+      unawaited(() async {
+        await _disposeControllers();
+        if (!mounted || generation != _loadGeneration) return;
+        await _downloadAction(generation);
+      }());
     });
   }
 
@@ -164,7 +186,7 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
     final generation = _loadGeneration;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || generation != _loadGeneration) return;
-      _downloadAction(generation);
+      unawaited(_downloadAction(generation));
     });
   }
 
