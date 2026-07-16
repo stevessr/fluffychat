@@ -4,9 +4,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat_details/chat_details.dart';
 import 'package:fluffychat/pages/chat_details/participant_list_item.dart';
+import 'package:fluffychat/pages/chat_details/room_metadata_viewer.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/chat_settings_popup_menu.dart';
@@ -314,6 +316,21 @@ class ChatDetailsView extends StatelessWidget {
                             ),
                           ),
                         ],
+                        if (AppSettings.showRoomMetadata.value)
+                          ListTile(
+                            title: Text(L10n.of(context).roomMetadata),
+                            subtitle: Text(
+                              L10n.of(context).roomMetadataDescription,
+                            ),
+                            leading: CircleAvatar(
+                              backgroundColor:
+                                  theme.colorScheme.surfaceContainer,
+                              foregroundColor: iconColor,
+                              child: const Icon(Icons.data_object_outlined),
+                            ),
+                            trailing: const Icon(Icons.chevron_right_outlined),
+                            onTap: () => showRoomMetadataViewer(context, room),
+                          ),
                         Divider(color: theme.dividerColor),
                         ListTile(
                           title: Text(

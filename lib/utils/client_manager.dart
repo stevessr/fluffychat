@@ -11,6 +11,7 @@ import 'package:fluffychat/utils/custom_image_resizer.dart';
 import 'package:fluffychat/utils/init_with_restore.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/rainbow_command_extension.dart';
+import 'package:fluffychat/utils/room_management_command_extension.dart';
 import 'package:fluffychat/utils/web_paths.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -151,6 +152,7 @@ abstract class ClientManager {
       ),
     );
     client.registerRainbowCommand();
+    client.registerRoomManagementCommands();
     return client;
   }
 

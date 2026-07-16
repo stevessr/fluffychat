@@ -22,6 +22,7 @@
   "swipeRightToLeftToReply": true,
   "sendOnEnter": false,
   "showPresences": true,
+  "showRoomMetadata": false,
   "displayNavigationRail": false,
   "experimentalVoip": false,
   "shareKeysWith": "all",
