@@ -78,6 +78,7 @@ enum AppSettings<T> {
   chatFilter<String>('chat.fluffy.chat_filter', 'allChats'),
   hideRoomsInSpaces<bool>('chat.fluffy.hideRoomsInSpaces', false),
   showThumbnailsInTimeline<bool>('chat.fluffy.showThumbnailsInTimeline', true),
+  showRoomMetadata<bool>('chat.fluffy.show_room_metadata', false),
 
   /// Block screenshots and screen recording on Android
   blockScreenshots<bool>('chat.fluffy.block_screenshots', false);
