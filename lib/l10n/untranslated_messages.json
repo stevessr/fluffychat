@@ -295,7 +295,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "az": [
     "editImage",
@@ -1147,7 +1155,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "be": [
     "editImage",
@@ -1283,7 +1299,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "bn": [
     "editImage",
@@ -2138,7 +2162,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "bo": [
     "editImage",
@@ -3025,7 +3057,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "ca": [
     "editImage",
@@ -3165,7 +3205,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "cs": [
     "editImage",
@@ -3392,7 +3440,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "da": [
     "editImage",
@@ -4248,7 +4304,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "de": [
     "editImage",
@@ -4393,7 +4457,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "el": [
     "editImage",
@@ -5199,7 +5271,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "eo": [
     "editImage",
@@ -5774,7 +5854,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "es": [
     "editImage",
@@ -5910,7 +5998,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "et": [
     "editImage",
@@ -6022,7 +6118,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "eu": [
     "editImage",
@@ -6150,7 +6254,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "fa": [
     "editImage",
@@ -6299,7 +6411,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "fi": [
     "editImage",
@@ -6496,7 +6616,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "fil": [
     "editImage",
@@ -7203,7 +7331,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "fr": [
     "editImage",
@@ -7508,7 +7644,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "ga": [
     "editImage",
@@ -7630,7 +7774,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "gl": [
     "editImage",
@@ -7755,7 +7907,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "he": [
     "editImage",
@@ -8419,7 +8579,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "hi": [
     "editImage",
@@ -9289,7 +9457,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "hr": [
     "editImage",
@@ -9462,7 +9638,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "hu": [
     "editImage",
@@ -9688,7 +9872,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "ia": [
     "editImage",
@@ -10561,7 +10753,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "id": [
     "editImage",
@@ -10697,7 +10897,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "ie": [
     "editImage",
@@ -11382,7 +11590,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "it": [
     "editImage",
@@ -11598,7 +11814,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "ja": [
     "editImage",
@@ -11941,7 +12165,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "ka": [
     "editImage",
@@ -12690,7 +12922,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "kab": [
     "editImage",
@@ -13002,7 +13242,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "ko": [
     "editImage",
@@ -13260,7 +13508,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "lt": [
     "editImage",
@@ -13757,7 +14013,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "lv": [
     "editImage",
@@ -13912,7 +14176,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "nb": [
     "editImage",
@@ -14048,7 +14320,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "nl": [
     "editImage",
@@ -14170,7 +14450,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "pl": [
     "editImage",
@@ -14297,7 +14585,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "pt": [
     "editImage",
@@ -15161,7 +15457,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "pt_BR": [
     "editImage",
@@ -15343,7 +15647,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "pt_PT": [
     "editImage",
@@ -15965,7 +16277,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "ro": [
     "editImage",
@@ -16438,7 +16758,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "ru": [
     "editImage",
@@ -16574,7 +16902,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "sk": [
     "editImage",
@@ -17248,7 +17584,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "sl": [
     "editImage",
@@ -18040,7 +18384,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "sq": [
     "editImage",
@@ -18927,7 +19279,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "sr": [
     "editImage",
@@ -19519,7 +19879,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "sv": [
     "editImage",
@@ -19766,7 +20134,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "ta": [
     "editImage",
@@ -19986,7 +20362,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "te": [
     "editImage",
@@ -20869,7 +21253,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "th": [
     "editImage",
@@ -21707,7 +22099,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "tr": [
     "editImage",
@@ -22003,7 +22403,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "uk": [
     "editImage",
@@ -22126,7 +22534,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "uz": [
     "editImage",
@@ -22299,7 +22715,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "vi": [
     "editImage",
@@ -23037,7 +23461,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "yue": [
     "editImage",
@@ -23864,7 +24296,15 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ],
   "zh": [
     "editImage",
@@ -24161,6 +24601,14 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "blockScreenshots",
-    "blockScreenshotsDescription"
+    "blockScreenshotsDescription",
+    "commandHint_banserver",
+    "commandHint_unbanserver",
+    "showRoomMetadata",
+    "showRoomMetadataDescription",
+    "roomMetadata",
+    "roomMetadataDescription",
+    "serverBlockedFromRoom",
+    "serverUnblockedFromRoom"
   ]
 }
