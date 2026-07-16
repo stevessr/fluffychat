@@ -353,6 +353,16 @@
         "type": "String",
         "description": "Usage hint for the command /rainbow"
     },
+    "commandHint_banserver": "阻止指定服务器或服务器通配符参与此聊天室",
+    "@commandHint_banserver": {
+        "type": "String",
+        "description": "Usage hint for the command /banserver"
+    },
+    "commandHint_unbanserver": "从此聊天室的服务器屏蔽列表中移除指定服务器或通配符",
+    "@commandHint_unbanserver": {
+        "type": "String",
+        "description": "Usage hint for the command /unbanserver"
+    },
     "@commandHint_html": {
         "type": "String",
         "description": "Usage hint for the command /html"
@@ -2823,5 +2833,41 @@
     "@blockScreenshotsDescription": {
         "type": "String",
         "placeholders": {}
+    },
+    "showRoomMetadata": "显示聊天室元数据",
+    "@showRoomMetadata": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "showRoomMetadataDescription": "在聊天详情中显示查看聊天室标识和当前状态 JSON 的入口",
+    "@showRoomMetadataDescription": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "roomMetadata": "聊天室元数据",
+    "@roomMetadata": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "roomMetadataDescription": "以 JSON 查看聊天室标识和当前非成员状态",
+    "@roomMetadataDescription": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "serverBlockedFromRoom": "服务器 {server} 现已被此聊天室屏蔽",
+    "@serverBlockedFromRoom": {
+        "placeholders": {
+            "server": {
+                "type": "String"
+            }
+        }
+    },
+    "serverUnblockedFromRoom": "服务器 {server} 已不再被此聊天室屏蔽",
+    "@serverUnblockedFromRoom": {
+        "placeholders": {
+            "server": {
+                "type": "String"
+            }
+        }
     }
 }

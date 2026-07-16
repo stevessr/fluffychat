@@ -30,6 +30,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extensi
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/other_party_can_receive.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/room_management_command_extension.dart';
 import 'package:fluffychat/utils/show_scaffold_dialog.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
@@ -650,17 +651,30 @@ class ChatController extends State<ChatPageWithRoom>
   });
 
   Future<void> send({bool forceUnencrypted = false}) async {
-    final proceed = await showTrustUserInRoomDialog(context, room);
-    if (!mounted || !proceed) return;
     if (sendController.text.trim().isEmpty) return;
+    final submittedText = sendController.text;
+    final commandMatch = RegExp(r'^\/(\w+)').firstMatch(submittedText);
+    final commandName = commandMatch?[1]?.toLowerCase();
+    final forcePlaintext = forceUnencrypted && room.encrypted;
+    final isRoomManagementCommand =
+        !forcePlaintext &&
+        commandName != null &&
+        roomManagementCommandNames.contains(commandName) &&
+        sendingClient.commands.containsKey(commandName);
+
+    // Server ACL commands send unencrypted room state and do not need the
+    // device trust checks intended for encrypted timeline messages.
+    if (!isRoomManagementCommand) {
+      final proceed = await showTrustUserInRoomDialog(context, room);
+      if (!mounted || !proceed) return;
+    }
+
     _storeInputTimeoutTimer?.cancel();
     final prefs = Matrix.of(context).store;
     prefs.remove('draft_$roomId');
     var parseCommands = true;
-    final forcePlaintext = forceUnencrypted && room.encrypted;
 
     if (!forcePlaintext) {
-      final commandMatch = RegExp(r'^\/(\w+)').firstMatch(sendController.text);
       if (commandMatch != null &&
           !sendingClient.commands.keys.contains(
             commandMatch[1]!.toLowerCase(),
@@ -682,11 +696,33 @@ class ChatController extends State<ChatPageWithRoom>
 
     if (forcePlaintext) {
       // ignore: unawaited_futures
-      _sendUnencryptedText(sendController.text);
+      _sendUnencryptedText(submittedText);
+    } else if (isRoomManagementCommand) {
+      try {
+        await room.sendTextEvent(submittedText, parseCommands: true);
+      } catch (error) {
+        await prefs.setString('draft_$roomId', submittedText);
+        if (!mounted) return;
+        final message = error is CommandException
+            ? error.message
+            : error.toLocalizedString(context);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
+        return;
+      }
+      if (!mounted) return;
+      final target = submittedText.substring(commandMatch!.end).trim();
+      final message = commandName == 'banserver'
+          ? L10n.of(context).serverBlockedFromRoom(target.toLowerCase())
+          : L10n.of(context).serverUnblockedFromRoom(target.toLowerCase());
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
     } else {
       // ignore: unawaited_futures
       room.sendTextEvent(
-        sendController.text,
+        submittedText,
         inReplyTo: replyEvent,
         editEventId: editEvent?.eventId,
         parseCommands: parseCommands,

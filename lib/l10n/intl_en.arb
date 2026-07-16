@@ -528,6 +528,16 @@
         "type": "String",
         "description": "Usage hint for the command /rainbow"
     },
+    "commandHint_banserver": "Block a server or server glob from participating in this room",
+    "@commandHint_banserver": {
+        "type": "String",
+        "description": "Usage hint for the command /banserver"
+    },
+    "commandHint_unbanserver": "Remove a server or server glob from this room's block list",
+    "@commandHint_unbanserver": {
+        "type": "String",
+        "description": "Usage hint for the command /unbanserver"
+    },
     "commandHint_invite": "Invite the given user to this room",
     "@commandHint_invite": {
         "type": "String",
@@ -2878,5 +2888,41 @@
     "@blockScreenshotsDescription": {
         "type": "String",
         "placeholders": {}
+    },
+    "showRoomMetadata": "Show room metadata",
+    "@showRoomMetadata": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "showRoomMetadataDescription": "Show an entry in chat details for viewing room identifiers and current state as JSON",
+    "@showRoomMetadataDescription": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "roomMetadata": "Room metadata",
+    "@roomMetadata": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "roomMetadataDescription": "View room identifiers and current non-member state as JSON",
+    "@roomMetadataDescription": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "serverBlockedFromRoom": "Server {server} is now blocked from this room",
+    "@serverBlockedFromRoom": {
+        "placeholders": {
+            "server": {
+                "type": "String"
+            }
+        }
+    },
+    "serverUnblockedFromRoom": "Server {server} is no longer blocked from this room",
+    "@serverUnblockedFromRoom": {
+        "placeholders": {
+            "server": {
+                "type": "String"
+            }
+        }
     }
 }
