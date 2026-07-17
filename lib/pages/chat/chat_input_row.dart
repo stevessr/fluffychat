@@ -388,12 +388,21 @@ class ChatInputRow extends StatelessWidget {
                         : IconButton(
                             key: Key('send_button'),
                             tooltip: L10n.of(context).send,
-                            onPressed: controller.send,
+                            onPressed: controller.isSendingText
+                                ? null
+                                : controller.send,
                             style: IconButton.styleFrom(
                               backgroundColor: theme.bubbleColor,
                               foregroundColor: theme.onBubbleColor,
                             ),
-                            icon: const Icon(Icons.send_outlined),
+                            icon: controller.isSendingText
+                                ? const SizedBox.square(
+                                    dimension: 18,
+                                    child: CircularProgressIndicator.adaptive(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.send_outlined),
                           ),
                   ),
                 ],

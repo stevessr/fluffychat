@@ -256,6 +256,7 @@ class RecordingViewModelState extends State<RecordingViewModel> {
     _recorderSubscription = null;
     _recordingGeneration++;
     _audioRecorder = null;
+    if (mounted) setState(() {});
     final recordedDuration = duration;
     final recordedAmplitudes = List<double>.from(amplitudeTimeline);
     try {
