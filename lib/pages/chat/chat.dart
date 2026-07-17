@@ -630,6 +630,7 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   TextEditingController sendController = TextEditingController();
+  bool isSendingText = false;
 
   void setSendingClient(Client c) {
     if (currentlyTyping) {
@@ -653,128 +654,188 @@ class ChatController extends State<ChatPageWithRoom>
   });
 
   Future<void> send({bool forceUnencrypted = false}) async {
-    if (sendController.text.trim().isEmpty) return;
-    final submittedText = sendController.text;
-    final commandMatch = RegExp(r'^\/(\w+)').firstMatch(submittedText);
-    final commandName = commandMatch?[1]?.toLowerCase();
-    final forcePlaintext = forceUnencrypted && room.encrypted;
-    final isRoomManagementCommand =
-        !forcePlaintext &&
-        commandName != null &&
-        roomManagementCommandNames.contains(commandName) &&
-        sendingClient.commands.containsKey(commandName);
+    if (isSendingText || sendController.text.trim().isEmpty) return;
+    setState(() => isSendingText = true);
+    var dispatched = false;
 
-    if (!isRoomManagementCommand) {
-      final proceed = await showTrustUserInRoomDialog(context, room);
-      if (!mounted || !proceed) return;
-    }
+    try {
+      final message = sendController.text;
+      final commandMatch = RegExp(r'^\/(\w+)').firstMatch(message);
+      final commandName = commandMatch?[1]?.toLowerCase();
+      final forcePlaintext = forceUnencrypted && room.encrypted;
 
-    _storeInputTimeoutTimer?.cancel();
-    final prefs = Matrix.of(context).store;
-    prefs.remove('draft_$roomId');
-    var parseCommands = true;
+      final isRoomManagementCommand =
+          !forcePlaintext &&
+          commandName != null &&
+          roomManagementCommandNames.contains(commandName) &&
+          sendingClient.commands.containsKey(commandName);
 
-    if (!forcePlaintext) {
-      if (commandMatch != null &&
-          !sendingClient.commands.keys.contains(
-            commandMatch[1]!.toLowerCase(),
-          )) {
-        final l10n = L10n.of(context);
-        final dialogResult = await showOkCancelAlertDialog(
-          context: context,
-          title: l10n.commandInvalid,
-          message: l10n.commandMissing(commandMatch[0]!),
-          okLabel: l10n.sendAsText,
-          cancelLabel: l10n.cancel,
-        );
-        if (!mounted) return;
-        if (dialogResult == OkCancelResult.cancel) return;
+      // Server ACL commands send unencrypted room state and do not need the
+      // device trust checks intended for encrypted timeline messages.
+      if (!isRoomManagementCommand) {
+        final proceed = await showTrustUserInRoomDialog(context, room);
+        if (!mounted || !proceed) return;
+      }
+
+      final failedReplyEvent = replyEvent;
+      var parseCommands = true;
+
+      if (!forcePlaintext) {
+        if (commandMatch != null &&
+            !sendingClient.commands.keys.contains(
+              commandMatch[1]!.toLowerCase(),
+            )) {
+          final l10n = L10n.of(context);
+          final dialogResult = await showOkCancelAlertDialog(
+            context: context,
+            title: l10n.commandInvalid,
+            message: l10n.commandMissing(commandMatch[0]!),
+            okLabel: l10n.sendAsText,
+            cancelLabel: l10n.cancel,
+          );
+          if (!mounted) return;
+          if (dialogResult == OkCancelResult.cancel) return;
+          parseCommands = false;
+        }
+      } else {
         parseCommands = false;
       }
-    } else {
-      parseCommands = false;
-    }
 
-    if (forcePlaintext) {
-      _sendUnencryptedText(submittedText);
-    } else if (isRoomManagementCommand) {
-      try {
-        await room.sendTextEvent(submittedText, parseCommands: true);
-      } catch (error) {
-        await prefs.setString('draft_$roomId', submittedText);
+      _storeInputTimeoutTimer?.cancel();
+      final prefs = Matrix.of(context).store;
+      await prefs.remove('draft_$roomId');
+
+      if (isRoomManagementCommand) {
+        try {
+          await room.sendTextEvent(message, parseCommands: true);
+        } catch (error) {
+          await prefs.setString('draft_$roomId', message);
+          if (!mounted) return;
+          final errorText = error is CommandException
+              ? error.message
+              : error.toLocalizedString(context);
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(errorText)));
+          return;
+        }
         if (!mounted) return;
-        final message = error is CommandException
-            ? error.message
-            : error.toLocalizedString(context);
+        final target = message.substring(commandMatch!.end).trim();
+        final successMessage = commandName == 'banserver'
+            ? L10n.of(context).serverBlockedFromRoom(target.toLowerCase())
+            : L10n.of(context).serverUnblockedFromRoom(target.toLowerCase());
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(message)));
-        return;
-      }
-      if (!mounted) return;
-      final target = submittedText.substring(commandMatch!.end).trim();
-      final message = commandName == 'banserver'
-          ? L10n.of(context).serverBlockedFromRoom(target.toLowerCase())
-          : L10n.of(context).serverUnblockedFromRoom(target.toLowerCase());
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
-    } else if (replyEvent != null) {
-      final replyTo = replyEvent!;
-      final mentionUserIds = <String>{replyTo.senderId};
-      for (final mention in _extractMentions(submittedText)) {
-        final resolvedId = mention.isValidMatrixIdStrict()
-            ? mention
-            : room.getMention(mention);
-        if (resolvedId != null) {
-          mentionUserIds.add(resolvedId);
-        }
-      }
-      mentionUserIds.remove(room.client.userID);
-      final content = <String, dynamic>{
-        'msgtype': MessageTypes.Text,
-        'body': submittedText,
-        'm.mentions': {
-          'user_ids': mentionUserIds.toList(),
-        },
-      };
-      if (activeThreadId != null) {
-        content['m.relates_to'] = {
-          'event_id': activeThreadId,
-          'rel_type': RelationshipTypes.thread,
-          'is_falling_back': false,
-          'm.in_reply_to': {'event_id': replyTo.eventId},
-        };
+        ).showSnackBar(SnackBar(content: Text(successMessage)));
       } else {
-        content['m.relates_to'] = {
-          'm.in_reply_to': {'event_id': replyTo.eventId},
-        };
+        final Future<void> sendFuture;
+        if (forcePlaintext) {
+          sendFuture = _sendUnencryptedText(message);
+        } else if (replyEvent != null) {
+          final replyTo = replyEvent!;
+          final mentionUserIds = <String>{replyTo.senderId};
+          for (final mention in _extractMentions(message)) {
+            final resolvedId = mention.isValidMatrixIdStrict()
+                ? mention
+                : room.getMention(mention);
+            if (resolvedId != null) {
+              mentionUserIds.add(resolvedId);
+            }
+          }
+          mentionUserIds.remove(room.client.userID);
+          final content = <String, dynamic>{
+            'msgtype': MessageTypes.Text,
+            'body': message,
+            'm.mentions': {
+              'user_ids': mentionUserIds.toList(),
+            },
+          };
+          if (activeThreadId != null) {
+            content['m.relates_to'] = {
+              'event_id': activeThreadId,
+              'rel_type': RelationshipTypes.thread,
+              'is_falling_back': false,
+              'm.in_reply_to': {'event_id': replyTo.eventId},
+            };
+          } else {
+            content['m.relates_to'] = {
+              'm.in_reply_to': {'event_id': replyTo.eventId},
+            };
+          }
+          sendFuture = room.sendEvent(
+            content,
+            editEventId: editEvent?.eventId,
+          );
+        } else {
+          sendFuture = room.sendTextEvent(
+            message,
+            inReplyTo: null,
+            editEventId: editEvent?.eventId,
+            parseCommands: parseCommands,
+            threadRootEventId: activeThreadId,
+          );
+        }
+        unawaited(
+          sendFuture.then<void>(
+            (_) {},
+            onError: (error, stackTrace) => _handleTextSendFailure(
+              error,
+              stackTrace,
+              message,
+              failedReplyEvent,
+            ),
+          ),
+        );
       }
-      room.sendEvent(
-        content,
-        editEventId: editEvent?.eventId,
-      );
-    } else {
-      room.sendTextEvent(
-        submittedText,
-        inReplyTo: null,
-        editEventId: editEvent?.eventId,
-        parseCommands: parseCommands,
-        threadRootEventId: activeThreadId,
-      );
-    }
-    sendController.value = TextEditingValue(
-      text: pendingText,
-      selection: const TextSelection.collapsed(offset: 0),
-    );
 
-    setState(() {
-      sendController.text = pendingText;
-      _inputTextIsEmpty = pendingText.isEmpty;
-      replyEvent = null;
-      editEvent = null;
-      pendingText = '';
-    });
+      dispatched = true;
+      sendController.value = TextEditingValue(
+        text: pendingText,
+        selection: const TextSelection.collapsed(offset: 0),
+      );
+
+      setState(() {
+        isSendingText = false;
+        sendController.text = pendingText;
+        _inputTextIsEmpty = pendingText.isEmpty;
+        replyEvent = null;
+        editEvent = null;
+        pendingText = '';
+      });
+    } catch (error, stackTrace) {
+      Logs().w('Unable to prepare text message', error, stackTrace);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error.toLocalizedString(context))),
+        );
+      }
+    } finally {
+      if (mounted && !dispatched) {
+        setState(() => isSendingText = false);
+      }
+    }
+  }
+
+  void _handleTextSendFailure(
+    Object error,
+    StackTrace stackTrace,
+    String message,
+    Event? failedReplyEvent,
+  ) {
+    Logs().w('Unable to send text message', error, stackTrace);
+    if (!mounted) return;
+    if (sendController.text.isEmpty) {
+      sendController.value = TextEditingValue(
+        text: message,
+        selection: TextSelection.collapsed(offset: message.length),
+      );
+      replyEvent ??= failedReplyEvent;
+      _inputTextIsEmpty = false;
+    }
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(error.toLocalizedString(context))));
+    setState(() {});
   }
 
   Future<void> _sendUnencryptedText(String message) async {
@@ -1018,6 +1079,7 @@ class ChatController extends State<ChatPageWithRoom>
       );
       return;
     }
+    if (!mounted) return;
     setState(() {
       replyEvent = null;
     });
