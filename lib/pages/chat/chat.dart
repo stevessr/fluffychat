@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
@@ -746,11 +745,39 @@ class ChatController extends State<ChatPageWithRoom>
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(message)));
+    } else if (replyEvent != null) {
+      // 发送回复消息，不添加回退文本（fallback text）
+      // 只使用 m.relates_to 中的 m.in_reply_to 引用
+      final replyTo = replyEvent!;
+      final content = <String, dynamic>{
+        'msgtype': MessageTypes.Text,
+        'body': submittedText,
+        'm.mentions': {
+          'user_ids': [replyTo.senderId],
+        },
+      };
+      if (activeThreadId != null) {
+        content['m.relates_to'] = {
+          'event_id': activeThreadId,
+          'rel_type': RelationshipTypes.thread,
+          'is_falling_back': false,
+          'm.in_reply_to': {'event_id': replyTo.eventId},
+        };
+      } else {
+        content['m.relates_to'] = {
+          'm.in_reply_to': {'event_id': replyTo.eventId},
+        };
+      }
+      // ignore: unawaited_futures
+      room.sendEvent(
+        content,
+        editEventId: editEvent?.eventId,
+      );
     } else {
       // ignore: unawaited_futures
       room.sendTextEvent(
         submittedText,
-        inReplyTo: replyEvent,
+        inReplyTo: null,
         editEventId: editEvent?.eventId,
         parseCommands: parseCommands,
         threadRootEventId: activeThreadId,
@@ -778,32 +805,11 @@ class ChatController extends State<ChatPageWithRoom>
 
     final inReplyTo = replyEvent;
     if (inReplyTo != null) {
-      var replyText =
-          '<${inReplyTo.senderId}> ${_stripBodyFallback(inReplyTo.body)}';
-      replyText = replyText.split('\n').map((line) => '> $line').join('\n');
-      content['format'] = 'org.matrix.custom.html';
-      final replyHtml =
-          (inReplyTo.formattedText.isNotEmpty
-                  ? inReplyTo.formattedText
-                  : htmlEscape.convert(inReplyTo.body).replaceAll('\n', '<br>'))
-              .replaceAll(
-                RegExp(
-                  r'<mx-reply>.*</mx-reply>',
-                  caseSensitive: false,
-                  multiLine: false,
-                  dotAll: true,
-                ),
-                '',
-              );
-      final repliedHtml = htmlEscape
-          .convert(content['body'] as String)
-          .replaceAll('\n', '<br>');
-      content['formatted_body'] =
-          '<mx-reply><blockquote><a href="https://matrix.to/#/${inReplyTo.roomId!}/${inReplyTo.eventId}">In reply to</a> <a href="https://matrix.to/#/${inReplyTo.senderId}">${inReplyTo.senderId}</a><br>$replyHtml</blockquote></mx-reply>$repliedHtml';
-      content['body'] =
-          '${replyText.replaceAll('@room', '@\u200broom')}\n\n${content['body']}';
       content['m.relates_to'] = {
         'm.in_reply_to': {'event_id': inReplyTo.eventId},
+      };
+      content['m.mentions'] = {
+        'user_ids': [inReplyTo.senderId],
       };
     }
 
@@ -839,22 +845,6 @@ class ChatController extends State<ChatPageWithRoom>
 
     final txid = sendingClient.generateUniqueTransactionId();
     await sendingClient.sendMessage(room.id, EventTypes.Message, txid, content);
-  }
-
-  String _stripBodyFallback(String body) {
-    if (body.startsWith('> <@')) {
-      var temp = '';
-      var inPrefix = true;
-      for (final l in body.split('\n')) {
-        if (inPrefix && (l.isEmpty || l.startsWith('> '))) {
-          continue;
-        }
-        inPrefix = false;
-        temp += temp.isEmpty ? l : ('\n$l');
-      }
-      return temp;
-    }
-    return body;
   }
 
   Future<void> sendFileAction({FileType type = FileType.any}) async {
