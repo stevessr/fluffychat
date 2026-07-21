@@ -303,7 +303,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "az": [
     "editImage",
@@ -1163,7 +1164,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "be": [
     "editImage",
@@ -1307,7 +1309,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "bn": [
     "editImage",
@@ -2170,7 +2173,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "bo": [
     "editImage",
@@ -3065,7 +3069,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "ca": [
     "editImage",
@@ -3213,7 +3218,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "cs": [
     "editImage",
@@ -3448,7 +3454,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "da": [
     "editImage",
@@ -4312,7 +4319,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "de": [
     "editImage",
@@ -4465,7 +4473,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "el": [
     "editImage",
@@ -5279,7 +5288,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "eo": [
     "editImage",
@@ -5862,7 +5872,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "es": [
     "editImage",
@@ -6006,7 +6017,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "et": [
     "editImage",
@@ -6126,7 +6138,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "eu": [
     "editImage",
@@ -6262,7 +6275,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "fa": [
     "editImage",
@@ -6419,7 +6433,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "fi": [
     "editImage",
@@ -6624,7 +6639,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "fil": [
     "editImage",
@@ -7339,7 +7355,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "fr": [
     "editImage",
@@ -7652,7 +7669,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "ga": [
     "editImage",
@@ -7782,7 +7800,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "gl": [
     "editImage",
@@ -7915,7 +7934,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "he": [
     "editImage",
@@ -8587,7 +8607,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "hi": [
     "editImage",
@@ -9465,7 +9486,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "hr": [
     "editImage",
@@ -9646,7 +9668,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "hu": [
     "editImage",
@@ -9880,7 +9903,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "ia": [
     "editImage",
@@ -10761,7 +10785,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "id": [
     "editImage",
@@ -10905,7 +10930,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "ie": [
     "editImage",
@@ -11598,7 +11624,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "it": [
     "editImage",
@@ -11822,7 +11849,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "ja": [
     "editImage",
@@ -12173,7 +12201,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "ka": [
     "editImage",
@@ -12930,7 +12959,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "kab": [
     "editImage",
@@ -13250,7 +13280,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "ko": [
     "editImage",
@@ -13516,7 +13547,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "lt": [
     "editImage",
@@ -14021,7 +14053,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "lv": [
     "editImage",
@@ -14184,7 +14217,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "nb": [
     "editImage",
@@ -14328,7 +14362,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "nl": [
     "editImage",
@@ -14458,7 +14493,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "pl": [
     "editImage",
@@ -14593,7 +14629,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "pt": [
     "editImage",
@@ -15465,7 +15502,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "pt_BR": [
     "editImage",
@@ -15655,7 +15693,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "pt_PT": [
     "editImage",
@@ -16285,7 +16324,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "ro": [
     "editImage",
@@ -16766,7 +16806,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "ru": [
     "editImage",
@@ -16910,7 +16951,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "sk": [
     "editImage",
@@ -17592,7 +17634,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "sl": [
     "editImage",
@@ -18392,7 +18435,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "sq": [
     "editImage",
@@ -19287,7 +19331,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "sr": [
     "editImage",
@@ -19887,7 +19932,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "sv": [
     "editImage",
@@ -20142,7 +20188,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "ta": [
     "editImage",
@@ -20370,7 +20417,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "te": [
     "editImage",
@@ -21261,7 +21309,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "th": [
     "editImage",
@@ -22107,7 +22156,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "tr": [
     "editImage",
@@ -22411,7 +22461,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "uk": [
     "editImage",
@@ -22542,7 +22593,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "uz": [
     "editImage",
@@ -22723,7 +22775,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "vi": [
     "editImage",
@@ -23469,7 +23522,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "yue": [
     "editImage",
@@ -24304,7 +24358,8 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ],
   "zh": [
     "editImage",
@@ -24609,6 +24664,7 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "sendingAttachmentCountOfCount"
   ]
 }
