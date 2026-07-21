@@ -2345,6 +2345,14 @@
     "doesNotSeemToBeAValidHomeserver": "Doesn't seem to be a compatible homeserver. Wrong URL?",
     "calculatingFileSize": "Calculating file size...",
     "sendingAttachment": "Sending attachment...",
+    "sendingAttachmentCountOfCount": "Sending attachment {current} of {total}...",
+    "@sendingAttachmentCountOfCount": {
+        "type": "String",
+        "placeholders": {
+            "current": {},
+            "total": {}
+        }
+    },
     "oneOfYourDevicesIsNotVerified": "One of your devices is not verified",
     "noticeChatBackupDeviceVerification": "Note: When you connect all your devices to the chat backup, they are automatically verified.",
     "continueText": "Continue",

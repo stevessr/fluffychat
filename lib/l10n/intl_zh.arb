@@ -1,6 +1,56 @@
 {
     "@@locale": "zh",
     "@@last_modified": "2021-08-14 12:41:09.767805",
+    "editImage": "编辑图片",
+    "@editImage": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "rotateLeft": "向左旋转",
+    "@rotateLeft": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "rotateRight": "向右旋转",
+    "@rotateRight": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "mirror": "镜像翻转",
+    "@mirror": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "save": "保存",
+    "@save": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "draw": "绘制",
+    "@draw": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "undo": "撤销",
+    "@undo": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "clear": "清除",
+    "@clear": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "eraser": "橡皮擦",
+    "@eraser": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "crop": "裁剪",
+    "@crop": {
+        "type": "String",
+        "placeholders": {}
+    },
     "about": "关于",
     "@about": {
         "type": "String",
@@ -1840,6 +1890,31 @@
     "hydrate": "从备份文件恢复",
     "dehydrate": "导出会话并擦除设备",
     "dehydrateWarning": "此操作无法撤消。 确保你安全地存储备份文件。",
+    "exportAccount": "导出账户（实验性）",
+    "@exportAccount": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "exportAccountWarning": "导出你的访问令牌、会话元数据和本地缓存恢复密钥到一个便携文件中。任何拥有此文件的人都可以完全访问你的账户。请安全存储，并在不再需要后立即删除。",
+    "@exportAccountWarning": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "exportAccountDescription": "将此账户保存到便携文件中，以便迁移到其他设备。",
+    "@exportAccountDescription": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "importAccount": "导入账户（实验性）",
+    "@importAccount": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "importAccountDescription": "从之前导出的文件恢复账户。",
+    "@importAccountDescription": {
+        "type": "String",
+        "placeholders": {}
+    },
     "user": "用户",
     "custom": "自定义",
     "confirmMatrixId": "请确认你的 Matrix ID 以删除账户。",
@@ -2039,6 +2114,11 @@
     "databaseMigrationBody": "请稍候。可能需要稍等片刻。",
     "thisDevice": "此设备：",
     "publicSpaces": "公开空间",
+    "presencesToggle": "显示其他用户的状态消息",
+    "@presencesToggle": {
+        "type": "String",
+        "placeholders": {}
+    },
     "passwordIsWrong": "你输入的密码有误",
     "pleaseEnterYourCurrentPassword": "请输入你当前的密码",
     "nothingFound": "未找到任何内容…",
@@ -2259,6 +2339,14 @@
     "loginWithMatrixId": "使用 Matrix-ID 登录",
     "doesNotSeemToBeAValidHomeserver": "似乎不是兼容的主服务器。URL 不正确？",
     "sendingAttachment": "发送附件中…",
+    "sendingAttachmentCountOfCount": "正在发送附件 {current}/{total}…",
+    "@sendingAttachmentCountOfCount": {
+        "type": "String",
+        "placeholders": {
+            "current": {},
+            "total": {}
+        }
+    },
     "calculatingFileSize": "计算文件尺寸中…",
     "oneOfYourDevicesIsNotVerified": "您设备中的一台未验证",
     "noticeChatBackupDeviceVerification": "注意：当你连接所有设备到聊天备份时，这些设备将被自动验证。",
