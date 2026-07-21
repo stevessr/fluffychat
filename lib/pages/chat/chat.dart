@@ -722,11 +722,22 @@ class ChatController extends State<ChatPageWithRoom>
       // 发送回复消息，不添加回退文本（fallback text）
       // 只使用 m.relates_to 中的 m.in_reply_to 引用
       final replyTo = replyEvent!;
+      final mentionUserIds = <String>{replyTo.senderId};
+      // 解析消息体中的 @[displayName] 和 @user:server.tld 提及
+      for (final mention in _extractMentions(submittedText)) {
+        final resolvedId = mention.isValidMatrixIdStrict()
+            ? mention
+            : room.getMention(mention);
+        if (resolvedId != null) {
+          mentionUserIds.add(resolvedId);
+        }
+      }
+      mentionUserIds.remove(room.client.userID);
       final content = <String, dynamic>{
         'msgtype': MessageTypes.Text,
         'body': submittedText,
         'm.mentions': {
-          'user_ids': [replyTo.senderId],
+          'user_ids': mentionUserIds.toList(),
         },
       };
       if (activeThreadId != null) {
@@ -781,8 +792,19 @@ class ChatController extends State<ChatPageWithRoom>
       content['m.relates_to'] = {
         'm.in_reply_to': {'event_id': inReplyTo.eventId},
       };
+      final mentionUserIds = <String>{inReplyTo.senderId};
+      // 解析消息体中的 @[displayName] 和 @user:server.tld 提及
+      for (final mention in _extractMentions(message)) {
+        final resolvedId = mention.isValidMatrixIdStrict()
+            ? mention
+            : room.getMention(mention);
+        if (resolvedId != null) {
+          mentionUserIds.add(resolvedId);
+        }
+      }
+      mentionUserIds.remove(room.client.userID);
       content['m.mentions'] = {
-        'user_ids': [inReplyTo.senderId],
+        'user_ids': mentionUserIds.toList(),
       };
     }
 
@@ -1861,6 +1883,25 @@ class ChatController extends State<ChatPageWithRoom>
         ],
       ),
     );
+  }
+
+  /// 从消息文本中提取 @[displayName] 和 @user:server.tld 形式的提及
+  List<String> _extractMentions(String message) {
+    if (message.isEmpty) return [];
+    final mentions = message
+        .split('@')
+        .map(
+          (text) => text.startsWith('[')
+              ? '@${text.split(']').first}]'
+              : '@${text.split(RegExp(r'\s+')).first}',
+        )
+        .toList()
+      ..removeAt(0);
+    // 过滤掉 @room 并移除空字符串
+    mentions.removeWhere(
+      (m) => m == '@room' || m == '@',
+    );
+    return mentions;
   }
 }
 
