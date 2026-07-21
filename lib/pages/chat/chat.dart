@@ -1460,6 +1460,11 @@ class ChatController extends State<ChatPageWithRoom>
   void editSelectedEventAction() {
     final timeline = this.timeline;
     if (timeline == null) return;
+    // NOTE: 必须基于原始事件（而非 displayEvent）作为编辑目标。
+    // displayEvent 是 getDisplayEvent 解析出的"最新编辑事件"，其 eventId 是某次编辑
+    // 而非原始消息。Matrix 的编辑关系 m.relates_to.event_id 必须指向原始事件，
+    // 否则 SDK 的 getDisplayEvent 无法把后续编辑聚合到原始事件下，导致第二次及以后
+    // 的编辑发送后，显示的仍是第一次编辑的结果。
     final event = selectedEvents.first;
     final displayEvent = event.getDisplayEvent(timeline);
     // For image/file/sticker events, open SendFileDialog with editEventId
@@ -1471,10 +1476,10 @@ class ChatController extends State<ChatPageWithRoom>
       MessageTypes.Audio,
     }.contains(displayEvent.messageType)) {
       // ignore: unawaited_futures
-      editFileEventAction(displayEvent);
+      editFileEventAction(event);
       return;
     }
-    _startEditingEvent(displayEvent, clearSelection: true);
+    _startEditingEvent(event, clearSelection: true);
   }
 
   Future<void> editFileEventAction(Event event) async {
