@@ -263,9 +263,4 @@ class _LockScreenState extends State<LockScreen> {
     );
   }
 
-  @override
-  void dispose() {
-    _textEditingController.dispose();
-    super.dispose();
-  }
 }

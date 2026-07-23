@@ -191,12 +191,6 @@ class NewGroupController extends State<NewGroup> {
   }
 
   @override
-  void dispose() {
-    nameController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) => NewGroupView(this);
 }
 
