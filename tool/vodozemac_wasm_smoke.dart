@@ -9,6 +9,7 @@ import 'dart:typed_data';
 
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/custom_image_resizer.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 // ignore: implementation_imports
@@ -122,6 +123,19 @@ Future<void> main() async {
       customResized.mimeType != 'image/jpeg') {
     throw StateError('Custom image resizer Wasm round trip failed');
   }
+  final avatarFile = await MatrixFile(
+    bytes: png,
+    name: 'avatar.png',
+  ).prepareAvatar();
+  if (avatarFile is! MatrixImageFile ||
+      avatarFile.bytes.isEmpty ||
+      avatarFile.width != 1 ||
+      avatarFile.height != 1 ||
+      avatarFile.mimeType != 'image/jpeg') {
+    throw StateError('Avatar image generation Wasm round trip failed');
+  }
+  web.console.log('AVATAR_IMAGE_GENERATION_OK'.toJS);
+
   final invalidPreview = await customImageResizer(
     MatrixImageFileResizeArguments(
       bytes: Uint8List.fromList([0, 1, 2, 3]),

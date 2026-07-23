@@ -5,6 +5,9 @@
 
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/utils/client_manager.dart';
+import 'package:fluffychat/utils/custom_image_resizer.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/size_string.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -66,6 +69,23 @@ extension MatrixFileExtension on MatrixFile {
       return MatrixAudioFile(bytes: bytes, name: name);
     }
     return this;
+  }
+
+  /// Generates a bounded avatar image through the active Web/WASM or native
+  /// image pipeline. Invalid images are returned unchanged by `shrink()`.
+  Future<MatrixFile> prepareAvatar() async {
+    if (msgType != MessageTypes.Image) return this;
+
+    return MatrixImageFile.shrink(
+      bytes: bytes,
+      name: name,
+      mimeType: mimeType,
+      maxDimension: 512,
+      customImageResizer: PlatformInfos.supportsCustomImageResizer
+          ? customImageResizer
+          : null,
+      nativeImplementations: ClientManager.nativeImplementations,
+    );
   }
 
   String get sizeString => size.sizeString;

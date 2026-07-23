@@ -175,6 +175,10 @@ dependency_overrides:
   # sending. Remove after regenerated upstream bindings normalize byte arrays.
   vodozemac:
     path: third_party/vodozemac
+  # swipe_to_action schedules an unguarded post-frame setState from build. Use
+  # the local lifecycle-safe patch until the upstream package fixes this.
+  swipe_to_action:
+    path: third_party/swipe_to_action
   # To fix 16kb compatiblity in PlayStore. It is fixed in main branch but
   # not yet published:
   # https://github.com/google/webcrypto.dart/issues/207

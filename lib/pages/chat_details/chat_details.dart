@@ -9,6 +9,7 @@ import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_view.dart';
 import 'package:fluffychat/pages/settings/settings.dart';
 import 'package:fluffychat/utils/file_selector.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_modal_action_popup.dart';
@@ -165,7 +166,10 @@ class ChatDetailsController extends State<ChatDetails> {
     if (!mounted) return;
     await showFutureLoadingDialog(
       context: context,
-      future: () => room.setAvatar(file),
+      future: () async {
+        final avatarFile = await file.prepareAvatar();
+        await room.setAvatar(avatarFile);
+      },
     );
   }
 

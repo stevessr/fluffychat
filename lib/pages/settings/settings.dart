@@ -9,6 +9,7 @@ import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/file_selector.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
@@ -158,7 +159,10 @@ class SettingsController extends State<Settings> {
     if (!mounted) return;
     final success = await showFutureLoadingDialog(
       context: context,
-      future: () => matrix.client.setAvatar(file),
+      future: () async {
+        final avatarFile = await file.prepareAvatar();
+        await matrix.client.setAvatar(avatarFile);
+      },
     );
     if (success.error == null && mounted) {
       updateProfile();
