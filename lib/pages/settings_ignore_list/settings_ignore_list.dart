@@ -63,11 +63,5 @@ class SettingsIgnoreListController extends State<SettingsIgnoreList> {
   }
 
   @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) => SettingsIgnoreListView(this);
 }
