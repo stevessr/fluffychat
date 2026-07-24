@@ -2932,5 +2932,58 @@
                 "type": "String"
             }
         }
+    },
+    "discardContent": "Discard changes?",
+    "@discardContent": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "discard": "Discard",
+    "@discard": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "antiRedaction": "Anti-redaction",
+    "@antiRedaction": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "antiRedactionDescription": "Show the original content of redacted messages",
+    "@antiRedactionDescription": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "editHistory": "Edit history",
+    "@editHistory": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "editHistoryDescription": "Makes the (edited) label clickable to view edit history",
+    "@editHistoryDescription": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "originalMessage": "Original message",
+    "@originalMessage": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "editVersion": "Edit {index}",
+    "@editVersion": {
+        "type": "String",
+        "placeholders": {
+            "index": {
+                "type": "int"
+            }
+        }
+    },
+    "redactedIndicator": "Redacted by {username}",
+    "@redactedIndicator": {
+        "type": "String",
+        "placeholders": {
+            "username": {
+                "type": "String"
+            }
+        }
     }
 }

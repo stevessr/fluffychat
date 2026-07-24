@@ -267,6 +267,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -276,7 +277,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "az": [
@@ -1070,6 +1080,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -1079,7 +1090,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "be": [
@@ -1200,6 +1220,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -1209,7 +1230,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "bn": [
@@ -1983,6 +2013,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -1992,7 +2023,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "bo": [
@@ -2794,6 +2834,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -2803,7 +2844,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "ca": [
@@ -2928,6 +2978,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -2937,7 +2988,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "cs": [
@@ -3138,6 +3198,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -3147,7 +3208,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "da": [
@@ -3920,6 +3990,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -3929,7 +4000,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "de": [
@@ -3996,6 +4076,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -4005,7 +4086,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "el": [
@@ -4731,6 +4821,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -4740,7 +4831,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "eo": [
@@ -5263,6 +5363,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -5272,7 +5373,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "es": [
@@ -5377,6 +5487,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -5386,7 +5497,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "et": [
@@ -5443,6 +5563,7 @@
     "emojiMashupStyleSparkle",
     "useBiometricsOnly",
     "biometricsOnlyDescription",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -5452,7 +5573,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "eu": [
@@ -5551,6 +5681,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -5560,7 +5691,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "fa": [
@@ -5686,6 +5826,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -5695,7 +5836,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "fi": [
@@ -5867,6 +6017,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -5876,7 +6027,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "fil": [
@@ -6513,6 +6673,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -6522,7 +6683,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "fr": [
@@ -6579,6 +6749,7 @@
     "emojiMashupStyleSparkle",
     "useBiometricsOnly",
     "biometricsOnlyDescription",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -6588,7 +6759,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "ga": [
@@ -6645,6 +6825,7 @@
     "emojiMashupStyleSparkle",
     "useBiometricsOnly",
     "biometricsOnlyDescription",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -6654,7 +6835,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "gl": [
@@ -6711,6 +6901,7 @@
     "emojiMashupStyleSparkle",
     "useBiometricsOnly",
     "biometricsOnlyDescription",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -6720,7 +6911,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "he": [
@@ -7321,6 +7521,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -7330,7 +7531,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "hi": [
@@ -8115,6 +8325,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -8124,7 +8335,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "hr": [
@@ -8273,6 +8493,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -8282,7 +8503,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "hu": [
@@ -8481,6 +8711,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -8490,7 +8721,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "ia": [
@@ -9278,6 +9518,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -9287,7 +9528,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "id": [
@@ -9363,6 +9613,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -9372,7 +9623,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "ie": [
@@ -10001,6 +10261,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -10010,7 +10271,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "it": [
@@ -10199,6 +10469,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -10208,7 +10479,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "ja": [
@@ -10513,6 +10793,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -10522,7 +10803,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "ka": [
@@ -11194,6 +11484,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -11203,7 +11494,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "kab": [
@@ -11478,6 +11778,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -11487,7 +11788,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "ko": [
@@ -11718,6 +12028,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -11727,7 +12038,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "lt": [
@@ -12155,6 +12475,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -12164,7 +12485,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "lv": [
@@ -12236,6 +12566,7 @@
     "useBiometricsOnly",
     "biometricsOnlyDescription",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -12245,7 +12576,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "nb": [
@@ -12366,6 +12706,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -12375,7 +12716,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "nl": [
@@ -12432,6 +12782,7 @@
     "emojiMashupStyleSparkle",
     "useBiometricsOnly",
     "biometricsOnlyDescription",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -12441,7 +12792,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "pl": [
@@ -12498,6 +12858,7 @@
     "emojiMashupStyleSparkle",
     "useBiometricsOnly",
     "biometricsOnlyDescription",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -12507,7 +12868,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "pt": [
@@ -13287,6 +13657,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -13296,7 +13667,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "pt_BR": [
@@ -13454,6 +13834,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -13463,7 +13844,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "pt_PT": [
@@ -13903,6 +14293,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -13912,7 +14303,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "ro": [
@@ -14348,6 +14748,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -14357,7 +14758,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "ru": [
@@ -14425,6 +14835,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -14434,7 +14845,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "sk": [
@@ -15042,6 +15462,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -15051,7 +15472,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "sl": [
@@ -15763,6 +16193,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -15772,7 +16203,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "sq": [
@@ -16574,6 +17014,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -16583,7 +17024,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "sr": [
@@ -17121,6 +17571,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -17130,7 +17581,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "sv": [
@@ -17350,6 +17810,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -17359,7 +17820,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "ta": [
@@ -17489,6 +17959,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -17498,7 +17969,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "te": [
@@ -18297,6 +18777,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -18306,7 +18787,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "th": [
@@ -19061,6 +19551,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -19070,7 +19561,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "tr": [
@@ -19339,6 +19839,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -19348,7 +19849,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "uk": [
@@ -19454,6 +19964,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -19463,7 +19974,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "uz": [
@@ -19612,6 +20132,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -19621,7 +20142,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "vi": [
@@ -20290,6 +20820,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -20299,7 +20830,16 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
 
   "yue": [
@@ -21045,6 +21585,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -21054,7 +21595,20 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
+  ],
+
+  "zh": [
+    "loadingMessages"
   ],
 
   "zh_Hant": [
@@ -21250,6 +21804,7 @@
     "biometricsOnlyDescription",
     "resetPin",
     "forwardCountMessages",
+    "loadingMessages",
     "compressVideo",
     "ignoreUser",
     "blockScreenshots",
@@ -21259,6 +21814,15 @@
     "roomMetadata",
     "roomMetadataDescription",
     "serverBlockedFromRoom",
-    "serverUnblockedFromRoom"
+    "serverUnblockedFromRoom",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ]
 }
