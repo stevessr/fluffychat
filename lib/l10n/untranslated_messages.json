@@ -304,7 +304,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "az": [
     "editImage",
@@ -1165,7 +1174,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "be": [
     "editImage",
@@ -1310,7 +1328,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "bn": [
     "editImage",
@@ -2174,7 +2201,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "bo": [
     "editImage",
@@ -3070,7 +3106,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "ca": [
     "editImage",
@@ -3219,7 +3264,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "cs": [
     "editImage",
@@ -3455,7 +3509,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "da": [
     "editImage",
@@ -4320,7 +4383,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "de": [
     "editImage",
@@ -4474,7 +4546,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "el": [
     "editImage",
@@ -5289,7 +5370,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "eo": [
     "editImage",
@@ -5873,7 +5963,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "es": [
     "editImage",
@@ -6018,7 +6117,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "et": [
     "editImage",
@@ -6139,7 +6247,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "eu": [
     "editImage",
@@ -6276,7 +6393,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "fa": [
     "editImage",
@@ -6434,7 +6560,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "fi": [
     "editImage",
@@ -6640,7 +6775,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "fil": [
     "editImage",
@@ -7356,7 +7500,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "fr": [
     "editImage",
@@ -7670,7 +7823,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "ga": [
     "editImage",
@@ -7801,7 +7963,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "gl": [
     "editImage",
@@ -7935,7 +8106,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "he": [
     "editImage",
@@ -8608,7 +8788,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "hi": [
     "editImage",
@@ -9487,7 +9676,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "hr": [
     "editImage",
@@ -9669,7 +9867,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "hu": [
     "editImage",
@@ -9904,7 +10111,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "ia": [
     "editImage",
@@ -10786,7 +11002,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "id": [
     "editImage",
@@ -10931,7 +11156,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "ie": [
     "editImage",
@@ -11625,7 +11859,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "it": [
     "editImage",
@@ -11850,7 +12093,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "ja": [
     "editImage",
@@ -12202,7 +12454,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "ka": [
     "editImage",
@@ -12960,7 +13221,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "kab": [
     "editImage",
@@ -13281,7 +13551,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "ko": [
     "editImage",
@@ -13548,7 +13827,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "lt": [
     "editImage",
@@ -14054,7 +14342,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "lv": [
     "editImage",
@@ -14218,7 +14515,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "nb": [
     "editImage",
@@ -14363,7 +14669,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "nl": [
     "editImage",
@@ -14494,7 +14809,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "pl": [
     "editImage",
@@ -14630,7 +14954,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "pt": [
     "editImage",
@@ -15503,7 +15836,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "pt_BR": [
     "editImage",
@@ -15694,7 +16036,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "pt_PT": [
     "editImage",
@@ -16325,7 +16676,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "ro": [
     "editImage",
@@ -16807,7 +17167,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "ru": [
     "editImage",
@@ -16952,7 +17321,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "sk": [
     "editImage",
@@ -17635,7 +18013,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "sl": [
     "editImage",
@@ -18436,7 +18823,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "sq": [
     "editImage",
@@ -19332,7 +19728,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "sr": [
     "editImage",
@@ -19933,7 +20338,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "sv": [
     "editImage",
@@ -20189,7 +20603,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "ta": [
     "editImage",
@@ -20418,7 +20841,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "te": [
     "editImage",
@@ -21310,7 +21742,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "th": [
     "editImage",
@@ -22157,7 +22598,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "tr": [
     "editImage",
@@ -22462,7 +22912,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "uk": [
     "editImage",
@@ -22594,7 +23053,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "uz": [
     "editImage",
@@ -22776,7 +23244,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "vi": [
     "editImage",
@@ -23523,7 +24000,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "yue": [
     "editImage",
@@ -24359,7 +24845,16 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ],
   "zh": [
     "editImage",
@@ -24665,6 +25160,15 @@
     "roomMetadataDescription",
     "serverBlockedFromRoom",
     "serverUnblockedFromRoom",
-    "sendingAttachmentCountOfCount"
+    "sendingAttachmentCountOfCount",
+    "discardContent",
+    "discard",
+    "antiRedaction",
+    "antiRedactionDescription",
+    "editHistory",
+    "editHistoryDescription",
+    "originalMessage",
+    "editVersion",
+    "redactedIndicator"
   ]
 }
