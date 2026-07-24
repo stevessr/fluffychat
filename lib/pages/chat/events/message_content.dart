@@ -175,6 +175,15 @@ class MessageContent extends StatelessWidget {
             if (event.redacted) {
               if (AppSettings.antiRedaction.value) {
                 final originalBody = event.originalContentBeforeRedaction;
+                // 当服务端未提供原始内容时，降级显示标准撤回提示
+                if (originalBody == null) {
+                  return RedactionWidget(
+                    event: event,
+                    buttonTextColor: buttonTextColor,
+                    onInfoTab: onInfoTab,
+                    fontSize: fontSize,
+                  );
+                }
                 final html =
                     originalBody != null &&
                         AppSettings.renderHtml.value &&
