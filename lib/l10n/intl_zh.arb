@@ -2658,7 +2658,7 @@
     "playSoundOnNotification": "播放通知声音",
     "addTag": "添加标签",
     "removeTag": "删除标签",
-    "tagName": "标签名",
+    "tagName": "标签名称",
     "createNewTag": "创建新标签",
     "discardEdits": "有未保存的更改。放弃编辑吗？",
     "@discardEdits": {
@@ -2898,10 +2898,6 @@
     "@emojiMashupStyleOrbit": {},
     "emojiMashupStyleSparkle": "闪光",
     "@emojiMashupStyleSparkle": {},
-    "addTag": "添加标签",
-    "removeTag": "删除标签",
-    "tagName": "标签名称",
-    "createNewTag": "创建新标签",
     "compressVideo": "压缩视频",
     "@compressVideo": {
         "type": "String",
@@ -2954,6 +2950,59 @@
     "@serverUnblockedFromRoom": {
         "placeholders": {
             "server": {
+                "type": "String"
+            }
+        }
+    },
+    "discardContent": "放弃修改？",
+    "@discardContent": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "discard": "放弃",
+    "@discard": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "antiRedaction": "反撤回",
+    "@antiRedaction": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "antiRedactionDescription": "显示被撤回消息的原始内容",
+    "@antiRedactionDescription": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "editHistory": "编辑历史",
+    "@editHistory": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "editHistoryDescription": "使（已编辑）标签可点击，以查看编辑历史",
+    "@editHistoryDescription": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "originalMessage": "原始消息",
+    "@originalMessage": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "editVersion": "编辑 {index}",
+    "@editVersion": {
+        "type": "String",
+        "placeholders": {
+            "index": {
+                "type": "int"
+            }
+        }
+    },
+    "redactedIndicator": "被 {username} 撤回",
+    "@redactedIndicator": {
+        "type": "String",
+        "placeholders": {
+            "username": {
                 "type": "String"
             }
         }
