@@ -63,7 +63,9 @@ class MessageContent extends StatelessWidget {
         switch (event.messageType) {
           case MessageTypes.Image:
           case MessageTypes.Sticker:
-            if (event.redacted) continue textmessage;
+            if (event.redacted && !AppSettings.antiRedaction.value) {
+              continue textmessage;
+            }
             final maxSize = event.messageType == MessageTypes.Sticker
                 ? 128.0
                 : 256.0;
@@ -171,6 +173,34 @@ class MessageContent extends StatelessWidget {
           textmessage:
           default:
             if (event.redacted) {
+              if (AppSettings.antiRedaction.value) {
+                final originalBody = event.originalContentBeforeRedaction;
+                final html =
+                    originalBody != null &&
+                        AppSettings.renderHtml.value &&
+                        originalBody['format'] == 'org.matrix.custom.html'
+                    ? (originalBody['formatted_body'] as String? ?? '')
+                    : (originalBody?.tryGet<String>('body') ??
+                          event.bodyWithoutReplyFallback);
+                if (event.messageType == MessageTypes.Emote) {
+                  return _RedactedEmoteContent(
+                    html: '* $html',
+                    event: event,
+                    textColor: textColor,
+                    linkColor: linkColor,
+                    bigEmojis: bigEmojis,
+                    timeline: timeline,
+                  );
+                }
+                return _RedactedTextContent(
+                  html: html,
+                  event: event,
+                  textColor: textColor,
+                  linkColor: linkColor,
+                  bigEmojis: bigEmojis,
+                  timeline: timeline,
+                );
+              }
               return RedactionWidget(
                 event: event,
                 buttonTextColor: buttonTextColor,
@@ -180,7 +210,9 @@ class MessageContent extends StatelessWidget {
             }
             var html = AppSettings.renderHtml.value && event.isRichMessage
                 ? event.formattedText
-                : event.bodyWithoutReplyFallback.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+                : event.bodyWithoutReplyFallback
+                      .replaceAll('<', '&lt;')
+                      .replaceAll('>', '&gt;');
             if (event.messageType == MessageTypes.Emote) {
               html = '* $html';
             }
@@ -197,12 +229,14 @@ class MessageContent extends StatelessWidget {
                     html: html,
                     textColor: textColor,
                     room: event.room,
-                    fontSize: AppSettings.fontSizeFactor.value *
+                    fontSize:
+                        AppSettings.fontSizeFactor.value *
                         AppConfig.messageFontSize *
                         (bigEmotes ? 5 : 1),
                     linkStyle: TextStyle(
                       color: linkColor,
-                      fontSize: AppSettings.fontSizeFactor.value *
+                      fontSize:
+                          AppSettings.fontSizeFactor.value *
                           AppConfig.messageFontSize,
                       decoration: TextDecoration.underline,
                       decorationColor: linkColor,
@@ -333,6 +367,146 @@ class _ButtonContent extends StatelessWidget {
           '$icon  $label',
           style: TextStyle(color: textColor, fontSize: fontSize),
         ),
+      ),
+    );
+  }
+}
+
+class _RedactedTextContent extends StatelessWidget {
+  final String html;
+  final Event event;
+  final Color textColor;
+  final Color linkColor;
+  final Set<String> bigEmojis;
+  final Timeline timeline;
+
+  const _RedactedTextContent({
+    required this.html,
+    required this.event,
+    required this.textColor,
+    required this.linkColor,
+    required this.bigEmojis,
+    required this.timeline,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final redactedBy =
+        event.redactedBecause?.senderFromMemoryOrFallback.calcDisplayname() ??
+        event.redactedBecause?.senderId.localpart ??
+        L10n.of(context).user;
+    final bigEmotes = event.isBigEmojiMessage(bigEmojis);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Opacity(
+            opacity: 0.6,
+            child: HtmlMessage(
+              html: html,
+              textColor: textColor,
+              room: event.room,
+              fontSize:
+                  AppSettings.fontSizeFactor.value *
+                  AppConfig.messageFontSize *
+                  (bigEmotes ? 5 : 1),
+              linkStyle: TextStyle(
+                color: linkColor,
+                fontSize:
+                    AppSettings.fontSizeFactor.value *
+                    AppConfig.messageFontSize,
+              ),
+              onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
+              eventId: event.eventId,
+              checkboxCheckedEvents: event.aggregatedEvents(
+                timeline,
+                EventCheckboxRoomExtension.relationshipType,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            L10n.of(context).redactedIndicator(redactedBy),
+            style: TextStyle(
+              color: theme.colorScheme.error.withAlpha(180),
+              fontSize: 11,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RedactedEmoteContent extends StatelessWidget {
+  final String html;
+  final Event event;
+  final Color textColor;
+  final Color linkColor;
+  final Set<String> bigEmojis;
+  final Timeline timeline;
+
+  const _RedactedEmoteContent({
+    required this.html,
+    required this.event,
+    required this.textColor,
+    required this.linkColor,
+    required this.bigEmojis,
+    required this.timeline,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final redactedBy =
+        event.redactedBecause?.senderFromMemoryOrFallback.calcDisplayname() ??
+        event.redactedBecause?.senderId.localpart ??
+        L10n.of(context).user;
+    final bigEmotes = event.isBigEmojiMessage(bigEmojis);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Opacity(
+            opacity: 0.6,
+            child: HtmlMessage(
+              html: html,
+              textColor: textColor,
+              room: event.room,
+              fontSize:
+                  AppSettings.fontSizeFactor.value *
+                  AppConfig.messageFontSize *
+                  (bigEmotes ? 5 : 1),
+              linkStyle: TextStyle(
+                color: linkColor,
+                fontSize:
+                    AppSettings.fontSizeFactor.value *
+                    AppConfig.messageFontSize,
+              ),
+              onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
+              eventId: event.eventId,
+              checkboxCheckedEvents: event.aggregatedEvents(
+                timeline,
+                EventCheckboxRoomExtension.relationshipType,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            L10n.of(context).redactedIndicator(redactedBy),
+            style: TextStyle(
+              color: theme.colorScheme.error.withAlpha(180),
+              fontSize: 11,
+            ),
+          ),
+        ],
       ),
     );
   }

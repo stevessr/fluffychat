@@ -75,6 +75,16 @@ class SettingsChatView extends StatelessWidget {
                 setting: AppSettings.showRoomMetadata,
               ),
               SettingsSwitchListTile.adaptive(
+                title: L10n.of(context).antiRedaction,
+                subtitle: L10n.of(context).antiRedactionDescription,
+                setting: AppSettings.antiRedaction,
+              ),
+              SettingsSwitchListTile.adaptive(
+                title: L10n.of(context).editHistory,
+                subtitle: L10n.of(context).editHistoryDescription,
+                setting: AppSettings.showEditHistory,
+              ),
+              SettingsSwitchListTile.adaptive(
                 title: L10n.of(context).presencesToggle,
                 setting: AppSettings.showPresences,
               ),
