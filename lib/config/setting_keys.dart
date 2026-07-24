@@ -81,7 +81,13 @@ enum AppSettings<T> {
   showRoomMetadata<bool>('chat.fluffy.show_room_metadata', false),
 
   /// Block screenshots and screen recording on Android
-  blockScreenshots<bool>('chat.fluffy.block_screenshots', false);
+  blockScreenshots<bool>('chat.fluffy.block_screenshots', false),
+
+  /// Show the original content of redacted messages instead of a redaction notice
+  antiRedaction<bool>('chat.fluffy.anti_redaction', false),
+
+  /// Show edit history dialog when clicking on (edited) label
+  showEditHistory<bool>('chat.fluffy.show_edit_history', true);
 
   final String key;
   final T defaultValue;
