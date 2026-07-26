@@ -6,9 +6,8 @@
 
 import 'dart:async';
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
-
-// ByteBuffer is from typed_data; keep explicit for worker byte payloads.
 
 import 'package:matrix/matrix.dart' hide Event;
 import 'package:matrix/src/utils/web_worker/native_implementations_web_worker.dart';
@@ -43,6 +42,8 @@ DedicatedWorkerGlobalScope get _workerScope =>
 Future<void> startWebWorker() async {
   Logs().i('[native implementations worker]: Starting...');
   _workerScope.onmessage = (MessageEvent event) {
+    // Prefer event.data when it is already a JS object map; dartify still
+    // works for transferred ArrayBuffers that arrive as typed arrays.
     final rawData = event.data.dartify();
     if (rawData is! Map) {
       Logs().e('[native implementations worker] Invalid message: $rawData');
@@ -62,6 +63,8 @@ Future<void> startWebWorker() async {
               'shrinkImage expects a map of resize arguments',
             );
           }
+          // Preserve transferred typed-array bytes: Map<String,dynamic>.from
+          // keeps Uint8List values as-is for fromJson/_workerUint8List.
           final result = MatrixImageFile.resizeImplementation(
             MatrixImageFileResizeArguments.fromJson(
               Map<String, dynamic>.from(rawArgs),
@@ -102,9 +105,48 @@ Uint8List _workerBytes(Object? value, String operation) {
   );
 }
 
+/// Build a JS payload and collect transferable ArrayBuffers for image bytes.
+JSAny? _prepareResponsePayload(Object? value, List<JSAny> transfer) {
+  if (value is Uint8List) {
+    final jsBytes = value.toJS;
+    if (value.offsetInBytes == 0 &&
+        value.lengthInBytes == value.buffer.lengthInBytes) {
+      transfer.add(jsBytes.getProperty<JSArrayBuffer>('buffer'.toJS));
+    }
+    return jsBytes;
+  }
+  if (value is List) {
+    return <JSAny?>[
+      for (final item in value) _prepareResponsePayload(item, transfer),
+    ].toJS;
+  }
+  if (value is Map) {
+    final object = JSObject();
+    value.forEach((key, item) {
+      object[key?.toString() ?? ''] = _prepareResponsePayload(item, transfer);
+    });
+    return object;
+  }
+  if (value is String || value is num || value is bool || value == null) {
+    return value.jsify();
+  }
+  return value.jsify();
+}
+
 void _sendResponse(double label, dynamic response) {
   try {
-    _workerScope.postMessage({'label': label, 'data': response}.jsify());
+    final transfer = <JSAny>[];
+    final payload = _prepareResponsePayload({
+      'label': label,
+      'data': response,
+    }, transfer);
+    if (transfer.isEmpty) {
+      _workerScope.postMessage(payload);
+    } else {
+      // Move thumbnail/metadata byte buffers back to the main thread instead
+      // of structured-cloning multi-megabyte copies under WasmGC.
+      _workerScope.postMessage(payload, transfer.toJS);
+    }
   } catch (e, s) {
     Logs().e('[native implementations worker] Error responding: $e, $s');
     // A failed success response would otherwise leave the main completer

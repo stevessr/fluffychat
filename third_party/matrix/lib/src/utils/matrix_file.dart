@@ -404,10 +404,13 @@ extension ToMatrixFile on EncryptedFile {
 /// Rebuild a [Uint8List] from a worker/JS structured-clone payload.
 ///
 /// Under dart2wasm, integral numbers arrive as doubles and byte arrays may be
-/// plain [List]s rather than typed arrays. A direct `as Uint8List` / `as int`
-/// cast would fail the WasmGC runtime type check.
+/// plain [List]s rather than typed arrays. Transferred responses may also
+/// arrive as a [ByteBuffer] or an already-typed [Uint8List]; keep those
+/// without copying. A direct `as Uint8List` / `as int` cast on a plain list
+/// would fail the WasmGC runtime type check.
 Uint8List _workerUint8List(Object? value) {
   if (value is Uint8List) return value;
+  if (value is ByteBuffer) return value.asUint8List();
   if (value is! Iterable) {
     throw ArgumentError.value(value, 'bytes', 'Expected a byte iterable');
   }
