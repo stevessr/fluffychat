@@ -8,7 +8,8 @@ import 'dart:io';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/web_platform.dart';
+import 'package:fluffychat/utils/web_platform.dart'
+    show deleteWebIndexedDatabase, requestWebPersistentStorage;
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path/path.dart';
@@ -37,8 +38,20 @@ Future<DatabaseApi> flutterMatrixSdkDatabaseBuilder(String clientName) async {
       Logs().e('Unable to send error notification', e, s);
     }
 
-    // Delete database file:
-    if (!kIsWeb) {
+    // Delete broken storage before retrying. Native removes the sqlite file;
+    // web must wipe the IndexedDB database of the same name or the second
+    // open simply reuses the corrupt store.
+    if (kIsWeb) {
+      try {
+        await deleteWebIndexedDatabase(clientName);
+      } catch (deleteError, deleteStack) {
+        Logs().w(
+          'Unable to delete broken web database $clientName',
+          deleteError,
+          deleteStack,
+        );
+      }
+    } else {
       final dbFile = File(await _getDatabasePath(clientName));
       if (await dbFile.exists()) await dbFile.delete();
     }

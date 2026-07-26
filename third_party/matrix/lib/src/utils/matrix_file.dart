@@ -287,21 +287,21 @@ class MatrixImageFileResizedResponse {
 
   factory MatrixImageFileResizedResponse.fromJson(Map<String, dynamic> json) =>
       MatrixImageFileResizedResponse(
-        bytes: Uint8List.fromList(
-          (json['bytes'] as Iterable<dynamic>)
-              .map((value) => (value as num).toInt())
-              .toList(growable: false),
-        ),
+        bytes: _workerUint8List(json['bytes']),
         // Values crossing a JavaScript worker boundary can be represented as
         // doubles even when the producer sent Dart ints. Normalize them before
         // assigning to strongly typed fields so WasmGC does not fail a runtime
         // type check.
-        width: (json['width'] as num).toInt(),
-        height: (json['height'] as num).toInt(),
-        mimeType: json['mimeType'],
-        originalHeight: (json['originalHeight'] as num?)?.toInt(),
-        originalWidth: (json['originalWidth'] as num?)?.toInt(),
-        blurhash: json['blurhash'],
+        width: _workerInt(json['width']),
+        height: _workerInt(json['height']),
+        mimeType: json['mimeType'] is String
+            ? json['mimeType'] as String
+            : json['mimeType']?.toString(),
+        originalHeight: _workerIntOrNull(json['originalHeight']),
+        originalWidth: _workerIntOrNull(json['originalWidth']),
+        blurhash: json['blurhash'] is String
+            ? json['blurhash'] as String
+            : json['blurhash']?.toString(),
       );
 
   Map<String, dynamic> toJson() => {
@@ -333,14 +333,14 @@ class MatrixImageFileResizeArguments {
         // Structured cloning through a JavaScript worker produces a regular
         // numeric list and represents integral numbers as doubles under
         // dart2wasm. Rebuild the strongly typed arguments explicitly.
-        bytes: Uint8List.fromList(
-          (json['bytes'] as Iterable<dynamic>)
-              .map((value) => (value as num).toInt())
-              .toList(growable: false),
-        ),
-        maxDimension: (json['maxDimension'] as num).toInt(),
-        fileName: json['fileName'] as String,
-        calcBlurhash: json['calcBlurhash'] as bool,
+        bytes: _workerUint8List(json['bytes']),
+        maxDimension: _workerInt(json['maxDimension']),
+        fileName: json['fileName'] is String
+            ? json['fileName'] as String
+            : json['fileName']?.toString() ?? '',
+        // dartify may surface JSON/JS booleans as 0/1 on some bridges; accept
+        // the same truthy set used elsewhere for web-persisted flags.
+        calcBlurhash: _workerBool(json['calcBlurhash']),
       );
 
   Map<String, Object> toJson() => {
@@ -399,4 +399,41 @@ extension ToMatrixFile on EncryptedFile {
   MatrixFile toMatrixFile() {
     return MatrixFile.fromMimeType(bytes: data, name: 'crypt');
   }
+}
+
+/// Rebuild a [Uint8List] from a worker/JS structured-clone payload.
+///
+/// Under dart2wasm, integral numbers arrive as doubles and byte arrays may be
+/// plain [List]s rather than typed arrays. A direct `as Uint8List` / `as int`
+/// cast would fail the WasmGC runtime type check.
+Uint8List _workerUint8List(Object? value) {
+  if (value is Uint8List) return value;
+  if (value is! Iterable) {
+    throw ArgumentError.value(value, 'bytes', 'Expected a byte iterable');
+  }
+  return Uint8List.fromList([
+    for (final item in value) _workerInt(item),
+  ]);
+}
+
+int _workerInt(Object? value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  throw ArgumentError.value(value, 'value', 'Expected a number');
+}
+
+int? _workerIntOrNull(Object? value) {
+  if (value == null) return null;
+  return _workerInt(value);
+}
+
+bool _workerBool(Object? value) {
+  if (value is bool) return value;
+  if (value == 1 || value == 1.0 || value == 'true' || value == '1') {
+    return true;
+  }
+  if (value == 0 || value == 0.0 || value == 'false' || value == '0') {
+    return false;
+  }
+  throw ArgumentError.value(value, 'value', 'Expected a boolean');
 }

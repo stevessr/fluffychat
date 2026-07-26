@@ -11,7 +11,16 @@ Future<void> initializeWasmModule({required String root}) async {
   final script = web.HTMLScriptElement()..src = '$root.js';
   web.document.head!.append(script);
 
-  await script.onLoad.first;
+  // A missing/404 vodozemac_bindings_dart.js never fires onLoad. Race error so
+  // startup fails fast instead of hanging forever before runApp.
+  await Future.any<void>([
+    script.onLoad.first.then((_) {}),
+    script.onError.first.then((event) {
+      throw StateError(
+        'Failed to load flutter_rust_bridge wasm glue script at ${script.src}: $event',
+      );
+    }),
+  ]);
 
   jsEval('window.wasm_bindgen = wasm_bindgen');
 

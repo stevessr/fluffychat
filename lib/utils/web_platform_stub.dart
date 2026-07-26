@@ -24,4 +24,6 @@ void requestWebNotificationPermission() {}
 
 void requestWebPersistentStorage() {}
 
+Future<void> deleteWebIndexedDatabase(String name) async {}
+
 void playWebNotificationSound() {}

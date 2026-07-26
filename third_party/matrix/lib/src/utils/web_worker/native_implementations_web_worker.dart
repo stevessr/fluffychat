@@ -13,13 +13,20 @@ import 'package:web/web.dart';
 
 // ignore: unused-code
 class NativeImplementationsWebWorker extends NativeImplementations {
-  final Worker worker;
+  final Uri href;
   final Duration timeout;
   final WebWorkerStackTraceCallback onStackTrace;
 
+  /// How many times a crashed worker may be recreated for this app session.
+  /// After the budget is exhausted, failures stay terminal.
+  final int maxRecreations;
+
+  late Worker worker;
   final Map<double, Completer<dynamic>> _completers = {};
   final _random = Random();
   (Object, StackTrace)? _terminalFailure;
+  var _recreateBudget = 0;
+  var _disposed = false;
 
   /// the default handler for stackTraces in web workers
   static StackTrace defaultStackTraceHandler(String obfuscatedStackTrace) {
@@ -27,10 +34,17 @@ class NativeImplementationsWebWorker extends NativeImplementations {
   }
 
   NativeImplementationsWebWorker(
-    Uri href, {
+    this.href, {
     this.timeout = const Duration(seconds: 30),
     this.onStackTrace = defaultStackTraceHandler,
-  }) : worker = Worker(href.toString().toJS) {
+    this.maxRecreations = 3,
+  }) {
+    _recreateBudget = maxRecreations;
+    _attachWorker(Worker(href.toString().toJS));
+  }
+
+  void _attachWorker(Worker next) {
+    worker = next;
     worker.onmessage = _handleIncomingMessage.toJS;
     worker.onmessageerror = _handleWorkerMessageError.toJS;
     worker.onerror = _handleWorkerError.toJS;
@@ -88,7 +102,9 @@ class NativeImplementationsWebWorker extends NativeImplementations {
   }
 
   void _handleWorkerMessageError(Event event) {
-    _failPendingOperations(
+    // A deserialize failure usually means the worker is no longer trustworthy
+    // for later ops either. Treat it like a terminal crash so we can recreate.
+    _markTerminalFailure(
       StateError('Web worker could not deserialize a message: $event'),
       StackTrace.current,
     );
@@ -103,16 +119,54 @@ class NativeImplementationsWebWorker extends NativeImplementations {
   }
 
   void _markTerminalFailure(Object error, StackTrace stackTrace) {
-    _terminalFailure ??= (error, stackTrace);
     _failPendingOperations(error, stackTrace);
+    if (_disposed) {
+      _terminalFailure ??= (error, stackTrace);
+      return;
+    }
+    if (_recreateBudget > 0) {
+      _recreateBudget--;
+      Logs().w(
+        'Recreating native implementations web worker '
+        '(${maxRecreations - _recreateBudget}/$maxRecreations)',
+        error,
+        stackTrace,
+      );
+      try {
+        worker.terminate();
+      } catch (terminateError, terminateStack) {
+        Logs().w(
+          'Unable to terminate broken web worker',
+          terminateError,
+          terminateStack,
+        );
+      }
+      _terminalFailure = null;
+      try {
+        _attachWorker(Worker(href.toString().toJS));
+        return;
+      } catch (recreateError, recreateStack) {
+        Logs().e(
+          'Unable to recreate native implementations web worker',
+          recreateError,
+          recreateStack,
+        );
+        _terminalFailure = (recreateError, recreateStack);
+        return;
+      }
+    }
+    _terminalFailure ??= (error, stackTrace);
   }
 
   void dispose() {
+    _disposed = true;
     _markTerminalFailure(
       StateError('Web worker has been disposed'),
       StackTrace.current,
     );
-    worker.terminate();
+    try {
+      worker.terminate();
+    } catch (_) {}
   }
 
   // toJS is not working with Future<void> so we need to ignore avoid_void_async
@@ -175,7 +229,9 @@ class NativeImplementationsWebWorker extends NativeImplementations {
       if (result is! Map) {
         throw StateError('Web worker returned invalid image metadata: $result');
       }
-      return MatrixImageFileResizedResponse.fromJson(Map.from(result));
+      return MatrixImageFileResizedResponse.fromJson(
+        Map<String, dynamic>.from(result),
+      );
     } catch (e, s) {
       if (!retryInDummy) {
         Logs().e(
@@ -204,7 +260,9 @@ class NativeImplementationsWebWorker extends NativeImplementations {
       if (result is! Map) {
         throw StateError('Web worker returned invalid resized image: $result');
       }
-      return MatrixImageFileResizedResponse.fromJson(Map.from(result));
+      return MatrixImageFileResizedResponse.fromJson(
+        Map<String, dynamic>.from(result),
+      );
     } catch (e, s) {
       if (!retryInDummy) {
         Logs().e(

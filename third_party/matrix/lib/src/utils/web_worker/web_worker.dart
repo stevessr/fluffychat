@@ -52,25 +52,39 @@ Future<void> startWebWorker() async {
       final label = (operation.label as num).toDouble();
       switch (operation.name) {
         case WebWorkerOperations.shrinkImage:
+          final rawArgs = operation.data;
+          if (rawArgs is! Map) {
+            throw ArgumentError.value(
+              rawArgs,
+              'data',
+              'shrinkImage expects a map of resize arguments',
+            );
+          }
           final result = MatrixImageFile.resizeImplementation(
             MatrixImageFileResizeArguments.fromJson(
-              Map.from(operation.data as Map),
+              Map<String, dynamic>.from(rawArgs),
             ),
           );
           _sendResponse(label, result?.toJson());
           break;
         case WebWorkerOperations.calcImageMetadata:
+          final rawBytes = operation.data;
+          if (rawBytes is! Iterable) {
+            throw ArgumentError.value(
+              rawBytes,
+              'data',
+              'calcImageMetadata expects a byte iterable',
+            );
+          }
           final result = MatrixImageFile.calcMetadataImplementation(
-            Uint8List.fromList(
-              (operation.data as List)
-                  .map((value) => (value as num).toInt())
-                  .toList(growable: false),
-            ),
+            Uint8List.fromList([
+              for (final value in rawBytes) (value as num).toInt(),
+            ]),
           );
           _sendResponse(label, result?.toJson());
           break;
         default:
-          throw TypeError();
+          throw ArgumentError('Unknown web worker operation: ${operation.name}');
       }
     } catch (e, s) {
       final rawLabel = data['label'];
@@ -84,6 +98,10 @@ void _sendResponse(double label, dynamic response) {
     _workerScope.postMessage({'label': label, 'data': response}.jsify());
   } catch (e, s) {
     Logs().e('[native implementations worker] Error responding: $e, $s');
+    // A failed success response would otherwise leave the main completer
+    // waiting until its full timeout. Reuse the error protocol so the caller
+    // fails promptly.
+    _replyError(e, s, label);
   }
 }
 

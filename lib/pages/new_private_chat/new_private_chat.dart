@@ -96,6 +96,9 @@ class NewPrivateChatController extends State<NewPrivateChat> {
   void inviteAction() => FluffyShare.shareInviteLink(context);
 
   Future<void> openScannerAction() async {
+    // Camera QR scanning is mobile-only; keep an explicit guard so web/wasm
+    // never constructs QrScannerModal (it imports dart:io Platform APIs).
+    if (!PlatformInfos.isMobile) return;
     final l10n = L10n.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     if (PlatformInfos.isAndroid) {

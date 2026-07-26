@@ -63,6 +63,37 @@ Future<void> main() async {
       (await fragments.get('room,SENDING'))?.single != r'$local') {
     throw StateError('Transactional encrypted media state did not persist');
   }
+
+  // Multi-key get/delete must queue every IndexedDB request before awaiting so
+  // dart2wasm does not auto-commit the transaction between keys.
+  await events.put('room,event-a', {'event_id': r'$a'});
+  await events.put('room,event-b', {'event_id': r'$b'});
+  await events.put('room,event-c', {'event_id': r'$c'});
+  events.clearQuickAccessCache();
+  final batch = await events.getAll([
+    'room,event-a',
+    'room,event-b',
+    'room,event-missing',
+    'room,event-c',
+  ]);
+  if (batch.length != 4 ||
+      batch[0]?['event_id'] != r'$a' ||
+      batch[1]?['event_id'] != r'$b' ||
+      batch[2] != null ||
+      batch[3]?['event_id'] != r'$c') {
+    throw StateError('IndexedDB multi-key getAll returned unexpected values');
+  }
+  await events.deleteAll(['room,event-a', 'room,event-b', 'room,event-c']);
+  events.clearQuickAccessCache();
+  final afterDelete = await events.getAll([
+    'room,event-a',
+    'room,event-b',
+    'room,event-c',
+  ]);
+  if (afterDelete.any((value) => value != null)) {
+    throw StateError('IndexedDB multi-key deleteAll left residual values');
+  }
+
   await collection.clear();
   box.clearQuickAccessCache();
   events.clearQuickAccessCache();

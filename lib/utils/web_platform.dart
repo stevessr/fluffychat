@@ -35,4 +35,11 @@ void requestWebNotificationPermission() =>
 void requestWebPersistentStorage() =>
     implementation.requestWebPersistentStorage();
 
+/// Deletes a browser IndexedDB database by name.
+///
+/// Used when Matrix database construction fails on web so recovery can wipe
+/// the broken store the same way native recovery deletes the sqlite file.
+Future<void> deleteWebIndexedDatabase(String name) =>
+    implementation.deleteWebIndexedDatabase(name);
+
 void playWebNotificationSound() => implementation.playWebNotificationSound();

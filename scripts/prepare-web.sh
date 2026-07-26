@@ -33,3 +33,65 @@ unzip native_imaging.zip
 mv js/* web/
 rmdir js
 rm native_imaging.zip
+
+# Upstream native_imaging 0.4.0 ships a few web-only bugs that matter under
+# Flutter wasm thumbnail generation. Patch them after the zip extract so
+# prepare-web stays the single source of Imaging.js.
+python3 - <<'PY'
+from pathlib import Path
+path = Path('web/Imaging.js')
+text = path.read_text()
+replacements = [
+    (
+        'return Image(data.width, data.height, data.data);',
+        'return Image.fromRGBA(data.width, data.height, data.data);',
+    ),
+    (
+        'c.toBlob(resolve, "image/jpeg", {quality: quality / 100});',
+        '''c.toBlob(function(result) {
+        if (result == null) {
+          reject(new Error("canvas.toBlob returned null"));
+          return;
+        }
+        resolve(result);
+      }, "image/jpeg", quality / 100);''',
+    ),
+    (
+        '''return {init() {
+  if (!prom) prom = single_init.call(this);
+  return prom;
+}};''',
+        '''return {init() {
+  if (!prom) {
+    const pending = single_init.call(this);
+    prom = pending;
+    pending.catch(function() {
+      if (prom === pending) prom = undefined;
+    });
+  }
+  return prom;
+}};''',
+    ),
+]
+for old, new in replacements:
+    if old not in text:
+        raise SystemExit(f'Imaging.js patch target missing:\n{old}')
+    text = text.replace(old, new, 1)
+path.write_text(text)
+print('Patched web/Imaging.js for wasm thumbnail quality and init retry')
+PY
+
+# Fail closed if vodozemac web bindings were not produced. A bare
+# `flutter build web --wasm` without these assets boots a non-E2EE shell.
+for f in \
+  assets/vodozemac/vodozemac_bindings_dart.js \
+  assets/vodozemac/vodozemac_bindings_dart_bg.wasm \
+  web/native_executor.js \
+  web/Imaging.js \
+  web/Imaging.wasm
+do
+  if [ ! -f "$f" ]; then
+    echo "prepare-web missing required artifact: $f" >&2
+    exit 1
+  fi
+done

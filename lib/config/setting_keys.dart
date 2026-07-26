@@ -144,11 +144,16 @@ enum AppSettings<T> {
           if (configValue is String) {
             await store.setString(setting.key, configValue);
           }
-          if (configValue is int) {
-            await store.setInt(setting.key, configValue);
-          }
-          if (configValue is double) {
-            await store.setDouble(setting.key, configValue);
+          // dart2wasm/json.decode can restore integral numbers as int even for
+          // double settings (fontSizeFactor etc.). Prefer the setting's declared
+          // type so later reads do not hit a runtime type mismatch.
+          if (configValue is num) {
+            if (setting.defaultValue is double ||
+                (configValue is double && setting.defaultValue is! int)) {
+              await store.setDouble(setting.key, configValue.toDouble());
+            } else {
+              await store.setInt(setting.key, configValue.round());
+            }
           }
         }
       } on FormatException catch (_) {

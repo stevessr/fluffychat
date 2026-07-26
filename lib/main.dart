@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:async';
 import 'dart:isolate';
 import 'dart:ui';
 
@@ -29,8 +30,31 @@ ReceivePort? mainIsolateReceivePort;
 Future<void>? _vodozemacInitFuture;
 const _webMainGuardAttribute = 'data-fluffy-main-started';
 
-Future<void> _ensureVodozemacInitialized() => _vodozemacInitFuture ??=
-    initVodozemac(wasmPath: resolveWebPath('assets/assets/vodozemac/'));
+Future<void> _ensureVodozemacInitialized() {
+  final existing = _vodozemacInitFuture;
+  if (existing != null) return existing;
+
+  final pending = initVodozemac(
+    wasmPath: resolveWebPath('assets/assets/vodozemac/'),
+  );
+  _vodozemacInitFuture = pending;
+  // A permanently cached rejected Future would make every later await rethrow
+  // without re-running init (for example after a transient CDN/wasm 404).
+  // Keep the side-effect listener separate so callers still observe the
+  // original error from `pending`.
+  unawaited(
+    pending.then<void>(
+      (_) {},
+      onError: (Object error, StackTrace stackTrace) {
+        if (identical(_vodozemacInitFuture, pending)) {
+          _vodozemacInitFuture = null;
+        }
+        Logs().e('Vodozemac initialization failed', error, stackTrace);
+      },
+    ),
+  );
+  return pending;
+}
 
 bool isIntegrationTest = false;
 
@@ -69,7 +93,18 @@ void main(List<String> args) async {
   final store = await AppSettings.init();
   Logs().i('Welcome to ${AppSettings.applicationName.value} <3');
 
-  await _ensureVodozemacInitialized();
+  try {
+    await _ensureVodozemacInitialized();
+  } catch (error, stackTrace) {
+    // Web bootstrap previously hung or crashed hard on a missing wasm glue
+    // script. Keep going so the UI can still show an error/login surface; E2EE
+    // stays unavailable until a later successful init.
+    Logs().e(
+      'Continuing startup without vodozemac after initialization failure',
+      error,
+      stackTrace,
+    );
+  }
 
   Logs().nativeColors = !PlatformInfos.isIOS;
   final clients = await ClientManager.getClients(store: store);

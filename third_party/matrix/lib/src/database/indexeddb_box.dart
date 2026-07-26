@@ -314,102 +314,169 @@ class Box<V> {
     }
     txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
-    final list = await Future.wait(
-      keys.map((key) async {
-        final getObjectRequest = store.get(key.toJS);
-        final getObjectCompleter = Completer();
-        getObjectRequest.onerror = (Event event) {
-          Logs().e(
-            '[IndexedDBBox] [getAll] Error at key $key - ${getObjectRequest.error}',
-          );
+    // Queue every get() before awaiting any result. IndexedDB commits a
+    // transaction once its microtask returns with no pending request; under
+    // dart2wasm an await between store.get() calls can therefore hit an
+    // inactive transaction (same failure mode as getAllValues).
+    final requests = <({String key, IDBRequest request, Completer<void> done})>[];
+    for (final key in keys) {
+      final getObjectRequest = store.get(key.toJS);
+      final getObjectCompleter = Completer<void>();
+      getObjectRequest.onerror = (Event event) {
+        Logs().e(
+          '[IndexedDBBox] [getAll] Error at key $key - ${getObjectRequest.error}',
+        );
+        if (!getObjectCompleter.isCompleted) {
           getObjectCompleter.completeError(
             _indexedDbError(
               '[IndexedDBBox] [getAll] Error at key $key',
               getObjectRequest.error,
             ),
           );
-        }.toJS;
-        getObjectRequest.onsuccess = (Event event) {
+        }
+      }.toJS;
+      getObjectRequest.onsuccess = (Event event) {
+        if (!getObjectCompleter.isCompleted) {
           getObjectCompleter.complete();
-        }.toJS;
-        await getObjectCompleter.future;
-        return _fromValue(_dartifyIndexedDbValue(getObjectRequest.result));
-      }),
-    );
-    for (var i = 0; i < keys.length; i++) {
-      _quickAccessCache[keys[i]] = list[i];
+        }
+      }.toJS;
+      requests.add((
+        key: key,
+        request: getObjectRequest,
+        done: getObjectCompleter,
+      ));
+    }
+    await Future.wait(requests.map((entry) => entry.done.future));
+    final list = <V?>[];
+    for (final entry in requests) {
+      final value = _fromValue(
+        _dartifyIndexedDbValue(entry.request.result),
+      );
+      _quickAccessCache[entry.key] = value;
+      list.add(value);
     }
     return list;
   }
 
   Future<void> put(String key, V val, [IDBTransaction? txn]) async {
+    final ownsTxn = txn == null;
     txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
     final store = txn.objectStore(name);
     final putRequest = store.put(_prepareIndexedDbValue(val).jsify(), key.toJS);
-    final putCompleter = Completer();
+    final putCompleter = Completer<void>();
     putRequest.onerror = (Event event) {
       Logs().e('[IndexedDBBox] [put] Error - ${putRequest.error}');
-      putCompleter.completeError(
-        _indexedDbError('[IndexedDBBox] [put] Error', putRequest.error),
-      );
+      if (!putCompleter.isCompleted) {
+        putCompleter.completeError(
+          _indexedDbError('[IndexedDBBox] [put] Error', putRequest.error),
+        );
+      }
     }.toJS;
     putRequest.onsuccess = (Event event) {
-      putCompleter.complete();
+      if (!putCompleter.isCompleted) putCompleter.complete();
     }.toJS;
-    await putCompleter.future;
+    final futures = <Future<void>>[putCompleter.future];
+    if (ownsTxn) {
+      futures.add(_awaitTransaction(txn, 'put'));
+    }
+    await Future.wait(futures);
     _quickAccessCache[key] = val;
     _quickAccessCachedKeys?.add(key);
-    return;
   }
 
   Future<void> delete(String key, [IDBTransaction? txn]) async {
+    final ownsTxn = txn == null;
     txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
     final store = txn.objectStore(name);
     final deleteRequest = store.delete(key.toJS);
-    final deleteCompleter = Completer();
+    final deleteCompleter = Completer<void>();
     deleteRequest.onerror = (Event event) {
       Logs().e('[IndexedDBBox] [delete] Error - ${deleteRequest.error}');
-      deleteCompleter.completeError(
-        _indexedDbError('[IndexedDBBox] [delete] Error', deleteRequest.error),
-      );
+      if (!deleteCompleter.isCompleted) {
+        deleteCompleter.completeError(
+          _indexedDbError('[IndexedDBBox] [delete] Error', deleteRequest.error),
+        );
+      }
     }.toJS;
     deleteRequest.onsuccess = (Event event) {
-      deleteCompleter.complete();
+      if (!deleteCompleter.isCompleted) deleteCompleter.complete();
     }.toJS;
-    await deleteCompleter.future;
+    final futures = <Future<void>>[deleteCompleter.future];
+    if (ownsTxn) {
+      futures.add(_awaitTransaction(txn, 'delete'));
+    }
+    await Future.wait(futures);
 
     // Set to null instead remove() so that inside of transactions null is
     // returned.
     _quickAccessCache[key] = null;
     _quickAccessCachedKeys?.remove(key);
-    return;
+  }
+
+  Future<void> _awaitTransaction(IDBTransaction txn, String operation) {
+    final completer = Completer<void>();
+    txn.onerror = (Event event) {
+      Logs().e('[IndexedDBBox] [$operation] transaction error - ${txn.error}');
+      if (!completer.isCompleted) {
+        completer.completeError(
+          _indexedDbError(
+            '[IndexedDBBox] [$operation] transaction error',
+            txn.error,
+          ),
+        );
+      }
+    }.toJS;
+    txn.oncomplete = (Event event) {
+      if (!completer.isCompleted) completer.complete();
+    }.toJS;
+    return completer.future;
   }
 
   Future<void> deleteAll(List<String> keys, [IDBTransaction? txn]) async {
+    if (keys.isEmpty) return;
+    final ownsTxn = txn == null;
     txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
     final store = txn.objectStore(name);
+    // Issue every delete() before awaiting. Awaiting between deletes lets
+    // IndexedDB auto-commit the transaction under dart2wasm, so later keys
+    // fail with an inactive-transaction error and leave the cache half-updated.
+    final pending = <Completer<void>>[];
     for (final key in keys) {
       final deleteRequest = store.delete(key.toJS);
-      final deleteCompleter = Completer();
+      final deleteCompleter = Completer<void>();
       deleteRequest.onerror = (Event event) {
         Logs().e(
           '[IndexedDBBox] [deleteAll] Error at key $key - ${deleteRequest.error}',
         );
-        deleteCompleter.completeError(
-          _indexedDbError(
-            '[IndexedDBBox] [deleteAll] Error at key $key',
-            deleteRequest.error,
-          ),
-        );
+        if (!deleteCompleter.isCompleted) {
+          deleteCompleter.completeError(
+            _indexedDbError(
+              '[IndexedDBBox] [deleteAll] Error at key $key',
+              deleteRequest.error,
+            ),
+          );
+        }
       }.toJS;
       deleteRequest.onsuccess = (Event event) {
-        deleteCompleter.complete();
+        if (!deleteCompleter.isCompleted) {
+          deleteCompleter.complete();
+        }
       }.toJS;
-      await deleteCompleter.future;
+      pending.add(deleteCompleter);
+    }
+    final futures = <Future<void>>[
+      ...pending.map((completer) => completer.future),
+    ];
+    if (ownsTxn) {
+      futures.add(_awaitTransaction(txn, 'deleteAll'));
+    }
+    await Future.wait(futures);
+    // Only update the quick-access cache after the durable write path succeeds,
+    // so a failed transaction cannot claim keys are gone while rows remain.
+    for (final key in keys) {
       _quickAccessCache[key] = null;
       _quickAccessCachedKeys?.remove(key);
     }
-    return;
   }
 
   void clearQuickAccessCache() {
@@ -418,20 +485,27 @@ class Box<V> {
   }
 
   Future<void> clear([IDBTransaction? txn]) async {
+    final ownsTxn = txn == null;
     txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
     final store = txn.objectStore(name);
     final clearRequest = store.clear();
-    final clearCompleter = Completer();
+    final clearCompleter = Completer<void>();
     clearRequest.onerror = (Event event) {
       Logs().e('[IndexedDBBox] [clear] Error - ${clearRequest.error}');
-      clearCompleter.completeError(
-        _indexedDbError('[IndexedDBBox] [clear] Error', clearRequest.error),
-      );
+      if (!clearCompleter.isCompleted) {
+        clearCompleter.completeError(
+          _indexedDbError('[IndexedDBBox] [clear] Error', clearRequest.error),
+        );
+      }
     }.toJS;
     clearRequest.onsuccess = (Event event) {
-      clearCompleter.complete();
+      if (!clearCompleter.isCompleted) clearCompleter.complete();
     }.toJS;
-    await clearCompleter.future;
+    final futures = <Future<void>>[clearCompleter.future];
+    if (ownsTxn) {
+      futures.add(_awaitTransaction(txn, 'clear'));
+    }
+    await Future.wait(futures);
     clearQuickAccessCache();
   }
 

@@ -3,6 +3,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:async';
+import 'dart:js_interop';
+
 import 'package:web/web.dart' as web;
 
 String get webLocationHref => web.window.location.href;
@@ -39,6 +42,32 @@ void requestWebNotificationPermission() {
 
 void requestWebPersistentStorage() {
   web.window.navigator.storage.persist();
+}
+
+Future<void> deleteWebIndexedDatabase(String name) async {
+  final request = web.window.indexedDB.deleteDatabase(name);
+  final completer = Completer<void>();
+  request.onsuccess = ((web.Event event) {
+    if (!completer.isCompleted) completer.complete();
+  }).toJS;
+  request.onerror = ((web.Event event) {
+    if (!completer.isCompleted) {
+      completer.completeError(
+        StateError('Unable to delete IndexedDB database $name: ${request.error}'),
+      );
+    }
+  }).toJS;
+  request.onblocked = ((web.Event event) {
+    // Another tab still holds the DB open. Fail rather than hang recovery.
+    if (!completer.isCompleted) {
+      completer.completeError(
+        StateError(
+          'IndexedDB delete of $name is blocked by another open connection',
+        ),
+      );
+    }
+  }).toJS;
+  await completer.future;
 }
 
 final web.HTMLAudioElement _notificationAudioPlayer = web.HTMLAudioElement()
