@@ -288,6 +288,16 @@ class _MxcImageState extends State<MxcImage> {
                       height: widget.height,
                       fit: widget.fit ?? BoxFit.contain,
                       placeholderBuilder: placeholder,
+                      // flutter_svg has no errorBuilder; wrap so a corrupt
+                      // SVG still falls back to the broken-image UI used for
+                      // raster failures instead of bubbling a build error.
+                      errorBuilder: (context, error, stackTrace) {
+                        if (!_renderFailed) {
+                          _renderFailed = true;
+                          Logs().d('Unable to render mxc svg', error, stackTrace);
+                        }
+                        return _brokenImage(context);
+                      },
                     )
                   : Image.memory(
                       data,

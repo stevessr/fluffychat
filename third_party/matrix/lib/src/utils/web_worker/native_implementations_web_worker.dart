@@ -86,6 +86,15 @@ class NativeImplementationsWebWorker extends NativeImplementations {
       // inside the cleanup scope so such failures do not leak completers.
       worker.postMessage(message.toJson().jsify());
       return await completer.future.timeout(timeout);
+    } on TimeoutException catch (error, stackTrace) {
+      // A timed-out decode/resize can leave the shared worker busy forever.
+      // Recreate it (budget permitting) so later operations are not stuck
+      // behind abandoned work; the current caller still sees the timeout.
+      _markTerminalFailure(
+        StateError('Web worker operation timed out after $timeout: $error'),
+        stackTrace,
+      );
+      rethrow;
     } finally {
       // A timed-out worker response may never arrive. Do not retain its
       // completer indefinitely, and let a late response follow the safe

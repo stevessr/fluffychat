@@ -191,11 +191,23 @@ class BoxCollection with ZoneTransactionMixin {
     return dbOpenCompleter.future;
   }
 
+  /// Live Box instances opened from this collection. Used so collection-level
+  /// clear/close can invalidate per-box quick-access caches.
+  final List<Box<dynamic>> _openedBoxes = [];
+
   Box<V> openBox<V>(String name) {
     if (!boxNames.contains(name)) {
       throw ('Box with name $name is not in the known box names of this collection.');
     }
-    return Box<V>(name, this);
+    final box = Box<V>(name, this);
+    _openedBoxes.add(box);
+    return box;
+  }
+
+  void _clearOpenedBoxCaches() {
+    for (final box in _openedBoxes) {
+      box.clearQuickAccessCache();
+    }
   }
 
   /// Active multi-store IDB transaction for the current [zoneTransaction].
@@ -316,10 +328,14 @@ class BoxCollection with ZoneTransactionMixin {
       }
     }.toJS;
     await Future.wait<void>([transactionCompleter.future, ...operationFutures]);
+    _clearOpenedBoxCaches();
   }
 
   Future<void> close() async {
-    return zoneTransaction(() async => _db.close());
+    return zoneTransaction(() async {
+      _clearOpenedBoxCaches();
+      _db.close();
+    });
   }
 
   Future<void> deleteDatabase(String name, [dynamic factory]) async {
