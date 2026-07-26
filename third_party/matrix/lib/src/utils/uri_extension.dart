@@ -94,22 +94,17 @@ extension MxcUriExtension on Uri {
       return Uri();
     }
 
-    String requestPath;
-    if (!forceLegacy && await client.authenticatedMediaSupported()) {
-      requestPath =
-          '/_matrix/client/v1/media/thumbnail/$host${hasPort ? ':$port' : ''}$path';
-    } else {
-      requestPath =
-          '/_matrix/media/v3/thumbnail/$host${hasPort ? ':$port' : ''}$path';
-    }
+    // Use homeserver.resolve() like getDownloadUri so path-prefixed
+    // homeservers (e.g. https://example.com/matrix) keep their base path.
+    // Building a root-absolute Uri path would drop that prefix and 404.
+    final requestPath =
+        (!forceLegacy && await client.authenticatedMediaSupported())
+        ? '_matrix/client/v1/media/thumbnail/$host${hasPort ? ':$port' : ''}$path'
+        : '_matrix/media/v3/thumbnail/$host${hasPort ? ':$port' : ''}$path';
 
-    return Uri(
-      scheme: homeserver.scheme,
-      host: homeserver.host,
-      path: requestPath,
-      port: homeserver.port,
-      queryParameters: queryParameters,
-    );
+    return homeserver
+        .resolve(requestPath)
+        .replace(queryParameters: queryParameters);
   }
 
   @Deprecated(

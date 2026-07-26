@@ -372,40 +372,41 @@ class MatrixSdkDatabase extends DatabaseApi with DatabaseFileStorage {
 
   @override
   Future<void> forgetRoom(String roomId) async {
-    await _timelineFragmentsBox.delete(TupleKey(roomId, '').toString());
-    final eventsBoxKeys = await _eventsBox.getAllKeys();
-    for (final key in eventsBoxKeys) {
-      final multiKey = TupleKey.fromString(key);
-      if (multiKey.parts.first != roomId) continue;
-      await _eventsBox.delete(key);
+    // Collect keys first, then batch-delete. On web each Box.delete opens its
+    // own IDB transaction; N+1 deletes for large rooms are both slow and leave
+    // half-forgotten state if the tab dies mid-loop.
+    Future<List<String>> keysForRoom(dynamic box) async {
+      final keys = await box.getAllKeys() as List<String>;
+      return [
+        for (final key in keys)
+          if (TupleKey.fromString(key).parts.first == roomId) key,
+      ];
     }
-    final preloadRoomStateBoxKeys = await _preloadRoomStateBox.getAllKeys();
-    for (final key in preloadRoomStateBoxKeys) {
-      final multiKey = TupleKey.fromString(key);
-      if (multiKey.parts.first != roomId) continue;
-      await _preloadRoomStateBox.delete(key);
-    }
-    final nonPreloadRoomStateBoxKeys = await _nonPreloadRoomStateBox
-        .getAllKeys();
-    for (final key in nonPreloadRoomStateBoxKeys) {
-      final multiKey = TupleKey.fromString(key);
-      if (multiKey.parts.first != roomId) continue;
-      await _nonPreloadRoomStateBox.delete(key);
-    }
-    final roomMembersBoxKeys = await _roomMembersBox.getAllKeys();
-    for (final key in roomMembersBoxKeys) {
-      final multiKey = TupleKey.fromString(key);
-      if (multiKey.parts.first != roomId) continue;
-      await _roomMembersBox.delete(key);
-    }
-    final roomAccountDataBoxKeys = await _roomAccountDataBox.getAllKeys();
-    for (final key in roomAccountDataBoxKeys) {
-      final multiKey = TupleKey.fromString(key);
-      if (multiKey.parts.first != roomId) continue;
-      await _roomAccountDataBox.delete(key);
-    }
-    await _readReceiptsBox.delete(roomId);
-    await _roomsBox.delete(roomId);
+
+    final eventKeys = await keysForRoom(_eventsBox);
+    final preloadStateKeys = await keysForRoom(_preloadRoomStateBox);
+    final nonPreloadStateKeys = await keysForRoom(_nonPreloadRoomStateBox);
+    final memberKeys = await keysForRoom(_roomMembersBox);
+    final accountDataKeys = await keysForRoom(_roomAccountDataBox);
+
+    await transaction(() async {
+      await _timelineFragmentsBox.delete(TupleKey(roomId, '').toString());
+      // Also drop any sending-timeline fragment for this room.
+      await _timelineFragmentsBox.delete(TupleKey(roomId, 'SENDING').toString());
+      if (eventKeys.isNotEmpty) await _eventsBox.deleteAll(eventKeys);
+      if (preloadStateKeys.isNotEmpty) {
+        await _preloadRoomStateBox.deleteAll(preloadStateKeys);
+      }
+      if (nonPreloadStateKeys.isNotEmpty) {
+        await _nonPreloadRoomStateBox.deleteAll(nonPreloadStateKeys);
+      }
+      if (memberKeys.isNotEmpty) await _roomMembersBox.deleteAll(memberKeys);
+      if (accountDataKeys.isNotEmpty) {
+        await _roomAccountDataBox.deleteAll(accountDataKeys);
+      }
+      await _readReceiptsBox.delete(roomId);
+      await _roomsBox.delete(roomId);
+    });
   }
 
   @override
@@ -1583,8 +1584,10 @@ class MatrixSdkDatabase extends DatabaseApi with DatabaseFileStorage {
   @override
   Future<bool> importDump(String export) async {
     try {
+      // clear() already wipes every store on the live collection. Re-open
+      // without close() would leak a second IndexedDB connection on web/wasm
+      // and rebind boxes while the previous IDBDatabase is still open.
       await clear();
-      await open();
       final json = Map.from(jsonDecode(export)).cast<String, Map>();
       for (final key in json[_clientBoxName]!.keys) {
         await _clientBox.put(key, json[_clientBoxName]![key]);

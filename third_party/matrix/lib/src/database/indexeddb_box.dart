@@ -67,6 +67,63 @@ class BoxCollection with ZoneTransactionMixin {
     int version = 1,
   }) async {
     idbFactory ??= window.indexedDB;
+    // One automatic repair attempt: if a same-version DB is missing stores,
+    // bump the version so onupgradeneeded can create them without wiping data.
+    return _openWithOptionalStoreRepair(
+      name,
+      boxNames,
+      idbFactory: idbFactory,
+      version: version,
+      allowStoreRepair: true,
+    );
+  }
+
+  static Future<BoxCollection> _openWithOptionalStoreRepair(
+    String name,
+    Set<String> boxNames, {
+    required IDBFactory idbFactory,
+    required int version,
+    required bool allowStoreRepair,
+  }) async {
+    final collection = await _openAtVersion(
+      name,
+      boxNames,
+      idbFactory: idbFactory,
+      version: version,
+    );
+
+    final missing = boxNames
+        .where((boxName) => !collection._db.objectStoreNames.contains(boxName))
+        .toList(growable: false);
+    if (missing.isEmpty) return collection;
+
+    Logs().w(
+      '[IndexedDBBox] Database $name is missing stores $missing at version '
+      '$version; ${allowStoreRepair ? 'bumping version to repair' : 'failing'}',
+    );
+    await collection.close();
+    if (!allowStoreRepair) {
+      throw StateError(
+        'IndexedDB database $name is missing object stores $missing',
+      );
+    }
+    // Reopen one version higher so onupgradeneeded can create only the
+    // missing stores while preserving existing data.
+    return _openWithOptionalStoreRepair(
+      name,
+      boxNames,
+      idbFactory: idbFactory,
+      version: version + 1,
+      allowStoreRepair: false,
+    );
+  }
+
+  static Future<BoxCollection> _openAtVersion(
+    String name,
+    Set<String> boxNames, {
+    required IDBFactory idbFactory,
+    required int version,
+  }) async {
     final dbOpenCompleter = Completer<BoxCollection>();
     final request = idbFactory.open(name, version);
 
@@ -75,6 +132,19 @@ class BoxCollection with ZoneTransactionMixin {
       if (!dbOpenCompleter.isCompleted) {
         dbOpenCompleter.completeError(
           _indexedDbError('Error loading database', request.error),
+        );
+      }
+    }.toJS;
+
+    request.onblocked = (Event event) {
+      Logs().e(
+        '[IndexedDBBox] Opening database $name is blocked by another connection',
+      );
+      if (!dbOpenCompleter.isCompleted) {
+        dbOpenCompleter.completeError(
+          StateError(
+            'IndexedDB open of $name is blocked: close other FluffyChat tabs',
+          ),
         );
       }
     }.toJS;
@@ -91,10 +161,10 @@ class BoxCollection with ZoneTransactionMixin {
         }
       }.toJS;
 
-      for (final name in boxNames) {
-        if (db.objectStoreNames.contains(name)) continue;
+      for (final boxName in boxNames) {
+        if (db.objectStoreNames.contains(boxName)) continue;
         db.createObjectStore(
-          name,
+          boxName,
           IDBObjectStoreParameters(autoIncrement: true),
         );
       }
@@ -102,6 +172,14 @@ class BoxCollection with ZoneTransactionMixin {
 
     request.onsuccess = (Event event) {
       final db = request.result as IDBDatabase;
+      // Close cooperatively when another tab wants to upgrade/delete so those
+      // operations cannot hang forever waiting on this connection.
+      db.onversionchange = (Event event) {
+        Logs().i(
+          '[IndexedDBBox] Closing database $name after versionchange',
+        );
+        db.close();
+      }.toJS;
       if (!dbOpenCompleter.isCompleted) {
         dbOpenCompleter.complete(BoxCollection(db, boxNames, name));
       } else {
@@ -183,18 +261,34 @@ class BoxCollection with ZoneTransactionMixin {
 
   Future<void> deleteDatabase(String name, [dynamic factory]) async {
     await close();
-    final deleteDatabaseCompleter = Completer();
+    final deleteDatabaseCompleter = Completer<void>();
     final request = ((factory ?? window.indexedDB) as IDBFactory)
         .deleteDatabase(name);
     request.onerror = (Event event) {
       Logs().e('[IndexedDBBox] [deleteDatabase] Error - ${request.error}');
-      deleteDatabaseCompleter.completeError(
-        _indexedDbError('Error deleting database', request.error),
+      if (!deleteDatabaseCompleter.isCompleted) {
+        deleteDatabaseCompleter.completeError(
+          _indexedDbError('Error deleting database', request.error),
+        );
+      }
+    }.toJS;
+    request.onblocked = (Event event) {
+      Logs().e(
+        '[IndexedDBBox] Deleting database $name is blocked by another connection',
       );
+      if (!deleteDatabaseCompleter.isCompleted) {
+        deleteDatabaseCompleter.completeError(
+          StateError(
+            'IndexedDB delete of $name is blocked: close other FluffyChat tabs',
+          ),
+        );
+      }
     }.toJS;
     request.onsuccess = (Event event) {
       Logs().i('[IndexedDBBox] [deleteDatabase] Database deleted.');
-      deleteDatabaseCompleter.complete();
+      if (!deleteDatabaseCompleter.isCompleted) {
+        deleteDatabaseCompleter.complete();
+      }
     }.toJS;
     return deleteDatabaseCompleter.future;
   }

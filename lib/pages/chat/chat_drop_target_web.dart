@@ -327,13 +327,12 @@ class _WebChatDropTargetState extends State<_WebChatDropTarget> {
     final mimeType = file.type.isNotEmpty
         ? file.type
         : lookupMimeType(file.name);
-    if (mimeType == null || !mimeType.startsWith('image/')) {
-      return null;
-    }
-    final extension = extensionFromMime(mimeType);
+    // Accept every dropped/pasted file type. Restricting to image/* silently
+    // discarded videos, audio and documents on web/wasm.
+    final extension = mimeType == null ? null : extensionFromMime(mimeType);
     final name = file.name.isNotEmpty
         ? file.name
-        : 'clipboard-image${extension == null ? '' : '.$extension'}';
+        : 'clipboard-file${extension == null ? '' : '.$extension'}';
     return XFile(
       web.URL.createObjectURL(file),
       mimeType: mimeType,

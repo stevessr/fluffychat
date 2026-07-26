@@ -51,8 +51,10 @@ extension ClientDownloadContentExtension on Client {
 
     // A server can advertise v1.11 but still return M_NOT_FOUND for remote
     // media on the authenticated endpoint. Retry the equivalent legacy URL.
+    // Match with contains() so path-prefixed homeservers
+    // (`/matrix/_matrix/client/v1/media/...`) still take this branch.
     if (response.statusCode >= 400 &&
-        httpUri.path.startsWith('/_matrix/client/v1/media/')) {
+        httpUri.path.contains('/_matrix/client/v1/media/')) {
       final legacyUri = isThumbnail
           ? await mxc.getThumbnailUri(
               this,
@@ -67,10 +69,17 @@ extension ClientDownloadContentExtension on Client {
     }
 
     // Some homeservers fail remote thumbnail federation while download still
-    // works. Fallback once to raw download to keep media rendering functional.
+    // works. Prefer the authenticated download first, then legacy download.
     if (response.statusCode != 200 && isThumbnail) {
-      final fallbackUri = await mxc.getDownloadUri(this, forceLegacy: true);
-      response = await httpClient.get(fallbackUri, headers: headers);
+      final authedDownload = await mxc.getDownloadUri(this);
+      response = await httpClient.get(authedDownload, headers: headers);
+      if (response.statusCode != 200) {
+        final legacyDownload = await mxc.getDownloadUri(
+          this,
+          forceLegacy: true,
+        );
+        response = await httpClient.get(legacyDownload, headers: headers);
+      }
     }
 
     if (response.statusCode != 200) {

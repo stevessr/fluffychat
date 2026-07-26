@@ -70,8 +70,15 @@ Future<void> deleteWebIndexedDatabase(String name) async {
   await completer.future;
 }
 
+String _resolveWebAsset(String path) {
+  final baseUri = Uri.tryParse(web.document.baseURI) ?? Uri.base;
+  return baseUri.resolve(path).toString();
+}
+
 final web.HTMLAudioElement _notificationAudioPlayer = web.HTMLAudioElement()
-  ..src = 'assets/assets/sounds/notification.ogg'
+  // Resolve against <base href> so subpath deploys (/nightly/) still find the
+  // packaged notification sound.
+  ..src = _resolveWebAsset('assets/assets/sounds/notification.ogg')
   ..load();
 
 void playWebNotificationSound() {
