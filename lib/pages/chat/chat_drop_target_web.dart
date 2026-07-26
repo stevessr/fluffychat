@@ -149,13 +149,38 @@ class _WebChatDropTargetState extends State<_WebChatDropTarget> {
     final dataTransfer = event.clipboardData;
     if (dataTransfer == null) return;
 
-    final files = _filesFromClipboardData(dataTransfer);
-    if (files.isNotEmpty) {
+    // Snapshot File objects while the paste event is still dispatching;
+    // clipboard DataTransfer contents are not guaranteed afterwards.
+    final rawFiles = <web.File>[];
+    final fileList = dataTransfer.files;
+    if (fileList.length > 0) {
+      for (var i = 0; i < fileList.length; i++) {
+        final file = fileList.item(i);
+        if (file != null) rawFiles.add(file);
+      }
+    } else {
+      final items = dataTransfer.items;
+      for (var i = 0; i < items.length; i++) {
+        final item = items[i];
+        if (item.kind != 'file') continue;
+        final file = item.getAsFile();
+        if (file != null) rawFiles.add(file);
+      }
+    }
+    if (rawFiles.isNotEmpty) {
       event.preventDefault();
       event.stopImmediatePropagation();
       _runFileOperation(
         'Unable to process pasted files',
-        () => widget.onFilesDropped(files),
+        () async {
+          final files = <XFile>[];
+          for (final file in rawFiles) {
+            final xfile = await _toXFile(file);
+            if (xfile != null) files.add(xfile);
+          }
+          if (files.isEmpty) return;
+          await widget.onFilesDropped(files);
+        },
       );
       return;
     }
@@ -212,30 +237,9 @@ class _WebChatDropTargetState extends State<_WebChatDropTarget> {
   }
 
   Future<void> _handleDrop(web.DragEvent event) async {
-    final files = _filesFromFileList(event.dataTransfer?.files);
+    final files = await _filesFromFileList(event.dataTransfer?.files);
     if (files.isEmpty) return;
     await widget.onFilesDropped(files);
-  }
-
-  List<XFile> _filesFromClipboardData(web.DataTransfer? dataTransfer) {
-    if (dataTransfer == null) return [];
-    final fileList = dataTransfer.files;
-    if (fileList.length > 0) {
-      return _filesFromFileList(fileList);
-    }
-    final files = <XFile>[];
-    final items = dataTransfer.items;
-    for (var i = 0; i < items.length; i++) {
-      final item = items[i];
-      if (item.kind != 'file') continue;
-      final file = item.getAsFile();
-      if (file == null) continue;
-      final xfile = _toXFile(file);
-      if (xfile != null) {
-        files.add(xfile);
-      }
-    }
-    return files;
   }
 
   String? _clipboardText(web.DataTransfer dataTransfer) {
@@ -309,13 +313,13 @@ class _WebChatDropTargetState extends State<_WebChatDropTarget> {
     return 'clipboard-image$suffix${extension == null ? '' : '.$extension'}';
   }
 
-  List<XFile> _filesFromFileList(web.FileList? fileList) {
+  Future<List<XFile>> _filesFromFileList(web.FileList? fileList) async {
     if (fileList == null) return [];
     final files = <XFile>[];
     for (var i = 0; i < fileList.length; i++) {
       final file = fileList.item(i);
       if (file == null) continue;
-      final xfile = _toXFile(file);
+      final xfile = await _toXFile(file);
       if (xfile != null) {
         files.add(xfile);
       }
@@ -323,18 +327,22 @@ class _WebChatDropTargetState extends State<_WebChatDropTarget> {
     return files;
   }
 
-  XFile? _toXFile(web.File file) {
+  Future<XFile?> _toXFile(web.File file) async {
     final mimeType = file.type.isNotEmpty
         ? file.type
         : lookupMimeType(file.name);
     // Accept every dropped/pasted file type. Restricting to image/* silently
     // discarded videos, audio and documents on web/wasm.
+    //
+    // Read bytes eagerly instead of createObjectURL so we never leak blob
+    // URLs that nothing revokes after SendFileDialog finishes.
     final extension = mimeType == null ? null : extensionFromMime(mimeType);
     final name = file.name.isNotEmpty
         ? file.name
         : 'clipboard-file${extension == null ? '' : '.$extension'}';
-    return XFile(
-      web.URL.createObjectURL(file),
+    final bytes = await _blobToBytes(file);
+    return XFile.fromData(
+      bytes,
       mimeType: mimeType,
       name: name,
       length: file.size,
