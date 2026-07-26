@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -27,6 +28,10 @@ class NativeImplementationsWebWorker extends NativeImplementations {
   (Object, StackTrace)? _terminalFailure;
   var _recreateBudget = 0;
   var _disposed = false;
+  // Serialize image work on the single shared worker. Parallel postMessage
+  // storms from media-heavy timelines otherwise pile up until individual
+  // timeouts fire and force worker recreations.
+  Future<void> _operationChain = Future<void>.value();
 
   /// the default handler for stackTraces in web workers
   static StackTrace defaultStackTraceHandler(String obfuscatedStackTrace) {
@@ -71,7 +76,19 @@ class NativeImplementationsWebWorker extends NativeImplementations {
     bool retryInDummy = true,
   }) => NativeImplementations.dummy.decryptFile(file);
 
-  Future<T> operation<T, U>(WebWorkerOperations name, U argument) async {
+  Future<T> operation<T, U>(WebWorkerOperations name, U argument) {
+    final gate = Completer<void>();
+    final previous = _operationChain;
+    _operationChain = gate.future;
+    return previous
+        .catchError((Object error, StackTrace stackTrace) {})
+        .then((_) => _runOperation<T, U>(name, argument))
+        .whenComplete(() {
+          if (!gate.isCompleted) gate.complete();
+        });
+  }
+
+  Future<T> _runOperation<T, U>(WebWorkerOperations name, U argument) async {
     final terminalFailure = _terminalFailure;
     if (terminalFailure != null) {
       Error.throwWithStackTrace(terminalFailure.$1, terminalFailure.$2);
@@ -80,11 +97,19 @@ class NativeImplementationsWebWorker extends NativeImplementations {
     final completer = Completer<T>();
     _completers[label] = completer;
     final message = WebWorkerData(label, name, argument);
+    final transfer = <JSAny>[];
+    final payload = _prepareWorkerPayload(message.toJson(), transfer);
 
     try {
       // postMessage itself can throw when structured cloning fails. Keep it
       // inside the cleanup scope so such failures do not leak completers.
-      worker.postMessage(message.toJson().jsify());
+      // Large image byte buffers are listed in `transfer` so structured clone
+      // can move them instead of copying under WasmGC.
+      if (transfer.isEmpty) {
+        worker.postMessage(payload);
+      } else {
+        worker.postMessage(payload, transfer.toJS);
+      }
       return await completer.future.timeout(timeout);
     } on TimeoutException catch (error, stackTrace) {
       // A timed-out decode/resize can leave the shared worker busy forever.
@@ -101,6 +126,43 @@ class NativeImplementationsWebWorker extends NativeImplementations {
       // unknown-label path in _handleIncomingMessage.
       _completers.remove(label);
     }
+  }
+
+  /// Convert a worker JSON payload to JS, collecting ArrayBuffers that can be
+  /// transferred. Nested `Uint8List` values (image bytes) are replaced with
+  /// `JSUint8Array` views so `postMessage(..., transfer)` can move them.
+  JSAny? _prepareWorkerPayload(
+    Object? value,
+    List<JSAny> transfer,
+  ) {
+    if (value is Uint8List) {
+      // Transfer only when we own the full underlying buffer; a view into a
+      // larger allocation cannot be moved without corrupting sibling data.
+      final jsBytes = value.toJS;
+      if (value.offsetInBytes == 0 &&
+          value.lengthInBytes == value.buffer.lengthInBytes) {
+        final buffer = jsBytes.getProperty<JSArrayBuffer>('buffer'.toJS);
+        transfer.add(buffer);
+      }
+      return jsBytes;
+    }
+    if (value is List) {
+      return <JSAny?>[
+        for (final item in value) _prepareWorkerPayload(item, transfer),
+      ].toJS;
+    }
+    if (value is Map) {
+      final object = JSObject();
+      value.forEach((key, item) {
+        final name = key?.toString() ?? '';
+        object[name] = _prepareWorkerPayload(item, transfer);
+      });
+      return object;
+    }
+    if (value is String || value is num || value is bool || value == null) {
+      return value.jsify();
+    }
+    return value.jsify();
   }
 
   void _handleWorkerError(Event event) {

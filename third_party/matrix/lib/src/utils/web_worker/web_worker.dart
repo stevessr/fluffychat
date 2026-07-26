@@ -8,6 +8,8 @@ import 'dart:async';
 import 'dart:js_interop';
 import 'dart:typed_data';
 
+// ByteBuffer is from typed_data; keep explicit for worker byte payloads.
+
 import 'package:matrix/matrix.dart' hide Event;
 import 'package:matrix/src/utils/web_worker/native_implementations_web_worker.dart';
 import 'package:web/web.dart';
@@ -68,18 +70,8 @@ Future<void> startWebWorker() async {
           _sendResponse(label, result?.toJson());
           break;
         case WebWorkerOperations.calcImageMetadata:
-          final rawBytes = operation.data;
-          if (rawBytes is! Iterable) {
-            throw ArgumentError.value(
-              rawBytes,
-              'data',
-              'calcImageMetadata expects a byte iterable',
-            );
-          }
           final result = MatrixImageFile.calcMetadataImplementation(
-            Uint8List.fromList([
-              for (final value in rawBytes) (value as num).toInt(),
-            ]),
+            _workerBytes(operation.data, 'calcImageMetadata'),
           );
           _sendResponse(label, result?.toJson());
           break;
@@ -91,6 +83,23 @@ Future<void> startWebWorker() async {
       _replyError(e, s, rawLabel is num ? rawLabel.toDouble() : -1);
     }
   }.toJS;
+}
+
+/// Accept transferred `Uint8List`/typed-array payloads as well as the plain
+/// numeric lists produced by structured clone without transfer.
+Uint8List _workerBytes(Object? value, String operation) {
+  if (value is Uint8List) return value;
+  if (value is ByteBuffer) return value.asUint8List();
+  if (value is Iterable) {
+    return Uint8List.fromList([
+      for (final item in value) (item as num).toInt(),
+    ]);
+  }
+  throw ArgumentError.value(
+    value,
+    'data',
+    '$operation expects a byte iterable',
+  );
 }
 
 void _sendResponse(double label, dynamic response) {
