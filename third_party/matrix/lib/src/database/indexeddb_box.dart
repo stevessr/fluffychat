@@ -198,15 +198,78 @@ class BoxCollection with ZoneTransactionMixin {
     return Box<V>(name, this);
   }
 
+  /// Active multi-store IDB transaction for the current [zoneTransaction].
+  ///
+  /// Box put/delete/clear pick this up so multi-write SDK transactions share
+  /// one IndexedDB transaction (and therefore one commit) instead of opening
+  /// and auto-committing a fresh transaction per key.
+  IDBTransaction? _activeTxn;
+  Set<String>? _activeTxnBoxNames;
+
   Future<void> transaction(
     Future<void> Function() action, {
     List<String>? boxNames,
     bool readOnly = false,
   }) {
-    // Cached generic operation closures escape IndexedDB callbacks as
-    // unhandled WebAssembly.Exception values under dart2wasm. Execute each
-    // operation normally under the existing zone lock instead.
-    return zoneTransaction(action);
+    return zoneTransaction(() async {
+      final stores = (boxNames == null || boxNames.isEmpty)
+          ? this.boxNames.toList(growable: false)
+          : boxNames;
+      final mode = readOnly ? 'readonly' : 'readwrite';
+      final txn = _db.transaction(stores.toList().jsify()!, mode);
+      _activeTxn = txn;
+      _activeTxnBoxNames = stores.toSet();
+      final txnDone = Completer<void>();
+      txn.onerror = (Event event) {
+        Logs().e('[IndexedDBBox] [transaction] Error - ${txn.error}');
+        if (!txnDone.isCompleted) {
+          txnDone.completeError(
+            _indexedDbError(
+              'DB transaction not completed due to an error',
+              txn.error,
+            ),
+          );
+        }
+      }.toJS;
+      txn.oncomplete = (Event event) {
+        if (!txnDone.isCompleted) txnDone.complete();
+      }.toJS;
+      txn.onabort = (Event event) {
+        if (!txnDone.isCompleted) {
+          txnDone.completeError(
+            StateError(
+              'DB transaction aborted${txn.error == null ? '' : ': ${txn.error}'}',
+            ),
+          );
+        }
+      }.toJS;
+      try {
+        // Run box ops without awaiting the IDB commit between them. All
+        // store requests must be queued before the action returns so the
+        // browser does not auto-commit an empty/half-filled transaction
+        // under dart2wasm.
+        await action();
+      } catch (error, stackTrace) {
+        try {
+          txn.abort();
+        } catch (_) {}
+        _activeTxn = null;
+        _activeTxnBoxNames = null;
+        Error.throwWithStackTrace(error, stackTrace);
+      }
+      _activeTxn = null;
+      _activeTxnBoxNames = null;
+      await txnDone.future;
+    });
+  }
+
+  IDBTransaction? _txnForBox(String boxName) {
+    final txn = _activeTxn;
+    final names = _activeTxnBoxNames;
+    if (txn == null || names == null || !names.contains(boxName)) {
+      return null;
+    }
+    return txn;
   }
 
   Future<void> clear() async {
@@ -310,7 +373,8 @@ class Box<V> {
 
   Future<List<String>> getAllKeys([IDBTransaction? txn]) async {
     if (_quickAccessCachedKeys != null) return _quickAccessCachedKeys!.toList();
-    txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
+    txn ??= boxCollection._txnForBox(name) ??
+        boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
     final getAllKeysCompleter = Completer();
     final request = store.getAllKeys();
@@ -334,7 +398,8 @@ class Box<V> {
   }
 
   Future<Map<String, V>> getAllValues([IDBTransaction? txn]) async {
-    txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
+    txn ??= boxCollection._txnForBox(name) ??
+        boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
     final map = <String, V>{};
 
@@ -382,7 +447,8 @@ class Box<V> {
 
   Future<V?> get(String key, [IDBTransaction? txn]) async {
     if (_quickAccessCache.containsKey(key)) return _quickAccessCache[key];
-    txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
+    txn ??= boxCollection._txnForBox(name) ??
+        boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
     final getObjectRequest = store.get(key.toJS);
     final getObjectCompleter = Completer();
@@ -406,7 +472,8 @@ class Box<V> {
     if (keys.every(_quickAccessCache.containsKey)) {
       return keys.map((key) => _quickAccessCache[key]).toList();
     }
-    txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
+    txn ??= boxCollection._txnForBox(name) ??
+        boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
     // Queue every get() before awaiting any result. IndexedDB commits a
     // transaction once its microtask returns with no pending request; under
@@ -453,8 +520,9 @@ class Box<V> {
   }
 
   Future<void> put(String key, V val, [IDBTransaction? txn]) async {
-    final ownsTxn = txn == null;
-    txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
+    final zoneTxn = boxCollection._txnForBox(name);
+    final ownsTxn = txn == null && zoneTxn == null;
+    txn ??= zoneTxn ?? boxCollection._db.transaction(name.toJS, 'readwrite');
     final store = txn.objectStore(name);
     final putRequest = store.put(_prepareIndexedDbValue(val).jsify(), key.toJS);
     final putCompleter = Completer<void>();
@@ -479,8 +547,9 @@ class Box<V> {
   }
 
   Future<void> delete(String key, [IDBTransaction? txn]) async {
-    final ownsTxn = txn == null;
-    txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
+    final zoneTxn = boxCollection._txnForBox(name);
+    final ownsTxn = txn == null && zoneTxn == null;
+    txn ??= zoneTxn ?? boxCollection._db.transaction(name.toJS, 'readwrite');
     final store = txn.objectStore(name);
     final deleteRequest = store.delete(key.toJS);
     final deleteCompleter = Completer<void>();
@@ -528,8 +597,9 @@ class Box<V> {
 
   Future<void> deleteAll(List<String> keys, [IDBTransaction? txn]) async {
     if (keys.isEmpty) return;
-    final ownsTxn = txn == null;
-    txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
+    final zoneTxn = boxCollection._txnForBox(name);
+    final ownsTxn = txn == null && zoneTxn == null;
+    txn ??= zoneTxn ?? boxCollection._db.transaction(name.toJS, 'readwrite');
     final store = txn.objectStore(name);
     // Issue every delete() before awaiting. Awaiting between deletes lets
     // IndexedDB auto-commit the transaction under dart2wasm, so later keys
@@ -579,8 +649,9 @@ class Box<V> {
   }
 
   Future<void> clear([IDBTransaction? txn]) async {
-    final ownsTxn = txn == null;
-    txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
+    final zoneTxn = boxCollection._txnForBox(name);
+    final ownsTxn = txn == null && zoneTxn == null;
+    txn ??= zoneTxn ?? boxCollection._db.transaction(name.toJS, 'readwrite');
     final store = txn.objectStore(name);
     final clearRequest = store.clear();
     final clearCompleter = Completer<void>();

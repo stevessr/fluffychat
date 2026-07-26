@@ -12,7 +12,9 @@ import 'package:matrix/encryption/utils/ssss_cache.dart';
 import 'package:matrix/encryption/utils/stored_inbound_group_session.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix/src/database/database_file_storage_stub.dart'
-    if (dart.library.io) 'package:matrix/src/database/database_file_storage_io.dart';
+    if (dart.library.io) 'package:matrix/src/database/database_file_storage_io.dart'
+    if (dart.library.js_interop)
+        'package:matrix/src/database/database_file_storage_web.dart';
 import 'package:matrix/src/database/sqflite_box.dart'
     if (dart.library.js_interop) 'package:matrix/src/database/indexeddb_box.dart';
 import 'package:matrix/src/utils/copy_map.dart';

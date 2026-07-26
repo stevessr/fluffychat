@@ -64,7 +64,12 @@ Future<DatabaseApi> flutterMatrixSdkDatabaseBuilder(String clientName) async {
 Future<MatrixSdkDatabase> _constructDatabase(String clientName) async {
   if (kIsWeb) {
     requestWebPersistentStorage();
-    return await MatrixSdkDatabase.init(clientName);
+    // Enable the IndexedDB-backed media cache (see database_file_storage_web)
+    // with the same soft size budget used on native.
+    return await MatrixSdkDatabase.init(
+      clientName,
+      maxFileSize: 1000 * 1000 * 10,
+    );
   }
 
   final cipher = await getDatabaseCipher();
