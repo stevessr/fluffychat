@@ -3,7 +3,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
@@ -42,9 +41,6 @@ class ChatInputRow extends StatelessWidget {
         controller.sendController.text.isNotEmpty ||
         controller.replyEvent != null ||
         controller.editEvent != null;
-    final showVoiceMessageButton = controller.sendController.text
-        .trim()
-        .isEmpty;
 
     if (!controller.room.otherPartyCanReceiveMessages) {
       return Center(
@@ -120,8 +116,8 @@ class ChatInputRow extends StatelessWidget {
                         style: selectedTextButtonStyle,
                         onPressed: controller.selectedEvents.length == 1
                             ? () => controller.replyWithImageAction(
-                                  controller.selectedEvents.first,
-                                )
+                                controller.selectedEvents.first,
+                              )
                             : null,
                         child: Tooltip(
                           message: L10n.of(context).replyWithImage,
@@ -358,46 +354,89 @@ class ChatInputRow extends StatelessWidget {
                     height: height,
                     width: height,
                     alignment: Alignment.center,
-                    child: showVoiceMessageButton
-                        ? IconButton(
-                            tooltip: L10n.of(context).voiceMessage,
-                            icon: const Icon(Icons.mic_outlined),
-                            onPressed: () =>
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    margin: EdgeInsets.only(
-                                      bottom: height + 16,
-                                      left: 16,
-                                      right: 16,
-                                      top: 16,
-                                    ),
-                                    showCloseIcon: true,
-                                    content: Text(
-                                      L10n.of(
-                                        context,
-                                      ).longPressToRecordVoiceMessage,
-                                    ),
-                                  ),
-                                ),
-                            onLongPress: () => recordingViewModel
-                                .startRecording(controller.room),
-                            style: IconButton.styleFrom(
-                              backgroundColor: theme.bubbleColor,
-                              foregroundColor: theme.onBubbleColor,
+                    child: ChatInputActionButton(
+                      textController: controller.sendController,
+                      voiceMessageTooltip: L10n.of(context).voiceMessage,
+                      sendMessageTooltip: L10n.of(context).send,
+                      onVoiceMessagePressed: () =>
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              margin: EdgeInsets.only(
+                                bottom: height + 16,
+                                left: 16,
+                                right: 16,
+                                top: 16,
+                              ),
+                              showCloseIcon: true,
+                              content: Text(
+                                L10n.of(context).longPressToRecordVoiceMessage,
+                              ),
                             ),
-                          )
-                        : IconButton(
-                            key: Key('send_button'),
-                            tooltip: L10n.of(context).send,
-                            onPressed: controller.send,
-                            style: IconButton.styleFrom(
-                              backgroundColor: theme.bubbleColor,
-                              foregroundColor: theme.onBubbleColor,
-                            ),
-                            icon: const Icon(Icons.send_outlined),
                           ),
+                      onVoiceMessageLongPressed: () =>
+                          recordingViewModel.startRecording(controller.room),
+                      onSendPressed: controller.send,
+                    ),
                   ),
                 ],
+        );
+      },
+    );
+  }
+}
+
+/// The trailing composer action, kept in sync with the text controller.
+///
+/// Listening to the controller directly is important because clearing the
+/// composer after sending does not invoke [TextField.onChanged]. Android users
+/// could otherwise type their next message while the stale microphone button
+/// remained on screen until an unrelated parent rebuild occurred.
+class ChatInputActionButton extends StatelessWidget {
+  final TextEditingController textController;
+  final String voiceMessageTooltip;
+  final String sendMessageTooltip;
+  final VoidCallback onVoiceMessagePressed;
+  final VoidCallback onVoiceMessageLongPressed;
+  final VoidCallback onSendPressed;
+
+  const ChatInputActionButton({
+    required this.textController,
+    required this.voiceMessageTooltip,
+    required this.sendMessageTooltip,
+    required this.onVoiceMessagePressed,
+    required this.onVoiceMessageLongPressed,
+    required this.onSendPressed,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: textController,
+      builder: (context, value, _) {
+        if (value.text.trim().isEmpty) {
+          return IconButton(
+            key: const Key('voice_message_button'),
+            tooltip: voiceMessageTooltip,
+            icon: const Icon(Icons.mic_outlined),
+            onPressed: onVoiceMessagePressed,
+            onLongPress: onVoiceMessageLongPressed,
+            style: IconButton.styleFrom(
+              backgroundColor: theme.bubbleColor,
+              foregroundColor: theme.onBubbleColor,
+            ),
+          );
+        }
+        return IconButton(
+          key: const Key('send_button'),
+          tooltip: sendMessageTooltip,
+          onPressed: onSendPressed,
+          style: IconButton.styleFrom(
+            backgroundColor: theme.bubbleColor,
+            foregroundColor: theme.onBubbleColor,
+          ),
+          icon: const Icon(Icons.send_outlined),
         );
       },
     );
