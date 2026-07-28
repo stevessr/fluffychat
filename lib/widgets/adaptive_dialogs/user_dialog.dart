@@ -7,6 +7,7 @@ import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/fluffy_share.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/direct_chat_extension.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart';
 import 'package:fluffychat/widgets/avatar.dart';
@@ -39,6 +40,25 @@ class UserDialog extends StatelessWidget {
   final bool noProfileWarning;
 
   const UserDialog(this.profile, {this.noProfileWarning = false, super.key});
+
+  Future<void> _openDirectChat(
+    BuildContext context, {
+    bool? enableEncryption,
+  }) async {
+    final router = GoRouter.of(context);
+    final roomIdResult = await showFutureLoadingDialog(
+      context: context,
+      future: () =>
+          Matrix.of(context).client.startDirectChatWithEncryptionSetting(
+            profile.userId,
+            enableEncryption: enableEncryption,
+          ),
+    );
+    final roomId = roomIdResult.result;
+    if (roomId == null) return;
+    if (context.mounted) Navigator.of(context).pop();
+    router.go('/rooms/$roomId');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -245,17 +265,7 @@ class UserDialog extends StatelessWidget {
               AdaptiveDialogInkWell(
                 onTap: client.userID == profile.userId
                     ? null
-                    : () async {
-                        final router = GoRouter.of(context);
-                        final roomIdResult = await showFutureLoadingDialog(
-                          context: context,
-                          future: () => client.startDirectChat(profile.userId),
-                        );
-                        final roomId = roomIdResult.result;
-                        if (roomId == null) return;
-                        if (context.mounted) Navigator.of(context).pop();
-                        router.go('/rooms/$roomId');
-                      },
+                    : () => _openDirectChat(context),
                 child: Text(
                   dmRoomId == null
                       ? L10n.of(context).createNewChat
@@ -272,17 +282,7 @@ class UserDialog extends StatelessWidget {
           AdaptiveDialogAction(
             borderRadius: AdaptiveDialogAction.topRadius,
             bigButtons: true,
-            onPressed: () async {
-              final router = GoRouter.of(context);
-              final roomIdResult = await showFutureLoadingDialog(
-                context: context,
-                future: () => client.startDirectChat(profile.userId),
-              );
-              final roomId = roomIdResult.result;
-              if (roomId == null) return;
-              if (context.mounted) Navigator.of(context).pop();
-              router.go('/rooms/$roomId');
-            },
+            onPressed: () => _openDirectChat(context),
             child: Text(
               dmRoomId == null
                   ? L10n.of(context).createNewChat
@@ -293,20 +293,8 @@ class UserDialog extends StatelessWidget {
             AdaptiveDialogAction(
               bigButtons: true,
               borderRadius: AdaptiveDialogAction.centerRadius,
-              onPressed: () async {
-                final router = GoRouter.of(context);
-                final roomIdResult = await showFutureLoadingDialog(
-                  context: context,
-                  future: () => client.startDirectChat(
-                    profile.userId,
-                    enableEncryption: false,
-                  ),
-                );
-                final roomId = roomIdResult.result;
-                if (roomId == null) return;
-                if (context.mounted) Navigator.of(context).pop();
-                router.go('/rooms/$roomId');
-              },
+              onPressed: () =>
+                  _openDirectChat(context, enableEncryption: false),
               child: Text(
                 '${L10n.of(context).createNewChat} '
                 '(${L10n.of(context).encryptionNotEnabled})',
