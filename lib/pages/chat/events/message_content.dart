@@ -10,12 +10,7 @@ import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat/events/poll.dart';
 import 'package:fluffychat/pages/chat/events/video_player.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
-import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/widgets/avatar.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
@@ -185,12 +180,11 @@ class MessageContent extends StatelessWidget {
                   );
                 }
                 final html =
-                    originalBody != null &&
-                        AppSettings.renderHtml.value &&
-                        originalBody['format'] == 'org.matrix.custom.html'
-                    ? (originalBody['formatted_body'] as String? ?? '')
-                    : (originalBody?.tryGet<String>('body') ??
-                          event.bodyWithoutReplyFallback);
+                    AppSettings.renderHtml.value &&
+                            originalBody['format'] == 'org.matrix.custom.html'
+                        ? (originalBody['formatted_body'] as String? ?? '')
+                        : (originalBody.tryGet<String>('body') ??
+                              event.bodyWithoutReplyFallback);
                 if (event.messageType == MessageTypes.Emote) {
                   return _RedactedEmoteContent(
                     html: '* $html',

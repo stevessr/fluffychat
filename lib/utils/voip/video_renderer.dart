@@ -75,7 +75,7 @@ class _VideoRendererState extends State<VideoRenderer> {
 
   @override
   Widget build(BuildContext context) => !_rendererReady
-      ? Container()
+      ? const SizedBox.shrink()
       : Builder(
           key: widget.key,
           builder: (ctx) {
