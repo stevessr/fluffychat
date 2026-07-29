@@ -87,7 +87,13 @@ enum AppSettings<T> {
   antiRedaction<bool>('chat.fluffy.anti_redaction', false),
 
   /// Show edit history dialog when clicking on (edited) label
-  showEditHistory<bool>('chat.fluffy.show_edit_history', true);
+  showEditHistory<bool>('chat.fluffy.show_edit_history', true),
+
+  /// Per-character delay in seconds for the MSC4357 live-message typewriter.
+  liveMessageCharacterDelay<double>(
+    'chat.fluffy.live_message_character_delay',
+    0.05,
+  );
 
   final String key;
   final T defaultValue;

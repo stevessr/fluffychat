@@ -2988,5 +2988,15 @@
                 "type": "String"
             }
         }
+    },
+    "developer": "Developer",
+    "@developer": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "liveMessageCharacterDelay": "Live message character delay",
+    "@liveMessageCharacterDelay": {
+        "type": "String",
+        "placeholders": {}
     }
 }
