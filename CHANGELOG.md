@@ -67,6 +67,8 @@ Improved timeline design, implement biometrics for app lock and a lot of bug fix
 - feat: Reset recovery key flow (Christian Kußowski)
 - fix: forward only deep copy of contentshareitem (Christian Kußowski)
 - fix: privacy and tos url (Christian Kußowski)
+- fix: clear unread reminders after opening muted rooms (stevessr)
+- perf: reduce Flutter web startup font payload (stevessr)
 - build: (deps): bump actions/cache from 5 to 6 (dependabot[bot])
 - build: (deps): bump dart_code_linter from 4.1.2 to 4.1.5 (dependabot[bot])
 - build: (deps): bump dart_code_linter from 4.1.5 to 4.1.6 (dependabot[bot])
