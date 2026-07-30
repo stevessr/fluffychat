@@ -110,6 +110,48 @@ class SettingsChatView extends StatelessWidget {
               Divider(color: theme.dividerColor),
               ListTile(
                 title: Text(
+                  L10n.of(context).advancedConfigs,
+                  style: TextStyle(
+                    color: theme.colorScheme.secondary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              StatefulBuilder(
+                builder: (context, setInnerState) {
+                  final delay = AppSettings.liveMessageCharacterDelay.value;
+                  return ListTile(
+                    title: Text(L10n.of(context).liveMessageCharacterDelay),
+                    subtitle: Row(
+                      children: [
+                        Expanded(
+                          child: Slider.adaptive(
+                            min: 0.01,
+                            max: 0.5,
+                            value: delay,
+                            divisions: 49,
+                            label: '${(delay * 1000).round()} ms',
+                            onChanged: (v) {
+                              AppSettings.liveMessageCharacterDelay.setItem(v);
+                              setInnerState(() {});
+                            },
+                          ),
+                        ),
+                        SizedBox(
+                          width: 48,
+                          child: Text(
+                            '${(delay * 1000).round()} ms',
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              Divider(color: theme.dividerColor),
+              ListTile(
+                title: Text(
                   L10n.of(context).calls,
                   style: TextStyle(
                     color: theme.colorScheme.secondary,
