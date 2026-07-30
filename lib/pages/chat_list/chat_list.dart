@@ -14,6 +14,7 @@ import 'package:fluffychat/utils/dynamic_font_loader.dart';
 import 'package:fluffychat/utils/error_reporter.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/room_notification_sound_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/show_scaffold_dialog.dart';
 import 'package:fluffychat/utils/show_update_snackbar.dart';
@@ -518,9 +519,9 @@ class ChatListController extends State<ChatList>
               mainAxisSize: .min,
               children: [
                 Icon(
-                  room.pushRuleState == PushRuleState.notify
-                      ? Icons.notifications_off_outlined
-                      : Icons.notifications_off,
+                  room.isEffectivelyMuted
+                      ? Icons.notifications_off
+                      : Icons.notifications_off_outlined,
                 ),
                 const SizedBox(width: 12),
                 Text(
