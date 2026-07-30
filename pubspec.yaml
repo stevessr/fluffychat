@@ -121,7 +121,12 @@ flutter:
     - assets/
     - assets/logo/mini/
     - assets/emoji_kitchen_index/
-    - assets/fonts/
+    # Large fallback fonts are loaded on demand; keep the startup manifest small.
+    - assets/fonts/NotoSansSC-CJK-Common.ttf
+    - assets/fonts/NotoSansSC-CJK-ExtA.ttf
+    - assets/fonts/NotoSansSC-CJK-ExtB.ttf
+    - assets/fonts/NotoSansSC-CJK-ExtCDE.ttf
+    - assets/fonts/NotoColorEmoji-Emoji-Extended.ttf
     - assets/logo/img/
     - assets/sas-emoji.json
     - assets/sounds/
@@ -132,7 +137,7 @@ flutter:
         - asset: assets/fonts/NotoSansSC-Base.ttf
     - family: NotoColorEmoji
       fonts:
-        - asset: assets/fonts/NotoColorEmoji-Base.ttf
+        - asset: assets/fonts/NotoColorEmoji-Emoji-Base.ttf
     - family: GoogleSansCode
       fonts:
         - asset: assets/fonts/GoogleSansCode.ttf
