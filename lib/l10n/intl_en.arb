@@ -3031,5 +3031,69 @@
     "@liveMessageCharacterDelay": {
         "type": "String",
         "placeholders": {}
+    },
+    "urlRewriteRules": "URL rewriting",
+    "@urlRewriteRules": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "urlRewriteRulesDescription": "Rewrite outgoing request URLs, e.g. to bypass regional restrictions. Each rule matches either with wildcards (*) or a regular expression. In wildcard mode each * becomes $1, $2, … in the replacement; in regex mode $1, $2, … are capture groups and $0 is the whole match. $PROXY_DOMAIN is taken from --dart-define.",
+    "@urlRewriteRulesDescription": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "urlRewriteRulesNotConfigured": "Not configured — all requests go direct",
+    "@urlRewriteRulesNotConfigured": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "urlRewriteRulesAdd": "Add rule",
+    "@urlRewriteRulesAdd": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "urlRewriteRulesPatternType": "Pattern type",
+    "@urlRewriteRulesPatternType": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "urlRewriteRulesWildcard": "Wildcard (* matches any text)",
+    "@urlRewriteRulesWildcard": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "urlRewriteRulesRegex": "Regular expression",
+    "@urlRewriteRulesRegex": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "urlRewriteRulesPattern": "Pattern",
+    "@urlRewriteRulesPattern": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "urlRewriteRulesReplacement": "Replacement",
+    "@urlRewriteRulesReplacement": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "urlRewriteRulesEmptyPattern": "Pattern must not be empty",
+    "@urlRewriteRulesEmptyPattern": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "urlRewriteRulesInvalidRegex": "Invalid regular expression",
+    "@urlRewriteRulesInvalidRegex": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "urlRewriteRulesCount": "{count, plural, =1{1 rule} other{{count} rules}}",
+    "@urlRewriteRulesCount": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
     }
 }
