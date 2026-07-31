@@ -79,17 +79,82 @@ void main() {
         ),
       );
     });
+
+    test('regex mode matches with capture groups', () {
+      final rule = UrlRewriteRule(
+        pattern: r'^https://([^/]+)\.matrix\.org(/.*)$',
+        replacement: r'https://proxy.example/---https://$1.matrix.org$2',
+        regex: true,
+      );
+
+      expect(
+        rule.apply(Uri.parse('https://chat.matrix.org/foo/bar'))!,
+        Uri.parse('https://proxy.example/---https://chat.matrix.org/foo/bar'),
+      );
+      // $0 refers to the whole match.
+      final whole = UrlRewriteRule(
+        pattern: r'^https://matrix\.org(?:/.*)?$',
+        replacement: r'$0?via=proxy.example',
+        regex: true,
+      );
+      expect(
+        whole.apply(Uri.parse('https://matrix.org/_matrix/client/r0/sync'))!,
+        Uri.parse(
+          'https://matrix.org/_matrix/client/r0/sync?via=proxy.example',
+        ),
+      );
+    });
+
+    test('regex mode does not match other hosts', () {
+      final rule = UrlRewriteRule(
+        pattern: r'^https://[^/]*matrix\.org/',
+        replacement: r'https://proxy.example/---$0',
+        regex: true,
+      );
+      expect(rule.apply(Uri.parse('https://example.com/foo')), isNull);
+    });
+
+    test('invalid regex pattern never matches', () {
+      final rule = UrlRewriteRule(
+        pattern: r'https://(unclosed',
+        replacement: r'https://proxy.example/$0',
+        regex: true,
+      );
+      expect(UrlRewriteRule.isValidRegex(r'https://(unclosed'), isFalse);
+      expect(rule.apply(Uri.parse('https://example.com/')), isNull);
+    });
+
+    test('parses regex flag from JSON string and serializes back', () {
+      final rules = UrlRewriteRule.fromJsonString(
+        r'[{"pattern":"^https://[^/]*matrix\\.org/","replacement":"https://proxy.example/---$0","regex":true}]',
+      );
+      expect(rules, hasLength(1));
+      expect(rules.first.regex, isTrue);
+      expect(rules.first.toJson(), {
+        'pattern': r'^https://[^/]*matrix\.org/',
+        'replacement': 'https://proxy.example/---\$0',
+        'regex': true,
+      });
+      // Default (glob) rules omit the flag.
+      expect(UrlRewriteRule(pattern: 'a', replacement: 'b').toJson(), {
+        'pattern': 'a',
+        'replacement': 'b',
+      });
+    });
   });
 
   group('UrlRewritingClient', () {
     test('passes through non-matching requests unchanged', () async {
       final inner = _MockHttpClient();
-      final client = UrlRewritingClient(inner, [
-        UrlRewriteRule(
-          pattern: r'https://*matrix.org/*',
-          replacement: r'https://proxy.example/---https://$1matrix.org/$2',
-        ),
-      ]);
+      final client = UrlRewritingClient(
+        inner,
+        () => [
+          UrlRewriteRule(
+            pattern: r'https://*matrix.org/*',
+            replacement: r'https://proxy.example/---https://$1matrix.org/$2',
+          ),
+        ],
+      );
 
       final request = http.Request('GET', Uri.parse('https://example.com/foo'));
       await client.send(request);
@@ -99,12 +164,15 @@ void main() {
 
     test('rewrites matching request URLs and keeps the body', () async {
       final inner = _MockHttpClient();
-      final client = UrlRewritingClient(inner, [
-        UrlRewriteRule(
-          pattern: r'https://*matrix.org/*',
-          replacement: r'https://proxy.example/---https://$1matrix.org/$2',
-        ),
-      ]);
+      final client = UrlRewritingClient(
+        inner,
+        () => [
+          UrlRewriteRule(
+            pattern: r'https://*matrix.org/*',
+            replacement: r'https://proxy.example/---https://$1matrix.org/$2',
+          ),
+        ],
+      );
 
       final request = http.Request(
         'POST',
@@ -126,12 +194,15 @@ void main() {
       // RetryClient sends StreamedRequest copies; verify the body stream
       // survives URL rewriting.
       final inner = _MockHttpClient();
-      final client = UrlRewritingClient(inner, [
-        UrlRewriteRule(
-          pattern: r'https://*matrix.org/*',
-          replacement: r'https://proxy.example/---https://$1matrix.org/$2',
-        ),
-      ]);
+      final client = UrlRewritingClient(
+        inner,
+        () => [
+          UrlRewriteRule(
+            pattern: r'https://*matrix.org/*',
+            replacement: r'https://proxy.example/---https://$1matrix.org/$2',
+          ),
+        ],
+      );
 
       final request = http.StreamedRequest(
         'PUT',
@@ -148,6 +219,47 @@ void main() {
         ),
       );
       expect(inner.sentBody, 'hello');
+    });
+
+    test('picks up rule changes at runtime via the provider', () async {
+      final inner = _MockHttpClient();
+      var rules = <UrlRewriteRule>[];
+      final client = UrlRewritingClient(inner, () => rules);
+
+      // No rules configured — direct connection.
+      await client.send(
+        http.Request(
+          'GET',
+          Uri.parse('https://matrix.org/_matrix/client/r0/sync'),
+        ),
+      );
+      expect(inner.sentUrl!.host, 'matrix.org');
+
+      // Rules change (as if the user edited settings) — next request is
+      // rewritten without re-creating the client.
+      rules = [
+        UrlRewriteRule(
+          pattern: r'https://*matrix.org/*',
+          replacement: r'https://proxy.example/---https://$1matrix.org/$2',
+        ),
+      ];
+      await client.send(
+        http.Request(
+          'GET',
+          Uri.parse('https://matrix.org/_matrix/client/r0/sync'),
+        ),
+      );
+      expect(inner.sentUrl!.host, 'proxy.example');
+
+      // Disabled again — direct connection restored.
+      rules = <UrlRewriteRule>[];
+      await client.send(
+        http.Request(
+          'GET',
+          Uri.parse('https://matrix.org/_matrix/client/r0/sync'),
+        ),
+      );
+      expect(inner.sentUrl!.host, 'matrix.org');
     });
   });
 }
