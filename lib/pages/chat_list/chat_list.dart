@@ -384,8 +384,6 @@ class ChatListController extends State<ChatList>
     scrollController.addListener(_onScroll);
     _waitForFirstSync();
 
-    Matrix.of(context).voipPlugin?.context = context;
-
     // 预加载扩展字体以加速后续页面
     DynamicFontLoader().preloadExtendedCJK();
 
