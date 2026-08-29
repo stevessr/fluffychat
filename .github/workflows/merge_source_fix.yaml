@@ -1,0 +1,89 @@
+name: Apply Upstream Merge Source Fixes
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/merge_source_fix.yaml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Apply minimal merge fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          # Upstream changed buildFluffyChatCallKitParams()'s l10n argument
+          # from positional to named. Preserve all fork-specific push logic and
+          # only update the call site that now fails to compile.
+          p = Path('lib/utils/push_helper.dart')
+          s = p.read_text()
+          old = """final params = await buildFluffyChatCallKitParams(\n      event.room,\n      l10n,\n      intent: intent,"""
+          new = """final params = await buildFluffyChatCallKitParams(\n      event.room,\n      l10n: l10n,\n      intent: intent,"""
+          if old not in s:
+              if new not in s:
+                  raise SystemExit('push_helper.dart: expected CallKit call site not found')
+          else:
+              p.write_text(s.replace(old, new, 1))
+
+          # The fork has extra custom English strings, so do not replace the
+          # entire ARB with upstream. Append only the two new upstream keys that
+          # are required by the merged call/error-reporting code.
+          p = Path('lib/l10n/intl_en.arb')
+          s = p.read_text()
+          if '"preferSpeaker"' not in s or '"unexpectedErrorOccurded"' not in s:
+              stripped = s.rstrip()
+              if not stripped.endswith('}'):
+                  raise SystemExit('intl_en.arb: expected top-level JSON object')
+              body = stripped[:-1].rstrip()
+              additions = '''\n    "preferSpeaker": "Prefer speaker",\n    "unexpectedErrorOccurded": "Unfortunately, an unexpected error has occurred: {msg}",\n    "@unexpectedErrorOccurded": {\n        "placeholders": {\n            "msg": {"type": "String"}\n        }\n    }\n'''
+              p.write_text(body + ',' + additions + '}\n')
+
+          # Keep Chinese UI complete too. Flutter can fall back to the template
+          # locale, but these are user-visible strings in the fork.
+          p = Path('lib/l10n/intl_zh.arb')
+          s = p.read_text()
+          if '"preferSpeaker"' not in s or '"unexpectedErrorOccurded"' not in s:
+              stripped = s.rstrip()
+              if not stripped.endswith('}'):
+                  raise SystemExit('intl_zh.arb: expected top-level JSON object')
+              body = stripped[:-1].rstrip()
+              additions = '''\n    "preferSpeaker": "优先使用扬声器",\n    "unexpectedErrorOccurded": "发生了意外错误：{msg}",\n    "@unexpectedErrorOccurded": {\n        "placeholders": {\n            "msg": {"type": "String"}\n        }\n    }\n'''
+              p.write_text(body + ',' + additions + '}\n')
+          PY
+
+          python3 - <<'PY'
+          import json
+          for path in ('lib/l10n/intl_en.arb', 'lib/l10n/intl_zh.arb'):
+              with open(path, encoding='utf-8') as f:
+                  json.load(f)
+              print(f'validated {path}')
+          PY
+
+          git diff --check
+          git diff -- lib/utils/push_helper.dart lib/l10n/intl_en.arb lib/l10n/intl_zh.arb
+
+      - name: Commit fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo 'No source changes needed.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add lib/utils/push_helper.dart lib/l10n/intl_en.arb lib/l10n/intl_zh.arb
+          git commit -m 'fix: reconcile upstream call and localization APIs'
+          git push origin HEAD:main
