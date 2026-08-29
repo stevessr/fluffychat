@@ -13,6 +13,7 @@ import 'package:fluffychat/pages/call/call_tile.dart';
 import 'package:fluffychat/pages/call/call_view_model.dart';
 import 'package:fluffychat/pages/call/start_time.dart';
 import 'package:fluffychat/pages/call/utils/get_call_tiles.dart';
+import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar.dart';
@@ -37,7 +38,6 @@ class CallPage extends StatelessWidget {
       builder: (context, viewModel, _) {
         final liveKitRoom = viewModel.value.room;
         final localVideoTrack = viewModel.value.localVideoTrack;
-        final localAudioTrack = viewModel.value.localAudioTrack;
         final localParticipant = liveKitRoom?.localParticipant;
 
         final activeMembers = room.getActiveMatrixRtcMembers().length;
@@ -49,6 +49,9 @@ class CallPage extends StatelessWidget {
             localParticipant?.isScreenShareEnabled() == true;
         final iconButtonStyle = IconButton.styleFrom(
           backgroundColor: theme.colorScheme.surfaceBright.withAlpha(230),
+          disabledBackgroundColor: theme.colorScheme.surfaceBright.withAlpha(
+            230,
+          ),
           iconSize: mini ? null : 28,
           padding: EdgeInsets.all(mini ? 8.0 : 16.0),
           shape: RoundedRectangleBorder(
@@ -58,7 +61,9 @@ class CallPage extends StatelessWidget {
         );
         final iconButtonStyleActive = IconButton.styleFrom(
           backgroundColor: theme.colorScheme.inverseSurface,
+          disabledBackgroundColor: theme.colorScheme.inverseSurface,
           foregroundColor: theme.colorScheme.onInverseSurface,
+          disabledForegroundColor: theme.colorScheme.onInverseSurface,
         ).merge(iconButtonStyle);
 
         return MediaQuery.removePadding(
@@ -168,8 +173,10 @@ class CallPage extends StatelessWidget {
                           child: SafeArea(
                             child: Container(
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.errorContainer
-                                    .withAlpha(230),
+                                color: viewModel.value.error == null
+                                    ? theme.colorScheme.errorContainer
+                                          .withAlpha(230)
+                                    : theme.colorScheme.error.withAlpha(230),
                                 borderRadius: BorderRadius.circular(
                                   AppConfig.borderRadius,
                                 ),
@@ -177,11 +184,16 @@ class CallPage extends StatelessWidget {
                               margin: EdgeInsets.all(16.0),
                               padding: EdgeInsets.all(16.0),
                               child: Text(
-                                L10n.of(context).videoCallsBetaWarning,
+                                viewModel.value.error?.toLocalizedString(
+                                      context,
+                                    ) ??
+                                    L10n.of(context).videoCallsBetaWarning,
                                 textAlign: .center,
                                 style: TextStyle(
                                   fontSize: 11,
-                                  color: theme.colorScheme.onErrorContainer,
+                                  color: viewModel.value.error == null
+                                      ? theme.colorScheme.onErrorContainer
+                                      : theme.colorScheme.onError,
                                 ),
                               ),
                             ),
@@ -445,16 +457,31 @@ class CallPage extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: SizedBox(
-                          width: 200,
+                          width: 212,
                           child: TextButton.icon(
-                            onPressed: () => showFutureLoadingDialog(
-                              context: context,
-                              future: () => viewModel.connect(context),
+                            onPressed: viewModel.value.isLoading
+                                ? null
+                                : viewModel.connect,
+                            style: ButtonStyle(
+                              padding: iconButtonStyleActive.padding,
+                              foregroundColor:
+                                  iconButtonStyleActive.foregroundColor,
+                              backgroundColor:
+                                  iconButtonStyleActive.backgroundColor,
                             ),
-                            style: ButtonStyle(shape: iconButtonStyle.shape),
-                            icon: Icon(Icons.call_outlined),
+                            icon: viewModel.value.isLoading
+                                ? SizedBox.square(
+                                    dimension: 16,
+                                    child: CircularProgressIndicator(
+                                      color: theme.colorScheme.onInverseSurface,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Icon(Icons.call_outlined),
                             label: Text(
-                              room.hasActiveMatrixRtcCall
+                              viewModel.value.isLoading
+                                  ? L10n.of(context).loadingPleaseWait
+                                  : room.hasActiveMatrixRtcCall
                                   ? L10n.of(context).enterCall
                                   : L10n.of(context).startCall,
                             ),
@@ -465,11 +492,11 @@ class CallPage extends StatelessWidget {
                     IconButton(
                       tooltip: L10n.of(context).toggleMicrophone,
                       style: iconButtonStyle,
-                      onPressed: localAudioTrack != null
-                          ? viewModel.togglePreviewMic
-                          : null,
+                      onPressed: viewModel.value.isLoading
+                          ? null
+                          : viewModel.togglePreviewMic,
                       icon: Icon(
-                        !(localAudioTrack?.muted ?? true)
+                        (viewModel.value.startWithAudio)
                             ? Icons.mic_outlined
                             : Icons.mic_off_outlined,
                       ),
@@ -477,7 +504,9 @@ class CallPage extends StatelessWidget {
                     IconButton(
                       tooltip: L10n.of(context).toggleCamera,
                       style: iconButtonStyle,
-                      onPressed: localVideoTrack != null
+                      onPressed: viewModel.value.isLoading
+                          ? null
+                          : localVideoTrack != null
                           ? viewModel.togglePreviewCamera
                           : null,
                       icon: Icon(

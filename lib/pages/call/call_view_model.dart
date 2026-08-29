@@ -30,7 +30,9 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 class CallViewModelState {
   lk.Room? room;
   lk.LocalVideoTrack? localVideoTrack;
-  lk.LocalAudioTrack? localAudioTrack;
+  bool startWithAudio = true;
+  bool isLoading = false;
+  Object? error;
   String? focusedTrack;
 }
 
@@ -168,15 +170,7 @@ class CallViewModel extends ValueNotifier<CallViewModelState> {
     _onCallEncryptionKeysSub = room.client.onCallEncryptionKeys.listen(
       _onCallEncryptionKeys,
     );
-    _onCallMembersChanged = room.client.onSync.stream
-        .where(
-          (syncUpdate) =>
-              syncUpdate.rooms?.join?[room.id]?.timeline?.events?.any(
-                (event) => event.type == MatrixRtcCallMember.eventType,
-              ) ??
-              false,
-        )
-        .listen((_) => _createKeyAndShare());
+
     await WakelockPlus.enable();
     await lk.LiveKitClient.initialize();
 
@@ -187,6 +181,7 @@ class CallViewModel extends ValueNotifier<CallViewModelState> {
       ratchetWindowSize: 0,
       discardFrameWhenCryptorNotReady: true,
       keyDerivationAlgorithm: rtc.KeyDerivationAlgorithm.kHKDF,
+      keyRingSize: 255,
     );
     final nativeKeyProvider = await rtc.frameCryptorFactory
         .createDefaultKeyProvider(keyProviderOptions);
@@ -214,14 +209,6 @@ class CallViewModel extends ValueNotifier<CallViewModelState> {
         encryption: lk.E2EEOptions(keyProvider: baseKeyProvider),
       ),
     );
-    value.localVideoTrack = await lk.LocalVideoTrack.createCameraTrack();
-    if (room.getActiveMatrixRtcMembers().firstOrNull?.callIntent == .voice) {
-      value.localVideoTrack?.mute();
-    }
-    value.localVideoTrack?.addListener(notifyListeners);
-    value.localAudioTrack = await lk.LocalAudioTrack.create();
-    value.localAudioTrack?.addListener(notifyListeners);
-    notifyListeners();
 
     liveKitRoom.events.on<lk.ParticipantConnectedEvent>((event) async {
       if (event.participant.identity ==
@@ -257,6 +244,17 @@ class CallViewModel extends ValueNotifier<CallViewModelState> {
     });
 
     liveKitRoom.addListener(notifyListeners);
+
+    if (room.isDirectChat && room.hasActiveMatrixRtcCall) {
+      await connect();
+    } else {
+      value.localVideoTrack = await lk.LocalVideoTrack.createCameraTrack();
+      if (room.getActiveMatrixRtcMembers().firstOrNull?.callIntent == .voice) {
+        value.localVideoTrack?.mute();
+      }
+      value.localVideoTrack?.addListener(notifyListeners);
+      notifyListeners();
+    }
   }
 
   Future<void> togglePreviewCamera() async {
@@ -274,18 +272,8 @@ class CallViewModel extends ValueNotifier<CallViewModelState> {
     notifyListeners();
   }
 
-  Future<void> togglePreviewMic() async {
-    final track = value.localAudioTrack;
-    if (track == null) return;
-    if (!track.muted) {
-      await track.mute();
-      return;
-    }
-    track.removeListener(notifyListeners);
-    await track.stop();
-    value.localAudioTrack = await lk.LocalAudioTrack.create();
-    value.localAudioTrack?.addListener(notifyListeners);
-
+  void togglePreviewMic() {
+    value.startWithAudio = !value.startWithAudio;
     notifyListeners();
   }
 
@@ -328,73 +316,111 @@ class CallViewModel extends ValueNotifier<CallViewModelState> {
     }
   }
 
-  Future<void> connect(BuildContext context) async {
-    final l10n = L10n.of(context);
-    final playWaitingSound = !room.hasActiveMatrixRtcCall && room.isDirectChat;
+  Future<void> connect() async {
+    try {
+      value.isLoading = true;
+      notifyListeners();
+      final playWaitingSound =
+          !room.hasActiveMatrixRtcCall && room.isDirectChat;
 
-    final intent =
-        room.getActiveMatrixRtcMembers().firstOrNull?.callIntent ??
-        (value.localVideoTrack?.muted == false ? .video : .voice);
-
-    final credentials = await room.joinMatrixRtcCall(intent: intent);
-    timeline = await room.getTimeline(onInsert: _onNewTimelineEvent);
-    await _createKeyAndShare();
-    final video = value.localVideoTrack;
-    final audio = value.localAudioTrack;
-    value.localVideoTrack = value.localAudioTrack = null;
-    await value.room!.connect(
-      credentials.url,
-      credentials.jwt,
-      fastConnectOptions: lk.FastConnectOptions(
-        microphone: lk.TrackOption(track: audio),
-        camera: lk.TrackOption(track: video),
-      ),
-    );
-
-    _resendCallMemberState?.cancel();
-    _resendCallMemberState = Timer.periodic(const Duration(hours: 1), (_) {
-      final ownMembership = room.ownMatrixRtcMembership;
-      if (ownMembership == null) {
-        _resendCallMemberState?.cancel();
-        return;
+      final intent =
+          room.getActiveMatrixRtcMembers().firstOrNull?.callIntent ??
+          (value.localVideoTrack?.muted == false ? .video : .voice);
+      if (PlatformInfos.isMobile) {
+        await lk.AudioManager.instance.setSpeakerOutputPreferred(
+          intent == .video,
+        );
       }
-      room.setMatrixRtcMembershipState(
-        ownMembership.fociPreferred,
-        intent: intent,
-      );
-    });
-    startTime = DateTime.now();
 
-    if (PlatformInfos.isMobile) {
-      final activeCalls = await FlutterCallkitIncoming.activeCalls();
-      callKitId = activeCalls
-          .firstWhereOrNull(
-            (call) =>
-                call.extra?['roomId'] == room.id &&
-                call.extra?['clientName'] == room.client.clientName,
+      timeline = await room.getTimeline(onInsert: _onNewTimelineEvent);
+      final credentials = await room.joinMatrixRtcCall(intent: intent);
+      _onCallMembersChanged = room.client.onSync.stream
+          .where(
+            (syncUpdate) =>
+                syncUpdate.rooms?.join?[room.id]?.timeline?.events?.any(
+                  (event) => event.type == MatrixRtcCallMember.eventType,
+                ) ??
+                false,
           )
-          ?.id;
-      if (callKitId == null) {
-        final params = await buildFluffyChatCallKitParams(
-          room,
-          l10n,
+          .listen((_) {
+            notifyListeners();
+            _createKeyAndShare();
+          });
+      await _createKeyAndShare();
+
+      final startWithVideo =
+          !(value.localVideoTrack?.muted ?? intent == .voice);
+      final startWithAudio = value.startWithAudio;
+      await value.localVideoTrack?.stop();
+      await value.localVideoTrack?.dispose();
+      value.localVideoTrack = null;
+      await value.room!.connect(
+        credentials.url,
+        credentials.jwt,
+        fastConnectOptions: lk.FastConnectOptions(
+          microphone: lk.TrackOption(
+            track: startWithAudio ? await lk.LocalAudioTrack.create() : null,
+          ),
+          camera: lk.TrackOption(
+            track: startWithVideo
+                ? await lk.LocalVideoTrack.createCameraTrack()
+                : null,
+          ),
+        ),
+      );
+
+      _resendCallMemberState?.cancel();
+      _resendCallMemberState = Timer.periodic(const Duration(hours: 1), (_) {
+        final ownMembership = room.ownMatrixRtcMembership;
+        if (ownMembership == null) {
+          _resendCallMemberState?.cancel();
+          return;
+        }
+        room.setMatrixRtcMembershipState(
+          ownMembership.fociPreferred,
           intent: intent,
         );
-        await FlutterCallkitIncoming.startCall(params);
-        callKitId = params.id;
+      });
+      startTime = DateTime.now();
+
+      if (PlatformInfos.isMobile) {
+        final activeCalls = await FlutterCallkitIncoming.activeCalls();
+        callKitId = activeCalls
+            .firstWhereOrNull(
+              (call) =>
+                  call.extra?['roomId'] == room.id &&
+                  call.extra?['clientName'] == room.client.clientName,
+            )
+            ?.id;
+        if (callKitId == null) {
+          final params = await buildFluffyChatCallKitParams(
+            room,
+            intent: intent,
+          );
+          await FlutterCallkitIncoming.startCall(params);
+          callKitId = params.id;
+        }
       }
-    }
-    if (playWaitingSound) {
-      waitForOtherSide = true;
-      _playWaitingSound();
-    } else {
-      final callKitId = this.callKitId;
-      if (callKitId != null) {
-        await FlutterCallkitIncoming.setCallConnected(callKitId);
+      if (playWaitingSound) {
+        waitForOtherSide = true;
+        _playWaitingSound();
+      } else {
+        final callKitId = this.callKitId;
+        if (callKitId != null) {
+          await FlutterCallkitIncoming.setCallConnected(callKitId);
+        }
+        _playJoinSound();
       }
-      _playJoinSound();
+
+      notifyListeners();
+    } catch (e, s) {
+      Logs().e('Error while connecting', e, s);
+      value.error = e;
+      ErrorReporter(null, 'Unable to connect').onErrorCallback(e, s);
+    } finally {
+      value.isLoading = false;
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   Future<void> close(BuildContext context) async {
@@ -427,7 +453,6 @@ class CallViewModel extends ValueNotifier<CallViewModelState> {
     _onCallMembersChanged?.cancel();
     _resendCallMemberState?.cancel();
     timeline?.cancelSubscriptions();
-    value.localAudioTrack?.dispose();
     value.localVideoTrack?.dispose();
     final callKitId = this.callKitId;
     if (callKitId != null) {
@@ -483,10 +508,9 @@ class CallViewModel extends ValueNotifier<CallViewModelState> {
 
   Future<lk.MediaDevice?> _selectMediaDevice(
     BuildContext context,
-    String type,
+    List<lk.MediaDevice> devices,
     String? activeDeviceId,
   ) async {
-    final devices = await lk.Hardware.instance.enumerateDevices(type: type);
     if (!context.mounted) return null;
     return await showMenu<lk.MediaDevice>(
       context: context,
@@ -527,9 +551,11 @@ class CallViewModel extends ValueNotifier<CallViewModelState> {
   }
 
   Future<void> selectCamera(BuildContext context) async {
+    final devices = await lk.Hardware.instance.videoInputs();
+    if (!context.mounted) return;
     final source = await _selectMediaDevice(
       context,
-      'videoinput',
+      devices,
       value.room?.selectedVideoInputDeviceId,
     );
     if (source == null) return;
@@ -537,9 +563,11 @@ class CallViewModel extends ValueNotifier<CallViewModelState> {
   }
 
   Future<void> selectMicrophone(BuildContext context) async {
+    final devices = await lk.Hardware.instance.audioInputs();
+    if (!context.mounted) return;
     final source = await _selectMediaDevice(
       context,
-      'audioinput',
+      devices,
       value.room?.selectedAudioInputDeviceId,
     );
     if (source == null) return;
@@ -547,9 +575,44 @@ class CallViewModel extends ValueNotifier<CallViewModelState> {
   }
 
   Future<void> selectSpeaker(BuildContext context) async {
+    final devices = await lk.Hardware.instance.audioOutputs();
+    if (!context.mounted) return;
+    if (devices.isEmpty && PlatformInfos.isMobile) {
+      final preferSpeaker = lk.AudioManager.instance.isSpeakerOutputPreferred;
+      final toggle = await showMenu<bool>(
+        context: context,
+        position: context.position,
+        items: [
+          PopupMenuItem(
+            value: true,
+            child: Row(
+              mainAxisSize: .min,
+              spacing: 12,
+              children: [
+                Icon(
+                  preferSpeaker
+                      ? Icons.check_circle_outlined
+                      : Icons.circle_outlined,
+                ),
+                Expanded(
+                  child: Text(
+                    L10n.of(context).preferSpeaker,
+                    maxLines: 1,
+                    overflow: .ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+      if (toggle == null) return;
+      await lk.AudioManager.instance.setSpeakerOutputPreferred(!preferSpeaker);
+      return;
+    }
     final source = await _selectMediaDevice(
       context,
-      'audiooutput',
+      devices,
       value.room?.selectedAudioOutputDeviceId,
     );
     if (source == null) return;

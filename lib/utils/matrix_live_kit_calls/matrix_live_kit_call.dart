@@ -113,7 +113,7 @@ extension MatrixRtcRoomExtension on Room {
   }
 
   Future<void> setMatrixRtcMembershipState(
-    final List<MatrixRtcFocusPreferred> fociPreferred, {
+    List<MatrixRtcFocusPreferred> fociPreferred, {
     MatrixRtcCallIntent intent = MatrixRtcCallIntent.video,
   }) => client.setRoomStateWithKey(
     id,
@@ -142,13 +142,7 @@ extension MatrixRtcRoomExtension on Room {
     Timeline timeline,
   ) {
     final stateEvent =
-        states[MatrixRtcCallMember.eventType]?.entries
-                .lastWhereOrNull(
-                  (entry) =>
-                      entry.key.startsWith('_${matrixId}_') &&
-                      entry.key.endsWith('_m.call'),
-                )
-                ?.value
+        states[MatrixRtcCallMember.eventType]?[_ownMatrixRtcMembershipStateKey]
             as Event?;
     if (stateEvent == null) return false;
     final aggregatedEvents = timeline
@@ -210,6 +204,14 @@ extension MatrixRtcRoomExtension on Room {
       'Share call keys with',
       deviceKeys.map((key) => '${key.userId}:${key.deviceId}'),
     );
+
+    final doNotEncryptTo = deviceKeys.where((d) => !d.encryptToDevice);
+    if (doNotEncryptTo.isNotEmpty) {
+      Logs().w(
+        'Not sharing keys with ${doNotEncryptTo.length} device(s) because of key sharing restrictions!',
+      );
+      deviceKeys.removeWhere((d) => !d.encryptToDevice);
+    }
 
     await client.sendToDeviceEncrypted(
       deviceKeys,
