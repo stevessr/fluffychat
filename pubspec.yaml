@@ -96,8 +96,8 @@ dependencies:
   uuid: ^4.6.0
   video_player: ^2.14.0
   wakelock_plus: ^1.8.0
-  webrtc_interface: ^1.5.1
   web: ^1.1.1
+  webrtc_interface: ^1.5.1
 
 dev_dependencies:
   dart_code_linter: ^4.3.0
