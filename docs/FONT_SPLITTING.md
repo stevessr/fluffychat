@@ -8,7 +8,7 @@ FluffyChat Web 字体现在按以下顺序工作：
 2. 当前子部署路径下的本地分块字体：`assets/assets/fonts/*.ttf`
 3. 系统 Emoji 字体兜底
 
-`web/index.html` 显式传入：
+`web/flutter_bootstrap.js` 显式传入：
 
 ```js
 engineInitializer.initializeEngine({
@@ -25,7 +25,7 @@ engineInitializer.initializeEngine({
 
 - CJK base/common/ext 分块：`NotoSansSC-CJK-*.ttf`
 - Emoji base/extended 分块：`NotoColorEmoji-Emoji-*.ttf`
-- 小型启动基础字体：`NotoSansSC-Base.ttf`、`NotoColorEmoji-Base.ttf`
+- 首屏基础字体：`NotoSansSC-Base.ttf`、`NotoColorEmoji-Emoji-Base.ttf`
 
 完整源字体只放在 `tooling/fonts/`，不会进入 Flutter assets：
 
