@@ -6,13 +6,21 @@
 import 'package:matrix/matrix.dart';
 
 extension RoomNotificationSoundExtension on Room {
-  /// Whether notifications for this room should be delivered silently.
+    /// Whether notifications for this room should be delivered silently.
   ///
   /// A room is considered silent when the room itself is muted or when one of
   /// the known parent spaces is muted. This intentionally only affects sound/
   /// alerting: mention notifications can still be shown, but they must not make
   /// noise for muted rooms or muted spaces.
   bool get isNotificationSoundMuted => _isNotificationSoundMuted(<String>{});
+
+  /// Whether this room is effectively muted, considering both the room's own
+  /// push rules and the push rules of all parent spaces.
+  ///
+  /// A room is muted when the room itself has a non-notify push rule, or when
+  /// any of its parent spaces has a non-notify push rule. This is the effective
+  /// mute state used for UI indicators.
+  bool get isEffectivelyMuted => _isNotificationSoundMuted(<String>{});
 
   bool _isNotificationSoundMuted(Set<String> seenRoomIds) {
     if (!seenRoomIds.add(id)) return false;
