@@ -13,6 +13,7 @@ import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/utils/client_download_content_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
@@ -141,8 +142,10 @@ class _MxcImageState extends State<MxcImage> {
       if (!mounted) return;
       await Future.delayed(widget.retryDuration);
       _tryLoad();
-    } on MatrixException catch (e) {
-      Logs().d('Unable to load image', e);
+    } catch (e, s) {
+      // Some homeservers return 404/forbidden for remote thumbnails.
+      // Keep the UI alive and let the widget render its fallback.
+      Logs().w('Unable to load mxc image', e, s);
     }
   }
 
@@ -150,6 +153,23 @@ class _MxcImageState extends State<MxcImage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _tryLoad());
+  }
+
+  Widget placeholder(BuildContext context) =>
+      widget.placeholder?.call(context) ??
+      Container(
+        width: widget.width,
+        height: widget.height,
+        alignment: Alignment.center,
+        child: const CircularProgressIndicator.adaptive(strokeWidth: 2),
+      );
+
+  bool _looksLikeSvg(Uint8List data) {
+    if (data.isEmpty) return false;
+    final slice = data.sublist(0, min(1024, data.length));
+    final header = utf8.decode(slice, allowMalformed: true).toLowerCase();
+    return header.contains('<svg') ||
+        header.contains('http://www.w3.org/2000/svg');
   }
 
   @override
@@ -191,6 +211,14 @@ class _MxcImageState extends State<MxcImage> {
                   height: widget.height,
                   fit: widget.fit,
                   errorBuilder: errorFallback,
+                )
+              : _looksLikeSvg(data)
+              ? SvgPicture.memory(
+                  data,
+                  width: widget.width,
+                  height: widget.height,
+                  fit: widget.fit ?? BoxFit.contain,
+                  placeholderBuilder: placeholder,
                 )
               : Image.memory(
                   data,
