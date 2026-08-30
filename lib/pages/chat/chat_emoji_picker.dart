@@ -357,6 +357,7 @@ class _EmojiMashupDialogState extends State<EmojiMashupDialog> {
                 ),
                 bottomActionBarConfig: const BottomActionBarConfig(enabled: false),
                 categoryViewConfig: CategoryViewConfig(
+                  recentTabBehavior: RecentTabBehavior.NONE,
                   backspaceColor: theme.colorScheme.primary,
                   iconColor: theme.colorScheme.primary.withAlpha(128),
                   iconColorSelected: theme.colorScheme.primary,
