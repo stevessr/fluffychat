@@ -9,6 +9,7 @@ import 'package:fluffychat/pages/chat_list/active_call_indicator.dart';
 import 'package:fluffychat/pages/chat_list/unread_bubble.dart';
 import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/room_notification_sound_extension.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/widgets/hover_builder.dart';
 import 'package:fluffychat/widgets/typing_animation.dart';
@@ -43,7 +44,7 @@ class ChatListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final isMuted = room.pushRuleState != PushRuleState.notify;
+    final isMuted = room.isEffectivelyMuted;
     final typingText = room.getLocalizedTypingText(context);
     final lastEvent = room.lastEvent;
     final ownMessage = lastEvent?.senderId == room.client.userID;
