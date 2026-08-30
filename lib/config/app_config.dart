@@ -43,16 +43,17 @@ abstract class AppConfig {
       'https://ko-fi.com/post/How-can-I-support-FluffyChat-J2G325WE6I';
 
   static const Set<String> defaultReactions = {
-    '👍',
-    '❤️',
-    '😂',
+    '🥰',
+    '🫠',
     '🥹',
     '😭',
     '🫪',
     '🌲',
     '🪨',
     '💩',
-    '📦'
+    '📦',
+    '👍',
+    '❤️',
   };
 
   static final Uri newIssueUrl = Uri(
