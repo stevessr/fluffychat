@@ -63,6 +63,18 @@ class _SpaceViewState extends State<SpaceView> {
 
   StreamSubscription? _childStateSub;
 
+  void _addDiscoveredChildren(Iterable<SpaceRoomsChunk$2> children) {
+    final knownRoomIds = _discoveredChildren
+        .map((child) => child.roomId)
+        .toSet();
+    for (final child in children) {
+      if (child.roomId == widget.spaceId || !knownRoomIds.add(child.roomId)) {
+        continue;
+      }
+      _discoveredChildren.add(child);
+    }
+  }
+
   @override
   void initState() {
     _loadHierarchy();
@@ -89,13 +101,14 @@ class _SpaceViewState extends State<SpaceView> {
     final matrix = Matrix.of(context);
     final room = matrix.client.getRoomById(widget.spaceId);
     if (room == null) return;
+    if (_isLoading) return;
 
     final cacheKey = 'spaces_history_cache${room.id}';
     if (_discoveredChildren.isEmpty) {
       final cachedChildren = matrix.store.getStringList(cacheKey);
       if (cachedChildren != null) {
         try {
-          _discoveredChildren.addAll(
+          _addDiscoveredChildren(
             cachedChildren.map(
               (jsonString) =>
                   SpaceRoomsChunk$2.fromJson(jsonDecode(jsonString)),
@@ -112,21 +125,20 @@ class _SpaceViewState extends State<SpaceView> {
       _isLoading = true;
     });
 
+    final from = _nextBatch;
     try {
       final hierarchy = await room.client.getSpaceHierarchy(
         widget.spaceId,
         suggestedOnly: false,
         maxDepth: 2,
-        from: _nextBatch,
+        from: from,
       );
       if (!mounted) return;
       setState(() {
-        if (_nextBatch == null) _discoveredChildren.clear();
+        if (from == null) _discoveredChildren.clear();
         _nextBatch = hierarchy.nextBatch;
-        if (hierarchy.nextBatch == null) {
-          _noMoreRooms = true;
-        }
-        _discoveredChildren.addAll(
+        _noMoreRooms = hierarchy.nextBatch == null;
+        _addDiscoveredChildren(
           hierarchy.rooms.where((room) => room.roomId != widget.spaceId),
         );
         _isLoading = false;
