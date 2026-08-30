@@ -9,6 +9,12 @@ if [ ! -d "${TARGET_FONT_DIR}" ]; then
   exit 0
 fi
 
+FONT_MANIFEST="$(dirname "$(dirname "${TARGET_FONT_DIR}")")/FontManifest.json"
+if [ -f "${FONT_MANIFEST}" ] && grep -q 'NotoColorEmoji-Base.ttf' "${FONT_MANIFEST}"; then
+  echo "Web font check failed: oversized Emoji font is registered for eager startup loading" >&2
+  exit 1
+fi
+
 # These are source/full fallback files. They must not be shipped in web builds:
 # Flutter Web should prefer Google Fonts CDN and only fall back to the local
 # chunked assets below the current base href.
@@ -16,6 +22,7 @@ rm -f \
   "${TARGET_FONT_DIR}/NotoSansSC-Variable.ttf" \
   "${TARGET_FONT_DIR}/NotoSansSC-Extended.ttf" \
   "${TARGET_FONT_DIR}/NotoColorEmoji-Regular.ttf" \
+  "${TARGET_FONT_DIR}/NotoColorEmoji-Base.ttf" \
   "${TARGET_FONT_DIR}/NotoColorEmoji-Extended.ttf"
 
 echo "Web font chunks:"
@@ -25,6 +32,7 @@ if find "${TARGET_FONT_DIR}" -maxdepth 1 -type f \
   \( -name 'NotoSansSC-Variable.ttf' \
      -o -name 'NotoSansSC-Extended.ttf' \
      -o -name 'NotoColorEmoji-Regular.ttf' \
+     -o -name 'NotoColorEmoji-Base.ttf' \
      -o -name 'NotoColorEmoji-Extended.ttf' \) | grep -q .; then
   echo "Web font check failed: full source/Extended font leaked into build output" >&2
   exit 1
