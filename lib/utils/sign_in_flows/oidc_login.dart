@@ -24,12 +24,9 @@ Future<void> oidcLoginFlow(
 
   final (redirectUrl, urlScheme) = calcRedirectUrl();
 
-  final clientUri = Uri.parse(AppSettings.website.value);
+  final clientUri = _oidcClientUriForRedirect(redirectUrl);
   final supportWebPlatform =
-      kIsWeb &&
-      kReleaseMode &&
-      redirectUrl.scheme == 'https' &&
-      redirectUrl.host.contains(clientUri.host);
+      kIsWeb && kReleaseMode && _isBasedOnClientUri(redirectUrl, clientUri);
   if (kIsWeb && !supportWebPlatform) {
     Logs().w(
       'OIDC Application Type web is not supported. Using native now. Please use this instance not in production!',
@@ -44,9 +41,12 @@ Future<void> oidcLoginFlow(
     clientInformation: OidcClientInformation(
       clientName: AppSettings.applicationName.value,
       clientUri: clientUri,
-      logoUri: Uri.parse(AppSettings.logoUrl.value),
-      tosUri: Uri.parse(AppSettings.tos.value),
-      policyUri: Uri.parse(AppSettings.privacyPolicy.value),
+      logoUri: _oidcLogoUriForClient(clientUri),
+      tosUri: _oidcMetadataUriForClient(AppSettings.tos.value, clientUri),
+      policyUri: _oidcMetadataUriForClient(
+        AppSettings.privacyPolicy.value,
+        clientUri,
+      ),
     ),
   );
 
@@ -89,4 +89,44 @@ Future<void> oidcLoginFlow(
   final state = queryParameters['state'] as String;
 
   await client.oidcLogin(session: session, code: code, state: state);
+}
+
+Uri _oidcClientUriForRedirect(Uri redirectUrl) {
+  final configuredClientUri = _httpsUriOrNull(AppSettings.website.value);
+
+  if (kIsWeb && redirectUrl.scheme == 'https' && redirectUrl.host.isNotEmpty) {
+    // Self-hosted web builds often keep FluffyChat's default website URL in
+    // config.json. Matrix OIDC validates web redirect URIs against client_uri,
+    // so register the real web origin instead of downgrading to native.
+    if (configuredClientUri == null ||
+        !_isBasedOnClientUri(redirectUrl, configuredClientUri)) {
+      return Uri.parse(redirectUrl.origin);
+    }
+  }
+
+  return configuredClientUri ?? Uri.parse('https://fluffychat.im');
+}
+
+Uri? _oidcLogoUriForClient(Uri clientUri) =>
+    _oidcMetadataUriForClient(AppSettings.logoUrl.value, clientUri) ??
+    (kIsWeb ? clientUri.resolve('/favicon.png') : null);
+
+Uri? _oidcMetadataUriForClient(String value, Uri clientUri) {
+  final uri = _httpsUriOrNull(value);
+  if (uri == null || !_isBasedOnClientUri(uri, clientUri)) return null;
+  return uri;
+}
+
+Uri? _httpsUriOrNull(String value) {
+  final uri = Uri.tryParse(value);
+  return uri != null && uri.scheme == 'https' && uri.host.isNotEmpty
+      ? uri
+      : null;
+}
+
+bool _isBasedOnClientUri(Uri uri, Uri clientUri) {
+  if (uri.scheme != 'https' || clientUri.scheme != 'https') return false;
+  final host = uri.host.toLowerCase();
+  final clientHost = clientUri.host.toLowerCase();
+  return host == clientHost || host.endsWith('.$clientHost');
 }
