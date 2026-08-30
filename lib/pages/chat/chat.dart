@@ -834,6 +834,7 @@ class ChatController extends State<ChatPageWithRoom>
 
     setState(() {
       sendController.text = pendingText;
+      _inputTextIsEmpty = pendingText.isEmpty;
       replyEvent = null;
       editEvent = null;
       pendingText = '';
