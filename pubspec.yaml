@@ -150,7 +150,7 @@ flutter:
 hooks:
   user_defines:
     sqlite3:
-      source: sqlcipher
+      source: system
 
 flutter_launcher_icons:
   image_path: assets/logo/img/logo.png
