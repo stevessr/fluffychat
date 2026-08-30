@@ -6,6 +6,7 @@
 // ignore_for_file: depend_on_referenced_packages
 
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/utils/rainbow_command_extension.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
@@ -51,6 +52,7 @@ Future<Client> prepareTestClient({
       AuthenticationTypes.sso,
     },
   );
+  client.registerRainbowCommand();
   await client.init(
     newHomeserver: Uri.parse('https://fakeServer.notExisting'),
     newDeviceID: 'ABCD1234',
