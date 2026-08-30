@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:async';
+
 import 'package:matrix/matrix.dart';
 
 /// The stable room state event introduced by MSC1383 for federation ACLs.
@@ -10,6 +12,8 @@ const roomServerAclEventType = 'm.room.server_acl';
 
 /// Commands which alter room state rather than sending a timeline message.
 const roomManagementCommandNames = <String>{'banserver', 'unbanserver'};
+
+final Expando<Future<void>> _roomServerAclCommandTails = Expando();
 
 /// The result of applying a server ACL edit to an event content object.
 class ServerAclUpdate {
@@ -45,6 +49,30 @@ Future<String?> _setServerBlocked(
     throw const RoomCommandException();
   }
 
+  // ACL changes are read-modify-write operations. Serialize them per room so
+  // rapid taps or other concurrent callers cannot overwrite one another with
+  // content derived from the same stale state event.
+  final previousCommand = _roomServerAclCommandTails[room];
+  final releaseCommand = Completer<void>();
+  final commandTail = releaseCommand.future;
+  _roomServerAclCommandTails[room] = commandTail;
+
+  try {
+    if (previousCommand != null) await previousCommand;
+    return await _setServerBlockedUnlocked(args, room: room, blocked: blocked);
+  } finally {
+    releaseCommand.complete();
+    if (identical(_roomServerAclCommandTails[room], commandTail)) {
+      _roomServerAclCommandTails[room] = null;
+    }
+  }
+}
+
+Future<String?> _setServerBlockedUnlocked(
+  CommandArgs args, {
+  required Room room,
+  required bool blocked,
+}) async {
   final String pattern;
   try {
     pattern = normalizeServerAclPattern(args.msg);
@@ -82,29 +110,42 @@ Future<String?> _setServerBlocked(
   );
   if (!update.changed) return null;
 
-  return args.client.setRoomStateWithKey(
+  final eventId = await args.client.setRoomStateWithKey(
     room.id,
     roomServerAclEventType,
     '',
     update.content,
   );
+
+  // State PUT responses only contain the event ID; the SDK will not expose
+  // the new content through [Room.getState] until the next sync. Publish the
+  // acknowledged content locally so a second moderation command cannot
+  // accidentally rebuild the ACL from stale state and drop the first rule.
+  final senderId = args.client.userID;
+  if (senderId != null) {
+    room.setState(
+      StrippedStateEvent(
+        type: roomServerAclEventType,
+        stateKey: '',
+        senderId: senderId,
+        content: Map<String, Object?>.from(update.content),
+      ),
+    );
+  }
+
+  return eventId;
 }
 
 /// Normalizes and performs the client-side safety checks for an ACL pattern.
 ///
-/// Matrix ACL entries are glob patterns. Port numbers are intentionally not
-/// supported by the specification because matching happens against the server
-/// name with its port removed.
+/// Matrix ACL entries are glob patterns. Matching ignores federation ports,
+/// so a valid numeric port supplied by the user is stripped before storing the
+/// rule.
 String normalizeServerAclPattern(String input) {
-  final pattern = input.trim().toLowerCase();
+  var pattern = input.trim().toLowerCase();
   if (pattern.isEmpty) {
     throw const FormatException(
       'You must provide a server name or glob pattern',
-    );
-  }
-  if (pattern == '*') {
-    throw const FormatException(
-      'Blocking every server would make the room unusable',
     );
   }
   if (pattern.contains(RegExp(r'\s')) ||
@@ -116,11 +157,30 @@ String normalizeServerAclPattern(String input) {
     );
   }
 
-  // A single colon denotes a hostname port. Multiple colons can be an IPv6
-  // literal and are therefore left intact.
-  if (':'.allMatches(pattern).length == 1) {
+  if (pattern.startsWith('[')) {
+    final closingBracket = pattern.lastIndexOf(']');
+    if (closingBracket <= 0) {
+      throw const FormatException('Invalid bracketed IPv6 server name');
+    }
+    final suffix = pattern.substring(closingBracket + 1);
+    if (suffix.isNotEmpty) {
+      if (!RegExp(r'^:\d+$').hasMatch(suffix)) {
+        throw const FormatException('Invalid federation port number');
+      }
+      pattern = pattern.substring(0, closingBracket + 1);
+    }
+  } else if (':'.allMatches(pattern).length == 1) {
+    final separator = pattern.lastIndexOf(':');
+    final port = pattern.substring(separator + 1);
+    if (separator == 0 || !RegExp(r'^\d+$').hasMatch(port)) {
+      throw const FormatException('Invalid federation port number');
+    }
+    pattern = pattern.substring(0, separator);
+  }
+
+  if (pattern == '*') {
     throw const FormatException(
-      'Server ACL patterns must not include a port number',
+      'Blocking every server would make the room unusable',
     );
   }
 
