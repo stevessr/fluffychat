@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:characters/characters.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/room_send_formatted_text_extension.dart';
 import 'package:matrix/matrix.dart';
 
 const _matrixHtmlFormat = 'org.matrix.custom.html';
@@ -31,8 +32,16 @@ extension RainbowCommandExtension on Client {
           'You must provide a message when using /rainbow',
         );
       }
+      final content = buildRainbowTextEventContent(args.msg);
+      // Rainbow owns formatted_body; still resolve m.mentions so bare
+      // @user:server pings work when this command bypasses sendTextEvent.
+      room.prepareTextMessageContent(
+        content,
+        inReplyTo: args.inReplyTo,
+        parseMarkdown: false,
+      );
       return room.sendEvent(
-        buildRainbowTextEventContent(args.msg),
+        content,
         inReplyTo: args.inReplyTo,
         editEventId: args.editEventId,
         txid: args.txid,
