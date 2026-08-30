@@ -29,6 +29,7 @@ import '../custom_reaction_dialog.dart';
 import 'edit_history_dialog.dart';
 import 'message_content.dart';
 import 'message_reactions.dart';
+import 'msc4357_live_message.dart';
 import 'reply_content.dart';
 import 'state_message.dart';
 
@@ -149,6 +150,7 @@ class Message extends StatelessWidget {
         : MainAxisAlignment.start;
 
     final displayEvent = event.getDisplayEvent(timeline);
+    final liveMessage = Msc4357LiveMessage.fromTimeline(event, timeline);
     const groupedCorner = Radius.circular(AppConfig.borderRadius * 1.25);
     const roundedCorner = Radius.circular(AppConfig.borderRadius);
     final borderRadius = BorderRadius.only(
@@ -260,7 +262,7 @@ class Message extends StatelessWidget {
             shadows: wallpaperTextShadow,
           ),
         ),
-      if (event.hasAggregatedEvents(timeline, RelationshipTypes.edit)) ...[
+      if (isEdited && !liveMessage.isLiveMessage) ...[
         SizedBox(width: 4),
         GestureDetector(
           onTap: AppSettings.showEditHistory.value
@@ -640,16 +642,34 @@ class Message extends StatelessWidget {
                                                   );
                                                 },
                                               ),
-                                            MessageContent(
-                                              displayEvent,
-                                              textColor: textColor,
-                                              linkColor: linkColor,
-                                              onInfoTab: onInfoTab,
-                                              borderRadius: borderRadius,
-                                              timeline: timeline,
-                                              selected: selected,
-                                              bigEmojis: bigEmojis,
-                                            ),
+                                            if (liveMessage.isLiveMessage &&
+                                                Event.textOnlyMessageTypes
+                                                    .contains(
+                                                      displayEvent.messageType,
+                                                    ) &&
+                                                !displayEvent.redacted)
+                                              Msc4357LiveMessageContent(
+                                                displayEvent,
+                                                isLive: liveMessage.isLive,
+                                                textColor: textColor,
+                                                linkColor: linkColor,
+                                                onInfoTab: onInfoTab,
+                                                borderRadius: borderRadius,
+                                                timeline: timeline,
+                                                selected: selected,
+                                                bigEmojis: bigEmojis,
+                                              )
+                                            else
+                                              MessageContent(
+                                                displayEvent,
+                                                textColor: textColor,
+                                                linkColor: linkColor,
+                                                onInfoTab: onInfoTab,
+                                                borderRadius: borderRadius,
+                                                timeline: timeline,
+                                                selected: selected,
+                                                bigEmojis: bigEmojis,
+                                              ),
                                           ],
                                         ),
                                       ),
