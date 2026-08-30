@@ -1,3 +1,4 @@
+```dart
 // SPDX-FileCopyrightText: 2019-Present Christian Kußowski
 // SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
 //
@@ -28,126 +29,153 @@ import 'utils/background_push.dart';
 import 'widgets/fluffy_chat_app.dart';
 
 ReceivePort? mainIsolateReceivePort;
+
 Future<void>? _vodozemacInitFuture;
+
 const _webMainGuardAttribute = 'data-fluffy-main-started';
 
 Future<void> _ensureVodozemacInitialized() =>
-    _vodozemacInitFuture ??= vod.init(wasmPath: './assets/assets/vodozemac/');
-
-bool _vodozemacInitialized = false;
+    _vodozemacInitFuture ??=
+        vod.init(
+          wasmPath:
+              './assets/assets/vodozemac/${AppConfig.vodozemacVersion}/',
+        );
 
 bool isIntegrationTest = false;
 
 void main(List<String> args) => runZonedGuarded(() async {
-  // Forward Flutter errors to global error reporter
-  FlutterError.onError = (details) => Zone.current.handleUncaughtError(
-    details.exception,
-    details.stack ?? StackTrace.current,
-  );
+      // Forward Flutter errors to global error reporter
+      FlutterError.onError = (details) => Zone.current.handleUncaughtError(
+        details.exception,
+        details.stack ?? StackTrace.current,
+      );
 
-  isIntegrationTest = args.singleOrNull == 'integration_test';
-  if (kIsWeb) {
-    final htmlElement = web.window.document.documentElement;
-    final alreadyStarted =
-        htmlElement?.getAttribute(_webMainGuardAttribute) == '1';
-    if (alreadyStarted) {
-      Logs().w('Duplicate web startup detected. Ignoring this bootstrap.');
-      return;
-    }
-    // Guard against double bootstrap (e.g. script optimizer/reloader quirks).
-    htmlElement?.setAttribute(_webMainGuardAttribute, '1');
-  }
+      isIntegrationTest = args.singleOrNull == 'integration_test';
 
-  if (PlatformInfos.isAndroid) {
-    final port = mainIsolateReceivePort = ReceivePort();
-    IsolateNameServer.removePortNameMapping(AppConfig.mainIsolatePortName);
-    IsolateNameServer.registerPortWithName(
-      port.sendPort,
-      AppConfig.mainIsolatePortName,
-    );
-    await waitForPushIsolateDone();
-  }
+      if (kIsWeb) {
+        final htmlElement = web.window.document.documentElement;
+        final alreadyStarted =
+            htmlElement?.getAttribute(_webMainGuardAttribute) == '1';
 
-  // Sanitize hash for OIDC:
-  if (kIsWeb) {
-    final hash = web.window.location.hash;
-    if (hash.isNotEmpty && !hash.startsWith('/')) {
-      web.window.location.hash = hash.replaceFirst('#', '#?');
-    }
-  }
+        if (alreadyStarted) {
+          Logs().w('Duplicate web startup detected. Ignoring this bootstrap.');
+          return;
+        }
 
-  // Our background push shared isolate accesses flutter-internal things very early in the startup proccess
-  // To make sure that the parts of flutter needed are started up already, we need to ensure that the
-  // widget bindings are initialized already.
-  WidgetsFlutterBinding.ensureInitialized();
+        // Guard against double bootstrap (e.g. script optimizer/reloader quirks).
+        htmlElement?.setAttribute(_webMainGuardAttribute, '1');
+      }
 
-  final store = await AppSettings.init();
-  Logs().i('Welcome to ${AppSettings.applicationName.value} <3');
+      if (PlatformInfos.isAndroid) {
+        final port = mainIsolateReceivePort = ReceivePort();
 
-  kEnableMatrixSdkBenchmarks = AppSettings.benchmarksInLogs.value;
+        IsolateNameServer.removePortNameMapping(
+          AppConfig.mainIsolatePortName,
+        );
 
-  if (!_vodozemacInitialized) {
-    await vod.init(
-      wasmPath: './assets/assets/vodozemac/${AppConfig.vodozemacVersion}/',
-    );
-    _vodozemacInitialized = true;
-  }
-  await _ensureVodozemacInitialized();
+        IsolateNameServer.registerPortWithName(
+          port.sendPort,
+          AppConfig.mainIsolatePortName,
+        );
 
-  Logs().nativeColors = !PlatformInfos.isIOS;
+        await waitForPushIsolateDone();
+      }
 
-  // If the app starts in detached mode, we assume that it is in
-  // background fetch mode for processing push notifications. This is
-  // currently only supported on Android.
-  if (PlatformInfos.isAndroid &&
-      AppLifecycleState.detached == WidgetsBinding.instance.lifecycleState) {
-    await ForegroundServices.startService('background_push');
+      // Sanitize hash for OIDC:
+      if (kIsWeb) {
+        final hash = web.window.location.hash;
 
-    final clients = await ClientManager.getClients(store: store);
+        if (hash.isNotEmpty && !hash.startsWith('/')) {
+          web.window.location.hash = hash.replaceFirst('#', '#?');
+        }
+      }
 
-    // Do not send online presences when app is in background fetch mode.
-    for (final client in clients) {
-      client.backgroundSync = false;
-      client.syncPresence = PresenceType.offline;
-    }
+      // Our background push shared isolate accesses flutter-internal things very
+      // early in the startup process.
+      // To make sure that the parts of Flutter needed are started up already,
+      // we need to ensure that the widget bindings are initialized already.
+      WidgetsFlutterBinding.ensureInitialized();
 
-    // In the background fetch mode we do not want to waste ressources with
-    // starting the Flutter engine but process incoming push notifications.
-    BackgroundPush.clientOnly(clients);
-    // To start the flutter engine afterwards we add an custom observer.
-    WidgetsBinding.instance.addObserver(AppStarter(clients, store));
-    Logs().i(
-      '${AppSettings.applicationName.value} started in background-fetch mode. No GUI will be created unless the app is no longer detached.',
-    );
-    return;
-  }
+      final store = await AppSettings.init();
 
-  final clients = await ClientManager.getClients(store: store);
+      Logs().i('Welcome to ${AppSettings.applicationName.value} <3');
 
-  // Started in foreground mode.
-  Logs().i(
-    '${AppSettings.applicationName.value} started in foreground mode. Rendering GUI...',
-  );
-  await startGui(clients, store);
-}, ErrorReporter.onFlutterError);
+      kEnableMatrixSdkBenchmarks = AppSettings.benchmarksInLogs.value;
+
+      await _ensureVodozemacInitialized();
+
+      Logs().nativeColors = !PlatformInfos.isIOS;
+
+      // If the app starts in detached mode, we assume that it is in
+      // background fetch mode for processing push notifications. This is
+      // currently only supported on Android.
+      if (PlatformInfos.isAndroid &&
+          AppLifecycleState.detached ==
+              WidgetsBinding.instance.lifecycleState) {
+        await ForegroundServices.startService('background_push');
+
+        final clients = await ClientManager.getClients(store: store);
+
+        // Do not send online presences when app is in background fetch mode.
+        for (final client in clients) {
+          client.backgroundSync = false;
+          client.syncPresence = PresenceType.offline;
+        }
+
+        // In the background fetch mode we do not want to waste ressources with
+        // starting the Flutter engine but process incoming push notifications.
+        BackgroundPush.clientOnly(clients);
+
+        // To start the Flutter engine afterwards we add an custom observer.
+        WidgetsBinding.instance.addObserver(
+          AppStarter(clients, store),
+        );
+
+        Logs().i(
+          '${AppSettings.applicationName.value} '
+          'started in background-fetch mode. No GUI will be created unless '
+          'the app is no longer detached.',
+        );
+
+        return;
+      }
+
+      final clients = await ClientManager.getClients(store: store);
+
+      // Started in foreground mode.
+      Logs().i(
+        '${AppSettings.applicationName.value} '
+        'started in foreground mode. Rendering GUI...',
+      );
+
+      await startGui(clients, store);
+    }, ErrorReporter.onFlutterError);
 
 /// Fetch the pincode for the applock and start the flutter engine.
-Future<void> startGui(List<Client> clients, SharedPreferences store) async {
+Future<void> startGui(
+  List<Client> clients,
+  SharedPreferences store,
+) async {
   // Fetch the pin for the applock if existing for mobile applications.
   String? pin;
   var useBiometrics = false;
+
   if (PlatformInfos.supportsAppLock) {
     try {
       pin = await const FlutterSecureStorage().read(
         key: 'chat.fluffy.app_lock',
       );
-      useBiometrics =
-          (await const FlutterSecureStorage().read(
+
+      useBiometrics = (await const FlutterSecureStorage().read(
             key: 'chat.fluffy.use_biometrics',
           )) ==
           'true';
     } catch (e, s) {
-      Logs().d('Unable to read PIN from Secure storage', e, s);
+      Logs().d(
+        'Unable to read PIN from Secure storage',
+        e,
+        s,
+      );
     }
   }
 
@@ -157,13 +185,17 @@ Future<void> startGui(List<Client> clients, SharedPreferences store) async {
 
   // Preload first client
   final firstClient = clients.firstOrNull;
+
   await firstClient?.roomsLoading;
   await firstClient?.accountDataLoading;
 
   runApp(
     FluffyChatApp(
       clients: clients,
-      appLockSettings: (pincode: pin, useBiometrics: useBiometrics),
+      appLockSettings: (
+        pincode: pin,
+        useBiometrics: useBiometrics,
+      ),
       store: store,
     ),
   );
@@ -174,6 +206,7 @@ Future<void> startGui(List<Client> clients, SharedPreferences store) async {
 class AppStarter with WidgetsBindingObserver {
   final List<Client> clients;
   final SharedPreferences store;
+
   bool guiStarted = false;
 
   AppStarter(this.clients, this.store);
@@ -184,15 +217,21 @@ class AppStarter with WidgetsBindingObserver {
     if (state == AppLifecycleState.detached) return;
 
     Logs().i(
-      '${AppSettings.applicationName.value} switches from the detached background-fetch mode to ${state.name} mode. Rendering GUI...',
+      '${AppSettings.applicationName.value} switches from the '
+      'detached background-fetch mode to ${state.name} mode. '
+      'Rendering GUI...',
     );
+
     // Switching to foreground mode needs to reenable send online sync presence.
     for (final client in clients) {
       client.backgroundSync = true;
       client.syncPresence = PresenceType.online;
     }
+
     startGui(clients, store);
+
     // We must make sure that the GUI is only started once.
     guiStarted = true;
   }
 }
+```
