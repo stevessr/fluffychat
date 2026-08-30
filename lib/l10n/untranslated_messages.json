@@ -291,7 +291,11 @@
     "exportAccountDescription",
     "importAccount",
     "importAccountDescription",
-    "compressVideo"
+    "compressVideo",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "az": [
     "editImage",
@@ -1139,7 +1143,11 @@
     "exportAccountDescription",
     "importAccount",
     "importAccountDescription",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "be": [
     "editImage",
@@ -1271,7 +1279,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "bn": [
     "editImage",
@@ -2122,7 +2134,11 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "bo": [
     "editImage",
@@ -3005,7 +3021,11 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "ca": [
     "editImage",
@@ -3141,7 +3161,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "cs": [
     "editImage",
@@ -3364,7 +3388,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "da": [
     "editImage",
@@ -4216,7 +4244,11 @@
     "exportAccountDescription",
     "importAccount",
     "importAccountDescription",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "de": [
     "editImage",
@@ -4357,7 +4389,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "el": [
     "editImage",
@@ -5159,7 +5195,11 @@
     "exportAccountDescription",
     "importAccount",
     "importAccountDescription",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "eo": [
     "editImage",
@@ -5730,7 +5770,11 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "es": [
     "editImage",
@@ -5862,7 +5906,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "et": [
     "editImage",
@@ -5970,7 +6018,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "eu": [
     "editImage",
@@ -6094,7 +6146,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "fa": [
     "editImage",
@@ -6239,7 +6295,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "fi": [
     "editImage",
@@ -6432,7 +6492,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "fil": [
     "editImage",
@@ -7135,7 +7199,11 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "fr": [
     "editImage",
@@ -7436,7 +7504,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "ga": [
     "editImage",
@@ -7554,7 +7626,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "gl": [
     "editImage",
@@ -7675,7 +7751,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "he": [
     "editImage",
@@ -8335,7 +8415,11 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "hi": [
     "editImage",
@@ -9201,7 +9285,11 @@
     "exportAccountDescription",
     "importAccount",
     "importAccountDescription",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "hr": [
     "editImage",
@@ -9370,7 +9458,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "hu": [
     "editImage",
@@ -9592,7 +9684,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "ia": [
     "editImage",
@@ -10461,7 +10557,11 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "id": [
     "editImage",
@@ -10593,7 +10693,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "ie": [
     "editImage",
@@ -11274,7 +11378,11 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "it": [
     "editImage",
@@ -11486,7 +11594,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "ja": [
     "editImage",
@@ -11825,7 +11937,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "ka": [
     "editImage",
@@ -12570,7 +12686,11 @@
     "exportAccountDescription",
     "importAccount",
     "importAccountDescription",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "kab": [
     "editImage",
@@ -12878,7 +12998,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "ko": [
     "editImage",
@@ -13132,7 +13256,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "lt": [
     "editImage",
@@ -13625,7 +13753,11 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "lv": [
     "editImage",
@@ -13776,7 +13908,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "nb": [
     "editImage",
@@ -13908,7 +14044,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "nl": [
     "editImage",
@@ -14026,7 +14166,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "pl": [
     "editImage",
@@ -14149,7 +14293,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "pt": [
     "editImage",
@@ -15009,7 +15157,11 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "pt_BR": [
     "editImage",
@@ -15187,7 +15339,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "pt_PT": [
     "editImage",
@@ -15805,7 +15961,11 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "ro": [
     "editImage",
@@ -16274,7 +16434,11 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "ru": [
     "editImage",
@@ -16406,7 +16570,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "sk": [
     "editImage",
@@ -17076,7 +17244,11 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "sl": [
     "editImage",
@@ -17864,7 +18036,11 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "sq": [
     "editImage",
@@ -18747,7 +18923,11 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "sr": [
     "editImage",
@@ -19335,7 +19515,11 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "sv": [
     "editImage",
@@ -19578,7 +19762,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "ta": [
     "editImage",
@@ -19794,7 +19982,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "te": [
     "editImage",
@@ -20673,7 +20865,11 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "th": [
     "editImage",
@@ -21507,7 +21703,11 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "tr": [
     "editImage",
@@ -21799,7 +21999,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "uk": [
     "editImage",
@@ -21918,7 +22122,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "uz": [
     "editImage",
@@ -22087,7 +22295,11 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "vi": [
     "editImage",
@@ -22821,7 +23033,11 @@
     "exportAccountDescription",
     "importAccount",
     "importAccountDescription",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "yue": [
     "editImage",
@@ -23644,7 +23860,11 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ],
   "zh": [
     "editImage",
@@ -23937,6 +24157,10 @@
     "importAccount",
     "importAccountDescription",
     "compressVideo",
-    "ignoreUser"
+    "ignoreUser",
+    "useBiometricsOnly",
+    "biometricsOnlyDescription",
+    "blockScreenshots",
+    "blockScreenshotsDescription"
   ]
 }
