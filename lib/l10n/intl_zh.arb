@@ -3101,5 +3101,69 @@
     "@liveMessageCharacterDelay": {
         "type": "String",
         "placeholders": {}
+    },
+    "urlRewriteRules": "URL 重写",
+    "@urlRewriteRules": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "urlRewriteRulesDescription": "重写出站请求 URL，例如绕过地区限制。每条规则可用通配符（*）或正则表达式匹配。通配符模式下每个 * 对应替换文本中的 $1、$2…；正则模式下 $1、$2… 为捕获组，$0 为整个匹配。$PROXY_DOMAIN 取自 --dart-define。",
+    "@urlRewriteRulesDescription": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "urlRewriteRulesNotConfigured": "未配置 — 所有请求直连",
+    "@urlRewriteRulesNotConfigured": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "urlRewriteRulesAdd": "添加规则",
+    "@urlRewriteRulesAdd": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "urlRewriteRulesPatternType": "匹配方式",
+    "@urlRewriteRulesPatternType": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "urlRewriteRulesWildcard": "通配符（* 匹配任意文本）",
+    "@urlRewriteRulesWildcard": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "urlRewriteRulesRegex": "正则表达式",
+    "@urlRewriteRulesRegex": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "urlRewriteRulesPattern": "匹配规则",
+    "@urlRewriteRulesPattern": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "urlRewriteRulesReplacement": "替换为",
+    "@urlRewriteRulesReplacement": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "urlRewriteRulesEmptyPattern": "匹配规则不能为空",
+    "@urlRewriteRulesEmptyPattern": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "urlRewriteRulesInvalidRegex": "正则表达式无效",
+    "@urlRewriteRulesInvalidRegex": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "urlRewriteRulesCount": "{count, plural, =1{1 条规则} other{{count} 条规则}}",
+    "@urlRewriteRulesCount": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
     }
 }
