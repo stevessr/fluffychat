@@ -5,6 +5,7 @@ import 'dart:ui_web' as ui_web;
 import 'package:cross_file/cross_file.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:mime/mime.dart';
 import 'package:web/web.dart' as web;
 
 import 'chat_drop_target.dart';
@@ -14,11 +15,15 @@ Widget buildChatDropTarget({
   required VoidCallback onDragEntered,
   required VoidCallback onDragExited,
   required ChatFilesDroppedCallback onFilesDropped,
+  FocusNode? inputFocus,
+  TextEditingController? inputController,
 }) {
   return _WebChatDropTarget(
     onDragEntered: onDragEntered,
     onDragExited: onDragExited,
     onFilesDropped: onFilesDropped,
+    inputFocus: inputFocus,
+    inputController: inputController,
     child: child,
   );
 }
@@ -28,12 +33,16 @@ class _WebChatDropTarget extends StatefulWidget {
   final VoidCallback onDragEntered;
   final VoidCallback onDragExited;
   final ChatFilesDroppedCallback onFilesDropped;
+  final FocusNode? inputFocus;
+  final TextEditingController? inputController;
 
   const _WebChatDropTarget({
     required this.child,
     required this.onDragEntered,
     required this.onDragExited,
     required this.onFilesDropped,
+    required this.inputFocus,
+    required this.inputController,
   });
 
   @override
@@ -55,20 +64,17 @@ class _WebChatDropTargetState extends State<_WebChatDropTarget> {
     _silenceDesktopDropWebChannel();
     _viewType =
         'chat-drop-target-${DateTime.now().microsecondsSinceEpoch}-${identityHashCode(this)}';
-    ui_web.platformViewRegistry.registerViewFactory(
-      _viewType,
-      (viewId) {
-        final overlay = web.HTMLDivElement()
-          ..style.position = 'absolute'
-          ..style.inset = '0'
-          ..style.width = '100%'
-          ..style.height = '100%'
-          ..style.background = 'transparent'
-          ..style.pointerEvents = 'none';
-        _overlay = overlay;
-        return overlay;
-      },
-    );
+    ui_web.platformViewRegistry.registerViewFactory(_viewType, (viewId) {
+      final overlay = web.HTMLDivElement()
+        ..style.position = 'absolute'
+        ..style.inset = '0'
+        ..style.width = '100%'
+        ..style.height = '100%'
+        ..style.background = 'transparent'
+        ..style.pointerEvents = 'none';
+      _overlay = overlay;
+      return overlay;
+    });
     _WebChatDropWindowHandlers.activate(this);
   }
 
@@ -133,6 +139,30 @@ class _WebChatDropTargetState extends State<_WebChatDropTarget> {
     unawaited(_handleDrop(event));
   }
 
+  void handleClipboardEvent(web.ClipboardEvent event) {
+    if (!(widget.inputFocus?.hasFocus ?? false)) return;
+
+    final dataTransfer = event.clipboardData;
+    if (dataTransfer == null) return;
+
+    final files = _filesFromClipboardData(dataTransfer);
+    if (files.isNotEmpty) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      unawaited(widget.onFilesDropped(files));
+      return;
+    }
+
+    final clipboardText = _clipboardText(dataTransfer);
+    if (clipboardText == null || !_looksLikeClipboardImagePath(clipboardText)) {
+      return;
+    }
+
+    final snapshot = widget.inputController?.value;
+    if (snapshot == null) return;
+    unawaited(_maybeUploadClipboardImage(snapshot));
+  }
+
   bool _containsFiles(web.DragEvent event) {
     final dataTransfer = event.dataTransfer;
     if (dataTransfer == null) return false;
@@ -152,31 +182,142 @@ class _WebChatDropTargetState extends State<_WebChatDropTarget> {
     final rect = overlay.getBoundingClientRect();
     final x = event.clientX.toDouble();
     final y = event.clientY.toDouble();
-    return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+    return x >= rect.left &&
+        x <= rect.right &&
+        y >= rect.top &&
+        y <= rect.bottom;
   }
 
   Future<void> _handleDrop(web.DragEvent event) async {
-    final files = <XFile>[];
-    final fileList = event.dataTransfer?.files;
-    if (fileList != null) {
-      for (var i = 0; i < fileList.length; i++) {
-        final file = fileList.item(i);
-        if (file == null) continue;
-        files.add(
-          XFile(
-            web.URL.createObjectURL(file),
-            mimeType: file.type,
-            name: file.name,
-            length: file.size,
-            lastModified: DateTime.fromMillisecondsSinceEpoch(
-              file.lastModified,
-            ),
-          ),
-        );
-      }
-    }
+    final files = _filesFromFileList(event.dataTransfer?.files);
     if (files.isEmpty) return;
     await widget.onFilesDropped(files);
+  }
+
+  List<XFile> _filesFromClipboardData(web.DataTransfer? dataTransfer) {
+    if (dataTransfer == null) return [];
+    final fileList = dataTransfer.files;
+    if (fileList.length > 0) {
+      return _filesFromFileList(fileList);
+    }
+    final files = <XFile>[];
+    final items = dataTransfer.items;
+    for (var i = 0; i < items.length; i++) {
+      final item = items[i];
+      if (item.kind != 'file') continue;
+      final file = item.getAsFile();
+      if (file == null) continue;
+      final xfile = _toXFile(file);
+      if (xfile != null) {
+        files.add(xfile);
+      }
+    }
+    return files;
+  }
+
+  String? _clipboardText(web.DataTransfer dataTransfer) {
+    final plainText = dataTransfer.getData('text/plain').trim();
+    if (plainText.isNotEmpty) return plainText;
+    final uriList = dataTransfer.getData('text/uri-list').trim();
+    if (uriList.isEmpty) return null;
+    return uriList
+        .split(RegExp(r'[\r\n]+'))
+        .map((line) => line.trim())
+        .firstWhere(
+          (line) => line.isNotEmpty && !line.startsWith('#'),
+          orElse: () => uriList,
+        );
+  }
+
+  bool _looksLikeClipboardImagePath(String text) {
+    final normalized = text.trim();
+    if (normalized.isEmpty) return false;
+    return _clipboardImagePathPattern.hasMatch(normalized) ||
+        normalized.contains('/.cache/dms/clipboard/');
+  }
+
+  Future<void> _maybeUploadClipboardImage(TextEditingValue snapshot) async {
+    final files = await _readClipboardImages();
+    if (files.isEmpty || !mounted) return;
+
+    final controller = widget.inputController;
+    if (controller != null) {
+      controller.value = snapshot;
+    }
+    if (!mounted) return;
+    await widget.onFilesDropped(files);
+  }
+
+  Future<List<XFile>> _readClipboardImages() async {
+    try {
+      final items = await web.window.navigator.clipboard.read().toDart;
+      final files = <XFile>[];
+      for (var i = 0; i < items.length; i++) {
+        final item = items[i];
+        for (var j = 0; j < item.types.length; j++) {
+          final type = item.types[j].toDart;
+          if (!type.startsWith('image/')) continue;
+          final blob = await item.getType(type).toDart;
+          final bytes = await _blobToBytes(blob);
+          files.add(
+            XFile.fromData(
+              bytes,
+              mimeType: type,
+              name: _clipboardImageName(type, files.length),
+            ),
+          );
+          break;
+        }
+      }
+      return files;
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<Uint8List> _blobToBytes(web.Blob blob) async {
+    final buffer = await blob.arrayBuffer().toDart;
+    return buffer.toDart.asUint8List();
+  }
+
+  String _clipboardImageName(String mimeType, int index) {
+    final extension = extensionFromMime(mimeType);
+    final suffix = index == 0 ? '' : '-${index + 1}';
+    return 'clipboard-image$suffix${extension == null ? '' : '.$extension'}';
+  }
+
+  List<XFile> _filesFromFileList(web.FileList? fileList) {
+    if (fileList == null) return [];
+    final files = <XFile>[];
+    for (var i = 0; i < fileList.length; i++) {
+      final file = fileList.item(i);
+      if (file == null) continue;
+      final xfile = _toXFile(file);
+      if (xfile != null) {
+        files.add(xfile);
+      }
+    }
+    return files;
+  }
+
+  XFile? _toXFile(web.File file) {
+    final mimeType = file.type.isNotEmpty
+        ? file.type
+        : lookupMimeType(file.name);
+    if (mimeType == null || !mimeType.startsWith('image/')) {
+      return null;
+    }
+    final extension = extensionFromMime(mimeType);
+    final name = file.name.isNotEmpty
+        ? file.name
+        : 'clipboard-image${extension == null ? '' : '.$extension'}';
+    return XFile(
+      web.URL.createObjectURL(file),
+      mimeType: mimeType,
+      name: name,
+      length: file.size,
+      lastModified: DateTime.fromMillisecondsSinceEpoch(file.lastModified),
+    );
   }
 
   @override
@@ -186,9 +327,7 @@ class _WebChatDropTargetState extends State<_WebChatDropTarget> {
       fit: StackFit.expand,
       children: [
         widget.child,
-        IgnorePointer(
-          child: HtmlElementView(viewType: _viewType),
-        ),
+        IgnorePointer(child: HtmlElementView(viewType: _viewType)),
       ],
     );
   }
@@ -200,6 +339,9 @@ class _WebChatDropWindowHandlers {
   static web.EventHandler? _originalOnDragOver;
   static web.EventHandler? _originalOnDragLeave;
   static web.EventHandler? _originalOnDrop;
+  static web.EventListener? _pasteListener;
+  static final web.AddEventListenerOptions _captureOptions =
+      web.AddEventListenerOptions(capture: true);
   static bool _capturedOriginalHandlers = false;
   static bool _installed = false;
 
@@ -226,6 +368,11 @@ class _WebChatDropWindowHandlers {
     web.window.ondrop = ((web.DragEvent event) {
       _activeTarget?.handleDrop(event);
     }).toJS;
+    _pasteListener ??= ((web.ClipboardEvent event) {
+      _activeTarget?.handleClipboardEvent(event);
+    }).toJS;
+    final document = web.window.document;
+    document.addEventListener('paste', _pasteListener, _captureOptions);
   }
 
   static void deactivate(_WebChatDropTargetState target) {
@@ -236,5 +383,12 @@ class _WebChatDropWindowHandlers {
     web.window.ondragover = _originalOnDragOver;
     web.window.ondragleave = _originalOnDragLeave;
     web.window.ondrop = _originalOnDrop;
+    final document = web.window.document;
+    document.removeEventListener('paste', _pasteListener, _captureOptions);
   }
 }
+
+final _clipboardImagePathPattern = RegExp(
+  r'^(?:file://)?(?:[a-zA-Z]:[\\/]|/).*\.(?:png|jpe?g|gif|webp|bmp|tiff?|svg)$',
+  caseSensitive: false,
+);

@@ -333,6 +333,8 @@ class ChatView extends StatelessWidget {
                   onFilesDropped: controller.onFilesDropped,
                   onDragEntered: () => controller.onDragEntered(null),
                   onDragExited: controller.onDragExited,
+                  inputFocus: controller.inputFocus,
+                  inputController: controller.sendController,
                   child: SafeArea(
                     top: false,
                     child: Stack(
