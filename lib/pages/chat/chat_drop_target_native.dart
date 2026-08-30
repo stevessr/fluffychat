@@ -9,6 +9,8 @@ Widget buildChatDropTarget({
   required VoidCallback onDragEntered,
   required VoidCallback onDragExited,
   required ChatFilesDroppedCallback onFilesDropped,
+  FocusNode? inputFocus,
+  TextEditingController? inputController,
 }) {
   return DropTarget(
     onDragEntered: (_) => onDragEntered(),
