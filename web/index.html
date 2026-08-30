@@ -35,6 +35,92 @@
 
   <title>FluffyChat</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="preload" as="script" href="assets/assets/vodozemac/vodozemac_bindings_dart.js">
+  <link rel="preload" as="fetch" type="application/wasm" href="assets/assets/vodozemac/vodozemac_bindings_dart_bg.wasm" crossorigin>
+  <script data-cfasync="false">
+    // Cloudflare Rocket Loader also hooks scripts that Flutter packages create
+    // dynamically (notably flutter_rust_bridge/vodozemac). Those dynamic
+    // scripts are not present in this HTML for us to annotate, so mark script
+    // elements before they receive a src or are inserted into the document.
+    // The bootstrap below is intentionally small and dependency-free because it
+    // must run before Flutter, vodozemac and any CDN optimizer touch the page.
+    (function () {
+      if (window.__fluffyRocketLoaderBypassInstalled) return;
+      window.__fluffyRocketLoaderBypassInstalled = true;
+
+      function markScript(node) {
+        if (!node || node.nodeType !== 1) return node;
+        if (String(node.tagName).toLowerCase() === 'script') {
+          node.setAttribute('data-cfasync', 'false');
+          // Dynamic scripts default to async=true. vodozemac waits for onload,
+          // but forcing ordered execution avoids CDN/defer rewrites racing the
+          // wasm-bindgen global assignment.
+          node.async = false;
+        }
+        if (node.querySelectorAll) {
+          node.querySelectorAll('script').forEach(markScript);
+        }
+        return node;
+      }
+
+      function patchMethod(proto, name, wrapper) {
+        if (!proto || !proto[name] || proto[name].__fluffyPatched) return;
+        var original = proto[name];
+        var patched = wrapper(original);
+        patched.__fluffyPatched = true;
+        proto[name] = patched;
+      }
+
+      patchMethod(Document.prototype, 'createElement', function (original) {
+        return function (tagName, options) {
+          return markScript(original.call(this, tagName, options));
+        };
+      });
+
+      patchMethod(Node.prototype, 'appendChild', function (original) {
+        return function (child) {
+          return original.call(this, markScript(child));
+        };
+      });
+
+      patchMethod(Node.prototype, 'insertBefore', function (original) {
+        return function (newNode, referenceNode) {
+          return original.call(this, markScript(newNode), referenceNode);
+        };
+      });
+
+      patchMethod(Element.prototype, 'append', function (original) {
+        return function () {
+          Array.prototype.forEach.call(arguments, markScript);
+          return original.apply(this, arguments);
+        };
+      });
+
+      patchMethod(Element.prototype, 'prepend', function (original) {
+        return function () {
+          Array.prototype.forEach.call(arguments, markScript);
+          return original.apply(this, arguments);
+        };
+      });
+
+      var srcDescriptor = Object.getOwnPropertyDescriptor(
+        HTMLScriptElement.prototype,
+        'src'
+      );
+      if (srcDescriptor && srcDescriptor.set && !srcDescriptor.set.__fluffyPatched) {
+        Object.defineProperty(HTMLScriptElement.prototype, 'src', {
+          configurable: true,
+          enumerable: srcDescriptor.enumerable,
+          get: srcDescriptor.get,
+          set: function (value) {
+            markScript(this);
+            return srcDescriptor.set.call(this, value);
+          },
+        });
+      }
+    })();
+  </script>
+  <script data-cfasync="false" src="assets/assets/vodozemac/vodozemac_bindings_dart.js"></script>
   <script data-cfasync="false" src="Imaging.js"></script>
 
   <!-- This script adds the flutter initialization JS code -->
