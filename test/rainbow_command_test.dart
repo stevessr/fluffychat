@@ -1,7 +1,6 @@
+import 'package:fluffychat/utils/rainbow_command_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
-
-import 'package:fluffychat/utils/rainbow_command_extension.dart';
 
 void main() {
   test('buildRainbowTextEventContent sends Matrix HTML rainbow spans', () {

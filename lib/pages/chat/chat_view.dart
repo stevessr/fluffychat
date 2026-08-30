@@ -363,7 +363,7 @@ class ChatView extends StatelessWidget {
                                 height: MediaQuery.sizeOf(context).height,
                                 width: MediaQuery.sizeOf(context).width,
                                 isThumbnail: false,
-                                placeholder: (_) => Container(),
+                                placeholder: (_) => const SizedBox.shrink(),
                               ),
                             ),
                           ),
