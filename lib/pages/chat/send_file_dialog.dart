@@ -175,6 +175,12 @@ class SendFileDialogState extends State<SendFileDialog> {
         }
 
         final label = _labelTextController.text.trim();
+        final labelOrNull = label.isEmpty ? null : label;
+        final isSpoiler = spoiler && file.msgType == MessageTypes.Image;
+        final extraContent = _buildExtraContent(
+          label: labelOrNull,
+          isSpoiler: isSpoiler,
+        );
 
         try {
           if (encrypt || !widget.room.encrypted) {
@@ -182,10 +188,7 @@ class SendFileDialogState extends State<SendFileDialog> {
               file,
               thumbnail: thumbnail,
               shrinkImageMaxDimension: compress ? 1600 : null,
-              extraContent: _buildExtraContent(
-                label: label,
-                isSpoiler: spoiler,
-              ),
+              extraContent: extraContent,
               threadRootEventId: widget.threadRootEventId,
               threadLastEventId: widget.threadLastEventId,
             );
@@ -193,9 +196,9 @@ class SendFileDialogState extends State<SendFileDialog> {
             await _sendUnencryptedFileEvent(
               file,
               thumbnail: thumbnail,
-              label: label.isEmpty ? null : label,
+              label: labelOrNull,
               shrinkImageMaxDimension: compress ? 1600 : null,
-              isSpoiler: spoiler,
+              spoiler: isSpoiler,
             );
           }
         } on MatrixException catch (e) {
@@ -213,10 +216,7 @@ class SendFileDialogState extends State<SendFileDialog> {
               file,
               thumbnail: thumbnail,
               shrinkImageMaxDimension: compress ? 1600 : null,
-              extraContent: _buildExtraContent(
-                label: label,
-                isSpoiler: spoiler,
-              ),
+              extraContent: extraContent,
               threadRootEventId: widget.threadRootEventId,
               threadLastEventId: widget.threadLastEventId,
             );
@@ -224,9 +224,9 @@ class SendFileDialogState extends State<SendFileDialog> {
             await _sendUnencryptedFileEvent(
               file,
               thumbnail: thumbnail,
-              label: label.isEmpty ? null : label,
+              label: labelOrNull,
               shrinkImageMaxDimension: compress ? 1600 : null,
-              isSpoiler: spoiler,
+              spoiler: isSpoiler,
             );
           }
         }
