@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:async/async.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/web_paths.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:managed_configurations/managed_configurations.dart';
@@ -139,7 +140,7 @@ enum AppSettings<T> {
     } else if (kIsWeb && loadWebConfigFile) {
       try {
         final configJsonString = utf8.decode(
-          (await http.get(Uri.parse('config.json'))).bodyBytes,
+          (await http.get(Uri.parse(resolveWebPath('config.json')))).bodyBytes,
         );
         _platformConfiguration =
             json.decode(configJsonString) as Map<String, Object?>;
