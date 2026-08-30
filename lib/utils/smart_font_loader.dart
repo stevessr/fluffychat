@@ -3,47 +3,83 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'dart:ui';
 import 'package:flutter/services.dart';
 import 'package:matrix/matrix.dart';
 
-/// 智能字体加载器 - 按 Unicode 区块细粒度按需加载
+class _FontChunk {
+  final String family;
+  final String assetPath;
+
+  const _FontChunk({required this.family, required this.assetPath});
+}
+
+/// Smart font loader for web-friendly, chunked fallback fonts.
 ///
-/// 策略：
-/// - 启动时仅加载 CJK-Base (500KB) + Emoji-Base (1MB)
-/// - 根据文本内容自动检测所需 Unicode 区块
-/// - 按需加载对应字体分片，最小化首屏加载时间
+/// Google Fonts CDN is preferred by the web engine fallback stack:
+/// `web/index.html` sets `fontFallbackBaseUrl` to fonts.gstatic.com, and
+/// `FluffyThemes.fontFallbacks` lists the engine's Noto family names before
+/// these local chunk families. This loader only provides the second layer:
+/// local chunks under the current sub-deployment/base href.
+///
+/// That keeps the app usable when Google Fonts is blocked or stale without
+/// downloading the sub-deployment chunks before the CDN path has a chance.
 class SmartFontLoader {
   static final SmartFontLoader _instance = SmartFontLoader._internal();
   factory SmartFontLoader() => _instance;
   SmartFontLoader._internal();
 
-  // CJK 字体加载状态
-  final Map<String, bool> _cjkLoaded = {
-    'base': true,     // pubspec 中声明，自动加载
-    'common': false,
-    'ext_a': false,
-    'ext_b': false,
-    'ext_cde': false,
+  static const Map<String, _FontChunk> _cjkChunks = {
+    'common': _FontChunk(
+      family: 'Unicode18-Common',
+      assetPath: 'assets/fonts/NotoSansSC-CJK-Common.ttf',
+    ),
+    'ext_a': _FontChunk(
+      family: 'Unicode18-ExtA',
+      assetPath: 'assets/fonts/NotoSansSC-CJK-ExtA.ttf',
+    ),
+    'ext_b': _FontChunk(
+      family: 'Unicode18-ExtB',
+      assetPath: 'assets/fonts/NotoSansSC-CJK-ExtB.ttf',
+    ),
+    'ext_cde': _FontChunk(
+      family: 'Unicode18-ExtCDE',
+      assetPath: 'assets/fonts/NotoSansSC-CJK-ExtCDE.ttf',
+    ),
   };
 
-  // Emoji 字体加载状态
+  static const Map<String, _FontChunk> _emojiChunks = {
+    'extended': _FontChunk(
+      family: 'NotoColorEmoji-Extended',
+      assetPath: 'assets/fonts/NotoColorEmoji-Emoji-Extended.ttf',
+    ),
+  };
+
+  final Map<String, bool> _cjkLoaded = {
+    'base': true,
+    for (final block in _cjkChunks.keys) block: false,
+  };
+
   final Map<String, bool> _emojiLoaded = {
-    'base': true,      // pubspec 中声明，自动加载
-    'extended': false,
+    'base': true,
+    for (final block in _emojiChunks.keys) block: false,
   };
 
   final Map<String, bool> _loading = {};
 
-  /// Unicode 区块范围定义
   static const Map<String, List<List<int>>> _cjkRanges = {
-    'common': [[0x4E00, 0x9FFF]],          // CJK 统一表意文字
-    'ext_a': [[0x3400, 0x4DBF]],           // CJK 扩展 A
-    'ext_b': [[0x20000, 0x2A6DF]],         // CJK 扩展 B
+    'common': [
+      [0x4E00, 0x9FFF],
+    ],
+    'ext_a': [
+      [0x3400, 0x4DBF],
+    ],
+    'ext_b': [
+      [0x20000, 0x2A6DF],
+    ],
     'ext_cde': [
-      [0x2A700, 0x2B73F],                  // CJK 扩展 C
-      [0x2B740, 0x2B81F],                  // CJK 扩展 D
-      [0x2B820, 0x2CEAF],                  // CJK 扩展 E
+      [0x2A700, 0x2B73F],
+      [0x2B740, 0x2B81F],
+      [0x2B820, 0x2CEAF],
     ],
   };
 
@@ -56,7 +92,6 @@ class SmartFontLoader {
     ],
   };
 
-  /// 检测文本需要的 CJK 区块
   Set<String> _detectRequiredCJKBlocks(String text) {
     final required = <String>{};
 
@@ -74,7 +109,6 @@ class SmartFontLoader {
     return required;
   }
 
-  /// 检测文本需要的 Emoji 区块
   Set<String> _detectRequiredEmojiBlocks(String text) {
     final required = <String>{};
 
@@ -92,116 +126,95 @@ class SmartFontLoader {
     return required;
   }
 
-  /// 智能预加载：根据文本内容自动检测并加载所需字体
   Future<void> preloadForText(String text) async {
     if (text.isEmpty) return;
 
-    final requiredCJK = _detectRequiredCJKBlocks(text);
-    final requiredEmoji = _detectRequiredEmojiBlocks(text);
-
-    final futures = <Future>[];
-
-    // 加载所需的 CJK 字体
-    for (final block in requiredCJK) {
-      if (!_cjkLoaded[block]! && !(_loading[block] ?? false)) {
-        futures.add(_loadCJKBlock(block));
-      }
-    }
-
-    // 加载所需的 Emoji 字体
-    for (final block in requiredEmoji) {
-      if (!_emojiLoaded[block]! && !(_loading[block] ?? false)) {
-        futures.add(_loadEmojiBlock(block));
-      }
-    }
-
-    if (futures.isNotEmpty) {
-      await Future.wait(futures);
-    }
-  }
-
-  /// 加载指定 CJK 区块
-  Future<void> _loadCJKBlock(String block) async {
-    final key = 'cjk_$block';
-    if (_loading[key] ?? false) return;
-
-    _loading[key] = true;
-    try {
-      final fontFamily = 'Unicode18-${_blockToFamilyName(block)}';
-      final fontLoader = FontLoader(fontFamily);
-      final fontData = await rootBundle.load(
-        'assets/fonts/NotoSansSC-CJK-${_blockToFamilyName(block)}.ttf',
-      );
-      fontLoader.addFont(Future.value(fontData.buffer.asByteData()));
-      await fontLoader.load();
-      _cjkLoaded[block] = true;
-      Logs().i('CJK font loaded: $block');
-    } catch (e, s) {
-      Logs().w('Failed to load CJK font: $block', e, s);
-    } finally {
-      _loading[key] = false;
-    }
-  }
-
-  /// 加载指定 Emoji 区块
-  Future<void> _loadEmojiBlock(String block) async {
-    final key = 'emoji_$block';
-    if (_loading[key] ?? false) return;
-
-    _loading[key] = true;
-    try {
-      final fontFamily = 'NotoColorEmoji-${_blockToFamilyName(block)}';
-      final fontLoader = FontLoader(fontFamily);
-      final fontData = await rootBundle.load(
-        'assets/fonts/NotoColorEmoji-Emoji-${_blockToFamilyName(block)}.ttf',
-      );
-      fontLoader.addFont(Future.value(fontData.buffer.asByteData()));
-      await fontLoader.load();
-      _emojiLoaded[block] = true;
-      Logs().i('Emoji font loaded: $block');
-    } catch (e, s) {
-      Logs().w('Failed to load Emoji font: $block', e, s);
-    } finally {
-      _loading[key] = false;
-    }
-  }
-
-  String _blockToFamilyName(String block) {
-    return block.split('_').map((s) => s[0].toUpperCase() + s.substring(1)).join('');
-  }
-
-  /// 预加载常用区块（在聊天列表加载后调用）
-  Future<void> preloadCommon() async {
     await Future.wait([
-      _loadCJKBlock('common'),
-      _loadEmojiBlock('extended'),
+      preloadCJKBlocks(_detectRequiredCJKBlocks(text)),
+      preloadEmojiBlocks(_detectRequiredEmojiBlocks(text)),
     ]);
   }
 
-  /// 预加载所有扩展字体（在空闲时调用）
-  Future<void> preloadAll() async {
-    final futures = <Future>[];
-
-    for (final block in _cjkLoaded.keys) {
-      if (!_cjkLoaded[block]!) {
+  Future<void> preloadCJKBlocks(Iterable<String> blocks) async {
+    final futures = <Future<void>>[];
+    for (final block in blocks) {
+      if (!(_cjkLoaded[block] ?? true) && !(_loading['cjk_$block'] ?? false)) {
         futures.add(_loadCJKBlock(block));
       }
     }
-
-    for (final block in _emojiLoaded.keys) {
-      if (!_emojiLoaded[block]!) {
-        futures.add(_loadEmojiBlock(block));
-      }
-    }
-
     await Future.wait(futures);
   }
 
-  /// 检查字体加载状态
+  Future<void> preloadEmojiBlocks(Iterable<String> blocks) async {
+    final futures = <Future<void>>[];
+    for (final block in blocks) {
+      if (!(_emojiLoaded[block] ?? true) &&
+          !(_loading['emoji_$block'] ?? false)) {
+        futures.add(_loadEmojiBlock(block));
+      }
+    }
+    await Future.wait(futures);
+  }
+
+  Future<void> _loadCJKBlock(String block) async {
+    final chunk = _cjkChunks[block];
+    if (chunk == null) return;
+    await _loadChunk(
+      key: 'cjk_$block',
+      chunk: chunk,
+      onLoaded: () => _cjkLoaded[block] = true,
+    );
+  }
+
+  Future<void> _loadEmojiBlock(String block) async {
+    final chunk = _emojiChunks[block];
+    if (chunk == null) return;
+    await _loadChunk(
+      key: 'emoji_$block',
+      chunk: chunk,
+      onLoaded: () => _emojiLoaded[block] = true,
+    );
+  }
+
+  Future<void> _loadChunk({
+    required String key,
+    required _FontChunk chunk,
+    required VoidCallback onLoaded,
+  }) async {
+    if (_loading[key] ?? false) return;
+
+    _loading[key] = true;
+    try {
+      final fontLoader = FontLoader(chunk.family);
+      final fontData = await _loadFontData(chunk.assetPath);
+      fontLoader.addFont(Future.value(fontData));
+      await fontLoader.load();
+      onLoaded();
+      Logs().i('Font chunk loaded: ${chunk.family}');
+    } catch (e, s) {
+      Logs().w('Failed to load font chunk: ${chunk.family}', e, s);
+    } finally {
+      _loading[key] = false;
+    }
+  }
+
+  Future<ByteData> _loadFontData(String assetPath) async {
+    Logs().i('Font chunk loaded from local assets: $assetPath');
+    return rootBundle.load(assetPath);
+  }
+
+  Future<void> preloadCommon() => preloadCJKBlocks(const ['common']);
+
+  Future<void> preloadAll() async {
+    await Future.wait([
+      preloadCJKBlocks(_cjkChunks.keys),
+      preloadEmojiBlocks(_emojiChunks.keys),
+    ]);
+  }
+
   bool isCJKBlockLoaded(String block) => _cjkLoaded[block] ?? false;
   bool isEmojiBlockLoaded(String block) => _emojiLoaded[block] ?? false;
 
-  /// 获取已加载字体统计
   Map<String, dynamic> getLoadedStats() {
     return {
       'cjk_loaded': _cjkLoaded.entries.where((e) => e.value).length,
