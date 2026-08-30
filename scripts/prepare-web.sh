@@ -17,6 +17,10 @@ rm -f ./assets/vodozemac/vodozemac_bindings_dart*
 mv .vodozemac/dart/web/pkg/vodozemac_bindings_dart* ./assets/vodozemac/
 rm -rf .vodozemac
 flutter pub get
+# pub get may have removed packages from pubspec.lock that are no longer
+# depended on, but the stale package_graph.json still references them.
+# Remove it so the next tool regenerates a consistent graph.
+rm -f .dart_tool/package_graph.json
 dart compile js ./web/native_executor.dart -o ./web/native_executor.js -m
 
 # Download native_imaging for web:
