@@ -131,7 +131,7 @@ class ChatController extends State<ChatPageWithRoom>
 
   late final Set<String> bigEmojis;
 
-  late final String readMarkerEventId;
+  String readMarkerEventId = '';
 
   String get roomId => widget.room.id;
 
@@ -662,15 +662,20 @@ class ChatController extends State<ChatPageWithRoom>
       return;
     }
 
-    Logs().d('Set read marker...', eventId);
+    final targetEventId = eventId;
+    Logs().d('Set read marker...', targetEventId);
     // ignore: unawaited_futures
     _setReadMarkerFuture = timeline
         .setReadMarker(
-          eventId: eventId,
+          eventId: targetEventId,
           public: AppSettings.sendPublicReadReceipts.value,
         )
         .then((_) {
           _setReadMarkerFuture = null;
+          if (targetEventId != readMarkerEventId) {
+            readMarkerEventId = targetEventId;
+            if (mounted) setState(() {});
+          }
         });
   }
 
