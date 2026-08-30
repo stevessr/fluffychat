@@ -46,9 +46,7 @@ class _ChatEmojiPickerState extends State<ChatEmojiPicker> {
           noRecents: const NoRecent(),
           backgroundColor: theme.colorScheme.onInverseSurface,
         ),
-        bottomActionBarConfig: const BottomActionBarConfig(
-          enabled: false,
-        ),
+        bottomActionBarConfig: const BottomActionBarConfig(enabled: false),
         categoryViewConfig: CategoryViewConfig(
           backspaceColor: theme.colorScheme.primary,
           iconColor: theme.colorScheme.primary.withAlpha(128),
@@ -102,7 +100,8 @@ class _ChatEmojiPickerState extends State<ChatEmojiPicker> {
                             );
                             if (!proceed) return;
                             // 优先使用回复模式下的回复对象，其次使用选择模式下的选中消息
-                            final inReplyTo = controller.replyEvent ??
+                            final inReplyTo =
+                                controller.replyEvent ??
                                 (controller.selectedEvents.length == 1
                                     ? controller.selectedEvents.first
                                     : null);
@@ -150,13 +149,13 @@ class _EmojiMashupDialogState extends State<EmojiMashupDialog> {
 
   Future<GoogleEmojiKitchenImage?>? get _mashupFuture =>
       _firstEmoji != null && _secondEmoji != null
-          ? resolveGoogleEmojiKitchenMix(_firstEmoji!.emoji, _secondEmoji!.emoji)
-          : null;
+      ? resolveGoogleEmojiKitchenMix(_firstEmoji!.emoji, _secondEmoji!.emoji)
+      : null;
 
   Future<List<GoogleEmojiKitchenSuggestion>>? get _suggestionsFuture =>
       _firstEmoji != null
-          ? resolveGoogleEmojiKitchenSuggestions(_firstEmoji!.emoji, limit: 8)
-          : null;
+      ? resolveGoogleEmojiKitchenSuggestions(_firstEmoji!.emoji, limit: 8)
+      : null;
 
   void _onEmojiSelected(Category? category, Emoji? emoji) {
     if (emoji == null) return;
@@ -178,7 +177,9 @@ class _EmojiMashupDialogState extends State<EmojiMashupDialog> {
           : null;
       await widget.controller.room.sendFileEvent(
         match.toMatrixFile(),
-        extraContent: {'body': '${L10n.of(context).emojiMashup}: ${match.fallbackText}'},
+        extraContent: {
+          'body': '${L10n.of(context).emojiMashup}: ${match.fallbackText}',
+        },
         inReplyTo: inReplyTo,
         threadRootEventId: widget.controller.activeThreadId,
         threadLastEventId: widget.controller.threadLastEventId,
@@ -192,7 +193,9 @@ class _EmojiMashupDialogState extends State<EmojiMashupDialog> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${L10n.of(context).oopsSomethingWentWrong}: $e')),
+        SnackBar(
+          content: Text('${L10n.of(context).oopsSomethingWentWrong}: $e'),
+        ),
       );
     } finally {
       if (mounted) setState(() => _sending = false);
@@ -213,11 +216,14 @@ class _EmojiMashupDialogState extends State<EmojiMashupDialog> {
       ),
       child: Column(
         children: [
+          // Header with drag handle and title
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 12, 8, 16),
             decoration: BoxDecoration(
               color: theme.colorScheme.surfaceContainerHighest,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(28),
+              ),
             ),
             child: Column(
               children: [
@@ -244,113 +250,207 @@ class _EmojiMashupDialogState extends State<EmojiMashupDialog> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                FutureBuilder<GoogleEmojiKitchenImage?>(
-                  future: _mashupFuture,
-                  builder: (context, snapshot) {
-                    final match = snapshot.data;
-                    final isWaiting = _firstEmoji != null && _secondEmoji != null &&
-                        snapshot.connectionState == ConnectionState.waiting;
-
-                    return Container(
-                      height: 160,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: match != null
-                          ? Image.memory(match.bytes, fit: BoxFit.contain)
-                          : isWaiting
-                          ? Center(child: CircularProgressIndicator())
-                          : Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (_firstEmoji != null)
-                                    Text(_firstEmoji!.emoji, style: const TextStyle(fontSize: 48)),
-                                  if (_firstEmoji != null && _secondEmoji == null)
-                                    const Icon(Icons.add, size: 32),
-                                  if (_secondEmoji != null)
-                                    Text(_secondEmoji!.emoji, style: const TextStyle(fontSize: 48)),
-                                  if (_firstEmoji == null)
-                                    Icon(Icons.auto_awesome, size: 48, color: theme.colorScheme.onSurfaceVariant),
-                                ],
-                              ),
-                            ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
-                if (_firstEmoji != null && _secondEmoji != null)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.swap_horiz),
-                        onPressed: () => setState(() {
-                          final temp = _firstEmoji;
-                          _firstEmoji = _secondEmoji;
-                          _secondEmoji = temp;
-                        }),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () => setState(() {
-                          _firstEmoji = null;
-                          _secondEmoji = null;
-                        }),
-                      ),
-                      const SizedBox(width: 16),
-                      FutureBuilder<GoogleEmojiKitchenImage?>(
-                        future: _mashupFuture,
-                        builder: (context, snapshot) {
-                          final match = snapshot.data;
-                          return FilledButton.icon(
-                            onPressed: match != null && !_sending ? () => _sendMashup(match) : null,
-                            icon: _sending
-                                ? const SizedBox.square(
-                                    dimension: 16,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
-                                  )
-                                : const Icon(Icons.send),
-                            label: Text(l10n.send),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                if (_firstEmoji != null)
-                  FutureBuilder<List<GoogleEmojiKitchenSuggestion>>(
-                    future: _suggestionsFuture,
-                    builder: (context, snapshot) {
-                      final suggestions = snapshot.data ?? const [];
-                      if (suggestions.isEmpty) return const SizedBox.shrink();
-                      return Column(
-                        children: [
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            height: 40,
-                            child: ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: suggestions.length,
-                              separatorBuilder: (_, _) => const SizedBox(width: 8),
-                              itemBuilder: (context, index) {
-                                final s = suggestions[index];
-                                return ActionChip(
-                                  label: Text(s.emoji, style: const TextStyle(fontSize: 20)),
-                                  onPressed: () => _onEmojiSelected(null, Emoji(s.emoji, s.codepointKey)),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
               ],
             ),
           ),
+
+          // Preview area with gradient background
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  theme.colorScheme.primaryContainer.withAlpha(60),
+                  theme.colorScheme.secondaryContainer.withAlpha(40),
+                  theme.colorScheme.tertiaryContainer.withAlpha(30),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Center(
+              child: FutureBuilder<GoogleEmojiKitchenImage?>(
+                future: _mashupFuture,
+                builder: (context, snapshot) {
+                  final match = snapshot.data;
+                  final isWaiting =
+                      _firstEmoji != null &&
+                      _secondEmoji != null &&
+                      snapshot.connectionState == ConnectionState.waiting;
+
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    height: 160,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: match != null
+                          ? [
+                              BoxShadow(
+                                color: theme.colorScheme.primary.withAlpha(30),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24),
+                      child: match != null
+                          ? Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                Image.memory(match.bytes, fit: BoxFit.contain),
+                                if (match.usedReverseOrder)
+                                  Positioned(
+                                    top: 8,
+                                    right: 8,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: theme.colorScheme.surface
+                                            .withAlpha(180),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Icon(
+                                        Icons.swap_horiz,
+                                        size: 14,
+                                        color:
+                                            theme.colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            )
+                          : isWaiting
+                          ? _buildShimmerLoading(theme)
+                          : _buildPreviewPlaceholder(theme, l10n),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+
+          // Action buttons (swap, clear, send)
+          if (_firstEmoji != null && _secondEmoji != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _ActionButton(
+                    icon: Icons.swap_horiz,
+                    onPressed: () => setState(() {
+                      final temp = _firstEmoji;
+                      _firstEmoji = _secondEmoji;
+                      _secondEmoji = temp;
+                    }),
+                  ),
+                  const SizedBox(width: 8),
+                  _ActionButton(
+                    icon: Icons.clear,
+                    tooltip: l10n.clear,
+                    onPressed: () => setState(() {
+                      _firstEmoji = null;
+                      _secondEmoji = null;
+                    }),
+                  ),
+                  const SizedBox(width: 16),
+                  FutureBuilder<GoogleEmojiKitchenImage?>(
+                    future: _mashupFuture,
+                    builder: (context, snapshot) {
+                      final match = snapshot.data;
+                      return FilledButton.icon(
+                        onPressed: match != null && !_sending
+                            ? () => _sendMashup(match)
+                            : null,
+                        style: FilledButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        icon: _sending
+                            ? const SizedBox.square(
+                                dimension: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.send),
+                        label: Text(l10n.send),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+          // Suggestions
+          if (_firstEmoji != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: FutureBuilder<List<GoogleEmojiKitchenSuggestion>>(
+                future: _suggestionsFuture,
+                builder: (context, snapshot) {
+                  final suggestions = snapshot.data ?? const [];
+                  if (suggestions.isEmpty) return const SizedBox.shrink();
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Text(
+                          l10n.emojiMashup,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 48,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: suggestions.length,
+                          separatorBuilder: (_, _) => const SizedBox(width: 8),
+                          itemBuilder: (context, index) {
+                            final s = suggestions[index];
+                            return Material(
+                              color: theme.colorScheme.secondaryContainer
+                                  .withAlpha(120),
+                              borderRadius: BorderRadius.circular(16),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(16),
+                                onTap: () => _onEmojiSelected(
+                                  null,
+                                  Emoji(s.emoji, s.codepointKey),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  child: Text(
+                                    s.emoji,
+                                    style: const TextStyle(fontSize: 28),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+
+          // Emoji picker
           Expanded(
             child: EmojiPicker(
               onEmojiSelected: _onEmojiSelected,
@@ -371,7 +471,9 @@ class _EmojiMashupDialogState extends State<EmojiMashupDialog> {
                   noRecents: const NoRecent(),
                   backgroundColor: theme.colorScheme.surface,
                 ),
-                bottomActionBarConfig: const BottomActionBarConfig(enabled: false),
+                bottomActionBarConfig: const BottomActionBarConfig(
+                  enabled: false,
+                ),
                 categoryViewConfig: CategoryViewConfig(
                   recentTabBehavior: RecentTabBehavior.NONE,
                   backspaceColor: theme.colorScheme.primary,
@@ -395,6 +497,99 @@ class _EmojiMashupDialogState extends State<EmojiMashupDialog> {
       ),
     );
   }
+
+  Widget _buildPreviewPlaceholder(ThemeData theme, L10n l10n) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (_firstEmoji != null && _secondEmoji != null) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(_firstEmoji!.emoji, style: const TextStyle(fontSize: 48)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Icon(
+                    Icons.add,
+                    size: 24,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                Text(_secondEmoji!.emoji, style: const TextStyle(fontSize: 48)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l10n.loadingPleaseWait,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ] else if (_firstEmoji != null) ...[
+            Text(_firstEmoji!.emoji, style: const TextStyle(fontSize: 64)),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.arrow_downward,
+                  size: 16,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  l10n.emojiMashup,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+          ] else ...[
+            Icon(
+              Icons.auto_awesome,
+              size: 48,
+              color: theme.colorScheme.onSurfaceVariant.withAlpha(100),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l10n.emojiMashup,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShimmerLoading(ThemeData theme) {
+    final l10n = L10n.of(context);
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 32,
+            height: 32,
+            child: CircularProgressIndicator(
+              strokeWidth: 3,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.loadingPleaseWait,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class NoRecent extends StatelessWidget {
@@ -409,6 +604,35 @@ class NoRecent extends StatelessWidget {
           L10n.of(context).emoteKeyboardNoRecents,
           style: Theme.of(context).textTheme.bodyLarge,
           textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String? tooltip;
+  final VoidCallback onPressed;
+
+  const _ActionButton({
+    required this.icon,
+    this.tooltip,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest,
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Icon(icon, size: 20),
         ),
       ),
     );
