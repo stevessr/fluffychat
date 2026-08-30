@@ -144,6 +144,7 @@ class _EditHistoryDialogState extends State<EditHistoryDialog> {
                       isLatest: index == 0,
                       textColor: theme.colorScheme.onSurface,
                       linkColor: theme.colorScheme.primary,
+                      room: widget.event.room,
                     );
                   },
                 ),
@@ -178,12 +179,14 @@ class _EditVersionTile extends StatelessWidget {
   final bool isLatest;
   final Color textColor;
   final Color linkColor;
+  final Room room;
 
   const _EditVersionTile({
     required this.version,
     required this.isLatest,
     required this.textColor,
     required this.linkColor,
+    required this.room,
   });
 
   @override
@@ -266,7 +269,7 @@ class _EditVersionTile extends StatelessWidget {
                           .replaceAll('<', '&lt;')
                           .replaceAll('>', '&gt;'),
                 textColor: textColor,
-                room: widget.event.room,
+                room: room,
                 fontSize: 14,
                 linkStyle: TextStyle(
                   color: linkColor,
