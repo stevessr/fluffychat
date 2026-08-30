@@ -4,14 +4,23 @@
 
 import 'dart:convert';
 
-/// A URL rewrite rule: glob pattern → replacement string.
+/// A URL rewrite rule: pattern → replacement string.
 ///
-/// Pattern uses `*` as a wildcard matching any non-empty-or-empty substring.
-/// Each `*` is a capture group referenced as `$1`, `$2`, … in the replacement.
-/// `$UPPERCASE_NAME` variables are resolved from `--dart-define`/`String.fromEnvironment`.
-/// `$$` produces a literal `$`.
+/// [pattern] is matched either as a glob ([regex] == false, the default) or
+/// as a regular expression ([regex] == true).
 ///
-/// Example:
+/// Glob mode: `*` matches any (possibly empty) substring.  Each `*` is a
+/// capture group referenced as `$1`, `$2`, … in the replacement.
+///
+/// Regex mode: [pattern] is a Dart [RegExp] pattern matched against the full
+/// request URL.  Capture groups are referenced as `$1`, `$2`, …; `$0` refers
+/// to the entire match.
+///
+/// Both modes support `$UPPERCASE_NAME` variables, resolved from
+/// `--dart-define`/`String.fromEnvironment` (e.g. `$PROXY_DOMAIN`), and `$$`
+/// for a literal `$`.
+///
+/// Example (glob):
 ///   pattern: `https://*matrix.org/*`
 ///   replacement: `https://$PROXY_DOMAIN/---https://$1matrix.org/$2`
 ///   Input: `https://matrix.org/_matrix/client/r0/sync`
@@ -19,6 +28,9 @@ import 'dart:convert';
 class UrlRewriteRule {
   final String pattern;
   final String replacement;
+
+  /// Whether [pattern] is a regular expression instead of a glob.
+  final bool regex;
 
   /// Built-in replacement variables, resolved at compile time from
   /// `--dart-define` so that `$PROXY_DOMAIN` in a replacement actually
@@ -30,21 +42,65 @@ class UrlRewriteRule {
     'HOMESERVER': String.fromEnvironment('HOMESERVER'),
   };
 
-  /// Pre-split pattern parts — the fixed strings between `*` wildcards.
+  /// Pre-split pattern parts — the fixed strings between `*` wildcards
+  /// (glob mode only).
   late final List<String> _patternParts;
+
+  /// Compiled regular expression (regex mode only), or `null` when the
+  /// pattern is not a valid regular expression (the rule then never matches).
+  final RegExp? _regex;
 
   /// Pre-parsed replacement tokens.
   late final List<_ReplacementToken> _replacementTokens;
 
-  UrlRewriteRule({required this.pattern, required this.replacement}) {
+  UrlRewriteRule({
+    required this.pattern,
+    required this.replacement,
+    this.regex = false,
+  }) : _regex = regex ? _tryCompile(pattern) : null {
     _patternParts = pattern.split('*');
     _replacementTokens = _tokenizeReplacement(replacement);
   }
+
+  static RegExp? _tryCompile(String pattern) {
+    try {
+      return RegExp(pattern);
+    } on FormatException {
+      return null;
+    }
+  }
+
+  /// Whether the pattern would be valid if used in regex mode.
+  static bool isValidRegex(String pattern) => _tryCompile(pattern) != null;
 
   /// Try to apply this rule to [url]. Returns the rewritten URI if the
   /// pattern matches, or `null` if it does not.
   Uri? apply(Uri url) {
     final urlStr = url.toString();
+    final captures = regex ? _regexCaptures(urlStr) : _globCaptures(urlStr);
+    if (captures == null) return null;
+
+    // Build replacement.
+    final buffer = StringBuffer();
+    for (final token in _replacementTokens) {
+      switch (token.type) {
+        case _TokenType.literal:
+          buffer.write(token.value);
+        case _TokenType.capture:
+          final idx = int.parse(token.value);
+          if (idx < captures.length) {
+            buffer.write(captures[idx]);
+          }
+        case _TokenType.variable:
+          buffer.write(_variables[token.value] ?? '');
+      }
+    }
+
+    return Uri.tryParse(buffer.toString());
+  }
+
+  /// Glob matching: capture the substrings matched by each `*`.
+  List<String>? _globCaptures(String urlStr) {
     final captures = <String>[];
     var pos = 0;
 
@@ -65,25 +121,24 @@ class UrlRewriteRule {
         pos = found + part.length;
       }
     }
-
-    // Build replacement.
-    final buffer = StringBuffer();
-    for (final token in _replacementTokens) {
-      switch (token.type) {
-        case _TokenType.literal:
-          buffer.write(token.value);
-        case _TokenType.capture:
-          final idx = int.parse(token.value);
-          if (idx < captures.length) {
-            buffer.write(captures[idx]);
-          }
-        case _TokenType.variable:
-          buffer.write(_variables[token.value] ?? '');
-      }
-    }
-
-    return Uri.tryParse(buffer.toString());
+    return captures;
   }
+
+  /// Regex matching: `$0` is the whole match, `$1`.. the capture groups.
+  List<String>? _regexCaptures(String urlStr) {
+    final regex = _regex;
+    if (regex == null) return null;
+    final match = regex.firstMatch(urlStr);
+    if (match == null) return null;
+    return [for (var i = 0; i <= match.groupCount; i++) match.group(i) ?? ''];
+  }
+
+  /// Serialize to JSON for persistence in settings.
+  Map<String, dynamic> toJson() => {
+    'pattern': pattern,
+    'replacement': replacement,
+    if (regex) 'regex': true,
+  };
 
   /// Parse rewrite rules from `--dart-define=URL_REWRITE_RULES`.
   ///
@@ -106,6 +161,7 @@ class UrlRewriteRule {
             (e) => UrlRewriteRule(
               pattern: (e as Map)['pattern'] as String,
               replacement: e['replacement'] as String,
+              regex: e['regex'] == true,
             ),
           )
           .toList();
