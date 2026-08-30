@@ -119,6 +119,30 @@ class ChatInputRow extends StatelessWidget {
                         ),
                       ),
                     ),
+                  if (controller.selectedEvents.length == 1 &&
+                      controller.selectedEvents.first
+                          .getDisplayEvent(controller.timeline!)
+                          .status
+                          .isSent)
+                    SizedBox(
+                      height: height,
+                      child: TextButton(
+                        style: selectedTextButtonStyle,
+                        onPressed: controller.selectedEvents.length == 1
+                            ? () => controller.replyWithImageAction(
+                                  controller.selectedEvents.first,
+                                )
+                            : null,
+                        child: Tooltip(
+                          message: L10n.of(context).replyWithImage,
+                          child: Row(
+                            children: <Widget>[
+                              const Icon(Icons.add_photo_alternate_outlined),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   controller.selectedEvents.length == 1
                       ? controller.selectedEvents.first
                                 .getDisplayEvent(controller.timeline!)
