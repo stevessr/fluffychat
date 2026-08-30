@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Resolve Flutter version
-        run: echo "FLUTTER_VERSION=$(yq '.environment.flutter' < pubspec.yaml)" >> $GITHUB_ENV
+        run: echo "FLUTTER_VERSION=$(yq '.environment.flutter' < .tool_versions.yaml)" >> $GITHUB_ENV
       - name: Build web with shared prefix
         uses: ./.github/actions/web_build_prefix
         with:
