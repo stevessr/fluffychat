@@ -8,8 +8,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:desktop_drop/desktop_drop.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/config/setting_keys.dart';
@@ -908,7 +906,7 @@ class ChatController extends State<ChatPageWithRoom>
       ),
     );
   }
-
+  
   Future<void> openCameraAction() async {
     inputFocus.unfocus();
     final file = await ImagePicker().pickImage(source: ImageSource.camera);
