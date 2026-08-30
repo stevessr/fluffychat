@@ -18,10 +18,10 @@
 
 | 区块 | 大小 | 描述 | 加载时机 |
 |------|------|------|----------|
-| **Emoji-Base** | 18KB | 基础表情 + 常用符号 | 启动时 |
-| **Emoji-Extended** | 31KB | 完整 Emoji 集 | 按需 |
+| **Emoji-Base** | 23KB | 启动界面所需的小型 Emoji 子集 | 启动时 |
+| **Emoji-Extended** | 1.1MB | 扩展 Emoji 集 | 按需 |
 
-**注意**：当前 Emoji 拆分结果异常小，需要优化字符提取逻辑。
+Web 构建不再发布旧的 5.6MB `NotoColorEmoji-Base.ttf`。
 
 ## 智能加载机制
 
@@ -40,9 +40,9 @@ SmartFontLoader().preloadForText(messageText);
 ### 2. 渐进式加载策略
 
 ```dart
-// 启动时：仅加载 Base (268KB + 18KB = 286KB)
-// - 对比原方案 6MB，节省 95%
-// - 对比完整字体 27MB，节省 99%
+// 生产配置启动字体：808KB CJK 界面兜底 + 23KB Emoji Base
+// - 对比原 6.4MB 启动字体，减少约 87%
+// - 扩展 CJK/Emoji 分块继续按需加载
 
 // 聊天列表加载后：预加载 Common 区块
 SmartFontLoader().preloadCommon();  // +499KB
@@ -56,35 +56,34 @@ SmartFontLoader().preloadAll();     // +4MB
 ```yaml
 # pubspec.yaml
 fonts:
-  - family: Unicode18-Base
+  - family: Unicode18
     fonts:
-      - asset: assets/fonts/NotoSansSC-CJK-Base.ttf
-  - family: Unicode18-Common
+      - asset: assets/fonts/NotoSansSC-Base.ttf
+  - family: NotoColorEmoji
     fonts:
-      - asset: assets/fonts/NotoSansSC-CJK-Common.ttf
-  # ... 其他区块
+      - asset: assets/fonts/NotoColorEmoji-Emoji-Base.ttf
 ```
 
 ```dart
 // lib/config/themes.dart
 fontFamilyFallback: [
-  'Unicode18-Base',      // 268KB - 立即可用
-  'Unicode18-Common',    // 499KB - 按需加载
+  'Unicode18',           // 808KB - 完整界面翻译的本地兜底
+  'Unicode18-Common',    // 495KB - 按需加载
   'Unicode18-ExtA',      // 4MB - 按需加载
   'Unicode18-ExtB',      // 33KB - 按需加载
   'Unicode18-ExtCDE',    // 104KB - 按需加载
-  'NotoColorEmoji-Base',
+  'NotoColorEmoji',      // 23KB - 立即可用
   'NotoColorEmoji-Extended',
 ]
 ```
 
 ## 性能对比
 
-| 方案 | 首屏加载 | 完整加载 | 节省 |
-|------|---------|---------|------|
+| 方案 | 首屏字体 | 完整本地分块 | 节省 |
+|------|---------|-------------|------|
 | **原始** | 27MB | 27MB | - |
-| **两级拆分** | 6MB | 27MB | 78% |
-| **Unicode 分区** | **286KB** | 5.9MB | **99%** |
+| **两级拆分** | 6.4MB | 27MB | 76% |
+| **当前生产配置** | **831KB** | 约 6.8MB | **约 87%** |
 
 ## 使用方式
 
@@ -122,22 +121,14 @@ print('CJK 已加载: ${stats['cjk_loaded']}/${stats['cjk_total']}');
 print('Emoji 已加载: ${stats['emoji_loaded']}/${stats['emoji_total']}');
 ```
 
-## 已知问题
+## 已知限制
 
-### Emoji 拆分结果过小
+### 本地 Emoji 覆盖范围
 
-当前 Emoji 区块拆分后仅 18KB/31KB，远小于预期。问题原因：
-1. 字符提取逻辑不完整（未扫描 Dart 代码中的 Emoji）
-2. Emoji 序列和组合字符未正确处理
-3. `unicode_17_emoji_set.dart` 可能不存在
-
-**解决方案**：
-```python
-# 改进 collect_chars_from_codebase() 中 Emoji 提取逻辑
-# 1. 添加完整 Emoji Unicode 范围
-# 2. 包含 ZWJ 序列和变体选择器
-# 3. 从实际代码中提取 Emoji 使用情况
-```
+23KB `Emoji-Base` 只覆盖启动界面需要的字符，1.1MB
+`Emoji-Extended` 在检测到扩展码点后按需加载。Flutter Web 的 Google Fonts
+fallback CDN 仍是完整字体的首选来源；CDN 不可用时，本地显示范围取决于已生成的
+两个 Emoji 分块。
 
 ### CJK 扩展 B 区字符数异常
 
@@ -148,7 +139,7 @@ ExtB 显示 42720 字符但仅占 33KB，可能是：
 
 ## 下一步优化
 
-1. **优化 Emoji 提取**：增强字符扫描，包含完整 Emoji 序列
+1. **扩大本地 Emoji 覆盖**：在不增加首屏清单的前提下改进按需分块
 2. **智能预测**：根据聊天历史预测需要的区块
 3. **缓存策略**：已加载区块持久化到本地存储
 4. **网络下载**：超大区块支持从 CDN 动态下载
