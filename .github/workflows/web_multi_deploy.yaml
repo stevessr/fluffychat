@@ -10,6 +10,10 @@ concurrency:
   group: web_multi_deploy
   cancel-in-progress: true
 
+env:
+  NODE_VERSION: "22.11.0"
+  NPM_CACHE_KEY_SUFFIX: v1
+
 jobs:
   build_web:
     name: Build web artifact
@@ -30,6 +34,7 @@ jobs:
           path: build/web
           if-no-files-found: error
           retention-days: 1
+          compression-level: 1
 
   deploy_edgeone:
     name: Deploy to EdgeOne Pages
@@ -47,7 +52,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22.11.0"
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Cache npm packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ env.NODE_VERSION }}-${{ env.NPM_CACHE_KEY_SUFFIX }}-${{ hashFiles('.github/workflows/web_multi_deploy.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-${{ env.NODE_VERSION }}-${{ env.NPM_CACHE_KEY_SUFFIX }}-
       - name: Validate EdgeOne secrets
         env:
           EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
@@ -68,9 +80,9 @@ jobs:
           EDGEONE_ENV: ${{ secrets.EDGEONE_ENV }}
         run: |
           if [ -n "$EDGEONE_ENV" ]; then
-            npx edgeone pages deploy build/web -n "$EDGEONE_PROJECT_NAME" -t "$EDGEONE_API_TOKEN" -e "$EDGEONE_ENV"
+            npx --yes edgeone pages deploy build/web -n "$EDGEONE_PROJECT_NAME" -t "$EDGEONE_API_TOKEN" -e "$EDGEONE_ENV"
           else
-            npx edgeone pages deploy build/web -n "$EDGEONE_PROJECT_NAME" -t "$EDGEONE_API_TOKEN"
+            npx --yes edgeone pages deploy build/web -n "$EDGEONE_PROJECT_NAME" -t "$EDGEONE_API_TOKEN"
           fi
 
   deploy_cloudflare:
@@ -90,7 +102,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22.11.0"
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Cache npm packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ env.NODE_VERSION }}-${{ env.NPM_CACHE_KEY_SUFFIX }}-${{ hashFiles('.github/workflows/web_multi_deploy.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-${{ env.NODE_VERSION }}-${{ env.NPM_CACHE_KEY_SUFFIX }}-
       - name: Normalize and validate Cloudflare secrets
         env:
           RAW_CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -155,4 +174,4 @@ jobs:
             exit 1
           fi
       - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy build/web --project-name="$CLOUDFLARE_PAGES_PROJECT_NAME" --commit-dirty=true
+        run: npx --yes wrangler pages deploy build/web --project-name="$CLOUDFLARE_PAGES_PROJECT_NAME" --commit-dirty=true
