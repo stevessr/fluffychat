@@ -101,6 +101,11 @@ class _ChatEmojiPickerState extends State<ChatEmojiPicker> {
                               controller.room,
                             );
                             if (!proceed) return;
+                            // 优先使用回复模式下的回复对象，其次使用选择模式下的选中消息
+                            final inReplyTo = controller.replyEvent ??
+                                (controller.selectedEvents.length == 1
+                                    ? controller.selectedEvents.first
+                                    : null);
                             controller.room.sendEvent(
                               {
                                 'body': sticker.body,
@@ -108,9 +113,13 @@ class _ChatEmojiPickerState extends State<ChatEmojiPicker> {
                                 'url': sticker.url.toString(),
                               },
                               type: EventTypes.Sticker,
+                              inReplyTo: inReplyTo,
                               threadRootEventId: controller.activeThreadId,
                               threadLastEventId: controller.threadLastEventId,
                             );
+                            if (controller.selectedEvents.isNotEmpty) {
+                              controller.clearSelectedEvents();
+                            }
                             controller.hideEmojiPicker();
                           },
                         ),
@@ -164,13 +173,20 @@ class _EmojiMashupDialogState extends State<EmojiMashupDialog> {
     if (_sending) return;
     setState(() => _sending = true);
     try {
+      final inReplyTo = widget.controller.selectedEvents.length == 1
+          ? widget.controller.selectedEvents.first
+          : null;
       await widget.controller.room.sendFileEvent(
         match.toMatrixFile(),
         extraContent: {'body': '${L10n.of(context).emojiMashup}: ${match.fallbackText}'},
+        inReplyTo: inReplyTo,
         threadRootEventId: widget.controller.activeThreadId,
         threadLastEventId: widget.controller.threadLastEventId,
       );
       if (!mounted) return;
+      if (inReplyTo != null) {
+        widget.controller.clearSelectedEvents();
+      }
       Navigator.of(context).pop();
       widget.controller.hideEmojiPicker();
     } catch (e) {
