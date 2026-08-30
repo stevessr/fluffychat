@@ -42,3 +42,15 @@ jobs:
         run: flutter pub get
       - name: Build Android release APK
         run: flutter build apk --release --target-platform android-arm64
+      - name: Validate SQLCipher JNI symbols
+        run: |
+          set -euxo pipefail
+          apk=build/app/outputs/flutter-apk/app-release.apk
+          unzip -p "$apk" lib/arm64-v8a/libsqlcipher.so > /tmp/libsqlcipher.so
+          readelf -Ws /tmp/libsqlcipher.so | grep -E 'Java_net_sqlcipher|JNI_OnLoad'
+      - uses: actions/upload-artifact@v7
+        with:
+          name: fluffychat-runtime-fix-arm64-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 7
