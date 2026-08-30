@@ -19,17 +19,20 @@
 | 输入 | 说明 | 默认 |
 | --- | --- | --- |
 | `build_debug` | 构建未签名的 debug 变体（便于测试安装，无需签名密钥） | `false` |
-| `split_per_abi` | 按 ABI 拆分 APK（`arm64-v8a` / `armeabi-v7a`） | `false` |
 | `upload_to_release` | 是否将产物上传到指定 GitHub Release | `false` |
 | `release_tag` | 目标 Release tag（仅当 `upload_to_release=true` 时生效） | 空 |
 
 ### 构建矩阵
 
-- **release 单包**：`flutter build apk --release --target-platform android-arm,android-arm64`
+- **release**：`flutter build apk --release --target-platform android-arm,android-arm64`
   - 当 `FDROID_KEY` / `FDROID_KEY_PASS` secret 存在时，会先调用
-    `scripts/prepare-android-release.sh` 配置签名。
-- **release 按 ABI 拆分**：`--split-per-abi`
+    `scripts/prepare-android-release.sh` 配置签名；否则退回 Flutter 默认 debug 签名。
 - **debug**：`flutter build apk --debug ...`（跳过签名准备）
+
+> 注：本项目 `android/app/build.gradle.kts` 设置了 `ndk.abiFilters`
+> （Flutter issue #162153 的 workaround），与 Gradle 的 `--split-per-abi`
+> 不兼容，因此不提供按 ABI 拆分选项。需要单架构包时，分别用
+> `--target-platform android-arm64` / `android-arm` 触发即可。
 
 ### 产物
 
