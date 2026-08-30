@@ -38,6 +38,9 @@ jobs:
         run: |
           mkdir public/nightly
           cp -r build/web/* public/nightly/
+      - name: Subset web fonts
+        run: ./scripts/subset-web-fonts.sh
+      - run: mv build/web/ public
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
