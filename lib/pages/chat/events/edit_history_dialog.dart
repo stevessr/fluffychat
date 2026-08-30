@@ -2,9 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/pages/chat/events/html_message.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -35,7 +33,6 @@ class EditHistoryDialog extends StatefulWidget {
 }
 
 class _EditHistoryDialogState extends State<EditHistoryDialog> {
-  late final List<_EditVersion> _versions;
   late final List<_EditVersion> _orderedVersions;
 
   @override
@@ -97,7 +94,6 @@ class _EditHistoryDialogState extends State<EditHistoryDialog> {
       );
     }
 
-    _versions = versions;
     // Show in reverse chronological order (newest first)
     _orderedVersions = versions.reversed.toList();
   }
@@ -136,7 +132,7 @@ class _EditHistoryDialogState extends State<EditHistoryDialog> {
                   shrinkWrap: true,
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   itemCount: _orderedVersions.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  separatorBuilder: (_, _) => const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final version = _orderedVersions[index];
                     return _EditVersionTile(

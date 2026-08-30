@@ -1,9 +1,9 @@
 import 'dart:convert';
 
+import 'package:fluffychat/utils/matrix_sdk_extensions/room_send_formatted_text_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/utils/matrix_sdk_extensions/room_send_formatted_text_extension.dart';
 import 'utils/test_client.dart';
 
 void main() {
