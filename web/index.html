@@ -63,6 +63,40 @@
         return node;
       }
 
+      function isVodozemacBindingsScript(node) {
+        if (!node || node.nodeType !== 1) return false;
+        if (String(node.tagName).toLowerCase() !== 'script') return false;
+        try {
+          return new URL(node.src, document.baseURI).pathname.endsWith(
+            '/assets/assets/vodozemac/vodozemac_bindings_dart.js'
+          );
+        } catch (_) {
+          return false;
+        }
+      }
+
+      function hasLoadedVodozemacBindings() {
+        try {
+          // wasm-bindgen emits a global lexical `wasm_bindgen`, not a window
+          // property, until flutter_rust_bridge copies it to window.
+          return typeof wasm_bindgen !== 'undefined';
+        } catch (_) {
+          return false;
+        }
+      }
+
+      function reuseLoadedVodozemacBindings(node) {
+        if (!isVodozemacBindingsScript(node) || !hasLoadedVodozemacBindings()) {
+          return false;
+        }
+        // flutter_rust_bridge appends this script and only then subscribes to
+        // onLoad, so fire the synthetic load on the next macrotask.
+        setTimeout(function () {
+          node.dispatchEvent(new Event('load'));
+        }, 0);
+        return true;
+      }
+
       function patchMethod(proto, name, wrapper) {
         if (!proto || !proto[name] || proto[name].__fluffyPatched) return;
         var original = proto[name];
@@ -79,27 +113,39 @@
 
       patchMethod(Node.prototype, 'appendChild', function (original) {
         return function (child) {
-          return original.call(this, markScript(child));
+          markScript(child);
+          if (reuseLoadedVodozemacBindings(child)) return child;
+          return original.call(this, child);
         };
       });
 
       patchMethod(Node.prototype, 'insertBefore', function (original) {
         return function (newNode, referenceNode) {
-          return original.call(this, markScript(newNode), referenceNode);
+          markScript(newNode);
+          if (reuseLoadedVodozemacBindings(newNode)) return newNode;
+          return original.call(this, newNode, referenceNode);
         };
       });
 
       patchMethod(Element.prototype, 'append', function (original) {
         return function () {
-          Array.prototype.forEach.call(arguments, markScript);
-          return original.apply(this, arguments);
+          var nodes = Array.prototype.slice.call(arguments);
+          nodes.forEach(markScript);
+          nodes = nodes.filter(function (node) {
+            return !reuseLoadedVodozemacBindings(node);
+          });
+          if (nodes.length > 0) return original.apply(this, nodes);
         };
       });
 
       patchMethod(Element.prototype, 'prepend', function (original) {
         return function () {
-          Array.prototype.forEach.call(arguments, markScript);
-          return original.apply(this, arguments);
+          var nodes = Array.prototype.slice.call(arguments);
+          nodes.forEach(markScript);
+          nodes = nodes.filter(function (node) {
+            return !reuseLoadedVodozemacBindings(node);
+          });
+          if (nodes.length > 0) return original.apply(this, nodes);
         };
       });
 

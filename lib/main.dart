@@ -1,4 +1,3 @@
-```dart
 // SPDX-FileCopyrightText: 2019-Present Christian Kußowski
 // SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
 //
@@ -15,10 +14,10 @@ import 'package:fluffychat/utils/error_reporter.dart';
 import 'package:fluffychat/utils/notification_background_handler.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/start_push_foreground_service.dart';
+import 'package:fluffychat/utils/vodozemac_bootstrap.dart';
 import 'package:fluffychat/utils/web_paths.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:just_audio_media_kit/just_audio_media_kit.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
@@ -35,8 +34,8 @@ Future<void>? _vodozemacInitFuture;
 
 const _webMainGuardAttribute = 'data-fluffy-main-started';
 
-Future<void> _ensureVodozemacInitialized() =>
-    _vodozemacInitFuture ??= vod.init(
+Future<void> _ensureVodozemacInitialized() => _vodozemacInitFuture ??=
+    initVodozemac(
       wasmPath: resolveWebPath(
         'assets/assets/vodozemac/${AppConfig.vodozemacVersion}/',
       ),
@@ -235,4 +234,3 @@ class AppStarter with WidgetsBindingObserver {
     guiStarted = true;
   }
 }
-```
