@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -124,10 +125,16 @@ class Msc4357LiveMessageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final characterInterval = Duration(
+      milliseconds: (AppSettings.liveMessageCharacterDelay.value * 1000)
+          .round()
+          .clamp(1, 5000),
+    );
     return LiveMessageTextAnimator(
       text: event.bodyWithoutReplyFallback,
       revisionId: event.eventId,
       isLive: isLive,
+      characterInterval: characterInterval,
       builder: (context, visibleText) {
         final visibleEvent = isLive
             ? _eventWithPlainBody(event, visibleText)
