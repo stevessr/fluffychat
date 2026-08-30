@@ -128,6 +128,26 @@ extension LocalizedBody on Event {
   String get bodyWithoutReplyFallback =>
       calcUnlocalizedBody(hideReply: true, plaintextBody: true).trim();
 
+  /// Get the original content before redaction, if available.
+  /// When a message is redacted, the SDK preserves the original content
+  /// in unsigned.original_content so clients can implement anti-redaction.
+  Map<String, dynamic>? get originalContentBeforeRedaction {
+    if (!redacted) return null;
+    final result = unsigned?['original_content'];
+    if (result is Map<String, dynamic>) return result;
+    return null;
+  }
+
+  /// Get the original body text from before redaction, falling back to the
+  /// current body if not redacted or original content is unavailable.
+  String get bodyBeforeRedaction =>
+      originalContentBeforeRedaction?.tryGet<String>('body') ??
+      bodyWithoutReplyFallback;
+
+  /// Get the original formatted body from before redaction.
+  String? get formattedBodyBeforeRedaction =>
+      originalContentBeforeRedaction?.tryGet<String>('formatted_body');
+
   bool isBigEmojiMessage(Set<String> bigEmojis) {
     if (redacted || !Event.textOnlyMessageTypes.contains(messageType)) {
       return false;
