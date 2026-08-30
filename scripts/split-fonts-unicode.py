@@ -24,6 +24,7 @@ import pathlib
 import sys
 import subprocess
 import argparse
+import re
 
 # Unicode CJK 区块定义
 CJK_BLOCKS = {
@@ -144,6 +145,15 @@ def collect_chars_from_codebase(root_dir, block_config):
             except:
                 pass
 
+    for dart_file in (root_dir / "lib").rglob("*.dart"):
+        try:
+            content = dart_file.read_text(encoding='utf-8')
+        except Exception:
+            continue
+        for ch in content:
+            if ch in chars:
+                actual_chars.add(ch)
+
     # 如果是 base 块，添加 GB2312 常用字
     if 'gb2312_level' in block_config:
         gb_chars = load_gb2312_chars(block_config['gb2312_level'])
@@ -159,6 +169,25 @@ def collect_chars_from_codebase(root_dir, block_config):
     if block_config.get('name') == 'Emoji-Base':
         actual_chars.add('😀')  # 保底
         actual_chars.update(['‍', '️', '⃣'])  # Emoji 组合符
+
+    if block_config.get('name', '').startswith('Emoji-'):
+        emoji_file = root_dir / "lib" / "utils" / "unicode_17_emoji_set.dart"
+        if emoji_file.exists():
+            content = emoji_file.read_text(encoding='utf-8')
+            for match in re.finditer(r"Emoji\('([^']+)'", content):
+                for ch in match.group(1):
+                    if ch in chars or ord(ch) in (0x200D, 0xFE0F, 0x20E3):
+                        actual_chars.add(ch)
+
+        # Preserve skin tone modifiers and regional indicators that are part of
+        # common emoji sequences even when the sequence base sits in another
+        # range.
+        if block_config.get('name') == 'Emoji-Extended':
+            for cp in range(0x1F1E6, 0x1F1FF + 1):
+                actual_chars.add(chr(cp))
+            for cp in range(0x1F3FB, 0x1F3FF + 1):
+                actual_chars.add(chr(cp))
+            actual_chars.update(['‍', '️', '⃣'])
 
     return actual_chars if actual_chars else chars
 
@@ -234,8 +263,8 @@ def main():
     args = parser.parse_args()
 
     root_dir = args.root.resolve()
-    source_dir = args.source_dir or root_dir / 'assets' / 'fonts'
-    target_dir = args.target_dir or source_dir
+    source_dir = args.source_dir or root_dir / 'tooling' / 'fonts'
+    target_dir = args.target_dir or root_dir / 'assets' / 'fonts'
 
     if not ensure_fonttools():
         return 1
