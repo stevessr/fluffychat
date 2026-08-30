@@ -7,18 +7,24 @@ TARGET_FONT_DIR="${1:-${ROOT_DIR}/build/web/assets/assets/fonts}"
 
 SANS_FONT_NAME="NotoSansSC-Variable.ttf"
 EMOJI_FONT_NAME="NotoColorEmoji-Regular.ttf"
+CODE_FONT_NAME="GoogleSansCode-Regular.ttf"
+CODE_ITALIC_FONT_NAME="GoogleSansCode-Italic.ttf"
 
 SANS_SOURCE="${SOURCE_FONT_DIR}/${SANS_FONT_NAME}"
 EMOJI_SOURCE="${SOURCE_FONT_DIR}/${EMOJI_FONT_NAME}"
+CODE_SOURCE="${SOURCE_FONT_DIR}/${CODE_FONT_NAME}"
+CODE_ITALIC_SOURCE="${SOURCE_FONT_DIR}/${CODE_ITALIC_FONT_NAME}"
 SANS_TARGET="${TARGET_FONT_DIR}/${SANS_FONT_NAME}"
 EMOJI_TARGET="${TARGET_FONT_DIR}/${EMOJI_FONT_NAME}"
+CODE_TARGET="${TARGET_FONT_DIR}/${CODE_FONT_NAME}"
+CODE_ITALIC_TARGET="${TARGET_FONT_DIR}/${CODE_ITALIC_FONT_NAME}"
 
 if [ ! -d "${TARGET_FONT_DIR}" ]; then
   echo "Font subset skipped: build font directory not found: ${TARGET_FONT_DIR}" >&2
   exit 0
 fi
 
-if [ ! -f "${SANS_SOURCE}" ] || [ ! -f "${EMOJI_SOURCE}" ]; then
+if [ ! -f "${SANS_SOURCE}" ] || [ ! -f "${EMOJI_SOURCE}" ] || [ ! -f "${CODE_SOURCE}" ] || [ ! -f "${CODE_ITALIC_SOURCE}" ]; then
   echo "Font subset skipped: source fonts not found in ${SOURCE_FONT_DIR}" >&2
   exit 0
 fi
@@ -179,3 +185,5 @@ after_emoji_size="$(stat -c%s "${EMOJI_TARGET}")"
 echo "Font subset done:"
 echo "  ${SANS_FONT_NAME}: ${before_sans_size} -> ${after_sans_size} bytes"
 echo "  ${EMOJI_FONT_NAME}: ${before_emoji_size} -> ${after_emoji_size} bytes"
+echo "  ${CODE_FONT_NAME}: ${before_code_size} -> ${after_code_size} bytes"
+echo "  ${CODE_ITALIC_FONT_NAME}: ${before_code_italic_size} -> ${after_code_italic_size} bytes"
