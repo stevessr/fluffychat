@@ -1,5 +1,7 @@
-import 'dart:typed_data';
+import 'dart:convert';
 
+import 'package:archive/archive.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 
@@ -38,11 +40,35 @@ class GoogleEmojiKitchenImage {
       MatrixImageFile(bytes: bytes, name: fileName, mimeType: 'image/png');
 }
 
+class GoogleEmojiKitchenSuggestion {
+  final String codepointKey;
+  final String emoji;
+  final String date;
+  final Uri sourceUrl;
+
+  const GoogleEmojiKitchenSuggestion({
+    required this.codepointKey,
+    required this.emoji,
+    required this.date,
+    required this.sourceUrl,
+  });
+}
+
 Future<GoogleEmojiKitchenImage?> resolveGoogleEmojiKitchenMix(
   String firstEmoji,
   String secondEmoji,
 ) {
   return GoogleEmojiKitchenResolver.instance.resolve(firstEmoji, secondEmoji);
+}
+
+Future<List<GoogleEmojiKitchenSuggestion>> resolveGoogleEmojiKitchenSuggestions(
+  String firstEmoji, {
+  int limit = 8,
+}) {
+  return GoogleEmojiKitchenResolver.instance.suggestions(
+    firstEmoji,
+    limit: limit,
+  );
 }
 
 class GoogleEmojiKitchenResolver {
@@ -52,24 +78,40 @@ class GoogleEmojiKitchenResolver {
       GoogleEmojiKitchenResolver._();
 
   static final http.Client _client = http.Client();
-  final Map<String, Future<GoogleEmojiKitchenImage?>> _cache = {};
+  final Map<String, Future<GoogleEmojiKitchenImage?>> _resultCache = {};
+  final Map<String, Future<List<GoogleEmojiKitchenSuggestion>>>
+  _suggestionCache = {};
+  final Map<String, Future<_EmojiKitchenShard?>> _shardCache = {};
 
   Future<GoogleEmojiKitchenImage?> resolve(
     String firstEmoji,
     String secondEmoji,
   ) {
     final cacheKey = '$firstEmoji\u0000$secondEmoji';
-    return _cache.putIfAbsent(
+    return _resultCache.putIfAbsent(
       cacheKey,
       () => _resolve(firstEmoji, secondEmoji),
     );
+  }
+
+  Future<List<GoogleEmojiKitchenSuggestion>> suggestions(
+    String firstEmoji, {
+    int limit = 8,
+  }) {
+    final cacheKey = '$firstEmoji\u0000$limit';
+    return _suggestionCache.putIfAbsent(cacheKey, () async {
+      final shard = await _loadShardForEmoji(firstEmoji);
+      if (shard == null) return const [];
+      final firstCodepointKey = _emojiToCodepointKey(firstEmoji);
+      return shard.suggestions(firstCodepointKey, limit: limit);
+    });
   }
 
   Future<GoogleEmojiKitchenImage?> _resolve(
     String firstEmoji,
     String secondEmoji,
   ) async {
-    final direct = await _probePair(
+    final direct = await _resolveOrdered(
       requestedFirstEmoji: firstEmoji,
       requestedSecondEmoji: secondEmoji,
       resolvedFirstEmoji: firstEmoji,
@@ -82,7 +124,7 @@ class GoogleEmojiKitchenResolver {
       return null;
     }
 
-    return _probePair(
+    return _resolveOrdered(
       requestedFirstEmoji: firstEmoji,
       requestedSecondEmoji: secondEmoji,
       resolvedFirstEmoji: secondEmoji,
@@ -91,93 +133,147 @@ class GoogleEmojiKitchenResolver {
     );
   }
 
-  Future<GoogleEmojiKitchenImage?> _probePair({
+  Future<GoogleEmojiKitchenImage?> _resolveOrdered({
     required String requestedFirstEmoji,
     required String requestedSecondEmoji,
     required String resolvedFirstEmoji,
     required String resolvedSecondEmoji,
     required bool usedReverseOrder,
   }) async {
-    final resolvedFirstCodepoint = _emojiToCodepointPath(resolvedFirstEmoji);
-    final resolvedSecondCodepoint = _emojiToCodepointPath(resolvedSecondEmoji);
+    final resolvedFirstCodepoint = _emojiToCodepointKey(resolvedFirstEmoji);
+    final resolvedSecondCodepoint = _emojiToCodepointKey(resolvedSecondEmoji);
 
-    for (final date in _candidateReleaseDates) {
-      final url = Uri.parse(
-        'https://www.gstatic.com/android/keyboard/emojikitchen/$date/'
-        '$resolvedFirstCodepoint/${resolvedFirstCodepoint}_$resolvedSecondCodepoint.png',
-      );
-
-      try {
-        final response = await _client.get(url);
-        if (response.statusCode != 200) continue;
-        if (response.bodyBytes.isEmpty) continue;
-
-        return GoogleEmojiKitchenImage(
-          requestedFirstEmoji: requestedFirstEmoji,
-          requestedSecondEmoji: requestedSecondEmoji,
-          resolvedFirstEmoji: resolvedFirstEmoji,
-          resolvedSecondEmoji: resolvedSecondEmoji,
-          resolvedFirstCodepoint: resolvedFirstCodepoint,
-          resolvedSecondCodepoint: resolvedSecondCodepoint,
-          date: date,
-          sourceUrl: url,
-          bytes: response.bodyBytes,
-          usedReverseOrder: usedReverseOrder,
-        );
-      } catch (_) {
-        continue;
-      }
+    final shard = await _loadShardForCodepoint(resolvedFirstCodepoint);
+    final sourceUrlString = shard?.lookup(
+      resolvedFirstCodepoint,
+      resolvedSecondCodepoint,
+    );
+    if (sourceUrlString == null) {
+      return null;
     }
-    return null;
+
+    final sourceUrl = Uri.parse(sourceUrlString);
+    final response = await _client.get(sourceUrl);
+    if (response.statusCode != 200 || response.bodyBytes.isEmpty) {
+      return null;
+    }
+
+    return GoogleEmojiKitchenImage(
+      requestedFirstEmoji: requestedFirstEmoji,
+      requestedSecondEmoji: requestedSecondEmoji,
+      resolvedFirstEmoji: resolvedFirstEmoji,
+      resolvedSecondEmoji: resolvedSecondEmoji,
+      resolvedFirstCodepoint: resolvedFirstCodepoint,
+      resolvedSecondCodepoint: resolvedSecondCodepoint,
+      date: _dateFromUrl(sourceUrl),
+      sourceUrl: sourceUrl,
+      bytes: response.bodyBytes,
+      usedReverseOrder: usedReverseOrder,
+    );
   }
 
-  String _emojiToCodepointPath(String emoji) =>
-      emoji.runes.map((rune) => 'u${rune.toRadixString(16)}').join('-');
+  Future<_EmojiKitchenShard?> _loadShardForEmoji(String emoji) {
+    return _loadShardForCodepoint(_emojiToCodepointKey(emoji));
+  }
+
+  Future<_EmojiKitchenShard?> _loadShardForCodepoint(String codepointKey) {
+    final shardKey = _shardKeyForCodepoint(codepointKey);
+    return _shardCache.putIfAbsent(shardKey, () async {
+      try {
+        final data = await rootBundle.load(
+          'assets/emoji_kitchen_index/$shardKey.json.gz',
+        );
+        final decoded = utf8.decode(
+          GZipDecoder().decodeBytes(
+            data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+          ),
+        );
+        final json = jsonDecode(decoded);
+        if (json is! Map<String, dynamic>) return null;
+        return _EmojiKitchenShard.fromJson(json);
+      } catch (_) {
+        return null;
+      }
+    });
+  }
+
+  String _emojiToCodepointKey(String emoji) =>
+      emoji.runes.map((rune) => rune.toRadixString(16)).join('-');
+
+  String _shardKeyForCodepoint(String codepointKey) =>
+      codepointKey.split('-').first.padLeft(4, '0').substring(0, 4);
+
+  String _dateFromUrl(Uri url) {
+    if (url.pathSegments.length >= 4) {
+      return url.pathSegments[3];
+    }
+    return 'unknown';
+  }
 }
 
-const List<String> _candidateReleaseDates = <String>[
-  '20260202',
-  '20260128',
-  '20251029',
-  '20250731',
-  '20250519',
-  '20250501',
-  '20250430',
-  '20250204',
-  '20250130',
-  '20241023',
-  '20241021',
-  '20240715',
-  '20240610',
-  '20240530',
-  '20240214',
-  '20240206',
-  '20231128',
-  '20231113',
-  '20230821',
-  '20230818',
-  '20230803',
-  '20230426',
-  '20230421',
-  '20230418',
-  '20230405',
-  '20230301',
-  '20230221',
-  '20230216',
-  '20230127',
-  '20230126',
-  '20230118',
-  '20221107',
-  '20221101',
-  '20220823',
-  '20220815',
-  '20220506',
-  '20220406',
-  '20220203',
-  '20220110',
-  '20211115',
-  '20210831',
-  '20210521',
-  '20210218',
-  '20201001',
-];
+class _EmojiKitchenShard {
+  final Map<String, Map<String, String>> entries;
+
+  const _EmojiKitchenShard(this.entries);
+
+  factory _EmojiKitchenShard.fromJson(Map<String, dynamic> json) {
+    return _EmojiKitchenShard({
+      for (final entry in json.entries) entry.key: _castStringMap(entry.value),
+    });
+  }
+
+  String? lookup(String baseCodepoint, String otherCodepoint) =>
+      entries[baseCodepoint]?[otherCodepoint];
+
+  List<GoogleEmojiKitchenSuggestion> suggestions(
+    String baseCodepoint, {
+    int limit = 8,
+  }) {
+    final matches = entries[baseCodepoint];
+    if (matches == null || matches.isEmpty) return const [];
+
+    final suggestions =
+        matches.entries
+            .map(
+              (entry) => GoogleEmojiKitchenSuggestion(
+                codepointKey: entry.key,
+                emoji: _emojiFromCodepointKey(entry.key),
+                date: _dateFromUrl(entry.value),
+                sourceUrl: Uri.parse(entry.value),
+              ),
+            )
+            .toList(growable: false)
+          ..sort((a, b) {
+            final dateCompare = b.date.compareTo(a.date);
+            if (dateCompare != 0) return dateCompare;
+            return a.codepointKey.compareTo(b.codepointKey);
+          });
+
+    if (suggestions.length <= limit) return suggestions;
+    return suggestions.sublist(0, limit);
+  }
+
+  static Map<String, String> _castStringMap(Object? value) {
+    if (value is! Map) return const {};
+    return {
+      for (final entry in value.entries)
+        if (entry.key is String && entry.value is String)
+          entry.key as String: entry.value as String,
+    };
+  }
+
+  static String _emojiFromCodepointKey(String codepointKey) {
+    final codepoints = codepointKey.split('-').map((part) {
+      return int.parse(part, radix: 16);
+    });
+    return String.fromCharCodes(codepoints);
+  }
+
+  static String _dateFromUrl(String url) {
+    final uri = Uri.parse(url);
+    if (uri.pathSegments.length >= 4) {
+      return uri.pathSegments[3];
+    }
+    return 'unknown';
+  }
+}
