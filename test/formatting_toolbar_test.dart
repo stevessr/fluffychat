@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('uses the composer surface color', (tester) async {
+  testWidgets('merges into the composer surface instead of painting its own', (tester) async {
     final controller = TextEditingController();
     addTearDown(controller.dispose);
     final theme = ThemeData(
@@ -38,6 +38,8 @@ void main() {
     );
     final decoration = toolbar.decoration! as BoxDecoration;
 
-    expect(decoration.color, theme.colorScheme.surfaceContainer);
+    // The toolbar must not paint an opaque surface color of its own; it sits
+    // on the parent Material so it reads as the same surface as the composer.
+    expect(decoration.color, Colors.transparent);
   });
 }
