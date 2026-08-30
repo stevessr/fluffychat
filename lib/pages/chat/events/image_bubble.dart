@@ -146,7 +146,8 @@ class _ImageBubbleState extends State<ImageBubble> {
                           fit: widget.fit,
                           animated: widget.animated,
                           isThumbnail: widget.thumbnailOnly,
-                          placeholder: widget.event.messageType == MessageTypes.Sticker
+                          placeholder:
+                              widget.event.messageType == MessageTypes.Sticker
                               ? null
                               : _buildPlaceholder,
                         )
@@ -161,7 +162,9 @@ class _ImageBubbleState extends State<ImageBubble> {
                       child: MediaSpoilerOverlay(label: spoilerLabel),
                     ),
                   if (fileSendingStatus != null)
-                    FileSendStatusIndicator(fileSendingStatus: fileSendingStatus),
+                    FileSendStatusIndicator(
+                      fileSendingStatus: fileSendingStatus,
+                    ),
                 ],
               ),
             ),
