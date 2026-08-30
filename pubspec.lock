@@ -37,10 +37,18 @@ packages:
     dependency: transitive
     description:
       name: android_file_picker
-      sha256: "665a5a57dfca27f91a715d300e4852a784f9f98e503dcff281bec9afb55767be"
+      sha256: "3384b62685e04ce7afeaf57e94bf29bc167e32240be6c6cb382a94632aec0241"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1"
+    version: "1.0.2"
+  animations:
+    dependency: "direct main"
+    description:
+      name: animations
+      sha256: "9cb469212ea51be27097f23b519d594c01171721347b55df9334fff653659e7f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.0"
   ansicolor:
     dependency: transitive
     description:
@@ -1408,10 +1416,10 @@ packages:
     dependency: transitive
     description:
       name: native_toolchain_cmake
-      sha256: de90e8952bad0684bdcff4d674c53d961f5cd1fdcf3a0255a669a35986c4ac1d
+      sha256: "8ba223410102665483e873b83d2156720233a6a0181c07f9dc41cb2e961336b0"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.7"
+    version: "0.3.2"
   nested:
     dependency: transitive
     description:
@@ -2466,13 +2474,14 @@ packages:
     source: hosted
     version: "3.0.3"
   webcrypto:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: webcrypto
-      sha256: "9885ed99a846191542dd6ca820c83a098117df56be57453832233a3fef68f3f2"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.6.1"
+      path: "."
+      ref: master
+      resolved-ref: cfba3b87aabf583b9133268d127e89627390e907
+      url: "https://github.com/google/webcrypto.dart.git"
+    source: git
+    version: "0.6.2-wip"
   webdriver:
     dependency: transitive
     description:
