@@ -5,7 +5,6 @@
 
 import 'dart:ui' as ui;
 
-import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
@@ -26,6 +25,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 
 import '../../utils/stream_extension.dart';
+import 'chat_drop_target.dart';
 import 'chat_emoji_picker.dart';
 import 'chat_input_row.dart';
 import 'formatting_toolbar.dart';
@@ -338,9 +338,9 @@ class ChatView extends StatelessWidget {
                   );
                   return true;
                 },
-                child: DropTarget(
-                  onDragDone: controller.onDragDone,
-                  onDragEntered: controller.onDragEntered,
+                child: ChatDropTarget(
+                  onFilesDropped: controller.onFilesDropped,
+                  onDragEntered: () => controller.onDragEntered(null),
                   onDragExited: controller.onDragExited,
                   child: SafeArea(
                     top: false,
