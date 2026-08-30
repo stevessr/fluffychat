@@ -1,6 +1,9 @@
 name: Build Android APK
 
 on:
+  push:
+    branches:
+      - ci/apk-build-20260830-eaf35958
   workflow_dispatch:
     inputs:
       build_debug:
