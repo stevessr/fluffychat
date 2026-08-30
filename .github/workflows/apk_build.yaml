@@ -1,0 +1,35 @@
+name: APK Build Workflow
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: apk_build
+  cancel-in-progress: true
+
+jobs:
+  build_apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .tool_versions.yaml
+          cache: true
+      - name: Prepare Google Services
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: bash ./scripts/setup-google-services.sh
+      - name: Enable Firebase Messaging
+        run: bash ./scripts/add-firebase-messaging.sh
+      - uses: ./.github/actions/free_up_space
+      - uses: moonrepo/setup-rust@v1
+      - run: flutter pub get
+      - name: Build APK
+        run: flutter build apk --release --target-platform android-arm,android-arm64
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: fluffychat-release-apk
+          path: build/app/outputs/**/app-release.apk
+          if-no-files-found: error
