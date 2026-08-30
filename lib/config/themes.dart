@@ -19,7 +19,9 @@ abstract class FluffyThemes {
     'GoogleSansCode',
     'GoogleSansCodeItalic',
     'Unicode18',
+    'Unicode18Extended',
     'NotoColorEmoji',
+    'NotoColorEmojiExtended',
   ];
 
   static bool isColumnModeByWidth(double width) =>

@@ -23,6 +23,7 @@ import 'package:fluffychat/pages/chat/trust_user_key_dialog.dart';
 import 'package:fluffychat/pages/chat/utils/web_file_to_x_file.dart';
 import 'package:fluffychat/pages/chat_details/chat_details.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
+import 'package:fluffychat/utils/dynamic_font_loader.dart';
 import 'package:fluffychat/utils/error_reporter.dart';
 import 'package:fluffychat/utils/file_selector.dart';
 import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
@@ -401,6 +402,9 @@ class ChatController extends State<ChatPageWithRoom>
 
     scrollController.addListener(_updateScrollController);
     inputFocus.addListener(_inputFocusListener);
+
+    // 预加载扩展 Emoji 字体用于聊天消息
+    DynamicFontLoader().preloadExtendedEmoji();
 
     _loadDraft();
     WidgetsBinding.instance.addPostFrameCallback((_) {
