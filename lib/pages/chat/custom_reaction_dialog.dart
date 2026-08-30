@@ -1,52 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
-import 'package:emoji_picker_flutter/locales/default_emoji_set_locale.dart';
 import 'package:matrix/matrix.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/unicode_17_emoji_set.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
-
-List<CategoryEmoji> _emojiSetWithUnicode17(Locale locale) {
-  final baseSet = getDefaultEmojiLocale(locale);
-  final baseCategories = {
-    for (final category in baseSet) category.category,
-  };
-  final emojiByCategory = <Category, List<Emoji>>{
-    for (final category in baseSet)
-      category.category: List<Emoji>.from(category.emoji),
-  };
-  final emojiValuesByCategory = <Category, Set<String>>{
-    for (final category in baseSet)
-      category.category: category.emoji.map((emoji) => emoji.emoji).toSet(),
-  };
-
-  for (final category in unicode17EmojiSet) {
-    final list = emojiByCategory.putIfAbsent(category.category, () => []);
-    final existing =
-        emojiValuesByCategory.putIfAbsent(category.category, () => <String>{});
-    for (final emoji in category.emoji) {
-      if (existing.add(emoji.emoji)) {
-        list.add(emoji);
-      }
-    }
-  }
-
-  final merged = <CategoryEmoji>[
-    for (final category in baseSet)
-      CategoryEmoji(category.category, emojiByCategory[category.category]!),
-  ];
-
-  for (final category in emojiByCategory.entries) {
-    if (!baseCategories.contains(category.key)) {
-      merged.add(CategoryEmoji(category.key, category.value));
-    }
-  }
-
-  return merged;
-}
 
 class CustomReactionDialog extends StatefulWidget {
   final Room room;
@@ -88,7 +47,7 @@ class _CustomReactionDialogState extends State<CustomReactionDialog>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -100,7 +59,6 @@ class _CustomReactionDialogState extends State<CustomReactionDialog>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = L10n.of(context);
 
     return Scaffold(
@@ -109,7 +67,6 @@ class _CustomReactionDialogState extends State<CustomReactionDialog>
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(text: l10n.emojis),
             Tab(text: l10n.customReactionEmotesTab),
             Tab(text: l10n.customReactionTextTab),
           ],
@@ -118,37 +75,6 @@ class _CustomReactionDialogState extends State<CustomReactionDialog>
       body: TabBarView(
         controller: _tabController,
         children: [
-          // Emoji tab
-          EmojiPicker(
-            onEmojiSelected: (_, emoji) =>
-                Navigator.of(context).pop(emoji.emoji),
-            config: Config(
-              checkPlatformCompatibility: false,
-              locale: Localizations.localeOf(context),
-              emojiSet: _emojiSetWithUnicode17,
-              emojiTextStyle: const TextStyle(
-                fontFamily: 'NotoColorEmoji',
-              ),
-              emojiViewConfig: const EmojiViewConfig(
-                backgroundColor: Colors.transparent,
-              ),
-              bottomActionBarConfig:
-                  const BottomActionBarConfig(enabled: false),
-              categoryViewConfig: CategoryViewConfig(
-                initCategory: Category.SMILEYS,
-                backspaceColor: theme.colorScheme.primary,
-                iconColor: theme.colorScheme.primary.withAlpha(128),
-                iconColorSelected: theme.colorScheme.primary,
-                indicatorColor: theme.colorScheme.primary,
-                backgroundColor: theme.colorScheme.surface,
-              ),
-              skinToneConfig: SkinToneConfig(
-                dialogBackgroundColor: Color.lerp(theme.colorScheme.surface,
-                    theme.colorScheme.primaryContainer, 0.75)!,
-                indicatorColor: theme.colorScheme.onSurface,
-              ),
-            ),
-          ),
           // Emotes tab
           _EmotePickerGrid(
             room: widget.room,
@@ -200,7 +126,7 @@ class _CustomReactionDialogState extends State<CustomReactionDialog>
   }
 }
 
-class _EmotePickerGrid extends StatelessWidget {
+class _EmotePickerGrid extends StatefulWidget {
   final Room room;
   final Set<String> disabledKeys;
   final TextEditingController searchController;
@@ -211,6 +137,14 @@ class _EmotePickerGrid extends StatelessWidget {
     required this.searchController,
   });
 
+  @override
+  State<_EmotePickerGrid> createState() => _EmotePickerGridState();
+}
+
+class _EmotePickerGridState extends State<_EmotePickerGrid> {
+  final AutoScrollController _scrollController = AutoScrollController();
+  int? _selectedSectionIndex;
+
   String _packDisplayName(ImagePackContent pack, String id) {
     final displayName = pack.pack.displayName?.trim();
     if (displayName == null || displayName.isEmpty) {
@@ -219,33 +153,160 @@ class _EmotePickerGrid extends StatelessWidget {
     return displayName;
   }
 
+  Future<void> _scrollToTop() async {
+    if (!_scrollController.hasClients) return;
+    await _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  Future<void> _scrollToSection(int index) async {
+    await _scrollController.scrollToIndex(
+      index,
+      preferPosition: AutoScrollPosition.begin,
+      duration: const Duration(milliseconds: 250),
+    );
+  }
+
+  void _handleSearchChanged(String value) => setState(() {});
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  List<_EmotePackEntry> _collectEmotePacks(Room room) {
+    final client = room.client;
+    final packs = <_EmotePackEntry>[];
+    final seenIds = <String>{};
+
+    void addImagePack(
+      BasicEvent? event, {
+      required String id,
+      Room? sourceRoom,
+      String? stateKey,
+    }) {
+      if (event == null) return;
+      if (!seenIds.add(id)) return;
+
+      final rawPack = event.parsedImagePackContent;
+      final filteredImages = <String, ImagePackImageContent>{};
+      for (final entry in rawPack.images.entries) {
+        final image = entry.value;
+        final imageUsage = image.usage ?? rawPack.pack.usage;
+        if (imageUsage != null &&
+            !imageUsage.contains(ImagePackUsage.emoticon)) {
+          continue;
+        }
+        filteredImages[entry.key] = image;
+      }
+      if (filteredImages.isEmpty) return;
+
+      final pack = ImagePackContent(
+        images: filteredImages,
+        pack: ImagePackPackContent(
+          displayName: rawPack.pack.displayName,
+          avatarUrl: rawPack.pack.avatarUrl,
+          usage: rawPack.pack.usage,
+          attribution: rawPack.pack.attribution,
+        ),
+      );
+
+      final fallbackName = () {
+        if (sourceRoom == null) return id;
+        final baseName = sourceRoom.getLocalizedDisplayname();
+        if (stateKey != null && stateKey.isNotEmpty) {
+          return '$baseName - $stateKey';
+        }
+        return baseName;
+      }();
+
+      final displayName = pack.pack.displayName?.trim();
+      if (displayName == null || displayName.isEmpty) {
+        pack.pack.displayName = fallbackName;
+      }
+      if (pack.pack.avatarUrl == null ||
+          pack.pack.avatarUrl.toString() == '.::') {
+        pack.pack.avatarUrl = sourceRoom?.avatar;
+      }
+
+      packs.add(_EmotePackEntry(id, pack));
+    }
+
+    addImagePack(
+      client.accountData['im.ponies.user_emotes'],
+      id: 'user',
+      stateKey: 'user',
+    );
+
+    final packRooms = client.accountData['im.ponies.emote_rooms'];
+    final rooms = packRooms?.content.tryGetMap<String, Object?>('rooms');
+    if (packRooms != null && rooms != null) {
+      for (final roomEntry in rooms.entries) {
+        final roomId = roomEntry.key;
+        final roomValue = roomEntry.value;
+        final externalRoom = client.getRoomById(roomId);
+        if (externalRoom == null || roomValue is! Map<String, Object?>) {
+          continue;
+        }
+        for (final stateKeyEntry in roomValue.entries) {
+          final stateKey = stateKeyEntry.key;
+          addImagePack(
+            externalRoom.getState('im.ponies.room_emotes', stateKey),
+            id: 'room:$roomId:$stateKey',
+            sourceRoom: externalRoom,
+            stateKey: stateKey,
+          );
+        }
+      }
+    }
+
+    final allRoomEmotes = room.states['im.ponies.room_emotes'];
+    if (allRoomEmotes != null) {
+      for (final entry in allRoomEmotes.entries) {
+        final stateKey = entry.key;
+        addImagePack(
+          entry.value,
+          id: 'room:${room.id}:$stateKey',
+          sourceRoom: room,
+          stateKey: stateKey,
+        );
+      }
+    }
+
+    return packs;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context);
-    final emotePacks = room.getImagePacks(ImagePackUsage.emoticon);
+    final emotePacks = _collectEmotePacks(widget.room);
 
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: TextField(
-            controller: searchController,
+            controller: widget.searchController,
             decoration: InputDecoration(
               hintText: l10n.customReactionEmoteSearchHint,
               prefixIcon: const Icon(Icons.search_outlined),
               border: const OutlineInputBorder(),
               isDense: true,
             ),
-            onChanged: (_) => (context as Element).markNeedsBuild(),
+            onChanged: _handleSearchChanged,
           ),
         ),
         Expanded(
           child: Builder(builder: (context) {
-            final query = searchController.text.trim().toLowerCase();
+            final query = widget.searchController.text.trim().toLowerCase();
             final sections = <_EmotePackSection>[];
-            for (final entry in emotePacks.entries) {
+            for (final entry in emotePacks) {
               final emotes = <(String key, Uri uri)>[];
-              for (final emote in entry.value.images.entries) {
+              for (final emote in entry.pack.images.entries) {
                 if (query.isNotEmpty &&
                     !emote.key.toLowerCase().contains(query)) {
                   continue;
@@ -255,8 +316,8 @@ class _EmotePickerGrid extends StatelessWidget {
               if (emotes.isNotEmpty) {
                 sections.add(
                   _EmotePackSection(
-                    id: entry.key,
-                    pack: entry.value,
+                    id: entry.id,
+                    pack: entry.pack,
                     emotes: emotes,
                   ),
                 );
@@ -265,79 +326,156 @@ class _EmotePickerGrid extends StatelessWidget {
             if (sections.isEmpty) {
               return Center(child: Text(l10n.noEmotesFound));
             }
-            return ListView.builder(
-              padding: const EdgeInsets.all(8),
-              itemCount: sections.length,
-              itemBuilder: (context, sectionIndex) {
-                final section = sections[sectionIndex];
-                final packName = _packDisplayName(section.pack, section.id);
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (sectionIndex != 0) const SizedBox(height: 12),
-                    ListTile(
-                      dense: true,
-                      leading: Avatar(
-                        mxContent: section.pack.pack.avatarUrl,
-                        name: packName,
-                        client: room.client,
+
+            final selectedSectionIndex =
+                (_selectedSectionIndex != null &&
+                        _selectedSectionIndex! >= 0 &&
+                        _selectedSectionIndex! < sections.length)
+                    ? _selectedSectionIndex
+                    : null;
+
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.customReactionEmotesJumpLabel,
+                        style: Theme.of(context).textTheme.labelMedium,
                       ),
-                      title: Text(packName),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                    ),
-                    GridView.builder(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 6,
-                        crossAxisSpacing: 8,
-                        mainAxisSpacing: 8,
-                      ),
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: section.emotes.length,
-                      itemBuilder: (context, i) {
-                        final (shortcode, uri) = section.emotes[i];
-                        final key = uri.toString();
-                        final disabled = disabledKeys.contains(key);
-                        return InkWell(
-                          onTap: disabled
-                              ? null
-                              : () => Navigator.of(context).pop(key),
-                          child: Opacity(
-                            opacity: disabled ? 0.4 : 1.0,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Expanded(
-                                  child: Center(
-                                    child: MxcImage(
-                                      uri: uri,
-                                      width: 40,
-                                      height: 40,
-                                      animated: false,
-                                      isThumbnail: false,
+                      const SizedBox(height: 8),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            ChoiceChip(
+                              label: Text(l10n.customReactionEmotesJumpAll),
+                              selected: selectedSectionIndex == null,
+                              onSelected: (_) {
+                                setState(() {
+                                  _selectedSectionIndex = null;
+                                });
+                                _scrollToTop();
+                              },
+                            ),
+                            for (var sectionIndex = 0;
+                                sectionIndex < sections.length;
+                                sectionIndex++)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: ChoiceChip(
+                                  label: Text(
+                                    _packDisplayName(
+                                      sections[sectionIndex].pack,
+                                      sections[sectionIndex].id,
                                     ),
                                   ),
+                                  selected: selectedSectionIndex == sectionIndex,
+                                  onSelected: (_) {
+                                    setState(() {
+                                      _selectedSectionIndex = sectionIndex;
+                                    });
+                                    _scrollToSection(sectionIndex);
+                                  },
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  shortcode,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontSize: 11),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                );
-              },
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(8),
+                    itemCount: sections.length,
+                    itemBuilder: (context, sectionIndex) {
+                      return AutoScrollTag(
+                        key: ValueKey(sections[sectionIndex].id),
+                        controller: _scrollController,
+                        index: sectionIndex,
+                        child: _buildSection(context, sections, sectionIndex),
+                      );
+                    },
+                  ),
+                ),
+              ],
             );
           }),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSection(
+    BuildContext context,
+    List<_EmotePackSection> sections,
+    int sectionIndex,
+  ) {
+    final section = sections[sectionIndex];
+    final packName = _packDisplayName(section.pack, section.id);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (sectionIndex != 0) const SizedBox(height: 12),
+        ListTile(
+          dense: true,
+          leading: Avatar(
+            mxContent: section.pack.pack.avatarUrl,
+            name: packName,
+            client: widget.room.client,
+          ),
+          title: Text(packName),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+        ),
+        GridView.builder(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 6,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+          ),
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: section.emotes.length,
+          itemBuilder: (context, i) {
+            final (shortcode, uri) = section.emotes[i];
+            final key = uri.toString();
+            final disabled = widget.disabledKeys.contains(key);
+            return InkWell(
+              onTap: disabled ? null : () => Navigator.of(context).pop(key),
+              child: Opacity(
+                opacity: disabled ? 0.4 : 1.0,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Expanded(
+                      child: Center(
+                        child: MxcImage(
+                          uri: uri,
+                          width: 40,
+                          height: 40,
+                          animated: false,
+                          isThumbnail: false,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      shortcode,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 11),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ],
     );
@@ -354,4 +492,11 @@ class _EmotePackSection {
     required this.pack,
     required this.emotes,
   });
+}
+
+class _EmotePackEntry {
+  final String id;
+  final ImagePackContent pack;
+
+  const _EmotePackEntry(this.id, this.pack);
 }
