@@ -17,21 +17,24 @@ Web 端字体加载顺序现在是：
 
 现在脚本已删除这个完整复制逻辑，`*-Extended.ttf` 完整副本不会再生成。
 
-## Runtime 字体资产
+## Web Runtime 字体资产
 
-当前 `assets/fonts/` 只保留 runtime 小字体与本地兜底分块：
+Web 首屏 `FontManifest.json` 只注册必要字体：
 
-- `NotoSansSC-Base.ttf`
-- `NotoSansSC-CJK-Base.ttf`
+- `NotoSansSC-Base.ttf`：保留完整界面翻译所需的本地 CJK 兜底
+- `NotoColorEmoji-Emoji-Base.ttf`：小型启动 Emoji 子集
+- `GoogleSansCode.ttf`
+- `GoogleSansCode-Italic.ttf`
+
+以下分块只作为普通 asset 发布，由 `SmartFontLoader` 按需加载，不阻塞首屏：
+
 - `NotoSansSC-CJK-Common.ttf`
 - `NotoSansSC-CJK-ExtA.ttf`
 - `NotoSansSC-CJK-ExtB.ttf`
 - `NotoSansSC-CJK-ExtCDE.ttf`
-- `NotoColorEmoji-Base.ttf`
-- `NotoColorEmoji-Emoji-Base.ttf`
 - `NotoColorEmoji-Emoji-Extended.ttf`
-- `GoogleSansCode.ttf`
-- `GoogleSansCode-Italic.ttf`
+
+旧的 5.6MB `NotoColorEmoji-Base.ttf` 仍可由字体生成工具重建，但不会进入 Web 构建。
 
 源字体：
 

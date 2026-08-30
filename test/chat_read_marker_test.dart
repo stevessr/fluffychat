@@ -30,27 +30,28 @@ void main() {
     );
     addTearDown(() => client.dispose(closeDatabase: true));
 
-    final room = Room(id: '!localpart:example.com', client: client)
-      ..notificationCount = 1;
+    final room = Room(id: '!localpart:example.com', client: client);
     client.rooms = [room];
     _muteRoom(client, room.id);
     expect(room.pushRuleState, PushRuleState.mentionsOnly);
 
     final timeline = await room.getTimeline(limit: 0);
     addTearDown(timeline.cancelSubscriptions);
-    timeline.events.add(
-      Event(
-        eventId: r'$latest:example.com',
-        senderId: '@bob:example.com',
-        type: EventTypes.Message,
-        room: room,
-        originServerTs: DateTime.utc(2026),
-        content: const {
-          'msgtype': MessageTypes.Text,
-          'body': 'Muted messages are still readable',
-        },
-      ),
+    final latestEvent = Event(
+      eventId: r'$latest:example.com',
+      senderId: '@bob:example.com',
+      type: EventTypes.Message,
+      room: room,
+      originServerTs: DateTime.utc(2026),
+      content: const {
+        'msgtype': MessageTypes.Text,
+        'body': 'Muted messages are still readable',
+      },
     );
+    room.lastEvent = latestEvent;
+    timeline.events.add(latestEvent);
+    expect(room.notificationCount, isZero);
+    expect(room.hasNewMessages, isTrue);
 
     final controller = _TestChatController(room)
       ..timeline = timeline
