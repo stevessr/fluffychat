@@ -117,6 +117,7 @@ flutter:
   assets:
     - assets/
     - assets/logo/mini/
+    - assets/emoji_kitchen_index/
     - assets/sounds/
     - assets/vodozemac/0.8.1/
   fonts:
