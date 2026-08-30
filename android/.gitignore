@@ -11,3 +11,9 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# The bundled dummy keystore is committed so CI/fork builds without signing
+# secrets can still produce a release APK (signed with this throwaway key).
+# Its password is hard-coded in app/build.gradle.kts, so there is no secret
+# to protect here. See app/build.gradle.kts signingConfigs.release.
+!app/dummy.keystore
