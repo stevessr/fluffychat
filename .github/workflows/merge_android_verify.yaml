@@ -42,12 +42,26 @@ jobs:
         run: flutter pub get
       - name: Build Android release APK
         run: flutter build apk --release --target-platform android-arm64
-      - name: Validate SQLCipher JNI symbols
+      - name: Validate SQLCipher runtime payload
         run: |
           set -euxo pipefail
           apk=build/app/outputs/flutter-apk/app-release.apk
+
+          # sqflite_sqlcipher must own libsqlcipher.so. If sqlite3 native assets
+          # overwrite it, the JNI entry points disappear and Android crashes as
+          # soon as the encrypted Matrix database is opened.
           unzip -p "$apk" lib/arm64-v8a/libsqlcipher.so > /tmp/libsqlcipher.so
           readelf -Ws /tmp/libsqlcipher.so | grep -E 'Java_net_sqlcipher|JNI_OnLoad'
+
+          # R8 must also preserve the Java-side SQLCipher classes referenced by JNI.
+          found=0
+          while read -r dex; do
+            if unzip -p "$apk" "$dex" | strings | grep -q 'net/sqlcipher'; then
+              found=1
+              break
+            fi
+          done < <(unzip -Z1 "$apk" | grep '^classes.*\.dex$')
+          test "$found" -eq 1
       - uses: actions/upload-artifact@v7
         with:
           name: fluffychat-runtime-fix-arm64-apk
