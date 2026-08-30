@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/utils/string_color.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:fluffychat/widgets/presence_builder.dart';
@@ -40,19 +41,69 @@ class Avatar extends StatelessWidget {
     super.key,
   });
 
-  String _calcFallbackLetters() {
-    final name = this.name?.trim();
+  /// Matches a grapheme cluster whose first code point is a letter or a digit
+  /// in any script, so CJK, Cyrillic and accented names keep a real initial.
+  static final RegExp _alphanumericGrapheme = RegExp(
+    r'^[\p{L}\p{N}]',
+    unicode: true,
+  );
+
+  /// Matches a grapheme cluster that would paint nothing: control characters,
+  /// format characters such as zero width space, and unassigned code points.
+  static final RegExp _invisibleGrapheme = RegExp(
+    r'^[\p{C}\p{Z}]',
+    unicode: true,
+  );
+
+  /// Avatars rebuild often in long lists, so keep the splitter allocated once.
+  static final RegExp _whitespace = RegExp(r'\s+');
+
+  /// The first letter/digit grapheme cluster of [word], or `null` when [word]
+  /// only consists of emoji, symbols or punctuation.
+  static String? _initialOf(String word) {
+    for (final grapheme in word.characters) {
+      if (_alphanumericGrapheme.hasMatch(grapheme)) return grapheme;
+    }
+    return null;
+  }
+
+  /// Initials for the generated fallback avatar.
+  ///
+  /// Iterates grapheme clusters instead of UTF-16 code units: slicing with
+  /// `substring(0, 1)` cuts emoji surrogate pairs in half (rendering as `�`)
+  /// and strips combining marks off letters like `é`. Leading emoji and
+  /// punctuation are skipped so names such as `🔥Alice` or `[bot] fox` still
+  /// get a readable initial; names made up entirely of emoji keep their first
+  /// grapheme cluster whole.
+  ///
+  /// The result is either a single grapheme cluster or two alphanumeric ones,
+  /// so it can never overflow the fixed size avatar.
+  @visibleForTesting
+  static String calcFallbackLetters(String? rawName) {
+    final name = rawName?.trim();
     if (name == null || name.isEmpty) return '@';
-    final words = name.split(' ');
-    if (words.length <= 1) return name.substring(0, 1);
-    return '${words.first.substring(0, 1)}${words.last.substring(0, 1)}';
+
+    final words = name.split(_whitespace)..removeWhere((word) => word.isEmpty);
+    final first = words.isEmpty ? null : _initialOf(words.first);
+    final last = words.length > 1 ? _initialOf(words.last) : null;
+
+    if (first != null && last != null) return '$first$last';
+    if (first != null) return first;
+    if (last != null) return last;
+
+    // Emoji or symbol only name: keep the leading grapheme cluster whole, but
+    // skip anything that would paint nothing at all.
+    for (final grapheme in name.characters) {
+      if (!_invisibleGrapheme.hasMatch(grapheme)) return grapheme;
+    }
+    return '@';
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final fallbackLetters = _calcFallbackLetters();
+    final fallbackLetters = calcFallbackLetters(name);
 
     final noPic =
         mxContent == null ||
@@ -98,6 +149,10 @@ class Avatar extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontFamily: 'RobotoMono',
+                          // RobotoMono is not bundled and covers latin only;
+                          // without the fallbacks CJK and emoji initials would
+                          // render as tofu boxes.
+                          fontFamilyFallback: FluffyThemes.fontFallbacks,
                           color:
                               textColor ??
                               fallbackLetters.colorScheme.onPrimaryContainer,
