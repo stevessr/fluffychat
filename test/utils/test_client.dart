@@ -5,22 +5,24 @@
 
 // ignore_for_file: depend_on_referenced_packages
 
+import 'package:fluffychat/utils/rainbow_command_extension.dart';
+import 'package:fluffychat/utils/room_management_command_extension.dart';
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-
-import 'package:fluffychat/utils/rainbow_command_extension.dart';
 
 Future<Client> prepareTestClient({
   bool loggedIn = false,
   Uri? homeserver,
   String id = 'FluffyChat Widget Test',
+  FakeMatrixApi? fakeMatrixApi,
 }) async {
   homeserver ??= Uri.parse('https://fakeserver.notexisting');
+  fakeMatrixApi ??= FakeMatrixApi();
+  fakeMatrixApi.api['GET']!['/.well-known/matrix/client'] = (req) => {};
   final client = Client(
     'FluffyChat Widget Tests',
-    httpClient: FakeMatrixApi()
-      ..api['GET']!['/.well-known/matrix/client'] = (req) => {},
+    httpClient: fakeMatrixApi,
     verificationMethods: {
       KeyVerificationMethod.numbers,
       KeyVerificationMethod.emoji,
@@ -39,6 +41,7 @@ Future<Client> prepareTestClient({
     },
   );
   client.registerRainbowCommand();
+  client.registerRoomManagementCommands();
   await client.checkHomeserver(homeserver);
   if (loggedIn) {
     await client.login(

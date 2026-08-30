@@ -86,7 +86,13 @@ enum AppSettings<T> {
   fallbackLiveKitInstance<String>(
     'chat.fluffy.fallback_live_kit_instance',
     'https://livekit-jwt.fluffy.chat',
-  );
+  ),
+  customLiveKitInstance<String>('chat.fluffy.custom_live_kit_instance', ''),
+  sentryDns<String>(
+    'chat.fluffy.sentry_dns',
+    'https://001fc83b53bd409c82a505d74d56f001@observe.fluffy.chat/1',
+  ),
+  showRoomMetadata<bool>('chat.fluffy.show_room_metadata', false),
 
   /// Block screenshots and screen recording on Android
   blockScreenshots<bool>('chat.fluffy.block_screenshots', false);
