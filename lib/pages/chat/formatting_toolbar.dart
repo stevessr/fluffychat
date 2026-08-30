@@ -65,10 +65,14 @@ class FormattingToolbar extends StatelessWidget {
     return Container(
       height: 44,
       decoration: BoxDecoration(
-        // Keep the formatting actions on the same surface as the composer.
-        // Using surfaceContainerHigh here made the toolbar visibly lighter
-        // than the rest of the chat input on light themes.
-        color: theme.colorScheme.surfaceContainer,
+        // Inherit the composer surface from the parent Material instead of
+        // painting an opaque surfaceContainer here. The parent Material in
+        // chat_view paints surfaceContainer, but Material 3 overlays a
+        // surfaceTintColor on it, so an opaque surfaceContainer Container
+        // on top reads as a lighter band than the rest of the composer on
+        // both light and dark themes. A transparent background lets the
+        // toolbar sit on the exact same surface as the input row below.
+        color: Colors.transparent,
         border: Border(bottom: BorderSide(color: theme.dividerColor, width: 1)),
       ),
       child: Row(
