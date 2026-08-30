@@ -23,6 +23,10 @@ grep -qF "assets/vodozemac/${version}/" pubspec.yaml || "$SED" -i "\|- assets/so
 "$SED" -i "s/vodozemacVersion = '.*';/vodozemacVersion = '${version}';/" lib/config/app_config.dart
 
 flutter pub get --enforce-lockfile
+# pub get may have removed packages from pubspec.lock that are no longer
+# depended on, but the stale package_graph.json still references them.
+# Remove it so the next tool regenerates a consistent graph.
+rm -f .dart_tool/package_graph.json
 dart compile js ./web/native_executor.dart -o ./web/native_executor.js -m
 
 # Download native_imaging for web:
