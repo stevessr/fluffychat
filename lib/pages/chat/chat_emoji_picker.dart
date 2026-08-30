@@ -422,7 +422,17 @@ class _EmojiMashupDialogState extends State<EmojiMashupDialog> {
                             return Material(
                               color: theme.colorScheme.secondaryContainer
                                   .withAlpha(120),
-                              borderRadius: BorderRadius.circular(16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                side: BorderSide(
+                                  color: theme.colorScheme.primary,
+                                  width: 2,
+                                ),
+                              ),
+                              elevation: 1,
+                              shadowColor: theme.colorScheme.primary.withAlpha(
+                                60,
+                              ),
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(16),
                                 onTap: () => _onEmojiSelected(
