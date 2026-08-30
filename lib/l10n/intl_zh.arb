@@ -3112,5 +3112,15 @@
                 "type": "String"
             }
         }
+    },
+    "developer": "开发者",
+    "@developer": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "liveMessageCharacterDelay": "直播消息字符延迟",
+    "@liveMessageCharacterDelay": {
+        "type": "String",
+        "placeholders": {}
     }
 }
