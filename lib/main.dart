@@ -18,7 +18,6 @@ import 'package:fluffychat/utils/vodozemac_bootstrap.dart';
 import 'package:fluffychat/utils/web_paths.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:just_audio_media_kit/just_audio_media_kit.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
@@ -27,6 +26,7 @@ import 'package:universal_html/universal_html.dart' as web;
 
 import 'config/setting_keys.dart';
 import 'utils/background_push.dart';
+import 'utils/screenshot_blocker.dart';
 import 'widgets/fluffy_chat_app.dart';
 
 ReceivePort? mainIsolateReceivePort;
@@ -123,6 +123,7 @@ void main(List<String> args) => runZonedGuarded(() async {
   await startGui(clients, store);
 }, ErrorReporter.onFlutterError);
 
+
 /// Fetch the pincode for the applock and start the flutter engine.
 Future<void> startGui(List<Client> clients, SharedPreferences store) async {
   // Fetch the pin for the applock if existing for mobile applications.
@@ -151,6 +152,9 @@ Future<void> startGui(List<Client> clients, SharedPreferences store) async {
   final firstClient = clients.firstOrNull;
   await firstClient?.roomsLoading;
   await firstClient?.accountDataLoading;
+
+  // 设置禁止截屏/录屏状态
+  await ScreenshotBlocker.setBlocked(AppSettings.blockScreenshots.value);
 
   runApp(
     FluffyChatApp(

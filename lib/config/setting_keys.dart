@@ -85,6 +85,9 @@ enum AppSettings<T> {
   knownErrorHashes<List<String>>('chat.fluffy.known_crash_hashes', []),
   customLiveKitInstance<String>('chat.fluffy.custom_live_kit_instance', '');
 
+  /// Block screenshots and screen recording on Android
+  blockScreenshots<bool>('chat.fluffy.block_screenshots', false);
+
   final String key;
   final T _defaultValue;
 
