@@ -121,7 +121,8 @@ class Message extends StatelessWidget {
         nextEvent!.senderId == event.senderId &&
         nextEvent!.originServerTs.sameEnvironment(event.originServerTs);
 
-    final previousEventSameSender = previousEvent != null &&
+    final previousEventSameSender =
+        previousEvent != null &&
         {
           EventTypes.Message,
           EventTypes.Sticker,
@@ -144,15 +145,21 @@ class Message extends StatelessWidget {
         : MainAxisAlignment.start;
 
     final displayEvent = event.getDisplayEvent(timeline);
-    const hardCorner = Radius.circular(3);
+    const groupedCorner = Radius.circular(AppConfig.borderRadius * 1.25);
     const roundedCorner = Radius.circular(AppConfig.borderRadius);
     final borderRadius = BorderRadius.only(
-      topLeft: !ownMessage ? hardCorner : roundedCorner,
-      topRight: ownMessage && nextEventSameSender ? hardCorner : roundedCorner,
-      bottomLeft: !ownMessage && previousEventSameSender
-          ? hardCorner
+      topLeft: !ownMessage && nextEventSameSender
+          ? groupedCorner
           : roundedCorner,
-      bottomRight: ownMessage ? hardCorner : roundedCorner,
+      topRight: ownMessage && nextEventSameSender
+          ? groupedCorner
+          : roundedCorner,
+      bottomLeft: !ownMessage && previousEventSameSender
+          ? groupedCorner
+          : roundedCorner,
+      bottomRight: ownMessage && previousEventSameSender
+          ? groupedCorner
+          : roundedCorner,
     );
     const avatarSize = Avatar.defaultSize;
     final textIsBigEmote =
@@ -171,12 +178,12 @@ class Message extends StatelessWidget {
 
     final noBubble =
         (({
-          MessageTypes.Video,
-          MessageTypes.Image,
-          MessageTypes.Sticker,
-        }.contains(event.messageType) &&
-        event.fileDescription == null &&
-        !event.redacted)) ||
+              MessageTypes.Video,
+              MessageTypes.Image,
+              MessageTypes.Sticker,
+            }.contains(event.messageType) &&
+            event.fileDescription == null &&
+            !event.redacted)) ||
         textIsBigEmote;
 
     if (ownMessage) {
