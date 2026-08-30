@@ -7,6 +7,7 @@
 
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/utils/rainbow_command_extension.dart';
+import 'package:fluffychat/utils/room_management_command_extension.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
@@ -25,6 +26,7 @@ Future<Client> prepareTestClient({
   bool loggedIn = false,
   Uri? homeserver,
   String id = 'FluffyChat Widget Test',
+  FakeMatrixApi? fakeMatrixApi,
 }) async {
   await setUpVodozemac();
   SharedPreferences.setMockInitialValues({});
@@ -32,9 +34,11 @@ Future<Client> prepareTestClient({
   await AppSettings.init(loadWebConfigFile: false);
 
   homeserver ??= Uri.parse('https://fakeserver.notexisting');
+  fakeMatrixApi ??= FakeMatrixApi();
+  fakeMatrixApi.api['GET']!['/.well-known/matrix/client'] = (req) => {};
   final client = Client(
     'FluffyChat Widget Tests',
-    httpClient: FakeMatrixApi(),
+    httpClient: fakeMatrixApi,
     verificationMethods: {
       KeyVerificationMethod.numbers,
       KeyVerificationMethod.emoji,
@@ -53,6 +57,7 @@ Future<Client> prepareTestClient({
     },
   );
   client.registerRainbowCommand();
+  client.registerRoomManagementCommands();
   await client.init(
     newHomeserver: Uri.parse('https://fakeServer.notExisting'),
     newDeviceID: 'ABCD1234',
