@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'package:fluffychat/config/setting_keys.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart' as retry;
 
@@ -17,22 +18,27 @@ import 'url_rewriting_client.dart';
 /// default [http.Client] is used. Cronet is loaded only on `dart:io` platforms
 /// so the web build does not pull in the JNI-based `cronet_http` package.
 ///
-/// If `URL_REWRITE_RULES` is set via `--dart-define`, the client transparently
-/// rewrites outgoing request URLs before they reach the transport.
+/// URL rewrite rules are read live on every request:
+/// 1. `--dart-define=URL_REWRITE_RULES=…` (fixed at build time), then
+/// 2. `AppSettings.urlRewriteRules` (configurable at runtime in the settings
+///    UI / via `config.json` on web).
+/// Changes made in the settings take effect immediately, without restarting.
 class CustomHttpClient {
-  /// Create an HTTP client, optionally combined with [extraRules] from
-  /// `config.json` / `SharedPreferences`.
-  ///
-  /// Rules from `--dart-define=URL_REWRITE_RULES=…` take precedence over
-  /// [extraRules] (they are prepended so they match first).
-  static http.Client createHTTPClient({
-    List<UrlRewriteRule> extraRules = const [],
-  }) {
+  static http.Client createHTTPClient() {
     final envRules = UrlRewriteRule.fromEnvironment();
-    final allRules = [...envRules, ...extraRules];
-    final inner = allRules.isNotEmpty
-        ? UrlRewritingClient(createPlatformHttpClient(), allRules)
-        : createPlatformHttpClient();
-    return retry.RetryClient(inner);
+    // Cache parsed rules per source string so that unchanged settings do not
+    // re-parse JSON on every request.
+    var cachedSource = '';
+    var cachedRules = const <UrlRewriteRule>[];
+    return retry.RetryClient(
+      UrlRewritingClient(createPlatformHttpClient(), () {
+        final source = AppSettings.urlRewriteRules.value;
+        if (source != cachedSource) {
+          cachedSource = source;
+          cachedRules = UrlRewriteRule.fromJsonString(source);
+        }
+        return [...envRules, ...cachedRules];
+      }),
+    );
   }
 }

@@ -9,6 +9,10 @@ import 'url_rewrite_rule.dart';
 /// An [http.Client] wrapper that rewrites outgoing request URLs according to
 /// a list of [UrlRewriteRule]s.
 ///
+/// Rules are provided by [rulesProvider], which is consulted on every request
+/// so that settings changes take effect at runtime without re-creating the
+/// client.
+///
 /// Rules are evaluated in order; the first matching rule is applied.
 /// Non-matching requests pass through unchanged.
 ///
@@ -16,13 +20,13 @@ import 'url_rewrite_rule.dart';
 /// HTTP client, so that retries see the rewritten URL on every attempt.
 class UrlRewritingClient extends http.BaseClient {
   final http.Client _inner;
-  final List<UrlRewriteRule> rules;
+  final List<UrlRewriteRule> Function() rulesProvider;
 
-  UrlRewritingClient(this._inner, this.rules);
+  UrlRewritingClient(this._inner, this.rulesProvider);
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) {
-    final rewritten = _rewrite(request.url);
+    final rewritten = _rewrite(request.url, rulesProvider());
     if (rewritten == null) {
       // No rule matched — pass through unchanged.
       return _inner.send(request);
@@ -61,7 +65,7 @@ class UrlRewritingClient extends http.BaseClient {
 
   /// Apply the first matching rewrite rule. Returns the rewritten URI, or
   /// `null` if no rule matched.
-  Uri? _rewrite(Uri url) {
+  Uri? _rewrite(Uri url, List<UrlRewriteRule> rules) {
     // Skip non-http(s) schemes — they cannot be rewritten meaningfully.
     if (url.scheme != 'http' && url.scheme != 'https') return null;
     for (final rule in rules) {
