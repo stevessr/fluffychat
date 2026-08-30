@@ -4153,7 +4153,8 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "discardEdits"
   ],
   "el": [
     "editImage",
@@ -5617,7 +5618,8 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "discardEdits"
   ],
   "et": [
     "editImage",
@@ -5677,7 +5679,8 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "discardEdits"
   ],
   "eu": [
     "editImage",
@@ -5783,7 +5786,8 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "discardEdits"
   ],
   "fa": [
     "editImage",
@@ -7034,7 +7038,8 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "discardEdits"
   ],
   "ga": [
     "editImage",
@@ -7094,7 +7099,8 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "discardEdits"
   ],
   "gl": [
     "editImage",
@@ -7154,7 +7160,8 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "discardEdits"
   ],
   "he": [
     "editImage",
@@ -9972,7 +9979,8 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "discardEdits"
   ],
   "ie": [
     "editImage",
@@ -13022,7 +13030,8 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "discardEdits"
   ],
   "nb": [
     "editImage",
@@ -13203,7 +13212,8 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "discardEdits"
   ],
   "pl": [
     "editImage",
@@ -13260,7 +13270,8 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "discardEdits"
   ],
   "pt": [
     "editImage",
@@ -14888,7 +14899,8 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "discardEdits"
   ],
   "ro": [
     "editImage",
@@ -15420,7 +15432,8 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "discardEdits"
   ],
   "sk": [
     "editImage",
@@ -20840,7 +20853,8 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "discardEdits"
   ],
   "uz": [
     "editImage",
@@ -22567,7 +22581,8 @@
     "deny",
     "hideRoomsInSpaces",
     "possibleByYou",
-    "showThumbnailsInTimeline"
+    "showThumbnailsInTimeline",
+    "discardEdits"
   ],
   "zh_Hant": [
     "editImage",
@@ -22706,6 +22721,7 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "discardEdits"
   ]
 }
