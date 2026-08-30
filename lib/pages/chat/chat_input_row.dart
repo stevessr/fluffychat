@@ -4,9 +4,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 
-import 'package:flutter/material.dart';
-
-import 'package:animations/animations.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:emoji_picker_flutter/locales/default_emoji_set_locale.dart';
 import 'package:fluffychat/config/setting_keys.dart';
@@ -304,7 +301,6 @@ class ChatInputRow extends StatelessWidget {
                             ? TextInputAction.send
                             : null,
                         onSubmitted: controller.onInputBarSubmitted,
-                        onSubmitImage: controller.sendImageFromClipBoard,
                         focusNode: controller.inputFocus,
                         controller: controller.sendController,
                         decoration: InputDecoration(
