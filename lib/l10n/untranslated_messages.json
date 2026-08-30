@@ -4210,7 +4210,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
   "el": [
     "editImage",
@@ -5784,7 +5792,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
   "eu": [
     "editImage",
@@ -7200,7 +7216,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
   "ga": [
     "editImage",
@@ -7291,7 +7315,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
   "gl": [
     "editImage",
@@ -7395,7 +7427,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
   "he": [
     "editImage",
@@ -11473,7 +11513,9 @@
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
     "check",
-    "allowEncryptedCommunicationWith"
+    "allowEncryptedCommunicationWith",
+    "today",
+    "yesterday"
   ],
   "ka": [
     "editImage",
@@ -13236,7 +13278,14 @@
     "repeatPassphrase",
     "passphrasesMatch",
     "saveAsFile",
-    "youAreReadyToStart"
+    "youAreReadyToStart",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "yesterday"
   ],
   "lv": [
     "editImage",
@@ -13361,7 +13410,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
   "nb": [
     "editImage",
@@ -13575,7 +13632,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
   "pl": [
     "editImage",
@@ -13676,7 +13741,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
   "pt": [
     "editImage",
@@ -15889,7 +15962,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
   "sk": [
     "editImage",
@@ -23093,7 +23174,15 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ],
   "zh_Hant": [
     "editImage",
@@ -23283,6 +23372,14 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "today",
+    "sending",
+    "generatingThumbnail",
+    "encrypting",
+    "uploading",
+    "edited",
+    "couldNotBeSent",
+    "yesterday"
   ]
 }
