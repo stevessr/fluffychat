@@ -115,8 +115,10 @@ for a literal `$`. Rules are evaluated in order; the first match wins.
 In the app you can manage the rules visually under
 *Settings → Chat settings → Advanced configs → URL rewriting* — add, edit and
 delete rules with a form (pattern type, pattern, replacement). Changes take
-effect immediately, without restarting the app. The same rules can be set at
-build/deploy time via `--dart-define` or `config.json`:
+effect immediately, without restarting the app. The same visual editor also
+opens from the technical *Advanced configurations* page (the
+`urlRewriteRules` entry) instead of editing raw JSON. The rules can also be
+set at build/deploy time via `--dart-define` or `config.json`:
 
 Example: route all `matrix.org` traffic through a proxy:
 
