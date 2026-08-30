@@ -100,10 +100,23 @@ flutter build web --release
 FluffyChat can transparently rewrite outgoing request URLs at runtime, e.g. to
 route traffic through a proxy when a homeserver is blocked in your region.
 
-Rules are a list of `{pattern, replacement}` pairs, where `pattern` uses `*`
-as a wildcard. Each `*` is a capture group referenced as `$1`, `$2`, … in the
-replacement; `$UPPERCASE_NAME` variables are resolved from
-`--dart-define`/`String.fromEnvironment`; `$$` produces a literal `$`.
+Rules are a list of `{pattern, replacement}` pairs. Each pattern matches either
+with wildcards or as a regular expression (`"regex": true`):
+
+* **Wildcard mode (default):** `*` matches any text. Each `*` is a capture
+  group referenced as `$1`, `$2`, … in the replacement.
+* **Regex mode:** the pattern is a Dart `RegExp` matched against the full
+  request URL. Capture groups are `$1`, `$2`, …; `$0` is the whole match.
+
+Both modes support `$UPPERCASE_NAME` variables, resolved from
+`--dart-define`/`String.fromEnvironment` (e.g. `$PROXY_DOMAIN`), and `$$`
+for a literal `$`. Rules are evaluated in order; the first match wins.
+
+In the app you can manage the rules visually under
+*Settings → Chat settings → Advanced configs → URL rewriting* — add, edit and
+delete rules with a form (pattern type, pattern, replacement). Changes take
+effect immediately, without restarting the app. The same rules can be set at
+build/deploy time via `--dart-define` or `config.json`:
 
 Example: route all `matrix.org` traffic through a proxy:
 
@@ -121,6 +134,9 @@ For web builds you can also set the rules at deploy time via `config.json`
   "urlRewriteRules": "[{\"pattern\":\"https://*matrix.org/*\",\"replacement\":\"https://proxy.example.com/---https://$1matrix.org/$2\"}]"
 }
 ```
+
+Rules configured in the settings UI (or `config.json`) are combined with
+`--dart-define` rules; the latter take precedence.
 
 ### Desktop (Linux, Windows, macOS)
 
