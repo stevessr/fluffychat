@@ -243,7 +243,9 @@ class Message extends StatelessWidget {
               color: theme.colorScheme.surface,
             ),
           ];
-    final eventStateTextColor = theme.colorScheme.onSurface;
+    final eventStateTextColor = ownMessage
+        ? theme.onBubbleColor
+        : theme.colorScheme.onSurface;
     final showSenderHeader =
         !nextEventSameSender && !ownMessage && !event.room.isDirectChat;
     final showSenderPowerLevelIcon =
@@ -260,7 +262,7 @@ class Message extends StatelessWidget {
           ),
         ),
       if (event.hasAggregatedEvents(timeline, RelationshipTypes.edit)) ...[
-        Text(' ', style: TextStyle(fontSize: 11)),
+        SizedBox(width: 4),
         Text(
           L10n.of(context).edited,
           style: TextStyle(
@@ -271,7 +273,7 @@ class Message extends StatelessWidget {
         ),
       ],
       if (event.status == EventStatus.error) ...[
-        Text(' ', style: TextStyle(fontSize: 11)),
+        SizedBox(width: 4),
         Text(
           L10n.of(context).couldNotBeSent,
           style: TextStyle(
@@ -280,7 +282,7 @@ class Message extends StatelessWidget {
             shadows: wallpaperTextShadow,
           ),
         ),
-        Text(' ', style: TextStyle(fontSize: 11)),
+        SizedBox(width: 4),
         Icon(
           Icons.error_outlined,
           size: 14,
@@ -289,6 +291,7 @@ class Message extends StatelessWidget {
         ),
       ],
       if (event.status == EventStatus.sending) ...[
+        SizedBox(width: 4),
         Text(
           switch (event.fileSendingStatus) {
             null => L10n.of(context).sending,
@@ -304,7 +307,7 @@ class Message extends StatelessWidget {
             shadows: wallpaperTextShadow,
           ),
         ),
-        Text(' ', style: TextStyle(fontSize: 11)),
+        SizedBox(width: 4),
         SizedBox.square(
           dimension: 11,
           child: CircularProgressIndicator(strokeWidth: 1),
@@ -904,12 +907,14 @@ class Message extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: ownMessage
                               ? [
+                                  const Spacer(),
                                   if (showEventState)
                                     Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: eventStateWidgets,
                                     ),
-                                  const Spacer(),
+                                  if (showEventState && hasReactions)
+                                    SizedBox(width: 8),
                                   if (hasReactions)
                                     Flexible(
                                       child: Align(
@@ -932,7 +937,8 @@ class Message extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                  const Spacer(),
+                                  if (showEventState && hasReactions)
+                                    SizedBox(width: 8),
                                   if (showEventState)
                                     Row(
                                       mainAxisSize: MainAxisSize.min,
