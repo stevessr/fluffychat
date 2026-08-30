@@ -830,8 +830,9 @@ class Message extends StatelessWidget {
                                                                     emojiSetWithUnicode17,
                                                                 emojiTextStyle:
                                                                     const TextStyle(
-                                                                  fontFamily:
-                                                                      'GoogleSansCode',
+                                                                  fontFamilyFallback: [
+                                                                    'GoogleSansCode',
+                                                                  ],
                                                                 ),
                                                                 emojiViewConfig:
                                                                     EmojiViewConfig(
