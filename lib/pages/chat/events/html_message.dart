@@ -161,16 +161,118 @@ class HtmlMessage extends StatelessWidget {
     );
   }
 
+  /// Matches bare Matrix identifiers that the send-time PillSyntax turns into
+  /// `matrix.to` links. Used as a display-side fallback so plain-body messages
+  /// (or HTML disabled) still render user/room pills.
+  static final RegExp _matrixIdPillRegex = RegExp(
+    r'([@#!][^\s:]*:(?:[^\s]+\.\w+|[\d\.]+|\[[a-fA-F0-9:]+\])(?::\d+)?)',
+  );
+
   InlineSpan _renderText(String text, BuildContext context) {
     // Single linebreak nodes between Elements are ignored:
     if (text == '\n') text = '';
 
-    InlineSpan renderPlainText(String plainText) => LinkifySpan(
-      text: plainText,
-      options: const LinkifyOptions(humanize: false),
-      linkStyle: linkStyle,
-      onOpen: onOpen,
-    );
+    InlineSpan renderPlainText(String plainText) {
+      if (!plainText.contains('@') &&
+          !plainText.contains('#') &&
+          !plainText.contains('!')) {
+        return LinkifySpan(
+          text: plainText,
+          options: const LinkifyOptions(humanize: false),
+          linkStyle: linkStyle,
+          onOpen: onOpen,
+        );
+      }
+
+      final spans = <InlineSpan>[];
+      var lastIndex = 0;
+      for (final match in _matrixIdPillRegex.allMatches(plainText)) {
+        // Mirror PillSyntax boundary check: do not pill mid-token.
+        if (match.start > 0 &&
+            !RegExp(r'[\s.!?:;\(]').hasMatch(plainText[match.start - 1])) {
+          continue;
+        }
+        final identifier = match[1]!;
+        // Invalid IDs stay plain text; do not advance lastIndex so the
+        // surrounding slice still covers them when the next pill is emitted.
+        if (!identifier.isValidMatrixIdStrict()) continue;
+
+        if (match.start > lastIndex) {
+          spans.add(
+            LinkifySpan(
+              text: plainText.substring(lastIndex, match.start),
+              options: const LinkifyOptions(humanize: false),
+              linkStyle: linkStyle,
+              onOpen: onOpen,
+            ),
+          );
+        }
+
+        final href = 'https://matrix.to/#/$identifier';
+        if (identifier.sigil == '@') {
+          final user = room.unsafeGetUserFromMemoryOrFallback(identifier);
+          spans.add(
+            WidgetSpan(
+              child: MatrixPill(
+                key: Key('user_pill_$identifier'),
+                name: user.calcDisplayname(),
+                avatar: user.avatarUrl,
+                uri: href,
+                outerContext: context,
+                fontSize: fontSize,
+                color: linkStyle.color,
+              ),
+            ),
+          );
+        } else if (identifier.sigil == '#' || identifier.sigil == '!') {
+          final targetRoom = identifier.sigil == '!'
+              ? room.client.getRoomById(identifier)
+              : room.client.getRoomByAlias(identifier);
+          spans.add(
+            WidgetSpan(
+              child: MatrixPill(
+                name: targetRoom?.getLocalizedDisplayname() ?? identifier,
+                avatar: targetRoom?.avatar,
+                uri: href,
+                outerContext: context,
+                fontSize: fontSize,
+                color: linkStyle.color,
+              ),
+            ),
+          );
+        } else {
+          spans.add(
+            LinkifySpan(
+              text: identifier,
+              options: const LinkifyOptions(humanize: false),
+              linkStyle: linkStyle,
+              onOpen: onOpen,
+            ),
+          );
+        }
+        lastIndex = match.end;
+      }
+
+      if (spans.isEmpty) {
+        return LinkifySpan(
+          text: plainText,
+          options: const LinkifyOptions(humanize: false),
+          linkStyle: linkStyle,
+          onOpen: onOpen,
+        );
+      }
+      if (lastIndex < plainText.length) {
+        spans.add(
+          LinkifySpan(
+            text: plainText.substring(lastIndex),
+            options: const LinkifyOptions(humanize: false),
+            linkStyle: linkStyle,
+            onOpen: onOpen,
+          ),
+        );
+      }
+      return TextSpan(children: spans);
+    }
 
     if (!text.contains(':')) {
       return renderPlainText(text);
@@ -599,11 +701,7 @@ class HtmlMessage extends StatelessWidget {
           alignment: PlaceholderAlignment.middle,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: SafeIframeWidget(
-              src: src,
-              width: width,
-              height: height,
-            ),
+            child: SafeIframeWidget(src: src, width: width, height: height),
           ),
         );
       case 'details':
