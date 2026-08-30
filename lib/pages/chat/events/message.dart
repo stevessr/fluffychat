@@ -26,6 +26,7 @@ import 'package:swipe_to_action/swipe_to_action.dart';
 
 import '../../../config/app_config.dart';
 import '../custom_reaction_dialog.dart';
+import 'edit_history_dialog.dart';
 import 'message_content.dart';
 import 'message_reactions.dart';
 import 'reply_content.dart';
@@ -261,12 +262,25 @@ class Message extends StatelessWidget {
         ),
       if (event.hasAggregatedEvents(timeline, RelationshipTypes.edit)) ...[
         SizedBox(width: 4),
-        Text(
-          L10n.of(context).edited,
-          style: TextStyle(
-            color: eventStateTextColor,
-            fontSize: 11,
-            shadows: wallpaperTextShadow,
+        GestureDetector(
+          onTap: AppSettings.showEditHistory.value
+              ? () => EditHistoryDialog.show(
+                  context,
+                  event: event,
+                  timeline: timeline,
+                )
+              : null,
+          child: Text(
+            L10n.of(context).edited,
+            style: TextStyle(
+              color: eventStateTextColor,
+              fontSize: 11,
+              shadows: wallpaperTextShadow,
+              decoration: AppSettings.showEditHistory.value
+                  ? TextDecoration.underline
+                  : null,
+              decorationColor: eventStateTextColor.withAlpha(128),
+            ),
           ),
         ),
       ],
@@ -756,7 +770,8 @@ class Message extends StatelessWidget {
                                                                       key,
                                                                     );
                                                                 // 选择表情后关闭整个弹窗（包括外层的 emoji picker sheet）
-                                                                if (context.mounted) {
+                                                                if (context
+                                                                    .mounted) {
                                                                   Navigator.of(
                                                                     context,
                                                                   ).pop(null);
