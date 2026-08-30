@@ -183,47 +183,7 @@ class SettingsView extends StatelessWidget {
                   : null,
             ),
             Divider(color: theme.dividerColor),
-            Padding(
-              padding: const EdgeInsets.only(left: 16, top: 16, bottom: 4),
-              child: Text(
-                L10n.of(context).developer,
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ),
-            StatefulBuilder(
-              builder: (context, setInnerState) {
-                final delay = AppSettings.liveMessageCharacterDelay.value;
-                return ListTile(
-                  title: Text(L10n.of(context).liveMessageCharacterDelay),
-                  subtitle: Row(
-                    children: [
-                      Expanded(
-                        child: Slider.adaptive(
-                          min: 0.01,
-                          max: 0.5,
-                          value: delay,
-                          divisions: 49,
-                          label: '${(delay * 1000).round()} ms',
-                          onChanged: (v) {
-                            AppSettings.liveMessageCharacterDelay.setItem(v);
-                            setInnerState(() {});
-                          },
-                        ),
-                      ),
-                      SizedBox(
-                        width: 48,
-                        child: Text(
-                          '${(delay * 1000).round()} ms',
-                          style: theme.textTheme.bodySmall,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
+
             ListTile(
               leading: const Icon(Icons.dns_outlined),
               title: Text(
