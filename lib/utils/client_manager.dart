@@ -14,6 +14,7 @@ import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call_memb
 import 'package:fluffychat/utils/notification_background_handler.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/rainbow_command_extension.dart';
+import 'package:fluffychat/utils/web_paths.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
@@ -101,7 +102,7 @@ abstract class ClientManager {
 
   static NativeImplementations get nativeImplementations => kIsWeb
       ? NativeImplementationsWebWorker(
-          Uri.parse('native_executor.js'),
+          Uri.parse(resolveWebPath('native_executor.js')),
           timeout: const Duration(minutes: 1),
         )
       : NativeImplementationsIsolate(
