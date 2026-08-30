@@ -290,7 +290,8 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo"
   ],
   "az": [
     "editImage",
@@ -1137,7 +1138,8 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "ignoreUser"
   ],
   "be": [
     "editImage",
@@ -1267,7 +1269,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "bn": [
     "editImage",
@@ -3135,7 +3139,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "cs": [
     "editImage",
@@ -3356,7 +3362,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "da": [
     "editImage",
@@ -4207,7 +4215,8 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "ignoreUser"
   ],
   "de": [
     "editImage",
@@ -4346,7 +4355,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "el": [
     "editImage",
@@ -5147,7 +5158,8 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "ignoreUser"
   ],
   "eo": [
     "editImage",
@@ -5848,7 +5860,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "et": [
     "editImage",
@@ -5954,7 +5968,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "eu": [
     "editImage",
@@ -6076,7 +6092,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "fa": [
     "editImage",
@@ -6219,7 +6237,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "fi": [
     "editImage",
@@ -6410,7 +6430,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "fil": [
     "editImage",
@@ -7412,7 +7434,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "ga": [
     "editImage",
@@ -7528,7 +7552,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "gl": [
     "editImage",
@@ -7647,7 +7673,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "he": [
     "editImage",
@@ -9172,7 +9200,8 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "ignoreUser"
   ],
   "hr": [
     "editImage",
@@ -9339,7 +9368,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "hu": [
     "editImage",
@@ -9559,7 +9590,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "ia": [
     "editImage",
@@ -10558,7 +10591,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "ie": [
     "editImage",
@@ -11449,7 +11484,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "ja": [
     "editImage",
@@ -11786,7 +11823,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "ka": [
     "editImage",
@@ -12530,7 +12569,8 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "ignoreUser"
   ],
   "kab": [
     "editImage",
@@ -12836,7 +12876,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "ko": [
     "editImage",
@@ -13088,7 +13130,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "lt": [
     "editImage",
@@ -13730,7 +13774,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "nb": [
     "editImage",
@@ -13860,7 +13906,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "nl": [
     "editImage",
@@ -13976,7 +14024,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "pl": [
     "editImage",
@@ -14097,7 +14147,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "pt": [
     "editImage",
@@ -15133,7 +15185,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "pt_PT": [
     "editImage",
@@ -16350,7 +16404,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "sk": [
     "editImage",
@@ -19520,7 +19576,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "ta": [
     "editImage",
@@ -19734,7 +19792,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "te": [
     "editImage",
@@ -21737,7 +21797,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "uk": [
     "editImage",
@@ -21854,7 +21916,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "uz": [
     "editImage",
@@ -22021,7 +22085,9 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ],
   "vi": [
     "editImage",
@@ -22754,7 +22820,8 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "ignoreUser"
   ],
   "yue": [
     "editImage",
@@ -23868,6 +23935,8 @@
     "exportAccountWarning",
     "exportAccountDescription",
     "importAccount",
-    "importAccountDescription"
+    "importAccountDescription",
+    "compressVideo",
+    "ignoreUser"
   ]
 }
