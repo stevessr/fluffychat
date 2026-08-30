@@ -42,6 +42,7 @@ dependencies:
   flutter_new_badger: ^2.0.0
   flutter_secure_storage: ^11.0.0
   flutter_shortcuts_new: ^2.0.0
+  flutter_svg: ^2.2.0
   flutter_vodozemac: ^0.7.1
   flutter_web_auth_2: ^5.1.0
   flutter_webrtc: ^1.6.0
@@ -114,6 +115,13 @@ flutter:
     - assets/logo/mini/
     - assets/sounds/
     - assets/vodozemac/
+  fonts:
+    - family: Unicode18
+      fonts:
+        - asset: assets/fonts/NotoSansSC-Variable.ttf
+    - family: NotoColorEmoji
+      fonts:
+        - asset: assets/fonts/NotoColorEmoji-Regular.ttf
 
 hooks:
   user_defines:
