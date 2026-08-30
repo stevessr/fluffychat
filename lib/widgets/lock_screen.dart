@@ -22,6 +22,7 @@ class _LockScreenState extends State<LockScreen> {
   String? _errorText;
   int _coolDownSeconds = 5;
   bool _inputBlocked = false;
+  bool _autoTriggered = false;
   final TextEditingController _textEditingController = TextEditingController();
 
   Future<void> tryUnlockWithBiometrics() async {
@@ -39,17 +40,24 @@ class _LockScreenState extends State<LockScreen> {
       return;
     }
 
-    setState(() {
-      _errorText = L10n.of(context).wrongPinEntered(_coolDownSeconds);
-      _inputBlocked = true;
-    });
-    Future.delayed(Duration(seconds: _coolDownSeconds)).then((_) {
+    // Only increment cooldown for non-biometrics-only mode
+    if (!AppLock.of(context).isBiometricsOnly) {
       setState(() {
-        _inputBlocked = false;
-        _coolDownSeconds *= 2;
-        _errorText = null;
+        _errorText = L10n.of(context).wrongPinEntered(_coolDownSeconds);
+        _inputBlocked = true;
       });
-    });
+      Future.delayed(Duration(seconds: _coolDownSeconds)).then((_) {
+        setState(() {
+          _inputBlocked = false;
+          _coolDownSeconds *= 2;
+          _errorText = null;
+        });
+      });
+    } else {
+      setState(() {
+        _errorText = L10n.of(context).invalidInput;
+      });
+    }
     _textEditingController.clear();
   }
 
@@ -92,13 +100,33 @@ class _LockScreenState extends State<LockScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    if (AppLock.of(context).isBiometricsOnly) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_autoTriggered) {
+          _autoTriggered = true;
+          tryUnlockWithBiometrics();
+        }
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context);
+    final isBiometricsOnly = AppLock.of(context).isBiometricsOnly;
+
     return Overlay(
       initialEntries: [
         OverlayEntry(
           builder: (context) => Scaffold(
             appBar: AppBar(
-              title: Text(L10n.of(context).pleaseEnterYourPin),
+              title: Text(
+                isBiometricsOnly
+                    ? l10n.unlockWithBiometrics
+                    : l10n.pleaseEnterYourPin,
+              ),
               centerTitle: true,
             ),
             body: ListView(
@@ -113,8 +141,49 @@ class _LockScreenState extends State<LockScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Center(
-                  child: TextField(
+                if (isBiometricsOnly) ...[
+                  Text(
+                    l10n.biometricsOnlyDescription,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 32),
+                  Center(
+                    child: FutureBuilder(
+                      future: LocalAuthentication().getAvailableBiometrics(),
+                      builder: (context, snapshot) {
+                        final availableBiometrics = snapshot.data ?? [];
+                        final isFace = availableBiometrics.contains(
+                          BiometricType.face,
+                        );
+                        return IconButton(
+                          iconSize: 80,
+                          onPressed: _inputBlocked
+                              ? null
+                              : tryUnlockWithBiometrics,
+                          icon: Icon(
+                            isFace
+                                ? Icons.face_unlock_outlined
+                                : Icons.fingerprint_outlined,
+                          ),
+                          tooltip: l10n.unlockWithBiometrics,
+                        );
+                      },
+                    ),
+                  ),
+                  if (_errorText != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: Text(
+                        _errorText!,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                ] else ...[
+                  TextField(
                     controller: _textEditingController,
                     textInputAction: TextInputAction.go,
                     keyboardType: TextInputType.number,
@@ -141,7 +210,7 @@ class _LockScreenState extends State<LockScreen> {
                       ),
                       prefix: AppLock.of(context).useBiometrics
                           ? IconButton(
-                              tooltip: L10n.of(context).unlockWithBiometrics,
+                              tooltip: l10n.unlockWithBiometrics,
                               icon: FutureBuilder(
                                 future: LocalAuthentication()
                                     .getAvailableBiometrics(),
@@ -151,7 +220,9 @@ class _LockScreenState extends State<LockScreen> {
                                   if (availableBiometrics.contains(
                                     BiometricType.face,
                                   )) {
-                                    return Icon(Icons.face_unlock_outlined);
+                                    return Icon(
+                                      Icons.face_unlock_outlined,
+                                    );
                                   }
                                   return Icon(Icons.fingerprint_outlined);
                                 },
@@ -161,14 +232,14 @@ class _LockScreenState extends State<LockScreen> {
                                   : tryUnlockWithBiometrics,
                             )
                           : IconButton(
-                              tooltip: L10n.of(context).reset,
+                              tooltip: l10n.reset,
                               icon: Icon(Icons.cancel_outlined),
                               onPressed: _inputBlocked
                                   ? null
                                   : _textEditingController.clear,
                             ),
                       suffix: IconButton(
-                        tooltip: L10n.of(context).unlock,
+                        tooltip: l10n.unlock,
                         icon: Icon(Icons.send_outlined),
                         onPressed: _inputBlocked
                             ? null
@@ -176,12 +247,12 @@ class _LockScreenState extends State<LockScreen> {
                       ),
                     ),
                   ),
-                ),
-                if (_inputBlocked)
-                  const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: CircularProgressIndicator.adaptive(),
-                  ),
+                  if (_inputBlocked)
+                    const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: CircularProgressIndicator.adaptive(),
+                    ),
+                ],
               ],
             ),
           ),

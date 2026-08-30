@@ -55,6 +55,40 @@ class SettingsSecurityController extends State<SettingsSecurity> {
     setState(() {});
   }
 
+  Future<void> toggleBiometricsOnlyAction() async {
+    final appLock = AppLock.of(context);
+    final isBiometricsOnly = appLock.isBiometricsOnly;
+
+    if (isBiometricsOnly) {
+      // Disable biometrics-only mode
+      final consent = await showOkCancelAlertDialog(
+        context: context,
+        title: L10n.of(context).disableAppLock,
+        message: L10n.of(context).disableAppLockAreYouSure,
+        okLabel: L10n.of(context).disableAppLock,
+        cancelLabel: L10n.of(context).cancel,
+        isDestructive: true,
+      );
+      if (consent != OkCancelResult.ok) return;
+      if (!mounted) return;
+      await appLock.changeUseBiometrics(false);
+    } else {
+      // Enable biometrics-only mode - authenticate first, then clear PIN
+      final localAuth = LocalAuthentication();
+      final unlocked = await localAuth.authenticate(
+        localizedReason: L10n.of(context).enableBiometrics,
+        biometricOnly: true,
+      );
+      if (!unlocked) return;
+      if (!mounted) return;
+      await appLock.changeUseBiometrics(true);
+      await appLock.changePincode(null);
+      appLock.showLockScreen();
+    }
+    if (!mounted) return;
+    setState(() {});
+  }
+
   Future<void> disableAppLockAction() async {
     AppLock.of(context).showLockScreen();
     final consent = await showOkCancelAlertDialog(
