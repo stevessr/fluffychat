@@ -55,6 +55,13 @@ import '../../utils/localized_exception_extension.dart';
 import 'send_file_dialog.dart';
 import 'send_location_dialog.dart';
 
+@visibleForTesting
+String? latestReadMarkerEventId(Iterable<Event> events) => events
+    .firstWhereOrNull(
+      (event) => event.status.isSynced && event.eventId.isValidMatrixIdStrict(),
+    )
+    ?.eventId;
+
 class ChatPage extends StatelessWidget {
   final String roomId;
   final List<ShareItem>? shareItems;
@@ -322,11 +329,14 @@ class ChatController extends State<ChatPageWithRoom>
       return;
     }
     if (!scrollController.hasClients) return;
-    if (timeline?.allowNewEvent == false ||
-        scrollController.position.pixels > 0 && _scrolledUp == false) {
+    final position = scrollController.position;
+    final isAtBottom =
+        timeline?.allowNewEvent != false &&
+        position.pixels <= position.minScrollExtent + 1;
+    if (!isAtBottom && _scrolledUp == false) {
       setState(() => _scrolledUp = true);
-    } else if (scrollController.position.pixels <= 0 && _scrolledUp == true) {
-      setState(() => _scrolledUp = false);
+    } else if (isAtBottom) {
+      if (_scrolledUp) setState(() => _scrolledUp = false);
       setReadMarker();
     }
   }
@@ -480,6 +490,7 @@ class ChatController extends State<ChatPageWithRoom>
     readMarkerEventId = room.hasNewMessages
         ? lastEventThreadId ?? room.fullyRead
         : '';
+    _lastSuccessfulReadMarkerEventId = room.fullyRead;
     WidgetsBinding.instance.addObserver(this);
     _tryLoadTimeline();
   }
@@ -642,7 +653,11 @@ class ChatController extends State<ChatPageWithRoom>
     setReadMarker();
   }
 
-  String? _setReadMarkerEventId;
+  Future<void>? _setReadMarkerFuture;
+  String? _setReadMarkerTargetEventId;
+  String? _lastSuccessfulReadMarkerEventId;
+  bool _setReadMarkerPending = false;
+  String? _pendingReadMarkerEventId;
 
   void setReadMarker({String? eventId}) {
     // Do not send read markers when app is not in foreground
@@ -669,20 +684,16 @@ class ChatController extends State<ChatPageWithRoom>
       return;
     }
 
-    eventId ??= timeline.events.firstWhereOrNull((event) {
-      if (event.eventId == room.lastEvent?.eventId) return true;
-      if (room.client.pushruleEvaluator.match(event).notify) {
-        return true;
-      }
-      final original = event.originalSource;
-      if (original != null &&
-          room.client.pushruleEvaluator
-              .match(Event.fromMatrixEvent(original, room))
-              .notify) {
-        return true;
-      }
-      return false;
-    })?.eventId;
+    // The divider marks where this visit started. Once the user reaches the
+    // bottom it must disappear even when no network request is necessary.
+    if (setOnLatestEvent && readMarkerEventId.isNotEmpty) {
+      setState(() => readMarkerEventId = '');
+    }
+
+    // A read marker tracks the timeline position, not whether a push rule
+    // would notify. Muted rooms deliberately return notify=false, but still
+    // need their read marker advanced when the user reaches the bottom.
+    eventId ??= latestReadMarkerEventId(timeline.events);
 
     if (setOnLatestEvent && (room.hasNewMessages || room.isUnread)) {
       eventId ??=
@@ -695,11 +706,24 @@ class ChatController extends State<ChatPageWithRoom>
     // This is a sending event, we do not set a readmarker yet
     if (eventId.isValidMatrixIdStrict() == false) return;
 
-    // We are already setting a read marker on this event
-    if (_setReadMarkerEventId == eventId) return;
+    // Do not drop a newer marker while the previous request is in flight.
+    // Keep only the latest request and re-evaluate automatic targets when the
+    // active request finishes. This check comes before the no-op checks because
+    // an explicit in-flight request may still move the marker away from the
+    // currently synced position.
+    if (_setReadMarkerFuture != null) {
+      if (_setReadMarkerTargetEventId == eventId) return;
+      _setReadMarkerPending = true;
+      _pendingReadMarkerEventId = setOnLatestEvent ? null : eventId;
+      return;
+    }
 
-    // Already set a read marker on this event
-    if (room.fullyRead == eventId && !setOnLatestEvent) return;
+    // Already set a read marker on this event. The local success value avoids
+    // duplicate requests while the homeserver result is waiting for /sync.
+    if (room.fullyRead == eventId ||
+        (setOnLatestEvent && _lastSuccessfulReadMarkerEventId == eventId)) {
+      return;
+    }
 
     // Set a readmarker on a specific event, not latest, but room is not unread
     // at all.
@@ -711,22 +735,44 @@ class ChatController extends State<ChatPageWithRoom>
 
     final targetEventId = eventId;
     Logs().d('Set read marker...', targetEventId);
-    _setReadMarkerEventId = targetEventId;
-    // ignore: unawaited_futures
-    timeline
-        .setReadMarker(
-          eventId: targetEventId,
-          public: AppSettings.sendPublicReadReceipts.value,
-        )
-        .whenComplete(() {
-          if (_setReadMarkerEventId == targetEventId) {
-            _setReadMarkerEventId = null;
-          }
-          if (targetEventId != readMarkerEventId) {
-            readMarkerEventId = targetEventId;
-            if (mounted) setState(() {});
-          }
-        });
+    _setReadMarkerTargetEventId = targetEventId;
+    _setReadMarkerFuture = _sendReadMarker(
+      timeline: timeline,
+      targetEventId: targetEventId,
+      setOnLatestEvent: setOnLatestEvent,
+    );
+  }
+
+  Future<void> _sendReadMarker({
+    required Timeline timeline,
+    required String targetEventId,
+    required bool setOnLatestEvent,
+  }) async {
+    try {
+      await timeline.setReadMarker(
+        eventId: targetEventId,
+        public: AppSettings.sendPublicReadReceipts.value,
+      );
+      _lastSuccessfulReadMarkerEventId = targetEventId;
+      if (!setOnLatestEvent && targetEventId != readMarkerEventId && mounted) {
+        setState(() => readMarkerEventId = targetEventId);
+      }
+    } catch (error, stackTrace) {
+      Logs().w('Unable to set read marker', error, stackTrace);
+    } finally {
+      _setReadMarkerFuture = null;
+      _setReadMarkerTargetEventId = null;
+
+      if (!mounted) {
+        _setReadMarkerPending = false;
+        _pendingReadMarkerEventId = null;
+      } else if (_setReadMarkerPending) {
+        final pendingEventId = _pendingReadMarkerEventId;
+        _setReadMarkerPending = false;
+        _pendingReadMarkerEventId = null;
+        setReadMarker(eventId: pendingEventId);
+      }
+    }
   }
 
   @override
@@ -1529,7 +1575,8 @@ class ChatController extends State<ChatPageWithRoom>
       });
       await loadTimelineFuture;
     }
-    scrollController.jumpTo(0);
+    scrollController.jumpTo(scrollController.position.minScrollExtent);
+    _updateScrollController();
   }
 
   void onEmojiSelected(_, Emoji? emoji) {
