@@ -877,6 +877,26 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
+  Future<void> sendImageFromClipBoard(Uint8List image) async {
+    if (!mounted) return;
+    await showAdaptiveDialog(
+      context: context,
+      builder: (c) => SendFileDialog(
+        files: [
+          XFile.fromData(
+            image,
+            mimeType: 'image/png',
+            name: 'clipboard-image.png',
+          ),
+        ],
+        room: room,
+        outerContext: context,
+        threadRootEventId: activeThreadId,
+        threadLastEventId: threadLastEventId,
+      ),
+    );
+  }
+
   Future<void> openCameraAction() async {
     inputFocus.unfocus();
     final file = await ImagePicker().pickImage(source: ImageSource.camera);
