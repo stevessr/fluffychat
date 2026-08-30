@@ -281,7 +281,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "az": [
     "editImage",
@@ -1174,7 +1176,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "bn": [
     "editImage",
@@ -2017,7 +2021,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "bo": [
     "editImage",
@@ -2892,7 +2898,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "ca": [
     "editImage",
@@ -3017,7 +3025,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "cs": [
     "editImage",
@@ -3229,7 +3239,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "da": [
     "editImage",
@@ -4072,7 +4084,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "de": [
     "editImage",
@@ -4154,7 +4168,19 @@
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
-    "discardEdits"
+    "discardEdits",
+    "showMore",
+    "showLess",
+    "appSubtitle",
+    "interactiveVerification",
+    "interactiveVerificationDescription",
+    "countUnverifiedDevices",
+    "check",
+    "encryptedMessage",
+    "unencryptedMessage",
+    "allowEncryptedCommunicationWith",
+    "publicKey",
+    "deviceIdentityKey"
   ],
   "el": [
     "editImage",
@@ -4947,7 +4973,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "eo": [
     "editImage",
@@ -5510,7 +5538,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "es": [
     "editImage",
@@ -5619,7 +5649,19 @@
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
-    "discardEdits"
+    "discardEdits",
+    "showMore",
+    "showLess",
+    "appSubtitle",
+    "appDescription",
+    "interactiveVerification",
+    "interactiveVerificationDescription",
+    "countUnverifiedDevices",
+    "check",
+    "encryptedMessage",
+    "unencryptedMessage",
+    "allowEncryptedCommunicationWith",
+    "publicKey"
   ],
   "et": [
     "editImage",
@@ -5787,7 +5829,8 @@
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
-    "discardEdits"
+    "discardEdits",
+    "check"
   ],
   "fa": [
     "editImage",
@@ -5921,7 +5964,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "fi": [
     "editImage",
@@ -6103,7 +6148,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "fil": [
     "editImage",
@@ -6798,7 +6845,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "fr": [
     "editImage",
@@ -7039,7 +7088,20 @@
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
-    "discardEdits"
+    "discardEdits",
+    "showMore",
+    "showLess",
+    "appSubtitle",
+    "appDescription",
+    "interactiveVerification",
+    "interactiveVerificationDescription",
+    "countUnverifiedDevices",
+    "check",
+    "encryptedMessage",
+    "unencryptedMessage",
+    "allowEncryptedCommunicationWith",
+    "publicKey",
+    "deviceIdentityKey"
   ],
   "ga": [
     "editImage",
@@ -7161,7 +7223,20 @@
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
-    "discardEdits"
+    "discardEdits",
+    "showMore",
+    "showLess",
+    "appSubtitle",
+    "appDescription",
+    "interactiveVerification",
+    "interactiveVerificationDescription",
+    "countUnverifiedDevices",
+    "check",
+    "encryptedMessage",
+    "unencryptedMessage",
+    "allowEncryptedCommunicationWith",
+    "publicKey",
+    "deviceIdentityKey"
   ],
   "he": [
     "editImage",
@@ -7813,7 +7888,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "hi": [
     "editImage",
@@ -8670,7 +8747,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "hr": [
     "editImage",
@@ -8828,7 +8907,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "hu": [
     "editImage",
@@ -9039,7 +9120,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "ia": [
     "editImage",
@@ -9900,7 +9983,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "id": [
     "editImage",
@@ -9980,7 +10065,20 @@
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
-    "discardEdits"
+    "discardEdits",
+    "showMore",
+    "showLess",
+    "appSubtitle",
+    "appDescription",
+    "interactiveVerification",
+    "interactiveVerificationDescription",
+    "countUnverifiedDevices",
+    "check",
+    "encryptedMessage",
+    "unencryptedMessage",
+    "allowEncryptedCommunicationWith",
+    "publicKey",
+    "deviceIdentityKey"
   ],
   "ie": [
     "editImage",
@@ -10653,7 +10751,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "it": [
     "editImage",
@@ -10854,7 +10954,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "ja": [
     "editImage",
@@ -11180,7 +11282,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "ka": [
     "editImage",
@@ -11916,7 +12020,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "kab": [
     "editImage",
@@ -12212,7 +12318,11 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "showMore",
+    "check",
+    "allowEncryptedCommunicationWith",
+    "publicKey"
   ],
   "ko": [
     "editImage",
@@ -12455,7 +12565,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "lt": [
     "editImage",
@@ -12924,7 +13036,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "lv": [
     "editImage",
@@ -13031,7 +13145,9 @@
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
-    "discardEdits"
+    "discardEdits",
+    "showMore",
+    "showLess"
   ],
   "nb": [
     "editImage",
@@ -13152,7 +13268,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "nl": [
     "editImage",
@@ -13271,7 +13389,20 @@
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
-    "discardEdits"
+    "discardEdits",
+    "showMore",
+    "showLess",
+    "appSubtitle",
+    "appDescription",
+    "interactiveVerification",
+    "interactiveVerificationDescription",
+    "countUnverifiedDevices",
+    "check",
+    "encryptedMessage",
+    "unencryptedMessage",
+    "allowEncryptedCommunicationWith",
+    "publicKey",
+    "deviceIdentityKey"
   ],
   "pt": [
     "editImage",
@@ -14123,7 +14254,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "pt_BR": [
     "editImage",
@@ -14290,7 +14423,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "pt_PT": [
     "editImage",
@@ -14900,7 +15035,9 @@
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
-    "discardEdits"
+    "discardEdits",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "ro": [
     "editImage",
@@ -15361,7 +15498,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "ru": [
     "editImage",
@@ -15433,7 +15572,20 @@
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
-    "discardEdits"
+    "discardEdits",
+    "showMore",
+    "showLess",
+    "appSubtitle",
+    "appDescription",
+    "interactiveVerification",
+    "interactiveVerificationDescription",
+    "countUnverifiedDevices",
+    "check",
+    "encryptedMessage",
+    "unencryptedMessage",
+    "allowEncryptedCommunicationWith",
+    "publicKey",
+    "deviceIdentityKey"
   ],
   "sk": [
     "editImage",
@@ -16095,7 +16247,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "sl": [
     "editImage",
@@ -16875,7 +17029,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "sq": [
     "editImage",
@@ -17750,7 +17906,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "sr": [
     "editImage",
@@ -18330,7 +18488,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "sv": [
     "editImage",
@@ -18562,7 +18722,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "ta": [
     "editImage",
@@ -18766,7 +18928,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "te": [
     "editImage",
@@ -19637,7 +19801,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "th": [
     "editImage",
@@ -20463,7 +20629,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "tr": [
     "editImage",
@@ -20744,7 +20912,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "uk": [
     "editImage",
@@ -21012,7 +21182,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "vi": [
     "editImage",
@@ -21737,7 +21909,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "yue": [
     "editImage",
@@ -22552,7 +22726,9 @@
     "emojiMashupStyleBlend",
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
-    "emojiMashupStyleSparkle"
+    "emojiMashupStyleSparkle",
+    "check",
+    "allowEncryptedCommunicationWith"
   ],
   "zh": [
     "editImage",
@@ -22722,6 +22898,26 @@
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
-    "discardEdits"
+    "discardEdits",
+    "customReactionEmotesTab",
+    "customReactionTextTab",
+    "customReactionEnterTextLabel",
+    "customReactionEnterTextHint",
+    "customReactionEmoteSearchHint",
+    "customReactionEmotesJumpLabel",
+    "customReactionEmotesJumpAll",
+    "showMore",
+    "showLess",
+    "appSubtitle",
+    "appDescription",
+    "interactiveVerification",
+    "interactiveVerificationDescription",
+    "countUnverifiedDevices",
+    "check",
+    "encryptedMessage",
+    "unencryptedMessage",
+    "allowEncryptedCommunicationWith",
+    "publicKey",
+    "deviceIdentityKey"
   ]
 }
