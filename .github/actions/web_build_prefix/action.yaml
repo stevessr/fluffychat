@@ -71,7 +71,7 @@ runs:
 
     - name: Build web
       shell: bash
-      run: flutter build web --release
+      run: flutter build web --dart-define=FLUTTER_WEB_CANVASKIT_URL=canvaskit/ --release --source-maps
 
     - name: Subset web fonts
       shell: bash
