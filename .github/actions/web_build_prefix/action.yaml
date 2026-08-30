@@ -63,7 +63,7 @@ runs:
 
     - name: Resolve Flutter dependencies
       shell: bash
-      run: flutter pub get
+      run: flutter pub get --enforce-lockfile
 
     - name: Build web
       shell: bash

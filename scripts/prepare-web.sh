@@ -22,7 +22,7 @@ rm -rf .vodozemac
 grep -qF "assets/vodozemac/${version}/" pubspec.yaml || "$SED" -i "\|- assets/sounds/|a\\    - assets/vodozemac/${version}/" pubspec.yaml
 "$SED" -i "s/vodozemacVersion = '.*';/vodozemacVersion = '${version}';/" lib/config/app_config.dart
 
-flutter pub get
+flutter pub get --enforce-lockfile
 dart compile js ./web/native_executor.dart -o ./web/native_executor.js -m
 
 # Download native_imaging for web:
