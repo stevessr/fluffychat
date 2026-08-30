@@ -13,6 +13,7 @@ import 'package:fluffychat/pages/chat_list/active_call_indicator.dart';
 import 'package:fluffychat/pages/chat_list/unread_bubble.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_live_kit_calls/matrix_live_kit_call.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/room_notification_sound_extension.dart';
 import 'package:fluffychat/utils/stream_extension.dart';
 import 'package:fluffychat/utils/string_color.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
@@ -622,8 +623,7 @@ class _SpaceViewState extends State<SpaceView> {
                                       ),
                                     ),
                                     if (joinedRoom != null &&
-                                        joinedRoom.pushRuleState !=
-                                            PushRuleState.notify)
+                                        joinedRoom.isEffectivelyMuted)
                                       const Padding(
                                         padding: EdgeInsets.only(left: 4.0),
                                         child: Icon(
