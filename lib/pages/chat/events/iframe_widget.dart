@@ -1,8 +1,7 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 // Conditional imports for web-specific code
 import 'iframe_widget_stub.dart' if (dart.library.html) 'iframe_widget_web.dart'
