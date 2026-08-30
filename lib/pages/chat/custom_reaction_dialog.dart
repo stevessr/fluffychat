@@ -1,11 +1,9 @@
-import 'package:flutter/material.dart';
-
-import 'package:matrix/matrix.dart';
-import 'package:scroll_to_index/scroll_to_index.dart';
-
 import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/widgets/avatar.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
+import 'package:flutter/material.dart';
+import 'package:matrix/matrix.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 
 class CustomReactionDialog extends StatefulWidget {
   final Room room;
@@ -142,8 +140,13 @@ class _EmotePickerGrid extends StatefulWidget {
 }
 
 class _EmotePickerGridState extends State<_EmotePickerGrid> {
+  static const double _emotePreviewSize = 40;
+
   final AutoScrollController _scrollController = AutoScrollController();
   int? _selectedSectionIndex;
+
+  String _emotePreviewCacheKey(Uri uri) =>
+      'custom_reaction_emote_preview:${_emotePreviewSize.toInt()}:static:$uri';
 
   String _packDisplayName(ImagePackContent pack, String id) {
     final displayName = pack.pack.displayName?.trim();
@@ -445,6 +448,7 @@ class _EmotePickerGridState extends State<_EmotePickerGrid> {
           itemBuilder: (context, i) {
             final (shortcode, uri) = section.emotes[i];
             final key = uri.toString();
+            final cacheKey = _emotePreviewCacheKey(uri);
             final disabled = widget.disabledKeys.contains(key);
             return InkWell(
               onTap: disabled ? null : () => Navigator.of(context).pop(key),
@@ -456,11 +460,15 @@ class _EmotePickerGridState extends State<_EmotePickerGrid> {
                     Expanded(
                       child: Center(
                         child: MxcImage(
+                          key: ValueKey(cacheKey),
+                          cacheName: widget.room.id,
+                          cacheKey: cacheKey,
                           uri: uri,
-                          width: 40,
-                          height: 40,
+                          fit: BoxFit.contain,
+                          width: _emotePreviewSize,
+                          height: _emotePreviewSize,
                           animated: false,
-                          isThumbnail: false,
+                          isThumbnail: true,
                         ),
                       ),
                     ),
