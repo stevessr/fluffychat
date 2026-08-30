@@ -59,3 +59,7 @@ runs:
     - name: Build web
       shell: bash
       run: flutter build web --release
+
+    - name: Subset web fonts
+      shell: bash
+      run: ./scripts/subset-web-fonts.sh
