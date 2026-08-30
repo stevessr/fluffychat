@@ -149,7 +149,10 @@ class _EventVideoPlayerState extends State<EventVideoPlayer> {
                             ? const Icon(Icons.play_arrow_outlined)
                             : const Icon(Icons.file_download_outlined),
                       ),
-                    ),
+                    if (isObscured)
+                      Positioned.fill(
+                        child: MediaSpoilerOverlay(label: spoilerLabel),
+                      ),
                     if (duration != null)
                       Positioned(
                         bottom: 8,
