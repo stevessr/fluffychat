@@ -26,6 +26,7 @@ import 'package:universal_html/universal_html.dart' as web;
 
 import 'config/setting_keys.dart';
 import 'utils/background_push.dart';
+import 'utils/screenshot_blocker.dart';
 import 'widgets/fluffy_chat_app.dart';
 
 ReceivePort? mainIsolateReceivePort;
@@ -151,6 +152,7 @@ void main(List<String> args) => runZonedGuarded(() async {
       await startGui(clients, store);
     }, ErrorReporter.onFlutterError);
 
+
 /// Fetch the pincode for the applock and start the flutter engine.
 Future<void> startGui(
   List<Client> clients,
@@ -188,6 +190,9 @@ Future<void> startGui(
 
   await firstClient?.roomsLoading;
   await firstClient?.accountDataLoading;
+
+  // 设置禁止截屏/录屏状态
+  await ScreenshotBlocker.setBlocked(AppSettings.blockScreenshots.value);
 
   runApp(
     FluffyChatApp(
