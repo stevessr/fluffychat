@@ -90,6 +90,9 @@ enum AppSettings<T> {
     'https://livekit-jwt.fluffy.chat',
   );
 
+  /// Block screenshots and screen recording on Android
+  blockScreenshots<bool>('chat.fluffy.block_screenshots', false);
+
   final String key;
   final T _defaultValue;
 
