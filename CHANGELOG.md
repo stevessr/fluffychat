@@ -73,6 +73,7 @@ It also adds double tap to react and better notifications for iOS.
 Improved timeline design, implement biometrics for app lock and a lot of bug fixes and performance improvements.
 
 - feat: implement biometrics for app lock (Christian Kußowski)
+- feat: runtime URL rewriting to route traffic through a proxy (stevessr)
 - feat: Reset recovery key flow (Christian Kußowski)
 - fix: forward only deep copy of contentshareitem (Christian Kußowski)
 - fix: privacy and tos url (Christian Kußowski)

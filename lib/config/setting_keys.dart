@@ -103,7 +103,14 @@ enum AppSettings<T> {
   liveMessageCharacterDelay<double>(
     'chat.fluffy.live_message_character_delay',
     0.05,
-  );
+  ),
+
+  /// URL rewrite rules as a JSON string (array of {pattern, replacement}).
+  ///
+  /// These are applied at runtime to every outgoing HTTP request made by the
+  /// Matrix SDK.  The primary source is `--dart-define=URL_REWRITE_RULES=…`;
+  /// this setting allows overriding them via `config.json` on web.
+  urlRewriteRules<String>('chat.fluffy.url_rewrite_rules', '');
 
   final String key;
   final T _defaultValue;
