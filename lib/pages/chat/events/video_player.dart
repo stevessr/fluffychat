@@ -8,7 +8,6 @@ import 'dart:math';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/chat/events/file_send_status_indicator.dart';
 import 'package:fluffychat/utils/file_description.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -154,6 +153,7 @@ class _EventVideoPlayerState extends State<EventVideoPlayer> {
                             ? const Icon(Icons.play_arrow_outlined)
                             : const Icon(Icons.file_download_outlined),
                       ),
+                    ),
                     if (isObscured)
                       Positioned.fill(
                         child: MediaSpoilerOverlay(label: spoilerLabel),
