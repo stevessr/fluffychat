@@ -283,7 +283,8 @@
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
     "check",
-    "allowEncryptedCommunicationWith"
+    "allowEncryptedCommunicationWith",
+    "presencesToggle"
   ],
   "az": [
     "editImage",
@@ -1123,7 +1124,8 @@
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
-    "check"
+    "check",
+    "presencesToggle"
   ],
   "be": [
     "editImage",
@@ -1246,7 +1248,8 @@
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
     "check",
-    "allowEncryptedCommunicationWith"
+    "allowEncryptedCommunicationWith",
+    "presencesToggle"
   ],
   "bn": [
     "editImage",
@@ -3095,7 +3098,8 @@
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
     "check",
-    "allowEncryptedCommunicationWith"
+    "allowEncryptedCommunicationWith",
+    "presencesToggle"
   ],
   "cs": [
     "editImage",
@@ -3309,7 +3313,8 @@
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
     "check",
-    "allowEncryptedCommunicationWith"
+    "allowEncryptedCommunicationWith",
+    "presencesToggle"
   ],
   "da": [
     "editImage",
@@ -4286,7 +4291,8 @@
     "uploading",
     "edited",
     "couldNotBeSent",
-    "yesterday"
+    "yesterday",
+    "presencesToggle"
   ],
   "el": [
     "editImage",
@@ -5769,7 +5775,8 @@
     "allowEncryptedCommunicationWith",
     "publicKey",
     "messageCanOnlyBeReadByUser",
-    "messageCanOnlyBeReadByUsers"
+    "messageCanOnlyBeReadByUsers",
+    "presencesToggle"
   ],
   "et": [
     "editImage",
@@ -5868,7 +5875,8 @@
     "uploading",
     "edited",
     "couldNotBeSent",
-    "yesterday"
+    "yesterday",
+    "presencesToggle"
   ],
   "eu": [
     "editImage",
@@ -5983,7 +5991,8 @@
     "passphraseLengthRequirement",
     "passphraseUpperAndLowerCaseRequirement",
     "passphraseSpecialCharactersRequirement",
-    "passphraseNumberRequirement"
+    "passphraseNumberRequirement",
+    "presencesToggle"
   ],
   "fa": [
     "editImage",
@@ -6119,7 +6128,8 @@
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
     "check",
-    "allowEncryptedCommunicationWith"
+    "allowEncryptedCommunicationWith",
+    "presencesToggle"
   ],
   "fi": [
     "editImage",
@@ -6303,7 +6313,8 @@
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
     "check",
-    "allowEncryptedCommunicationWith"
+    "allowEncryptedCommunicationWith",
+    "presencesToggle"
   ],
   "fil": [
     "editImage",
@@ -7292,7 +7303,8 @@
     "uploading",
     "edited",
     "couldNotBeSent",
-    "yesterday"
+    "yesterday",
+    "presencesToggle"
   ],
   "ga": [
     "editImage",
@@ -7401,7 +7413,8 @@
     "useAppLock",
     "unlockWithBiometrics",
     "resetPin",
-    "forwardCountMessages"
+    "forwardCountMessages",
+    "presencesToggle"
   ],
   "gl": [
     "editImage",
@@ -7513,7 +7526,8 @@
     "uploading",
     "edited",
     "couldNotBeSent",
-    "yesterday"
+    "yesterday",
+    "presencesToggle"
   ],
   "he": [
     "editImage",
@@ -9186,7 +9200,8 @@
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
     "check",
-    "allowEncryptedCommunicationWith"
+    "allowEncryptedCommunicationWith",
+    "presencesToggle"
   ],
   "hu": [
     "editImage",
@@ -9399,7 +9414,8 @@
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
     "check",
-    "allowEncryptedCommunicationWith"
+    "allowEncryptedCommunicationWith",
+    "presencesToggle"
   ],
   "ia": [
     "editImage",
@@ -10385,7 +10401,8 @@
     "unsignedDevice",
     "signedDevice",
     "noCurve25519KeyFound",
-    "messageNotDecryptable"
+    "messageNotDecryptable",
+    "presencesToggle"
   ],
   "ie": [
     "editImage",
@@ -11263,7 +11280,8 @@
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
     "check",
-    "allowEncryptedCommunicationWith"
+    "allowEncryptedCommunicationWith",
+    "presencesToggle"
   ],
   "ja": [
     "editImage",
@@ -11593,7 +11611,8 @@
     "check",
     "allowEncryptedCommunicationWith",
     "today",
-    "yesterday"
+    "yesterday",
+    "presencesToggle"
   ],
   "ka": [
     "editImage",
@@ -12876,7 +12895,8 @@
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
     "check",
-    "allowEncryptedCommunicationWith"
+    "allowEncryptedCommunicationWith",
+    "presencesToggle"
   ],
   "lt": [
     "editImage",
@@ -13505,7 +13525,8 @@
     "biometricsDescription",
     "useAppLock",
     "unlockWithBiometrics",
-    "resetPin"
+    "resetPin",
+    "presencesToggle"
   ],
   "nb": [
     "editImage",
@@ -13628,7 +13649,8 @@
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
     "check",
-    "allowEncryptedCommunicationWith"
+    "allowEncryptedCommunicationWith",
+    "presencesToggle"
   ],
   "nl": [
     "editImage",
@@ -13737,7 +13759,8 @@
     "useAppLock",
     "unlockWithBiometrics",
     "resetPin",
-    "forwardCountMessages"
+    "forwardCountMessages",
+    "presencesToggle"
   ],
   "pl": [
     "editImage",
@@ -13851,7 +13874,8 @@
     "useAppLock",
     "unlockWithBiometrics",
     "resetPin",
-    "forwardCountMessages"
+    "forwardCountMessages",
+    "presencesToggle"
   ],
   "pt": [
     "editImage",
@@ -14874,7 +14898,8 @@
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
     "check",
-    "allowEncryptedCommunicationWith"
+    "allowEncryptedCommunicationWith",
+    "presencesToggle"
   ],
   "pt_PT": [
     "editImage",
@@ -16072,7 +16097,8 @@
     "uploading",
     "edited",
     "couldNotBeSent",
-    "yesterday"
+    "yesterday",
+    "presencesToggle"
   ],
   "sk": [
     "editImage",
@@ -19211,7 +19237,8 @@
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
     "check",
-    "allowEncryptedCommunicationWith"
+    "allowEncryptedCommunicationWith",
+    "presencesToggle"
   ],
   "ta": [
     "editImage",
@@ -19418,7 +19445,8 @@
     "emojiMashupStyleSparkle",
     "check",
     "allowEncryptedCommunicationWith",
-    "unlock"
+    "unlock",
+    "presencesToggle"
   ],
   "te": [
     "editImage",
@@ -21402,7 +21430,8 @@
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
     "check",
-    "allowEncryptedCommunicationWith"
+    "allowEncryptedCommunicationWith",
+    "presencesToggle"
   ],
   "uk": [
     "editImage",
@@ -21512,7 +21541,8 @@
     "emojiMashupStyleStack",
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
-    "discardEdits"
+    "discardEdits",
+    "presencesToggle"
   ],
   "uz": [
     "editImage",
@@ -21672,7 +21702,8 @@
     "emojiMashupStyleOrbit",
     "emojiMashupStyleSparkle",
     "check",
-    "allowEncryptedCommunicationWith"
+    "allowEncryptedCommunicationWith",
+    "presencesToggle"
   ],
   "vi": [
     "editImage",
@@ -23284,7 +23315,8 @@
     "uploading",
     "edited",
     "couldNotBeSent",
-    "yesterday"
+    "yesterday",
+    "presencesToggle"
   ],
   "zh_Hant": [
     "editImage",
@@ -23494,6 +23526,7 @@
     "useAppLock",
     "unlockWithBiometrics",
     "resetPin",
-    "forwardCountMessages"
+    "forwardCountMessages",
+    "presencesToggle"
   ]
 }
