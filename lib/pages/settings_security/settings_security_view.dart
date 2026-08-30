@@ -155,7 +155,7 @@ class SettingsSecurityView extends StatelessWidget {
                       title: L10n.of(context).blockScreenshots,
                       subtitle: L10n.of(context).blockScreenshotsDescription,
                       setting: AppSettings.blockScreenshots,
-                      onChanged: (_) => controller.toggleBlockScreenshots(),
+                      onChanged: (v) => controller.toggleBlockScreenshots(v),
                     ),
 
                   Divider(color: theme.dividerColor),
