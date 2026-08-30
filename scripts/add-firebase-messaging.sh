@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+set -euo pipefail
+
+if [[ ! -f android/app/google-services.json ]]; then
+  echo "google-services.json not found; skipping Firebase Messaging setup."
+  exit 0
+fi
 
 # SPDX-FileCopyrightText: 2019-Present Christian Kußowski
 # SPDX-FileCopyrightText: 2019-Present Contributors to FluffyChat
