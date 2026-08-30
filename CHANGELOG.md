@@ -75,6 +75,7 @@ Improved timeline design, implement biometrics for app lock and a lot of bug fix
 - feat: implement biometrics for app lock (Christian Kußowski)
 - feat: runtime URL rewriting to route traffic through a proxy (stevessr)
 - feat: visual URL rewriting editor with wildcard/regex rules in chat settings (stevessr)
+- fix: use the visual URL rewriting editor in the advanced configs page instead of a raw JSON input (stevessr)
 - feat: Reset recovery key flow (Christian Kußowski)
 - fix: forward only deep copy of contentshareitem (Christian Kußowski)
 - fix: privacy and tos url (Christian Kußowski)

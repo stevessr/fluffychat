@@ -3,10 +3,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import 'dart:convert';
+
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/l10n/l10n.dart';
+import 'package:fluffychat/utils/url_rewrite_rule.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/url_rewrite_rules_editor.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -28,6 +32,22 @@ class _ConfigViewerState extends State<ConfigViewer> {
   ) async {
     if (appSetting is AppSettings<bool>) {
       await appSetting.setItem(!(initialValue == 'true'));
+      setState(() {});
+      return;
+    }
+
+    if (appSetting is AppSettings<String> &&
+        appSetting == AppSettings.urlRewriteRules) {
+      final result = await showUrlRewriteRulesEditor(
+        context,
+        initialRules: UrlRewriteRule.fromJsonString(initialValue),
+      );
+      if (result == null) return;
+      await appSetting.setItem(
+        result.isEmpty
+            ? ''
+            : jsonEncode([for (final rule in result) rule.toJson()]),
+      );
       setState(() {});
       return;
     }
