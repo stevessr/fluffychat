@@ -26,6 +26,7 @@ import '../../utils/stream_extension.dart';
 import 'chat_drop_target.dart';
 import 'chat_emoji_picker.dart';
 import 'chat_input_row.dart';
+import 'formatting_toolbar.dart';
 
 enum _EventContextAction { info, report }
 
@@ -511,11 +512,12 @@ class ChatView extends StatelessWidget {
                                                 children: [
                                                   ReplyDisplay(controller),
                                                   FormattingToolbar(
-                                                    controller:
-                                                        controller.sendController,
+                                                    controller: controller
+                                                        .sendController,
                                                     showSendUnencryptedAction:
                                                         true,
-                                                    onSendUnencrypted: controller
+                                                    onSendUnencrypted:
+                                                        controller
                                                             .sendController
                                                             .text
                                                             .trim()
@@ -525,6 +527,20 @@ class ChatView extends StatelessWidget {
                                                                 true,
                                                           )
                                                         : null,
+                                                    onEmojiMashup: () {
+                                                      showModalBottomSheet(
+                                                        context: context,
+                                                        isScrollControlled:
+                                                            true,
+                                                        backgroundColor:
+                                                            Colors.transparent,
+                                                        builder: (context) =>
+                                                            EmojiMashupDialog(
+                                                              controller:
+                                                                  controller,
+                                                            ),
+                                                      );
+                                                    },
                                                   ),
                                                   ChatInputRow(controller),
                                                   ChatEmojiPicker(controller),
