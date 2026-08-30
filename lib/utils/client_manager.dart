@@ -15,6 +15,7 @@ import 'package:fluffychat/utils/notification_background_handler.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/rainbow_command_extension.dart';
 import 'package:fluffychat/utils/room_management_command_extension.dart';
+import 'package:fluffychat/utils/url_rewrite_rule.dart';
 import 'package:fluffychat/utils/web_paths.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -123,7 +124,11 @@ abstract class ClientManager {
 
     final client = Client(
       clientName,
-      httpClient: CustomHttpClient.createHTTPClient(),
+      httpClient: CustomHttpClient.createHTTPClient(
+        extraRules: UrlRewriteRule.fromJsonString(
+          AppSettings.urlRewriteRules.value,
+        ),
+      ),
       verificationMethods: {
         KeyVerificationMethod.numbers,
         if (kIsWeb || PlatformInfos.isMobile || PlatformInfos.isLinux)

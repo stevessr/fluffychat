@@ -95,6 +95,33 @@ flutter build web --release
   **Please only the values, you really need**. If you e.g. only want
   to change the default homeserver, then only modify the `defaultHomeserver` key.
 
+#### URL rewriting (bypassing regional blocks)
+
+FluffyChat can transparently rewrite outgoing request URLs at runtime, e.g. to
+route traffic through a proxy when a homeserver is blocked in your region.
+
+Rules are a list of `{pattern, replacement}` pairs, where `pattern` uses `*`
+as a wildcard. Each `*` is a capture group referenced as `$1`, `$2`, … in the
+replacement; `$UPPERCASE_NAME` variables are resolved from
+`--dart-define`/`String.fromEnvironment`; `$$` produces a literal `$`.
+
+Example: route all `matrix.org` traffic through a proxy:
+
+```bash
+flutter build web --release \
+  --dart-define=URL_REWRITE_RULES='[{"pattern":"https://*matrix.org/*","replacement":"https://$PROXY_DOMAIN/---https://$1matrix.org/$2"}]' \
+  --dart-define=PROXY_DOMAIN=proxy.example.com
+```
+
+For web builds you can also set the rules at deploy time via `config.json`
+(no rebuild needed):
+
+```json
+{
+  "urlRewriteRules": "[{\"pattern\":\"https://*matrix.org/*\",\"replacement\":\"https://proxy.example.com/---https://$1matrix.org/$2\"}]"
+}
+```
+
 ### Desktop (Linux, Windows, macOS)
 
 * Enable Desktop support in Flutter: https://flutter.dev/desktop
