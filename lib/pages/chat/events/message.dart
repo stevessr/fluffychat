@@ -242,9 +242,7 @@ class Message extends StatelessWidget {
               color: theme.colorScheme.surface,
             ),
           ];
-    final eventStateTextColor = ownMessage
-        ? theme.onBubbleColor
-        : theme.colorScheme.onSurface;
+    final eventStateTextColor = theme.colorScheme.onSurface;
     final showSenderHeader =
         !nextEventSameSender && !ownMessage && !event.room.isDirectChat;
     final showSenderPowerLevelIcon =

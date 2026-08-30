@@ -178,8 +178,8 @@ extension DateTimeExtension on DateTime {
     };
     final l10n24h = languages24Hour.contains(locale);
 
-    // For Android: prefer 24h if the locale typically uses it
-    if (PlatformInfos.isAndroid) return mediaQuery24h || l10n24h;
+    // For Android this should always work.
+    if (PlatformInfos.isAndroid) return mediaQuery24h;
 
     // https://github.com/krille-chan/fluffychat/pull/1457#discussion_r1836817914
     if (PlatformInfos.isIOS) {
