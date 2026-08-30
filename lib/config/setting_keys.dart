@@ -83,7 +83,12 @@ enum AppSettings<T> {
   benchmarksInLogs<bool>('chat.fluffy.benchmarks_in_logs', false),
   autoSendErrorReports<bool?>('chat.fluffy.auto_send_eror_reports', null),
   knownErrorHashes<List<String>>('chat.fluffy.known_crash_hashes', []),
-  customLiveKitInstance<String>('chat.fluffy.custom_live_kit_instance', '');
+  customLiveKitInstance<String>('chat.fluffy.custom_live_kit_instance', ''),
+  sentryDns<String>(
+    'chat.fluffy.sentry_dns',
+    'https://001fc83b53bd409c82a505d74d56f001@observe.fluffy.chat/1',
+  ),
+  showRoomMetadata<bool>('chat.fluffy.show_room_metadata', false),
 
   /// Block screenshots and screen recording on Android
   blockScreenshots<bool>('chat.fluffy.block_screenshots', false);
