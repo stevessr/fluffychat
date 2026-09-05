@@ -6,6 +6,7 @@
 import 'dart:ui' as ui;
 
 import 'package:collection/collection.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/l10n/l10n.dart';
