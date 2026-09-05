@@ -102,7 +102,7 @@ dependencies:
   uuid: ^4.6.0
   video_compress: ^3.1.4
   video_player: ^2.14.0
-  vodozemac: ^0.7.0
+  vodozemac: ^0.8.0
   wakelock_plus: ^1.8.0
   web: ^1.1.1
   webrtc_interface: ^1.5.1
