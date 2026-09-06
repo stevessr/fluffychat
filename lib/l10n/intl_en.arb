@@ -3129,5 +3129,11 @@
                 "type": "int"
             }
         }
+    },
+    "serverRespondedWithError": "The server has replied with an error message: {error}",
+    "@serverRespondedWithError": {
+        "placeholders": {
+            "error": {"type": "String"}
+        }
     }
 }
