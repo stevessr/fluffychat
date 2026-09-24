@@ -381,161 +381,161 @@ class ChatView extends StatelessWidget {
                               ),
                             ),
                             SizeChangedLayoutNotifier(
-                            child: Container(
-                              key: controller.inputBarKey,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    theme.colorScheme.surface.withAlpha(0),
-                                    theme.colorScheme.surface,
-                                    theme.colorScheme.surface,
-                                  ],
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                ),
-                              ),
-                              alignment: Alignment.center,
                               child: Container(
-                                margin: EdgeInsets.all(bottomSheetPadding),
-                                constraints: const BoxConstraints(
-                                  maxWidth: FluffyThemes.maxTimelineWidth,
+                                key: controller.inputBarKey,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      theme.colorScheme.surface.withAlpha(0),
+                                      theme.colorScheme.surface,
+                                      theme.colorScheme.surface,
+                                    ],
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                  ),
                                 ),
-                                child: controller.room.isExtinct
-                                    ? ElevatedButton.icon(
-                                        icon: const Icon(Icons.chevron_right),
-                                        label: Text(
-                                          L10n.of(context).enterNewChat,
-                                        ),
-                                        onPressed: controller.goToNewRoomAction,
-                                      )
-                                    : controller.room.canSendDefaultMessages &&
-                                            controller.room.membership ==
-                                        Membership.join
-                                        ? Material(
-                                            clipBehavior: Clip.hardEdge,
-                                            color: controller.selectedEvents
-                                                    .isNotEmpty
-                                                ? theme
-                                                    .colorScheme.tertiaryContainer
-                                                : theme
-                                                    .colorScheme.surfaceContainer,
-                                            borderRadius:
-                                                BorderRadius.circular(32),
-                                            child: controller.room
-                                                        .isAbandonedDMRoom ==
-                                                    true
-                                                ? Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceEvenly,
-                                                    children: [
-                                                      TextButton.icon(
-                                                        style: TextButton
-                                                            .styleFrom(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .all(
-                                                            16,
-                                                          ),
-                                                          foregroundColor:
-                                                              theme.colorScheme
-                                                                  .error,
-                                                        ),
-                                                        icon: const Icon(
-                                                          Icons
-                                                              .archive_outlined,
-                                                        ),
-                                                        onPressed:
-                                                            controller.leaveChat,
-                                                        label: Text(
-                                                          L10n.of(context)
-                                                              .leave,
-                                                        ),
-                                                      ),
-                                                      TextButton.icon(
-                                                        style: TextButton
-                                                            .styleFrom(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .all(
-                                                            16,
-                                                          ),
-                                                        ),
-                                                        icon: const Icon(
-                                                          Icons.forum_outlined,
-                                                        ),
-                                                        onPressed: controller
-                                                            .recreateChat,
-                                                        label: Text(
-                                                          L10n.of(
-                                                            context,
-                                                          ).reopenChat,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  )
-                                                : Column(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      ReplyDisplay(controller),
-                                                      FormattingToolbar(
-                                                        controller:
-                                                            controller.sendController,
-                                                        showSendUnencryptedAction:
-                                                            true,
-                                                        onSendUnencrypted:
-                                                            controller.sendController.text
-                                                                    .trim()
-                                                                    .isNotEmpty
-                                                                ? () => controller.send(
-                                                                    forceUnencrypted:
-                                                                        true,
-                                                                  )
-                                                                : null,
-                                                        onEmojiMashup: () {
-                                                          showModalBottomSheet(
-                                                            context: context,
-                                                            isScrollControlled:
-                                                                true,
-                                                            backgroundColor:
-                                                                Colors.transparent,
-                                                            builder: (context) =>
-                                                                EmojiMashupDialog(
-                                                              controller:
-                                                                  controller,
-                                                            ),
-                                                          );
-                                                        },
-                                                      ),
-                                                      ChatInputRow(controller),
-                                                      ChatEmojiPicker(controller),
-                                                    ],
-                                                  ),
-                                          )
-                                        : Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              ReplyDisplay(controller),
-                                              FormattingToolbar(
-                                                controller:
-                                                    controller.sendController,
-                                                showSendUnencryptedAction: true,
-                                                onSendUnencrypted: controller
-                                                        .sendController.text
-                                                        .trim()
-                                                        .isNotEmpty
-                                                    ? () => controller.send(
-                                                        forceUnencrypted: true,
-                                                      )
-                                                    : null,
-                                              ),
-                                              ChatInputRow(controller),
-                                              ChatEmojiPicker(controller),
-                                            ],
+                                alignment: Alignment.center,
+                                child: Container(
+                                  margin: EdgeInsets.all(bottomSheetPadding),
+                                  constraints: const BoxConstraints(
+                                    maxWidth: FluffyThemes.maxTimelineWidth,
+                                  ),
+                                  child: controller.room.isExtinct
+                                      ? ElevatedButton.icon(
+                                          icon: const Icon(Icons.chevron_right),
+                                          label: Text(
+                                            L10n.of(context).enterNewChat,
                                           ),
+                                          onPressed: controller.goToNewRoomAction,
+                                        )
+                                      : controller.room.canSendDefaultMessages &&
+                                              controller.room.membership ==
+                                          Membership.join
+                                          ? Material(
+                                              clipBehavior: Clip.hardEdge,
+                                              color: controller.selectedEvents
+                                                      .isNotEmpty
+                                                  ? theme
+                                                      .colorScheme.tertiaryContainer
+                                                  : theme
+                                                      .colorScheme.surfaceContainer,
+                                              borderRadius:
+                                                  BorderRadius.circular(32),
+                                              child: controller.room
+                                                          .isAbandonedDMRoom ==
+                                                      true
+                                                  ? Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceEvenly,
+                                                      children: [
+                                                        TextButton.icon(
+                                                          style: TextButton
+                                                              .styleFrom(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(
+                                                              16,
+                                                            ),
+                                                            foregroundColor:
+                                                                theme.colorScheme
+                                                                    .error,
+                                                          ),
+                                                          icon: const Icon(
+                                                            Icons
+                                                                .archive_outlined,
+                                                          ),
+                                                          onPressed:
+                                                              controller.leaveChat,
+                                                          label: Text(
+                                                            L10n.of(context)
+                                                                .leave,
+                                                          ),
+                                                        ),
+                                                        TextButton.icon(
+                                                          style: TextButton
+                                                              .styleFrom(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(
+                                                              16,
+                                                            ),
+                                                          ),
+                                                          icon: const Icon(
+                                                            Icons.forum_outlined,
+                                                          ),
+                                                          onPressed: controller
+                                                              .recreateChat,
+                                                          label: Text(
+                                                            L10n.of(
+                                                              context,
+                                                            ).reopenChat,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    )
+                                                  : Column(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        ReplyDisplay(controller),
+                                                        FormattingToolbar(
+                                                          controller:
+                                                              controller.sendController,
+                                                          showSendUnencryptedAction:
+                                                              true,
+                                                          onSendUnencrypted:
+                                                              controller.sendController.text
+                                                                      .trim()
+                                                                      .isNotEmpty
+                                                                  ? () => controller.send(
+                                                                      forceUnencrypted:
+                                                                          true,
+                                                                    )
+                                                                  : null,
+                                                          onEmojiMashup: () {
+                                                            showModalBottomSheet(
+                                                              context: context,
+                                                              isScrollControlled:
+                                                                  true,
+                                                              backgroundColor:
+                                                                  Colors.transparent,
+                                                              builder: (context) =>
+                                                                  EmojiMashupDialog(
+                                                                controller:
+                                                                    controller,
+                                                              ),
+                                                            );
+                                                          },
+                                                        ),
+                                                        ChatInputRow(controller),
+                                                        ChatEmojiPicker(controller),
+                                                      ],
+                                                    ),
+                                            )
+                                          : Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                ReplyDisplay(controller),
+                                                FormattingToolbar(
+                                                  controller:
+                                                      controller.sendController,
+                                                  showSendUnencryptedAction: true,
+                                                  onSendUnencrypted: controller
+                                                          .sendController.text
+                                                          .trim()
+                                                          .isNotEmpty
+                                                      ? () => controller.send(
+                                                          forceUnencrypted: true,
+                                                        )
+                                                      : null,
+                                                ),
+                                                ChatInputRow(controller),
+                                                ChatEmojiPicker(controller),
+                                              ],
+                                            ),
+                                ),
                               ),
-                            ),
                             ),
                           ],
                         ),
