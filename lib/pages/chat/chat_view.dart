@@ -367,15 +367,20 @@ class ChatView extends StatelessWidget {
                               ),
                             ),
                           ),
-                        GestureDetector(
-                          onTap: controller.clearSingleSelectedEvent,
-                          child: ChatEventList(controller: controller),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: SizeChangedLayoutNotifier(
+                        // The composer is part of the layout, not an overlay on
+                        // the timeline. Its height may change when composing a
+                        // reply, formatting text, or opening the emoji picker.
+                        // Reserve that space immediately so no message can be
+                        // hidden behind the composer while it resizes.
+                        Column(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: controller.clearSingleSelectedEvent,
+                                child: ChatEventList(controller: controller),
+                              ),
+                            ),
+                            SizeChangedLayoutNotifier(
                             child: Container(
                               key: controller.inputBarKey,
                               decoration: BoxDecoration(
@@ -531,7 +536,8 @@ class ChatView extends StatelessWidget {
                                           ),
                               ),
                             ),
-                          ),
+                            ),
+                          ],
                         ),
                         if (controller.dragging)
                           Container(
