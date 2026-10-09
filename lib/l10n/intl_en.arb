@@ -2893,6 +2893,10 @@
     "doubleTapReaction": "Double-tap reaction",
     "shareCrashReports": "Share crash reports",
     "shareCrashReportsDescription": "Automatically share crash reports with the developers?",
+    "calls": "Calls",
+    "@calls": {
+        "description": "Title of the Calls section in chat settings."
+    },
     "countActiveCallMembers": "{count} active call members",
     "@countActiveCallMembers": {
         "placeholders": {
