@@ -30,6 +30,7 @@ class InputBar extends StatelessWidget {
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onSubmitted;
+  final ValueChanged<Uint8List?>? onSubmitImage;
   final FocusNode? focusNode;
   final TextEditingController? controller;
   final InputDecoration decoration;
@@ -44,6 +45,7 @@ class InputBar extends StatelessWidget {
     this.maxLines,
     this.keyboardType,
     this.onSubmitted,
+    this.onSubmitImage,
     this.focusNode,
     this.controller,
     required this.decoration,
