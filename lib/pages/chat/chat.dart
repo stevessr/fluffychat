@@ -28,6 +28,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/room_send_formatted_text_extension.dart';
+import 'package:fluffychat/utils/ogg_opus_remuxer.dart';
 import 'package:fluffychat/utils/other_party_can_receive.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/room_management_command_extension.dart';
@@ -45,7 +46,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mime/mime.dart';
-import 'package:ogg_caf_converter/ogg_caf_converter.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:universal_html/universal_html.dart' as web;
@@ -1195,15 +1195,15 @@ class ChatController extends State<ChatPageWithRoom>
 
     final bytesResult = await showFutureLoadingDialog(
       context: context,
-      future: () {
-        if (PlatformInfos.isCupertinoStyle && fileName.endsWith('.ogg')) {
-          return OggCafConverter().convertCafToOggInMemory(input: path);
-        }
-        return XFile(path).readAsBytes();
-      },
+      future: () => XFile(path).readAsBytes(),
     );
-    final bytes = bytesResult.result;
+    var bytes = bytesResult.result;
     if (bytes == null) return;
+
+    // Android's MediaMuxer writes broken Ogg containers:
+    if (PlatformInfos.isAndroid && fileName.endsWith('.ogg')) {
+      bytes = remuxOggOpus(bytes);
+    }
 
     final mimeType = lookupMimeType(fileName, headerBytes: bytes);
     final extension = mimeType == null ? null : extensionFromMime(mimeType);

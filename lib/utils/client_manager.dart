@@ -22,7 +22,6 @@ import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:universal_html/html.dart' as html;
 
 import 'matrix_sdk_extensions/flutter_matrix_dart_sdk_database/builder.dart';
 
@@ -170,11 +169,6 @@ abstract class ClientManager {
       );
 
   static Future<void> sendInitNotification(String title, String body) async {
-    if (kIsWeb) {
-      html.Notification(title, body: body);
-      return;
-    }
-
     final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
     await flutterLocalNotificationsPlugin.initialize(
@@ -188,6 +182,11 @@ abstract class ClientManager {
         macOS: const DarwinInitializationSettings(),
       ),
     );
+
+    if (kIsWeb &&
+        WebFlutterLocalNotificationsPlugin().permissionStatus != .granted) {
+      return;
+    }
 
     await flutterLocalNotificationsPlugin.show(
       id: 0,

@@ -69,7 +69,9 @@ class MessageReactions extends StatelessWidget {
                 if (evt != null) {
                   showFutureLoadingDialog(
                     context: context,
-                    future: evt.redactEvent,
+                    future: evt.status.isSent
+                        ? evt.redactEvent
+                        : evt.cancelSend,
                   );
                 }
               } else {

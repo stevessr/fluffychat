@@ -32,6 +32,17 @@
             ]
         },
         {
+            "name": "knoten.chat",
+            "website": "https://knoten.chat",
+            "description": "A general homeserver driven by volunteers.",
+            "reg_method": "oidc",
+            "languages": [
+                "All",
+                "English",
+                "Deutsch"
+            ]
+        },
+        {
             "name": "neko.aaca.eu.org",
             "website": "https://neko.aaca.eu.org",
             "reg_method": "oidc",
